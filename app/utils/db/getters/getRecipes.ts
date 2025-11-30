@@ -86,7 +86,7 @@ export async function getRecipes(
         comments:comments(*,
           user:profiles(id, username, picture)
         ),
-        user:profiles(id, username, picture)
+        user:profiles!recipes_user_id_fkey(id, username, picture)
       `);
 
   query = buildQuery(query, opts);

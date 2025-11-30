@@ -66,12 +66,20 @@ export default defineNuxtConfig({
       pathPrefix: true,
     },
   ],
-  modules: ['@pinia/nuxt', '@nuxtjs/supabase', '@nuxt/image'],
+  modules: [
+    '@pinia/nuxt',
+    '@nuxtjs/supabase',
+    '@nuxt/image',
+    '@nuxtjs/sitemap',
+  ],
   supabase: {
     url: process.env.NUXT_PUBLIC_SUPABASE_URL,
     key: process.env.NUXT_PUBLIC_SUPABASE_KEY,
     serviceKey: process.env.NUXT_PRIVATE_SERVICE_ROLE_KEY,
     redirect: false,
     types: 'types/supabase.ts',
+  },
+  sitemap: {
+    sources: ['/api/__sitemap__/urls'],
   },
 });

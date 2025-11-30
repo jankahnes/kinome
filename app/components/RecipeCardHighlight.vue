@@ -1,18 +1,29 @@
 <template>
   <NuxtLink
     v-if="recipe?.id"
-    :to="'/recipe/' + recipe?.id"
-    class="transition-all duration-300 group ml-4 md:ml-0 md:min-h-90 max-w-5xl flex"
+    :to="getRecipeUrl(recipe?.id, recipe?.title)"
+    class="transition-all duration-300 group ml-4 md:ml-0 md:min-h-90 flex"
   >
     <div class="flex flex-row md:items-center w-full">
       <!-- circular -->
-      <NuxtImg
-        v-if="recipe?.picture"
-        class="h-34 md:h-74 mt-6 md:mt-0 aspect-square object-cover bg-transparent shadow-[#00000044] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-4px] group-hover:scale-[1.015]"
-        :src="recipe?.picture || ''"
-        fetchpriority="high"
-        :alt="recipe?.title"
-      />
+      <div class="relative z-10 text-lg sm:text-xl">
+        <NuxtImg
+          v-if="recipe?.picture"
+          class="h-34 md:h-74 mt-6 md:mt-0 aspect-square object-cover bg-transparent shadow-[#00000044] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-4px] group-hover:scale-[1.015]"
+          :src="recipe?.picture || ''"
+          fetchpriority="high"
+          :alt="recipe?.title"
+        />
+        <div
+          class="absolute bottom-[6%] left-[72%] min-w-[16%] w-[2em] max-w-[25%] aspect-square rounded-xl z-20 flex items-center justify-center shrink-0 hover:scale-102 group-hover:scale-103 transition-transform will-change-transform duration-300"
+          v-if="recipe?.hidx && recipe?.hidx >= 55"
+          :class="gradeStickerColors[getGrade(recipe?.hidx, 'ovr')[0] as keyof typeof gradeStickerColors]"
+        >
+          <span class="font-bold leading-none">
+            {{ getGrade(recipe?.hidx, 'ovr') }}
+          </span>
+        </div>
+      </div>
 
       <div class="z-0 h-full flex-1">
         <div
@@ -33,7 +44,9 @@
               <span class="">TRENDING</span>
             </span>
           </h2>
-          <p class="text-xs md:text-base text-gray-600 leading-tight line-clamp-3 ml-1 max-w-2xl">
+          <p
+            class="text-xs md:text-base text-gray-600 leading-tight line-clamp-3 ml-1 max-w-2xl"
+          >
             {{ recipe?.description }}
           </p>
           <p class="flex items-center gap-2">
@@ -70,15 +83,7 @@
               class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-xs md:text-sm"
             >
               <div
-                v-if="recipe?.hidx && recipe?.hidx >= 55"
-                class="flex tag items-center justify-center !text-black shadow-sm text-center min-w-[2em] subpixel-antialiased tabular-nums"
-                :class="gradeColors[getGrade(recipe?.hidx, 'ovr')]"
-              >
-                {{ getGrade(recipe?.hidx, 'ovr') }}
-              </div>
-
-              <div
-                class="tag flex items-center justify-center text-nowrap shadow-sm"
+                class="tag flex items-center justify-center text-nowrap bg-slate-50"
                 v-for="(tag, index) in top3Tags"
                 :key="index"
               >

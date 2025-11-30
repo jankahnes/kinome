@@ -28,14 +28,14 @@
       >
         <div class="flex flex-col flex-1 max-w-3xl">
           <div class="flex justify-between items-start">
-            <h2
-              class="font-bold text-[2.5rem] tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-14"
+            <h1
+              class="font-bold text-[2.5rem] tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-12"
               :class="{
                 'underline decoration-primary underline-offset-4': true,
               }"
             >
               {{ recipe?.title }}
-            </h2>
+            </h1>
             <div class="flex items-start mt-4 gap-2">
               <button class="p-1">
                 <span class="material-symbols-outlined !text-xl leading-none">
@@ -197,7 +197,7 @@
                 :segments="[
                   { value: (recipe?.kcal ?? 0) / 2000, color: '#6a7282' },
                 ]"
-                widthClass="w-15"
+                class="w-15"
                 :strokeWidth="13"
               >
                 <div class="flex items-center justify-center text-center">
@@ -213,7 +213,7 @@
                 :segments="[
                   { value: (recipe?.protein ?? 0) / 120, color: '#6a7282' },
                 ]"
-                widthClass="w-15"
+                class="w-15"
                 :strokeWidth="13"
               >
                 <div class="flex items-center justify-center text-center">
@@ -229,8 +229,8 @@
                 :segments="[
                   { value: (recipe?.fiber ?? 0) / 30, color: '#6a7282' },
                 ]"
-                widthClass="w-15"
                 :strokeWidth="13"
+                class="w-15"
               >
                 <div class="flex items-center justify-center text-center">
                   <div class="text-xs font-bold text-gray-400">
@@ -252,12 +252,39 @@
                 Track
               </button>
               <button
-                class="animated-button bg-primary-200 rounded-xl p-2 font-semibold flex items-center justify-center gap-1 transition-colors flex-1"
+                class="animated-button bg-primary-200 rounded-xl p-2 font-semibold transition-colors flex-1"
+                :disabled="bookmarkLoading"
+                @click="bookmarkRecipe"
               >
-                <span class="material-symbols-outlined !text-xl leading-none"
-                  >bookmark</span
+                <span
+                  class="flex items-center justify-center gap-1"
+                  v-if="bookmarkState === 'not-bookmarked'"
                 >
-                Save
+                  <span class="material-symbols-outlined !text-xl leading-none">
+                    bookmark
+                  </span>
+                  <span class="text-sm font-semibold"> Save </span>
+                </span>
+                <span
+                  class="flex items-center justify-center gap-1"
+                  v-else-if="bookmarkState === 'bookmarked'"
+                >
+                  <span class="material-symbols-outlined !text-xl leading-none">
+                    bookmark_added
+                  </span>
+                  <span class="text-sm font-semibold"> Saved </span>
+                </span>
+                <span
+                  class="flex items-center justify-center gap-1"
+                  v-else-if="bookmarkState === 'loading'"
+                >
+                  <span
+                    class="material-symbols-outlined !text-xl leading-none animate-spin"
+                  >
+                    progress_activity
+                  </span>
+                  <span class="text-sm font-semibold"> Saving... </span>
+                </span>
               </button>
             </div>
             <!-- Main Action Area -->
@@ -275,7 +302,7 @@
         </div>
         <!-- Social Media Link -->
         <div
-          class="basis-42 flex-shrink-0 relative h-full aspect-9/16"
+          class="basis-42 flex-shrink-0 relative aspect-9/16"
           v-if="displayType === 'creator'"
         >
           <NuxtImg
@@ -326,7 +353,44 @@ const props = defineProps<{
 }>();
 const top7Tags = ref(getTop7Tags(props.recipe));
 const recipeStore = useRecipeStore();
+const auth = useAuthStore();
+const supabase = useSupabaseClient<Database>();
+const bookmarkLoading = ref(false);
 
+const bookmarkState = computed(() => {
+  if (bookmarkLoading.value) return 'loading';
+  else if (
+    auth.user?.bookmarks?.some((bookmark) => bookmark.id === props.recipe.id)
+  )
+    return 'bookmarked';
+  else return 'not-bookmarked';
+});
+
+async function bookmarkRecipe() {
+  if (!auth.user?.id) return;
+  console.log(bookmarkState.value);
+  if (bookmarkState.value === 'not-bookmarked') {
+    bookmarkLoading.value = true;
+    //@ts-ignore
+    //TODO
+    auth.user.bookmarks?.push(props.recipe);
+    await supabase.from('bookmarks').insert({
+      recipe_id: props.recipe.id,
+      user_id: auth.user.id,
+    });
+  } else if (bookmarkState.value === 'bookmarked') {
+    bookmarkLoading.value = true;
+    auth.user.bookmarks = auth.user.bookmarks?.filter(
+      (bookmark) => bookmark.id !== props.recipe.id
+    );
+    await supabase
+      .from('bookmarks')
+      .delete()
+      .eq('recipe_id', props.recipe.id)
+      .eq('user_id', auth.user.id);
+  }
+  bookmarkLoading.value = false;
+}
 function getTop7Tags(recipe: RecipeOverview) {
   const tags = recipe.tags.map((tag) => getTagByID(tag));
   tags.sort((a, b) => (b?.value ?? 0) - (a?.value ?? 0));

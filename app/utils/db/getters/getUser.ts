@@ -17,19 +17,27 @@ export async function getUsers(
     in: { user_id: ids },
     orderBy: { column: 'created_at', ascending: false },
   });
-  const likes = await getRecipeOverviews(client, { in: { user_id: ids } });
+  const { data: bookmarks, error: bookmarksError } = await client
+    .from('bookmarks')
+    .select('recipe_id')
+    .eq('user_id', ids);
+  if (bookmarksError) throw bookmarksError;
+  const bookmarkRecipeIds = bookmarks.map((bookmark) => bookmark.recipe_id);
+  const bookmarkRecipes = await getRecipeOverviews(client, {
+    in: { id: bookmarkRecipeIds },
+  });
   const stats = {
     recipesCount: ownRecipes.length,
     activityCount: activity.length,
-    likesCount: likes.length,
+    bookmarksCount: bookmarkRecipes.length,
   };
 
   const processedUsers = await Promise.all(
     users.map(async (user) => ({
       ...user,
-      recipes: ownRecipes.filter((recipe) => recipe.user_id === user.id),
-      activity: activity.filter((item) => item.user_id === user.id),
-      likes: likes.filter((recipe) => recipe.user_id === user.id),
+      recipes: ownRecipes,
+      activity: activity,
+      bookmarks: bookmarkRecipes,
       settings: user.settings as Record<string, any>,
       stats,
     }))

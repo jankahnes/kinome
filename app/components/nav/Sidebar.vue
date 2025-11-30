@@ -66,29 +66,10 @@
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
           :class="{
             'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 1 && sidebarNavigationActive,
-          }"
-          active-class="primary-gradient text-gray-800 px-3 py-2"
-          @click="onClickLink('/')"
-        >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >home</span
-          >
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Home</span
-          >
-        </NuxtLink>
-        <NuxtLink
-          to="/discover"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
               focusedIndex === 2 && sidebarNavigationActive,
           }"
           active-class="primary-gradient text-gray-800 px-3 py-2"
-          @click="onClickLink('/discover')"
+          @click="onClickLink('/')"
         >
           <span
             class="material-symbols-outlined text-xl transition-all duration-300"
@@ -97,6 +78,26 @@
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
             >Discover</span
+          >
+        </NuxtLink>
+        <NuxtLink
+          to="/collection"
+          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
+          :class="{
+            'ring-2 ring-primary-500 ring-offset-2':
+              focusedIndex === 4 && sidebarNavigationActive,
+            'primary-gradient text-gray-800 px-3 py-2':
+              route.path.startsWith('/collection'),
+          }"
+          @click="onClickLink('/collection')"
+        >
+          <span
+            class="material-symbols-outlined text-xl transition-all duration-300"
+            >book_2</span
+          >
+          <span
+            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
+            >Collection</span
           >
         </NuxtLink>
         <NuxtLink
@@ -118,26 +119,7 @@
             >Create</span
           >
         </NuxtLink>
-        <NuxtLink
-          to="/recipes"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 4 && sidebarNavigationActive,
-            'primary-gradient text-gray-800 px-3 py-2':
-              route.path.startsWith('/recipes'),
-          }"
-          @click="onClickLink('/recipes')"
-        >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >book_2</span
-          >
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Collection</span
-          >
-        </NuxtLink>
+
         <NuxtLink
           to="/tracking"
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
@@ -154,7 +136,7 @@
           >
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Track Your Diet</span
+            >Meal tracking</span
           >
         </NuxtLink>
 
@@ -209,9 +191,8 @@ const accountLink = computed(() => {
 const linkPaths = computed(() => [
   auth.isUser() ? accountLink.value : '/onboarding',
   '/',
-  '/discover',
+  '/collection',
   '/recipe/new',
-  '/recipes',
   '/tracking',
   '/community',
 ]);

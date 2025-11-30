@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDrag } from '@vueuse/gesture';
+//import { useDrag } from '@vueuse/gesture';
 const auth = useAuthStore();
 
 //init sidebar state using header heuristic
@@ -158,33 +158,33 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-if (import.meta.client) {
-  useDrag(
-    ({ swipe: [swipeX], movement: [mx, my], event, cancel }) => {
-      if ((event?.target as HTMLElement)?.closest('.ignore-swipe')) {
-        cancel();
-        return;
-      }
-
-      if (
-        document.documentElement.clientWidth < 1024 &&
-        Math.abs(mx) > Math.abs(my) * 1.5
-      ) {
-        if (swipeX === 1 && !sidebarOpen.value) {
-          sidebarOpen.value = true;
-        } else if (swipeX === -1 && sidebarOpen.value) {
-          sidebarOpen.value = false;
-        }
-      }
-    },
-    {
-      domTarget: swipeContainer,
-      filterTaps: true,
-      swipeDistance: 50,
-      swipeVelocity: 0.5,
-    }
-  );
-}
+//if (import.meta.client) {
+//  useDrag(
+//    ({ swipe: [swipeX], movement: [mx, my], event, cancel }) => {
+//      if ((event?.target as HTMLElement)?.closest('.ignore-swipe')) {
+//        cancel();
+//        return;
+//      }
+//
+//      if (
+//        document.documentElement.clientWidth < 1024 &&
+//        Math.abs(mx) > Math.abs(my) * 1.5
+//      ) {
+//        if (swipeX === 1 && !sidebarOpen.value) {
+//          sidebarOpen.value = true;
+//        } else if (swipeX === -1 && sidebarOpen.value) {
+//          sidebarOpen.value = false;
+//        }
+//      }
+//    },
+//    {
+//      domTarget: swipeContainer,
+//      filterTaps: true,
+//      swipeDistance: 50,
+//      swipeVelocity: 0.5,
+//    }
+//  );
+//}
 
 const handleKeyboardNavigation = (e: KeyboardEvent) => {
   // Only handle if not typing in an input/textarea/contenteditable

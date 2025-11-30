@@ -35,7 +35,7 @@
       <div class="flex items-center justify-between gap-6">
         <div class="text-sm font-semibold">
           <template v-if="feedItem.user">
-            {{ feedItem.user.username ?? "New User" }}
+            {{ feedItem.user.username ?? 'New User' }}
           </template>
           <template v-else-if="feedItem.food"> New Food Added </template>
           <template v-else-if="feedItem.recipe"> New Recipe Added </template>
@@ -51,13 +51,13 @@
           <span class="font-medium">{{
             feedItem!.comment!.recipe!.title
           }}</span>
-          <p class="mt-2 italic line-clamp-1">"{{ feedItem!.comment!.content }}"</p>
+          <p class="mt-2 italic line-clamp-1">
+            "{{ feedItem!.comment!.content }}"
+          </p>
         </template>
 
         <template v-else-if="feedItem.type === 'RECIPE_CREATION'">
-          <span v-if="feedItem.user"
-            >created a new recipe</span
-          >
+          <span v-if="feedItem.user">created a new recipe</span>
           <p class="mt-2 font-bold line-clamp-2">
             {{ feedItem.recipe!.title }}
           </p>
@@ -95,15 +95,27 @@ const props = defineProps<{ feedItem: Activity }>();
 
 function getLinkTarget() {
   if (props.feedItem?.type === 'COMMENT_CREATION') {
-    return '/recipe/' + props.feedItem?.comment?.recipe?.id;
+    return getRecipeUrl(
+      props.feedItem?.comment?.recipe?.id!,
+      props.feedItem?.comment?.recipe?.title!
+    );
   } else if (props.feedItem?.type === 'RATING_CREATION') {
-    return '/recipe/' + props.feedItem?.rating?.recipe?.id;
+    return getRecipeUrl(
+      props.feedItem?.rating?.recipe?.id!,
+      props.feedItem?.rating?.recipe?.title!
+    );
   } else if (props.feedItem?.type === 'RECIPE_CREATION') {
-    return '/recipe/' + props.feedItem?.recipe?.id;
+    return getRecipeUrl(
+      props.feedItem?.recipe?.id!,
+      props.feedItem?.recipe?.title!
+    );
   } else if (props.feedItem?.type === 'USER_CREATION') {
     return '/profile/' + props.feedItem?.user_id;
   } else if (props.feedItem?.type === 'FOOD_CREATION') {
-    return '/foods/' + props.feedItem?.food_name_id;
+    return getFoodUrl(
+      props.feedItem?.food_name_id!,
+      props.feedItem?.food?.name ?? ''
+    );
   }
 }
 </script>

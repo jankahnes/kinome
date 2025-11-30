@@ -33,7 +33,7 @@
       <NuxtLink
         class="flex gap-2 w-full bg-primary-10 pl-4 py-0 rounded-lg select-none cursor-pointer items-center"
         v-for="food in foodResultsStore.foodResults"
-        :to="`/foods/${food.id}`"
+        :to="getFoodUrl(food.id, food.name)"
       >
         <div class="flex-grow">
           <h2>{{ food.name }}</h2>

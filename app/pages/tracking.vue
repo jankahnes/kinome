@@ -662,4 +662,8 @@ watch(recipeSearchQuery, () => {
 onMounted(() => {
   loadMeals(selectedDate.value);
 });
+
+useHead({
+  title: 'Meal tracking | Kinome',
+});
 </script>

@@ -18,7 +18,7 @@
           <GradeContainer
             :score="props.recipe?.hidx ?? 0"
             :type="'ovr'"
-            class="font-bold text-4xl p-4 rounded-xl shadow-sm"
+            class="font-bold text-4xl p-4"
           />
         </div>
 

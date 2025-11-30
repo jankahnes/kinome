@@ -1,7 +1,10 @@
 <template>
   <NuxtLink to="/" class="">
     <div class="flex items-center">
-      <h1 class="text-5xl font-bold primary-gradient gradient-clip tracking-tighter z-10 gradient-text">
+      <NuxtImg src="/leaves.png" class="w-10 h-10 object-contain" />
+      <h1
+        class="text-5xl font-bold text-primary-500 tracking-tighter z-10 -ml-1"
+      >
         kinome
       </h1>
     </div>

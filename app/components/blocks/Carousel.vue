@@ -15,7 +15,7 @@
       >
         <div
           ref="desktopSlider"
-          class="flex items-center select-none cursor-grab active:cursor-grabbing w-max"
+          class="flex select-none cursor-grab active:cursor-grabbing w-max"
           :class="[
             {
               'transition-transform duration-300 ease-in-out':

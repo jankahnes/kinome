@@ -17,7 +17,7 @@
   --font-main: 'Libertinus Sans', sans-serif;
   --color-main: #f5eeee;
   --color-primary: #ffbc2b;
-  --color-primary-gradient: #ff9900;
+  --color-primary-gradient: #fdd835;
   --color-primary-5: color-mix(in srgb, var(--color-primary) 2%, white);
   --color-primary-10: color-mix(in srgb, var(--color-primary) 4%, white);
   --color-primary-15: color-mix(in srgb, var(--color-primary) 4.5%, white);
@@ -104,7 +104,7 @@
 }
 
 .action-card-padding {
-  @apply p-2 md:p-6;
+  @apply p-4 md:p-6;
 }
 
 .tag {
@@ -248,7 +248,7 @@
 }
 
 .animated-button {
-  @apply rounded-xl! active:rounded-2xl! active:scale-98 transition-all duration-200 cursor-pointer will-change-transform;
+  @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-all duration-200 cursor-pointer will-change-transform;
 }
 
 .page-slide-right-enter-active,
@@ -297,12 +297,12 @@
 .sticker-blue {
   background: linear-gradient(
     135deg,
-    rgba(219, 234, 254, 0.96) 0%,
-    rgba(191, 219, 254, 0.94) 25%,
-    rgba(147, 197, 253, 0.9) 55%,
-    rgba(191, 219, 254, 0.92) 65%,
-    rgba(96, 165, 250, 0.88) 85%,
-    rgba(59, 130, 246, 0.86) 100%
+    rgba(219, 234, 254, 1) 0%,
+    rgba(191, 219, 254, 1) 25%,
+    rgba(147, 197, 253, 1) 55%,
+    rgba(191, 219, 254, 1) 65%,
+    rgba(96, 165, 250, 1) 85%,
+    rgba(59, 130, 246, 1) 100%
   );
   box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3),
     0 2px 8px rgba(255, 255, 255, 0.4) inset;
@@ -311,12 +311,12 @@
 .sticker-emerald {
   background: linear-gradient(
     135deg,
-    rgba(209, 250, 229, 0.96) 0%,
-    rgba(167, 243, 208, 0.94) 25%,
-    rgba(110, 231, 183, 0.9) 55%,
-    rgba(167, 243, 208, 0.92) 65%,
-    rgba(52, 211, 153, 0.88) 85%,
-    rgba(16, 185, 129, 0.86) 100%
+    rgba(209, 250, 229, 1) 0%,
+    rgba(167, 243, 208, 1) 25%,
+    rgba(110, 231, 183, 1) 55%,
+    rgba(167, 243, 208, 1) 65%,
+    rgba(52, 211, 153, 1) 85%,
+    rgba(16, 185, 129, 1) 100%
   );
   box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3),
     0 2px 8px rgba(255, 255, 255, 0.4) inset;
@@ -325,12 +325,12 @@
 .sticker-green {
   background: linear-gradient(
     135deg,
-    rgba(220, 252, 231, 0.96) 0%,
-    rgba(187, 247, 208, 0.94) 25%,
-    rgba(134, 239, 172, 0.9) 55%,
-    rgba(187, 247, 208, 0.92) 65%,
-    rgba(74, 222, 128, 0.88) 85%,
-    rgba(34, 197, 94, 0.86) 100%
+    rgba(220, 252, 231, 1) 0%,
+    rgba(187, 247, 208, 1) 25%,
+    rgba(134, 239, 172, 1) 55%,
+    rgba(187, 247, 208, 1) 65%,
+    rgba(74, 222, 128, 1) 85%,
+    rgba(34, 197, 94, 1) 100%
   );
   box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.3),
     0 2px 8px rgba(255, 255, 255, 0.4) inset;
@@ -339,12 +339,12 @@
 .sticker-yellow {
   background: linear-gradient(
     135deg,
-    rgba(254, 252, 232, 0.96) 0%,
-    rgba(254, 249, 195, 0.94) 25%,
-    rgba(254, 240, 138, 0.9) 55%,
-    rgba(254, 249, 195, 0.92) 65%,
-    rgba(253, 224, 71, 0.88) 85%,
-    rgba(250, 204, 21, 0.86) 100%
+    rgba(254, 252, 232, 1) 0%,
+    rgba(254, 249, 195, 1) 25%,
+    rgba(254, 240, 138, 1) 55%,
+    rgba(254, 249, 195, 1) 65%,
+    rgba(253, 224, 71, 1) 85%,
+    rgba(250, 204, 21, 1) 100%
   );
   box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.3),
     0 2px 8px rgba(255, 255, 255, 0.4) inset;

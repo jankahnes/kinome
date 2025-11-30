@@ -74,9 +74,9 @@ const selectedFile = ref<File | null>(null);
 const processing = ref(false);
 const isOnSafari = computed(
   () =>
-    /iP(ad|hone|od)/.test(navigator.userAgent) &&
-    /Safari/.test(navigator.userAgent) &&
-    !/CriOS|FxiOS/.test(navigator.userAgent)
+    /iP(ad|hone|od)/.test(navigator?.userAgent) &&
+    /Safari/.test(navigator?.userAgent) &&
+    !/CriOS|FxiOS/.test(navigator?.userAgent)
 );
 
 const handleFileChange = async (event: Event) => {

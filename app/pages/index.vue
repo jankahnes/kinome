@@ -1,20 +1,27 @@
 <template>
-  <div class="mx-4 sm:mx-20 space-y-4 sm:space-y-10 py-6">
+  <div class="mx-4 sm:mx-10 md:mx-20 space-y-4 sm:space-y-10 py-6">
     <div class="flex justify-between items-center gap-6">
-      <div
-        class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 min-w-0!"
-      >
-        <input
-          type="text"
-          placeholder="Search for a recipe"
-          v-model="searchQuery"
-          @keyup.enter="handleSearch"
-          @blur="handleSearch"
-          class="flex-grow focus:outline-none py-2 min-w-0!"
-        />
-        <span class="material-symbols-outlined">search</span>
+      <div class="flex gap-4 flex-1">
+        <div
+          class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-2xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 flex-1 min-w-0! max-w-80"
+        >
+          <input
+            type="text"
+            placeholder="Search for a recipe"
+            v-model="searchQuery"
+            @keyup.enter="handleSearch"
+            @blur="handleSearch"
+            class="flex-1 focus:outline-none py-2 min-w-0! max-w-none! w-0"
+          />
+          <span class="material-symbols-outlined shrink-0">search</span>
+        </div>
+        <NuxtLink
+          to="/collection/recipes"
+          class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
+          >All Recipes</NuxtLink
+        >
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="items-center gap-2 shrink-0 hidden sm:flex">
         <NuxtLink to="/" class="text-gray-500 items-center gap-2">
           <span class="material-symbols-outlined font-bold!">tune</span>
         </NuxtLink>
@@ -38,7 +45,7 @@
     <BlocksCarousel>
       <div
         class="flex items-center gap-x-1 px-3 py-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
-        @click="navigateTo('/recipes/social')"
+        @click="navigateTo('/collection/social')"
       >
         <span class="text-2xl">🔥</span>
         <span class="text-sm sm:text-base sm:tracking-wider text-nowrap"
@@ -95,23 +102,24 @@
         }"
       >
         <RecipeCard
-          :key="0"
-          :recipe="recipeStore.indexRecipes[1]!"
-          :id="'desktop-0-0'"
-          :uniqueId="'desktop-0-0'"
-          class="basis-54 max-w-92 2xl:basis-62 2xl:max-w-110 flex-1 text-[30px]"
-          ref="firstCard"
-        />
-        <RecipeCard
-          v-for="(recipe, index) in recipeStore.indexRecipes.slice(2, 7)"
+          v-for="(recipe, index) in desktopRecipes"
           :key="recipe.id + 'desktop'"
           :recipe="recipe"
-          :id="'desktop-' + index + '-' + recipe.id"
-          :uniqueId="'desktop-' + index + '-' + recipe.id"
-          class="basis-60 max-w-100 flex-1 text-[30px]"
+          :id="'desktop-' + (index - 1) + '-' + recipe.id"
+          :uniqueId="
+            index === 0
+              ? 'desktop-0-0'
+              : 'desktop-' + (index - 1) + '-' + recipe.id
+          "
+          class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110"
+          :ref="
+            (el) => {
+              if (el) desktopCards[index] = el;
+            }
+          "
         />
       </div>
-      <div class="flex mt-8 flex-wrap gap-8 items-stretch">
+      <div class="flex mt-6 flex-wrap gap-8 items-stretch">
         <RecipeCardHighlight
           v-if="recipeStore.indexRecipes[0]"
           :recipe="recipeStore.indexRecipes[0]"
@@ -144,7 +152,7 @@
       <div class="flex flex-wrap pt-4">
         <div class="flex flex-col gap-4 items-start">
           <NuxtLink
-            to="/recipes/social/"
+            to="/collection/social"
             class="inline-block text-xl font-bold"
           >
             Trending on Social Media
@@ -161,37 +169,20 @@
         </div>
       </div>
     </Transition>
-
-    <!-- Recent Activity -->
-    <div v-if="recentActivity && recentActivity.length > 0">
-      <h2 class="text-xl font-bold">Recent Activity</h2>
-      <BlocksCarousel class="mt-4 -ml-2" :flexClass="'!items-stretch'">
-        <FeedItem
-          v-for="item in recentActivity.slice(0, 8)"
-          :key="item.id"
-          :feed-item="item"
-          class="min-w-90 ml-2 mb-4"
-        />
-      </BlocksCarousel>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const supabase = useSupabaseClient<Database>();
 const recipeStore = useRecipeStore();
-const auth = useAuthStore();
 const loadingStore = useLoadingStore();
 const searchQuery = ref('');
 
-const userRecipes = ref<RecipeOverview[] | null>(null);
-const recentActivity = ref<Activity[] | null>(null);
-
 useHead({ title: 'Kinome' });
 
-const firstCard = ref<any>(null);
-const rowMaxHeight = ref(0);
-const ro = ref<ResizeObserver | null>(null);
+const desktopCards = ref<any[]>([]);
+const rowMaxHeight = useTruncateRow(desktopCards, 12);
+const desktopRecipes = computed(() => recipeStore.indexRecipes.slice(1, 7));
 
 if (!recipeStore.indexRecipes.length) {
   const { data } = await useLazyAsyncData('index', () =>
@@ -215,13 +206,6 @@ if (!recipeStore.socialIndexRecipes.length) {
       eq: { source_type: 'MEDIA' },
     })
   ).then(({ data }) => recipeStore.setSocialIndexRecipes(data.value ?? []));
-}
-
-async function loadRecentActivity() {
-  recentActivity.value = await getActivity(supabase, {
-    orderBy: { column: 'created_at', ascending: false },
-    limit: 10,
-  });
 }
 
 const categories = ref([
@@ -272,43 +256,15 @@ const categories = ref([
   },
 ]);
 
-function measure() {
-  if (!firstCard.value) return;
-  const el = firstCard.value.$el;
-  if (el instanceof HTMLElement) {
-    rowMaxHeight.value = el.offsetHeight;
-  }
-}
-
-onMounted(async () => {
-  loadRecentActivity();
-  await nextTick();
-  measure();
-  ro.value = new ResizeObserver(measure);
-});
-
-watchEffect(() => {
-  if (firstCard.value && ro.value) {
-    const el = firstCard.value.$el;
-    if (el instanceof Element) {
-      ro.value?.observe(el);
-    }
-  }
-});
-
-onBeforeUnmount(() => {
-  ro.value?.disconnect();
-});
-
 const onClickCategory = (category: number) => {
-  navigateTo(`/recipes?tags=${category}`);
+  navigateTo(`/collection/recipes?tags=${category}`);
 };
 
 const handleSearch = () => {
   if (!searchQuery.value.trim()) {
     return;
   }
-  navigateTo(`/recipes?q=${searchQuery.value}&sort=Relevancy`);
+  navigateTo(`/collection/recipes?q=${searchQuery.value}&sort=Relevancy`);
 };
 
 const handleQuickImport = async () => {

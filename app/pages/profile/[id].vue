@@ -13,7 +13,9 @@
       <Transition name="loaded-content">
         <section class="flex-1" v-if="!loading && user">
           <template v-if="selectedView === 'recipes'">
-            <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-center max-w-6xl">
+            <div
+              class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-center max-w-6xl"
+            >
               <RecipeCard
                 v-if="user.recipes"
                 :recipe="recipe"
@@ -32,7 +34,7 @@
             </div>
           </template>
           <template v-if="selectedView === 'activity'">
-            <div class="flex flex-wrap gap-4 mr-12 justify-center">
+            <div class="flex flex-wrap gap-4 mr-12">
               <FeedItem
                 v-for="activity in user.activity"
                 :key="activity.id"
@@ -49,15 +51,17 @@
 </template>
 
 <script setup lang="ts">
-const choices: { value: string; displayName: string }[] = [
+const choices = computed(() => [
   { value: 'recipes', displayName: '🛎️ Recipes' },
   { value: 'activity', displayName: '🎯 Activity' },
   { value: 'meals', displayName: '🍽️ Meals' },
   { value: 'likes', displayName: '👍 Likes' },
   { value: 'stats', displayName: '📊 Stats' },
   { value: 'settings', displayName: '⚙️ Settings' },
-  { value: 'logout', displayName: '🚪 Log Out' },
-];
+  ...(auth.user?.id === userID
+    ? [{ value: 'logout', displayName: '🚪 Log Out' }]
+    : []),
+]);
 const selectedView = ref('recipes');
 const route = useRoute();
 const userID = route.params.id;
@@ -74,12 +78,17 @@ watchEffect(() => {
   }
 });
 
-onMounted(async () => {
-  user.value = await getUser(supabase, { eq: { id: userID } });
+watchEffect(async () => {
+  if (!auth.profileFetched) return;
+  if (auth.user?.id === userID) {
+    user.value = auth.user;
+  } else {
+    user.value = await getUser(supabase, { eq: { id: userID } });
+    useHead({
+      title: user.value?.username ?? 'User' + ' | Kinome',
+    });
+  }
   loading.value = false;
-  useHead({
-    title: user.value?.username ?? 'User' + ' | Kinome',
-  });
 });
 </script>
 

@@ -56,7 +56,7 @@
           <NuxtLink
             v-for="recipe in contributingRecipes"
             :key="recipe.id"
-            :to="`/recipe/${recipe.id}`"
+            :to="getRecipeUrl(recipe.id, recipe.title)"
             class="w-12 h-12 rounded-lg overflow-hidden hover:scale-107 transition-all duration-400"
           >
             <img
@@ -123,7 +123,12 @@ const estimatedTotal = computed(() => {
   return authStore.shoppingList.reduce((total, item) => {
     if (item.price) {
       const pricePerGram = item.price / 100;
-      const grams = convertToGrams(item.amount, item.unit, item.density, item.unit_weight ?? 0);
+      const grams = convertToGrams(
+        item.amount,
+        item.unit,
+        item.density,
+        item.unit_weight ?? 0
+      );
       return total + pricePerGram * grams;
     }
     return total;
@@ -156,7 +161,8 @@ function getIngredientName(ingredient: any) {
     isCountable(ingredient.unit) &&
     ingredient.amount > 1 &&
     !unitIsNoun(ingredient.unit)
-  ) return pluralizeWord(ingredient.name);
+  )
+    return pluralizeWord(ingredient.name);
   return ingredient.name;
 }
 

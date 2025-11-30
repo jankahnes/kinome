@@ -4,13 +4,13 @@
       <div class="space-y-5" v-if="food">
         <button
           @click="router.back()"
-          class="button flex items-center justify-center p-2 text-2xl font-bold ml-2 md:ml-6 !bg-primary/10"
+          class="button flex items-center justify-center p-2 text-2xl font-bold bg-primary-10"
         >
           <span class="material-symbols-outlined"> arrow_back </span>
         </button>
         <div class="space-y-2">
           <div
-            class="mx-2 px-3 py-2 ml-2 md:ml-6 bg-main text-primary border-4 border-primary rounded-lg inline-flex"
+            class="px-4 py-3 rounded-2xl bg-primary-10 inline-flex"
           >
             <h1 class="text-4xl font-bold">{{ foodName }}</h1>
           </div>
@@ -18,16 +18,16 @@
             ↪ From {{ refencingName }}
           </p>
         </div>
-        <div class="flex justify-center gap-y-10 flex-col md:flex-row">
+        <div class="flex justify-center gap-6 flex-col md:flex-row">
           <NutritionLabel v-if="food" :nutritionData="food" class="flex-1" />
           <HealthFacts v-if="food" :recipe="food" isFood class="flex-1" />
         </div>
 
         <p
-          class="text-sm mx-auto select-none cursor-pointer flex items-center justify-center"
+          class="text-sm select-none cursor-pointer flex items-center gap-2 ml-2"
           @click="expanded = !expanded"
         >
-          <span>ADVANCED</span>
+          <span>Details</span>
 
           <span class="material-symbols-outlined"> keyboard_arrow_down </span>
         </p>
@@ -201,7 +201,12 @@
                 </h3>
                 <div class="flex justify-between">
                   <span>Saturated Fat</span>
-                  <span>{{ (food.saturated_fat * 1000)?.toFixed(1) ?? '0' }} mg</span>
+                  <span
+                    >{{
+                      (food.saturated_fat * 1000)?.toFixed(1) ?? '0'
+                    }}
+                    mg</span
+                  >
                 </div>
                 <div class="flex justify-between">
                   <span>Trans Fats</span>
@@ -235,7 +240,9 @@
 <script setup lang="ts">
 const router = useRouter();
 const route = useRoute();
-const id = route.params.id as string;
+const paramValue = route.params.id as string;
+const id = paramValue.split('-')[0];
+
 const food = ref<FullFoodRow>();
 const expanded = ref(false);
 const foodName = ref('');
@@ -253,6 +260,11 @@ if (data.value) {
   food.value = data.value.food;
   food.value.id = data.value?.id;
   food.value.processing_level_score = 100 - 17 * food.value.processing_level;
+
+  //redirect from non-slugified URL to slugified URL
+  if (foodName.value && !paramValue.includes('-')) {
+    navigateTo(getFoodUrl(Number(id), foodName.value), { replace: true });
+  }
 }
 
 useHead({

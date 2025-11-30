@@ -132,7 +132,10 @@
                 </span>
               </Transition>
 
-              <NuxtLink :to="`/foods/${ingredient.id}`" class="cursor-pointer">
+              <NuxtLink
+                :to="getFoodUrl(ingredient.id, getIngredientName(ingredient))"
+                class="cursor-pointer"
+              >
                 <span class="font-medium">{{
                   getIngredientName(ingredient)
                 }}</span>

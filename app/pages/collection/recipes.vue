@@ -627,6 +627,10 @@ function toggleTag(item: { name: string; icon: string; tag: number }) {
     }
   }
 }
+
+useHead({
+  title: 'Browse recipes | Kinome',
+});
 </script>
 
 <style scoped></style>

@@ -26,12 +26,12 @@
               :formalize="formalizeInstructions"
             ></PagesRecipeInstructionContainer>
             <NutritionLabel
-              v-if="recipeStore.recipe"
+              v-if="recipeStore.recipe?.kcal"
               :nutritionData="recipeStore.recipe"
               class="basis-100"
             />
             <HealthFacts
-              v-if="recipeStore.recipe"
+              v-if="recipeStore.recipe?.hidx"
               :recipe="recipeStore.recipe"
               class="basis-100"
             />
@@ -48,7 +48,7 @@
               :id="0"
               class="flex-1 basis-100"
             ></PagesRecipeCommentSection>
-            <div class="flex flex-col w-full">
+            <div class="flex flex-col w-full gap-4">
               <p class="text-2xl font-bold ml-4">Similar Recipes</p>
               <div class="flex gap-4">
                 <RecipeCard
@@ -92,7 +92,8 @@ const supabase = useSupabaseClient<Database>();
 const auth = useAuthStore();
 const { useAsyncDataWithLoading } = useGlobalLoading();
 
-const id = Number(route.params.id);
+const paramValue = route.params.id as string;
+const id = Number(paramValue.split('-')[0]);
 
 const mobileChosen = ref('ingredients');
 const mobileChoices = ref<{ value: string; displayName: string }[]>([
@@ -288,9 +289,26 @@ const loadRecipeWithoutLoading = async (
 
 loadRecipe(id, false);
 
+//redirect from non-slugified URL to slugified URL
+watch(
+  () => recipeStore.recipe?.title,
+  (title) => {
+    if (title && !paramValue.includes('-')) {
+      navigateTo(getRecipeUrl(id, title), { replace: true });
+    }
+  },
+  { immediate: true }
+);
+
 watchEffect(() => {
   useHead({
-    title: recipeStore.recipe?.title + ' | Kinome',
+    title: recipeStore.recipe?.title + ' Recipe | Kinome',
+    meta: [
+      {
+        name: 'description',
+        content: recipeStore.recipe?.description ?? '',
+      },
+    ],
   });
 });
 

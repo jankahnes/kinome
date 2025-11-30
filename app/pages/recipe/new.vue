@@ -1,13 +1,20 @@
 <template>
-  <div class="w-full pl-14 pr-30">
-    <div class="flex gap-10 items-center mt-22 mx-auto">
+  <div class="w-full px-6 md:pl-14 md:pr-30">
+    <div class="flex lg:flex-row flex-col gap-10 items-center mt-10 md:mt-22 mx-auto">
       <FormsChoiceSlider
         v-if="currentView !== 'loading'"
         v-model="currentView"
         :choices="views"
         buttonStyle=""
-        class="min-w-36 flex-[0.2] max-w-45 self-start sticky top-22 left-0"
+        :class="'hidden lg:block min-w-36 flex-[0.2] max-w-45 self-start sticky top-22 left-0'"
         vertical
+      />
+      <FormsChoiceSlider
+        v-if="currentView !== 'loading'"
+        v-model="currentView"
+        :choices="views"
+        buttonStyle=""
+        :class="'block lg:hidden w-full sticky top-10'"
       />
       <PagesNewRecipeForm
         v-if="currentView === 'form'"
@@ -27,7 +34,7 @@
       />
       <div
         v-if="currentView === 'loading'"
-        class="flex flex-col items-center mt-[20vh] gap-6"
+        class="flex flex-col w-full items-center mt-[20vh] gap-6"
       >
         <img src="/loading.png" class="h-8 w-8" />
         <Transition name="fade-up">
@@ -111,9 +118,11 @@ const submitFromPreparsed = async (recipe: ComputableRecipe) => {
         publish: publish.value,
       },
     });
-    navigateTo(`/recipe/${response.id}?poll=${job.value?.id}`);
+    navigateTo(
+      getRecipeUrl(response.id, recipe.title ?? '') + `?poll=${job.value?.id}`
+    );
   } else {
-    navigateTo(`/recipe/${response.id}`);
+    navigateTo(getRecipeUrl(response.id, recipe.title ?? ''));
   }
 };
 
@@ -144,8 +153,8 @@ const submitFromLink = async (link: string) => {
     in: { source: urlVariations },
   });
   if (recipes.length > 0) {
-    const recipe = recipes[0];
-    navigateTo(`/recipe/${recipe.id}`);
+    const recipe = recipes[0]!;
+    navigateTo(getRecipeUrl(recipe.id, recipe.title ?? ''));
     return;
   }
 
@@ -232,7 +241,9 @@ const submitBaseRecipe = async (baseRecipe: BaseRecipe) => {
       publish: publish.value,
     },
   });
-  navigateTo(`/recipe/${id}?poll=${job.value?.id}`);
+  navigateTo(
+    getRecipeUrl(id, baseRecipe.title ?? '') + `?poll=${job.value?.id}`
+  );
 };
 
 onMounted(async () => {
@@ -244,6 +255,14 @@ onMounted(async () => {
       submitFromLink(validUrl.href);
     }
   }
+});
+
+watchEffect(() => {
+  router.replace({ query: { view: currentView.value } });
+});
+
+useHead({
+  title: 'Create a new recipe | Kinome',
 });
 </script>
 

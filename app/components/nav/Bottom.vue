@@ -41,14 +41,14 @@
 <script setup lang="ts">
 const sideLinks = [
   {
-    name: 'Home',
-    icon: 'home',
+    name: 'Discover',
+    icon: 'explore',
     path: '/',
   },
   {
-    name: 'Discover',
-    icon: 'explore',
-    path: '/discover',
+    name: 'Collection',
+    icon: 'book_2',
+    path: '/collection',
   },
 
   {

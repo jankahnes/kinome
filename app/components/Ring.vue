@@ -1,5 +1,5 @@
 <template>
-  <div :class="widthClass" class="relative aspect-square">
+  <div class="relative aspect-square">
     <svg
       class="absolute inset-0 w-full h-full -rotate-90"
       viewBox="0 0 100 100"
@@ -50,13 +50,11 @@ import { computed } from 'vue';
 
 interface Props {
   segments: { value: number; color: string }[];
-  widthClass?: string;
   strokeWidth?: number;
   ringBackground?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  widthClass: 'w-40',
   strokeWidth: 8,
   ringBackground: '#e5e5e5',
 });

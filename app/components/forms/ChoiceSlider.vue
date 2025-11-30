@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="containerRef"
     class="relative flex overflow-hidden"
     :class="vertical ? 'flex-col' : 'flex-row'"
   >
@@ -15,7 +16,10 @@
       ref="btnRefs"
       class="relative z-10 flex-1 flex items-center justify-center sm:text-xl transition-all duration-300 py-2 font-bold"
       @click="updateValue(choice.value)"
-      :class="{ 'mx-2! justify-stretch!': vertical, 'scale-110!': idx === currentIndex }"
+      :class="{
+        'mx-2! justify-stretch!': vertical,
+        'scale-110!': idx === currentIndex,
+      }"
     >
       <span
         v-if="choice.icon"
@@ -37,6 +41,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>();
 
+const containerRef = ref<HTMLElement | null>(null);
 const btnRefs = ref<Array<HTMLElement | null>>([]);
 
 const segmentSizes = ref<number[]>([]);
@@ -56,7 +61,22 @@ function measureSegments() {
   });
 }
 
-onMounted(measureSegments);
+onMounted(() => {
+  measureSegments();
+
+  // Set up ResizeObserver to react to dimension changes
+  if (containerRef.value) {
+    const resizeObserver = new ResizeObserver(() => {
+      measureSegments();
+    });
+    resizeObserver.observe(containerRef.value);
+
+    // Clean up observer on unmount
+    onBeforeUnmount(() => {
+      resizeObserver.disconnect();
+    });
+  }
+});
 
 const currentIndex = computed(() =>
   props.choices.findIndex((choice) => choice.value === props.modelValue)

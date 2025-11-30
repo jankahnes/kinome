@@ -142,12 +142,12 @@ export type FullUser = Partial<ProfileRow> &
     id: string;
     recipes?: RecipeOverview[];
     activity?: Activity[];
-    likes?: RecipeOverview[];
+    bookmarks?: RecipeOverview[];
     settings?: Record<string, any>;
     stats?: {
       recipesCount: number;
       activityCount: number;
-      likesCount: number;
+      bookmarksCount: number;
     };
   };
 
@@ -421,7 +421,14 @@ export type ProcessingRequirement = {
 export type ParsedPart = {
   text: string;
   styling: string;
-  type?: 'amount' | 'unit' | 'food' | 'product' | 'prep' | 'ignored' | 'request';
+  type?:
+    | 'amount'
+    | 'unit'
+    | 'food'
+    | 'product'
+    | 'prep'
+    | 'ignored'
+    | 'request';
   barcode?: string;
   productId?: string; // barcode or product ID from DB
 };

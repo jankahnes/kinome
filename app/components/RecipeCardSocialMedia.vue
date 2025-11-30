@@ -14,10 +14,13 @@
         :src="recipe.social_picture"
         :alt="recipe?.title"
       />
-      <Skeleton v-else class="w-full xs:w-auto aspect-9/16 xs:h-full object-cover" />
+      <Skeleton
+        v-else
+        class="w-full xs:w-auto aspect-9/16 xs:h-full object-cover"
+      />
     </a>
     <NuxtLink
-      :to="'/recipe/' + recipe.id"
+      :to="getRecipeUrl(recipe.id, recipe.title)"
       class="z-0 flex-1 h-full flex flex-col px-6 py-2"
     >
       <div class="flex flex-col gap-3 justify-center flex-1">
