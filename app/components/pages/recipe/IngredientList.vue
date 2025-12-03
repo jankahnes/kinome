@@ -10,7 +10,7 @@
           class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/70 text-xs"
           @click="copyIngredients"
         >
-          <span class="material-symbols-outlined !text-sm">copy_all</span>
+          <IconCopy class="w-4" />
           Copy
         </button>
         <transition name="fade-slide" mode="out-in">
@@ -19,7 +19,7 @@
             class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/70 text-xs will-change-transform"
             @click="resetUnits"
           >
-            <span class="material-symbols-outlined !text-sm">refresh</span>
+            <IconRefreshCcw class="w-4" />
             <span>Reset Units</span>
           </button>
         </transition>
@@ -28,7 +28,7 @@
           class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/70 text-xs will-change-transform"
           @click="formalize()"
         >
-          <span class="material-symbols-outlined !text-sm">auto_awesome</span>
+          <IconSparkles class="w-4" />
           <span>Analyze</span>
         </button>
       </div>
@@ -154,31 +154,29 @@
             class="button flex items-center gap-2 px-4 py-1 font-medium !bg-primary !text-white will-change-transform mt-6"
             @click="addToShoppingList"
           >
-            <span class="material-symbols-outlined !text-lg"
-              >add_shopping_cart</span
-            >
+            <IconShoppingCart class="w-5 h-5" />
             Add to Shopping List
           </button>
         </Transition>
         <div class="flex gap-2 items-center flex-wrap">
           <div
-            class="flex gap-2 items-center bg-primary-20 rounded-xl px-2"
+            class="flex gap-1 items-center bg-primary-20 rounded-xl px-2"
             v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1"
           >
-            <span class="material-symbols-outlined !text-lg">water_drop</span>
+            <span class="text-sm">🧈</span>
             <span class="text-xs font-medium"
               >Plus estimated ~{{ getAdded(addedInfo?.addedFat) }}g of fat</span
             >
           </div>
           <div
-            class="flex gap-2 items-center bg-primary-20 rounded-xl px-2"
+            class="flex gap-1 items-center bg-primary-20 rounded-xl px-2"
             v-if="
               addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
             "
           >
-            <span class="material-symbols-outlined !text-lg">grain</span>
+          <span class="text-sm">🧂</span>
             <span class="text-xs font-medium"
-              >Plus estimated ~{{ getAdded(addedInfo?.addedSalt) }}g of
+              > Plus estimated ~{{ getAdded(addedInfo?.addedSalt) }}g of
               salt</span
             >
           </div>

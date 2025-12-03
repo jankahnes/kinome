@@ -6,7 +6,7 @@
           @click="router.back()"
           class="button flex items-center justify-center p-2 text-2xl font-bold ml-2 md:ml-6 !bg-primary/10"
         >
-          <span class="material-symbols-outlined"> arrow_back </span>
+          <IconChevronLeft class="w-5" />
         </button>
         <div class="space-y-2">
           <p class="text-xl text-primary font-bold mx-2 md:ml-8">
@@ -46,9 +46,7 @@
               v-if="!hasSomeNutritionFields"
               class="flex gap-3 items-center flex-wrap justify-between"
             >
-              <span class="material-symbols-outlined !text-2xl">
-                arrow_forward
-              </span>
+              <IconChevronRight class="w-8" />
               <span class="text-lg flex-1 flex-shrink-0 text-nowrap"
                 >No Nutrition Label yet</span
               >
@@ -56,7 +54,7 @@
                 <button
                   class="button px-2 py-[5px] flex gap-2 items-center !text-primary"
                 >
-                  <span class="material-symbols-outlined"> edit </span>
+                  <IconPencil class="w-5" />
                   <span>Edit</span>
                 </button>
                 <button
@@ -69,9 +67,7 @@
                     src="/loading.png"
                     class="h-6 w-6"
                   />
-                  <span v-else class="material-symbols-outlined">
-                    visibility
-                  </span>
+                  <IconEye class="w-5" v-else />
                   <span>Scan</span>
                 </button>
               </div>
@@ -80,28 +76,24 @@
               v-else-if="!hasAllNutritionFields"
               class="flex gap-2 items-center"
             >
-              <span class="material-symbols-outlined !text-2xl">
-                arrow_forward
-              </span>
+              <IconChevronRight class="w-8" />
               <span class="text-lg flex-1">Incomplete Nutrition Label</span>
               <button
                 class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
               >
-                <span class="material-symbols-outlined"> edit </span>
+                <IconPencil class="w-8" />
                 <span>Fill in missing information</span>
               </button>
             </div>
             <div v-else class="flex gap-2 items-center opacity-60">
-              <span class="material-symbols-outlined !text-2xl"> check </span>
+              <IconCheck class="w-8" />
               <span class="text-lg flex-1">Complete Nutrition Label</span>
             </div>
             <div
               v-if="!isMatchedToGenericFood"
               class="flex gap-3 items-center flex-wrap justify-between"
             >
-              <span class="material-symbols-outlined !text-2xl">
-                arrow_forward
-              </span>
+              <IconChevronRight class="w-8" />
               <span class="text-lg flex-1 flex-shrink-0 text-nowrap"
                 >No matched generic food yet</span
               >
@@ -116,15 +108,13 @@
                     src="/loading.png"
                     class="h-6 w-6"
                   />
-                  <span v-else class="material-symbols-outlined">
-                    more_up
-                  </span>
+                  <IconArrowUp class="w-5" v-else />
                   <span>Request </span>
                 </button>
               </div>
             </div>
             <div v-else class="flex gap-2 items-center opacity-60">
-              <span class="material-symbols-outlined !text-2xl"> check </span>
+              <IconCheck class="w-8" />
               <span class="text-lg flex-1"
                 >Matched to {{ product?.food_name?.name }}</span
               >
@@ -205,26 +195,59 @@ const requestMatching = async () => {
 const hasSomeNutritionFields = computed(
   () =>
     product.value &&
-    nutritionalFields.some(
-      (field) =>
-        product.value![field] != null
-    )
+    nutritionalFields.some((field) => product.value![field] != null)
 );
 const hasAllNutritionFields = computed(
   () =>
     product.value &&
-    nutritionalFields.every(
-      (field) =>
-        product.value![field] != null
-    )
+    nutritionalFields.every((field) => product.value![field] != null)
 );
 const isMatchedToGenericFood = computed(
-  () =>
-    product.value &&
-    product.value?.matched_food_name_id != null
+  () => product.value && product.value?.matched_food_name_id != null
 );
 
-useHead({
-  title: product.value?.product_name + ' | Kinome',
+watchEffect(() => {
+  if (!product.value?.product_name) return;
+
+  const productName = product.value.product_name;
+  const brand = product.value.brand ? `${product.value.brand} ` : '';
+  const kcalText = product.value.kcal
+    ? ` ${Math.round(product.value.kcal)} calories per serving.`
+    : '';
+
+  const description = `Detailed nutrition information for ${brand}${productName}.${kcalText} Scan barcode to view complete nutritional facts, ingredients, and health analysis.`;
+  const productUrl = `https://kinome.app/product/${route.params.barcode}`;
+
+  useHead({
+    title: `${brand}${productName} - Barcode Nutrition Info | Kinome`,
+    meta: [
+      {
+        name: 'description',
+        content: description.slice(0, 160),
+      },
+      {
+        property: 'og:title',
+        content: `${brand}${productName} | Kinome`,
+      },
+      {
+        property: 'og:description',
+        content: description.slice(0, 200),
+      },
+      {
+        property: 'og:type',
+        content: 'product',
+      },
+      {
+        property: 'og:url',
+        content: productUrl,
+      },
+    ],
+    link: [
+      {
+        rel: 'canonical',
+        href: productUrl,
+      },
+    ],
+  });
 });
 </script>

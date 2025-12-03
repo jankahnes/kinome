@@ -6,7 +6,7 @@
         class="button flex items-center gap-1 px-2 py-1 font-medium !bg-primary-20/70 text-xs will-change-transform leading-none"
         @click="model.useNaturalLanguage = !model.useNaturalLanguage"
       >
-        <span class="material-symbols-outlined !text-sm">autorenew</span>
+        <IconRefreshCcw class="w-4" />
         <span>{{
           model.useNaturalLanguage
             ? 'Use Precise Parsing'
@@ -45,14 +45,14 @@
             v-if="category !== 'uncategorized'"
           >
             <h3 class="py-2 font-semibold flex items-center gap-2">
-              <span class="material-symbols-outlined"> topic </span>
+              <IconFolder class="w-4" />
               {{ category }}
             </h3>
             <button
               @click="removeCategory(category)"
-              class="material-symbols-outlined !text-lg cursor-pointer text-red-500 hover:text-red-700"
+              class="cursor-pointer text-red-500 hover:text-red-700"
             >
-              close
+              <IconX class="w-4" />
             </button>
           </div>
 
@@ -102,9 +102,9 @@
                   <button
                     v-if="!isLastEmptyIngredient(category, index)"
                     @click="removeIngredient(category, index)"
-                    class="material-symbols-outlined !text-xl cursor-pointer text-gray-500 hover:text-gray-700"
+                    class="cursor-pointer text-gray-500 hover:text-gray-700"
                   >
-                    close
+                    <IconX class="w-4" />
                   </button>
                 </div>
 
@@ -144,7 +144,7 @@
               newCategoryName = '';
             "
           >
-            <span class="material-symbols-outlined !text-lg">close</span>
+            <IconX class="w-4" />
           </button>
           <button
             @click="
@@ -155,7 +155,7 @@
               newCategoryName = '';
             "
           >
-            <span class="material-symbols-outlined !text-lg">check</span>
+            <IconCheck class="w-4" />
           </button>
         </div>
         <button
@@ -166,7 +166,7 @@
             newCategoryName = '';
           "
         >
-          <span class="material-symbols-outlined !text-lg">add</span>
+          <IconPlus class="w-4" />
           <span class="text-base">Add Category</span>
         </button>
       </div>

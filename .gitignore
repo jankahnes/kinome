@@ -24,6 +24,7 @@ summary.txt
 .env.*
 !.env.example
 TODO.txt
+TODO-OLD.txt
 notes.txt
 .vscode/extensions.json
 .vercel

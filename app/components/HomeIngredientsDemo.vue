@@ -30,7 +30,7 @@
         class="button px-6 py-2 font-bold text-white !bg-primary rounded-lg flex items-center gap-2 disabled:opacity-50"
         @click="searchRecipes"
       >
-        <span class="material-symbols-outlined !text-lg">search</span>
+        <IconSearch />
         Find Recipes
       </button>
     </div>
@@ -60,7 +60,8 @@
             }}
           </h4>
           <p class="text-sm text-gray-600">
-            Recipes using {{ matchedFoods.map((food) => food.matched).join(', ') }}
+            Recipes using
+            {{ matchedFoods.map((food) => food.matched).join(', ') }}
           </p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -74,9 +75,7 @@
       </div>
 
       <div v-else class="text-center">
-        <span class="material-symbols-outlined !text-4xl text-gray-400 mb-2"
-          >search_off</span
-        >
+        <IconSearchX class="text-gray-400 mb-2" />
         <p class="text-sm text-gray-600">
           No recipes found with all three ingredients
         </p>
@@ -161,10 +160,14 @@ const searchRecipes = async () => {
 
 async function getRecipesByFoodNames(
   client: SupabaseClient,
-  foodMatches: { original: string; matched: string; food_id: number; similarity: number }[]
+  foodMatches: {
+    original: string;
+    matched: string;
+    food_id: number;
+    similarity: number;
+  }[]
 ): Promise<RecipeOverview[]> {
   console.log('🔍 getRecipesByFoodNames called with:', foodMatches);
-
 
   const targetFoodIds = foodMatches.map((r) => r.food_id);
   console.log('🎯 Target food IDs:', targetFoodIds);

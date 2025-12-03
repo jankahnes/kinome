@@ -1,6 +1,6 @@
 <template>
   <div
-    class="font-bold w-[2em] aspect-square text-center flex items-center justify-center rounded-[0.5em]"
+    class="font-bold w-[2em] aspect-square text-center flex items-center justify-center rounded-[0.5em]!"
     :class="gradeStickerColors[getGrade(props.score, props.type)[0] as keyof typeof gradeStickerColors]"
   >
     {{ getGrade(props.score, props.type) }}

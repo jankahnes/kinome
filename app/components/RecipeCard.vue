@@ -54,13 +54,12 @@
     >
       <div class="pt-4 flex flex-col gap-4 justify-between h-full items-center">
         <h2
-          class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-center"
-          :class="{ 'line-clamp-1! text-xl! leading-none!': truncate }"
+          class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-center h-12 grid place-items-center"
         >
           {{ recipe?.title }}
         </h2>
         <div
-          class="flex gap-1.5 flex-wrap text-[0.6em] sm:text-[0.4em] max-h-[3.4rem] overflow-y-hidden items-end justify-center py-0.5"
+          class="flex gap-1.5 flex-wrap text-xs sm:text-[14px] h-14 overflow-y-hidden items-center justify-center py-0.5"
         >
           <div
             v-if="recipe?.hidx && recipe?.hidx >= 55 && !recipe?.picture && !recipe?.social_picture"

@@ -4,13 +4,11 @@
       <div
         v-if="show"
         key="onboarding-container"
-        class="min-h-screen onboarding-gradient flex items-center justify-center p10"
+        class="min-h-svh onboarding-gradient flex items-center justify-center pb-30 lg:pb-20 overflow-x-hidden"
       >
-        <div class="p-2 sm:p-8 max-w-2xl w-full">
+        <div class="p-8 max-w-2xl w-full">
           <NuxtLink to="/" class="text-gray-800 opacity-70 ml-2">
-            <span class="material-symbols-outlined !text-lg">
-              arrow_back_ios
-            </span>
+            <IconChevronLeft class="" />
           </NuxtLink>
           <!-- Progress Bar -->
           <div class="mb-8 mt-8">
@@ -24,7 +22,7 @@
             </div>
           </div>
 
-          <div class="min-h-[400px]">
+          <div class="min-h-[410px] md:min-h-[350px]">
             <!-- Diet Step -->
             <div
               v-if="currentStep === 'diet'"
@@ -92,7 +90,7 @@
                   Which cuisines interest you?
                 </p>
               </div>
-              <div class="flex flex-wrap gap-3 justify-center mx-10">
+              <div class="flex flex-wrap gap-3 justify-center md:mx-10">
                 <div
                   v-for="cuisine in cuisineOptions"
                   :key="cuisine.id"
@@ -228,11 +226,9 @@
                 @click="triggerFileInput"
                 class="relative cursor-pointer w-full aspect-square rounded-xl overflow-hidden border-2 border-dashed border-gray-400 flex items-center justify-center bg-gray-100 group hover:border-gray-600"
               >
-                <span
-                  class="material-symbols-outlined !text-8xl text-gray-800 select-none pointer-events-none"
-                >
-                  photo_camera
-                </span>
+                <IconCamera
+                  class="w-12 text-gray-800 select-none pointer-events-none"
+                />
                 <input
                   ref="imgUpload"
                   type="file"
@@ -343,20 +339,14 @@ const foodOptions = [
   { label: '🥗 Salad', id: '' },
   { label: '🍔 Burger', id: '' },
   { label: '🥩 Steak', id: '' },
-  { label: '🍝 Pasta', id: '' },
   { label: '🍛 Curry', id: '' },
-  { label: '🍞 Bread', id: '' },
   { label: '🍜 Ramen', id: '' },
-  { label: '🧀 Cheese', id: '' },
   { label: '🥑 Avocado', id: 298 },
   { label: '🌮 Tacos', id: '' },
   { label: '🍓 Strawberries', id: '' },
-  { label: '🍳 Eggs', id: '' },
-  { label: '🍗 Fried Chicken', id: '' },
   { label: '🥔 Potatoes', id: 284 },
   { label: '🍤 Shrimp', id: '' },
   { label: '🥬 Kale', id: '' },
-  { label: '🍉 Watermelon', id: '' },
 ];
 
 const steps = [

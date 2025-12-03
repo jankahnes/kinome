@@ -27,10 +27,8 @@
           auth.shoppingListOpen,
       }"
     >
-      <span v-if="!auth.shoppingListOpen" class="material-symbols-outlined"
-        >shopping_cart</span
-      >
-      <span v-else class="material-symbols-outlined">close</span>
+      <IconShoppingCart v-if="!auth.shoppingListOpen" />
+      <IconX v-else />
       <span
         class="w-6 h-6 absolute top-[-4px] right-[-4px] bg-white border-primary-600 border-2 text-primary font-bold rounded-full flex items-center justify-center"
         >{{ auth.shoppingList.length }}</span
@@ -61,9 +59,7 @@
     @click="auth.shoppingListOpen = true"
     class="flex sm:hidden fixed top-1/2 left-0 -translate-x-8 -translate-y-1/2 w-14 h-14 bg-primary-600 text-white rounded-full items-center justify-center z-50 transition-all duration-200 hover:scale-105"
   >
-    <span class="material-symbols-outlined !text-base -mr-6 mt-1"
-      >shopping_cart</span
-    >
+    <IconShoppingCart class="!text-base -mr-6 mt-1" />
   </button>
 
   <!-- Shopping List Panel -->

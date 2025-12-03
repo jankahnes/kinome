@@ -8,12 +8,10 @@
       class="flex items-center justify-between z-10 relative w-full h-full gap-1 p-2 button"
     >
       <span>{{ modelValue }}</span>
-      <span
-        class="material-symbols-outlined transition-transform duration-300"
+      <IconChevronDown
+        class="transition-transform duration-300"
         :class="{ 'rotate-180': isOpen }"
-      >
-        keyboard_arrow_down
-      </span>
+      />
     </button>
 
     <Transition @before-enter="beforeEnter" @enter="enter" @leave="leave">
@@ -33,12 +31,7 @@
               "
             >
               <span class="font-bold">{{ choice }}</span>
-              <span
-                class="material-symbols-outlined"
-                v-if="modelValue === choice"
-              >
-                check
-              </span>
+              <IconCheck class="w-4" v-if="modelValue === choice" />
             </button>
           </li>
         </ul>

@@ -49,7 +49,7 @@
               class="flex-1 basis-100"
             ></PagesRecipeCommentSection>
             <div class="flex flex-col w-full gap-4">
-              <p class="text-2xl font-bold ml-4">Similar Recipes</p>
+              <h2 class="text-2xl font-bold ml-4">Similar Recipes</h2>
               <div class="flex gap-4">
                 <RecipeCard
                   v-for="recipe in similarRecipes"
@@ -71,7 +71,7 @@
             :batchSize="recipeStore.recipe?.batch_size ?? undefined"
             :recipeId="recipeStore.recipe?.id"
             v-model:servingSize="servingSize"
-            class="shrink-0 lg:basis-125 sticky top-10"
+            class="shrink-0 lg:basis-125"
             :formalizationLoading="job?.step === 'formalizing_ingredients'"
             :displayFormalize="displayIngredientsFormalize"
             :formalize="formalizeIngredients"
@@ -301,12 +301,82 @@ watch(
 );
 
 watchEffect(() => {
+  const recipe = recipeStore.recipe;
+  if (!recipe) return;
+
+  // Build a descriptive meta description
+  const healthGrade = recipe.hidx ? getGrade(recipe.hidx, 'ovr') : null;
+  const healthText =
+    healthGrade && recipe.hidx >= 55 ? ` Health Score: ${healthGrade}.` : '';
+  const effortText = recipe.effort
+    ? ` ${capitalize(recipe.effort)} effort.`
+    : '';
+  const difficultyText = recipe.difficulty
+    ? ` ${capitalize(recipe.difficulty)} difficulty.`
+    : '';
+  const kcalText = recipe.kcal
+    ? ` ${Math.round(recipe.kcal)} calories per serving.`
+    : '';
+
+  const fullDescription = recipe.description
+    ? `${recipe.description}${healthText}${effortText}${difficultyText}${kcalText}`
+    : `Discover this delicious ${recipe.title} recipe with complete nutrition analysis.${healthText}${effortText}${difficultyText}${kcalText}`;
+
+  const recipeUrl = `https://kinome.app${getRecipeUrl(
+    recipe.id,
+    recipe.title
+  )}`;
+  const imageUrl =
+    recipe.picture || recipe.social_picture || 'https://kinome.app/feast.png';
+
   useHead({
-    title: recipeStore.recipe?.title + ' Recipe | Kinome',
+    title: `${recipe.title} Recipe - Complete Nutrition Analysis & Instructions | Kinome`,
     meta: [
       {
         name: 'description',
-        content: recipeStore.recipe?.description ?? '',
+        content: fullDescription.slice(0, 160), // Keep under 160 chars for optimal display
+      },
+      {
+        property: 'og:title',
+        content: `${recipe.title} Recipe | Kinome`,
+      },
+      {
+        property: 'og:description',
+        content: fullDescription.slice(0, 200),
+      },
+      {
+        property: 'og:type',
+        content: 'article',
+      },
+      {
+        property: 'og:url',
+        content: recipeUrl,
+      },
+      {
+        property: 'og:image',
+        content: imageUrl,
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
+      },
+      {
+        name: 'twitter:title',
+        content: `${recipe.title} Recipe`,
+      },
+      {
+        name: 'twitter:description',
+        content: fullDescription.slice(0, 200),
+      },
+      {
+        name: 'twitter:image',
+        content: imageUrl,
+      },
+    ],
+    link: [
+      {
+        rel: 'canonical',
+        href: recipeUrl,
       },
     ],
   });

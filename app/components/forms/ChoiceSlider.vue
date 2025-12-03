@@ -21,11 +21,7 @@
         'scale-110!': idx === currentIndex,
       }"
     >
-      <span
-        v-if="choice.icon"
-        class="material-symbols-outlined mx-1 !text-xl"
-        >{{ choice.icon }}</span
-      >
+      <Icon v-if="choice.icon" :name="choice.icon" class="mx-1" />
       <span class="mx-1">
         {{ choice.displayName }}
       </span>

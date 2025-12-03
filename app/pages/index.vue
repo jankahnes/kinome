@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-4 sm:mx-10 md:mx-20 space-y-4 sm:space-y-10 py-6">
+  <div class="md:mx-20 space-y-4 sm:space-y-10 m-4 sm:m-10">
     <div class="flex justify-between items-center gap-6">
       <div class="flex gap-4 flex-1">
         <div
@@ -13,22 +13,24 @@
             @blur="handleSearch"
             class="flex-1 focus:outline-none py-2 min-w-0! max-w-none! w-0"
           />
-          <span class="material-symbols-outlined shrink-0">search</span>
+          <IconSearch class="w-5 shrink-0" />
         </div>
         <NuxtLink
-          to="/collection/recipes"
+          to="/kitchen/recipes"
           class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
           >All Recipes</NuxtLink
         >
       </div>
       <div class="items-center gap-2 shrink-0 hidden sm:flex">
         <NuxtLink to="/" class="text-gray-500 items-center gap-2">
-          <span class="material-symbols-outlined font-bold!">tune</span>
+          <IconSettings2 class="w-6" />
         </NuxtLink>
       </div>
     </div>
     <div class="flex items-center gap-2 justify-between">
-      <h1 class="text-5xl font-bold pt-4">🌟 Discover</h1>
+      <h1 class="text-5xl font-bold pt-4">
+        🌟<span class="ml-0.5">Discover</span>
+      </h1>
       <div class="items-center gap-4 hidden sm:flex">
         <div class="flex flex-col items-center">
           <p class="text-3xl font-bold text-primary leading-none">1194</p>
@@ -45,7 +47,7 @@
     <BlocksCarousel>
       <div
         class="flex items-center gap-x-1 px-3 py-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
-        @click="navigateTo('/collection/social')"
+        @click="navigateTo('/kitchen/social')"
       >
         <span class="text-2xl">🔥</span>
         <span class="text-sm sm:text-base sm:tracking-wider text-nowrap"
@@ -84,6 +86,14 @@
         :recipe="recipeStore.indexRecipes[0]"
         :uniqueId="'mobile-0-0'"
         class="md:-ml-10! text-[20px] md:text-[30px]"
+      />
+      <RecipeCardHorizontal
+        v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
+        :key="recipe.id + 'mobile'"
+        :recipe="recipe"
+        :id="'mobile-' + index + '-' + recipe.id"
+        :uniqueId="'mobile-' + index + '-' + recipe.id"
+        class="text-[20px] basis-95 flex-1"
       />
     </div>
 
@@ -124,7 +134,7 @@
           v-if="recipeStore.indexRecipes[0]"
           :recipe="recipeStore.indexRecipes[0]"
           :uniqueId="'desktop-0-0'"
-          class="-ml-10! flex-1 basis-220"
+          class="-ml-10! flex-1 basis-220 3xl:max-w-5xl"
         />
         <div class="flex flex-wrap gap-4 shrink-0 basis-80 flex-1 items-center">
           <RecipeCardHorizontal
@@ -141,7 +151,7 @@
             :recipe="recipe"
             :id="'desktop-' + index + '-' + recipe.id"
             :uniqueId="'desktop-' + index + '-' + recipe.id"
-            class="text-[30px] hidden 3xl:flex basis-95 flex-1"
+            class="text-[30px] hide-below-2200 basis-95 flex-1"
           />
         </div>
       </div>
@@ -151,12 +161,11 @@
     <Transition name="loaded-content">
       <div class="flex flex-wrap pt-4">
         <div class="flex flex-col gap-4 items-start">
-          <NuxtLink
-            to="/collection/social"
-            class="inline-block text-xl font-bold"
-          >
-            Trending on Social Media
-          </NuxtLink>
+          <h2 class="text-xl font-bold">
+            <NuxtLink to="/kitchen/social" class="inline-block">
+              Trending on Social Media
+            </NuxtLink>
+          </h2>
           <div class="flex flex-wrap gap-4">
             <RecipeCardSocialMedia
               v-for="recipe in recipeStore.socialIndexRecipes"
@@ -178,7 +187,53 @@ const recipeStore = useRecipeStore();
 const loadingStore = useLoadingStore();
 const searchQuery = ref('');
 
-useHead({ title: 'Kinome' });
+useHead({
+  title:
+    'Kinome - Smart Recipe Platform with Advanced Nutrition Analysis & Diet Tracking',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Discover healthy recipes with detailed nutrition scores, save recipes from any website or social media, and track your diet with AI-powered ingredient parsing. Access 1000+ recipes with comprehensive health analysis.',
+    },
+    {
+      property: 'og:title',
+      content: 'Kinome - Smart Recipe Platform with Nutrition Analysis',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Discover healthy recipes with detailed nutrition scores, save recipes from any website or social media, and track your diet with AI-powered ingredient parsing.',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      property: 'og:url',
+      content: 'https://kinome.app',
+    },
+    {
+      name: 'twitter:card',
+      content: 'summary_large_image',
+    },
+    {
+      name: 'twitter:title',
+      content: 'Kinome - Smart Recipe Platform with Nutrition Analysis',
+    },
+    {
+      name: 'twitter:description',
+      content:
+        'Discover healthy recipes with detailed nutrition scores, save recipes from any website or social media, and track your diet with AI-powered ingredient parsing.',
+    },
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://kinome.app',
+    },
+  ],
+});
 
 const desktopCards = ref<any[]>([]);
 const rowMaxHeight = useTruncateRow(desktopCards, 12);
@@ -257,14 +312,14 @@ const categories = ref([
 ]);
 
 const onClickCategory = (category: number) => {
-  navigateTo(`/collection/recipes?tags=${category}`);
+  navigateTo(`/kitchen/recipes?tags=${category}`);
 };
 
 const handleSearch = () => {
   if (!searchQuery.value.trim()) {
     return;
   }
-  navigateTo(`/collection/recipes?q=${searchQuery.value}&sort=Relevancy`);
+  navigateTo(`/kitchen/recipes?q=${searchQuery.value}&sort=Relevancy`);
 };
 
 const handleQuickImport = async () => {
@@ -288,4 +343,13 @@ const handleQuickImport = async () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.hide-below-2200 {
+  display: none;
+}
+@media (min-width: 2199px) {
+  .hide-below-2200 {
+    display: flex;
+  }
+}
+</style>

@@ -5,7 +5,7 @@
       @click="handleClose"
       class="absolute top-4 right-4 z-50 text-white bg-black/50 rounded-full p-2 h-10 w-10 flex items-center justify-center"
     >
-      <span class="material-symbols-outlined text-3xl">close</span>
+      <IconX class="w-8 h-8 text-white" />
     </button>
 
     <div class="relative w-full h-[80%]">
@@ -36,7 +36,7 @@
             @click="triggerPhotoCapture"
             class="w-full bg-primary opacity-70 text-white font-semibold py-3 px-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
           >
-            <span class="material-symbols-outlined">photo_camera</span>
+            <IconCamera class="text-white" />
             Couldn't detect barcode? Tap here to take a photo instead.
           </button>
         </div>
@@ -56,11 +56,11 @@
     <div class="flex justify-between items-center w-full px-4 mt-4">
       <div class="bg-white/10 text-white px-4 py-2 rounded-lg text-sm">
         <div v-if="useNativeDetector" class="flex items-center gap-2">
-          <span class="material-symbols-outlined">bolt</span>
+          <IconBolt class="text-white" />
           <span>Using Chrome's Barcode Detector</span>
         </div>
         <div v-else class="flex items-center gap-2">
-          <span class="material-symbols-outlined">barcode</span>
+          <IconBarcode class="text-white" />
           <span>Using Quagga Barcode Detector</span>
         </div>
       </div>
@@ -69,9 +69,8 @@
         @click="toggleTorch"
         class="text-white text-2xl p-2"
       >
-        <span class="material-symbols-outlined">
-          {{ torchEnabled ? 'flashlight_on' : 'flashlight_off' }}
-        </span>
+        <IconFlashlight class="text-white" v-if="torchEnabled" />
+        <IconFlashlightOff class="text-white" v-else />
       </button>
     </div>
   </div>

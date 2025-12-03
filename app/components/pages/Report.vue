@@ -33,9 +33,7 @@
                 class="flex gap-3 items-center"
                 :class="grade.color"
               >
-                <span class="material-symbols-outlined !text-2xl">{{
-                  grade.icon
-                }}</span>
+                <Icon :name="grade.icon" :size="28"/>
                 <div class="flex flex-col">
                   <span class="font-semibold">{{ grade.description }}</span>
                   <span class="text-xs font-light" v-if="grade.subtitle">{{
@@ -57,9 +55,7 @@
               v-if="report.percentiles.hidx"
               :class="report.percentiles.hidx.color"
             >
-              <span class="material-symbols-outlined text-lg">{{
-                report.percentiles.hidx.icon
-              }}</span>
+              <Icon :name="report.percentiles.hidx.icon" :size="20"/>
               <span>{{ report.percentiles.hidx.description }}</span>
             </div>
             <Skeleton v-else class="w-52 h-10 rounded-xl" />
@@ -78,9 +74,7 @@
             :class="report.percentiles.hidx.color"
             v-if="report.percentiles.hidx"
           >
-            <span class="material-symbols-outlined text-lg">{{
-              report.percentiles.hidx.icon
-            }}</span>
+            <Icon :name="report.percentiles.hidx.icon" :size="20"/>
             <span>{{ report.percentiles.hidx.description }}</span>
           </div>
           <Skeleton v-else class="w-52 h-8 rounded-xl" />
@@ -110,9 +104,7 @@
                 :class="card.percentile.color"
                 v-if="card.percentile"
               >
-                <span class="material-symbols-outlined !text-lg">
-                  {{ card.percentile.icon }}
-                </span>
+                <Icon :name="card.percentile.icon" :size="20"/>
                 <span>{{ card.percentile.description }}</span>
               </div>
               <Skeleton v-else class="w-52 h-8 rounded-xl" />
@@ -128,9 +120,7 @@
             :key="nutrient.description"
           >
             <div class="flex gap-2" :class="nutrient.color">
-              <span class="material-symbols-outlined text-2xl">{{
-                nutrient.icon
-              }}</span>
+              <Icon :name="nutrient.icon" :size="28"/>
               <div class="flex flex-col">
                 <span class="font-semibold">{{ nutrient.description }}</span>
                 <span class="text-xs font-light" v-if="nutrient.subtitle">{{

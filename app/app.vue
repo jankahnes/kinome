@@ -1,5 +1,8 @@
 <template>
-  <div class="min-h-svh bg-[#f5eeee] font-main" ref="swipeContainer">
+  <div
+    class="min-h-svh bg-[#f5eeee] font-main overflow-x-hidden"
+    ref="swipeContainer"
+  >
     <div class="relative" @click="handleClickOutside">
       <Transition name="sidebar">
         <div
@@ -20,7 +23,7 @@
       </Transition>
 
       <Transition name="fade-up">
-        <NavBottom v-if="width && width < 700" />
+        <NavBottom v-if="!isWideScreen && width" />
       </Transition>
 
       <!-- Toggle button in blob notch -->
@@ -35,13 +38,11 @@
           !sidebarOpen ? 'hover:bg-primary/10' : '',
         ]"
       >
-        <span
-          class="transition-all duration-300 inline-block leading-none material-symbols-outlined"
-        >
-          chevron_left
-        </span>
+        <IconChevronLeft
+          class="transition-all duration-300 inline-block leading-none"
+        />
       </button>
-      <div class="flex-1 flex flex-col min-h-svh">
+      <div class="flex-1 flex flex-col min-h-svh overflow-x-hidden">
         <div
           class="transition-all duration-300 flex-1 flex flex-col"
           :class="pageMarginLeft"

@@ -5,11 +5,11 @@
     <ComponentHeader title="PUBLISH" />
     <div v-if="recipe.visibility === 'PUBLIC'" class="space-y-2 opacity-60">
       <div class="flex gap-2 items-center">
-        <span class="material-symbols-outlined !text-2xl"> check </span>
+        <IconCheck class="w-6" />
         <span class="text-lg flex-1">Your recipe is public!</span>
       </div>
       <div class="flex gap-2 items-center">
-        <span class="material-symbols-outlined !text-2xl"> show_chart </span>
+        <IconChartLine class="w-6" />
         <span class="text-lg">Relevancy</span>
         <div
           class="progress-ring ml-2"
@@ -35,11 +35,8 @@
           'opacity-50': publishingRequirements.hasInstructions,
         }"
       >
-        <span class="material-symbols-outlined !text-2xl">
-          {{
-            publishingRequirements.hasInstructions ? 'check' : 'arrow_forward'
-          }}
-        </span>
+        <IconCheck class="w-6" v-if="publishingRequirements.hasInstructions" />
+        <IconArrowRight class="w-6" v-else />
         <span class="text-[18px] flex-1 text-nowrap"
           >Add cooking instructions</span
         >
@@ -50,9 +47,8 @@
             @click="generateInstructions"
             :disabled="generateInstructionsLoading || generatePictureLoading"
           >
-            <span class="material-symbols-outlined">
-              {{ generateInstructionsLoading ? 'timer' : 'auto_awesome' }}
-            </span>
+            <IconLoader class="w-4 animate-spin" v-if="generateInstructionsLoading" />
+            <IconSparkles class="w-4" v-else />
             <span>{{
               generateInstructionsLoading ? 'Generating...' : 'Generate'
             }}</span>
@@ -63,7 +59,7 @@
             @click="scrollToEditableInstructions"
             :disabled="generateInstructionsLoading || generatePictureLoading"
           >
-            <span class="material-symbols-outlined"> edit </span>
+            <IconPencil class="w-4" />
             <span>Add</span>
           </button>
         </div>
@@ -72,9 +68,8 @@
         class="flex gap-2 items-center flex-wrap gap-y-1"
         :class="{ 'opacity-50': publishingRequirements.hasPicture }"
       >
-        <span class="material-symbols-outlined !text-2xl">
-          {{ publishingRequirements.hasPicture ? 'check' : 'arrow_forward' }}
-        </span>
+        <IconCheck class="w-6" v-if="publishingRequirements.hasPicture" />
+        <IconArrowRight class="w-6" v-else />
         <span class="text-[18px] flex-1 text-nowrap mr-4">Add picture</span>
         <div class="flex gap-2 items-center flex-wrap">
           <button
@@ -83,7 +78,8 @@
             @click="generatePicture"
             :disabled="generatePictureLoading || generateInstructionsLoading"
           >
-            <span class="material-symbols-outlined"> auto_awesome </span>
+            <IconSparkles class="w-4" v-if="!generatePictureLoading" />
+            <IconLoader class="w-4 animate-spin" v-else />
             <span>Generate</span>
           </button>
           <button
@@ -92,7 +88,7 @@
             @click="triggerFileUpload"
             :disabled="generatePictureLoading || generateInstructionsLoading"
           >
-            <span class="material-symbols-outlined"> file_upload </span>
+            <IconUpload class="w-4" />
             <span>Upload</span>
           </button>
 
@@ -102,7 +98,7 @@
             @click="triggerPhotoEnv"
             :disabled="generatePictureLoading || generateInstructionsLoading"
           >
-            <span class="material-symbols-outlined"> image </span>
+            <IconCamera class="w-4" />
             <span>Take picture</span>
           </button>
         </div>
@@ -123,7 +119,7 @@
               generatePictureLoading
             "
           >
-            <span class="material-symbols-outlined"> keyboard_arrow_up </span>
+            <IconChevronsUp class="w-4" />
             <span>{{
               publishLoading ? 'Generating...' : 'Generate & Publish'
             }}</span>
@@ -143,9 +139,8 @@
             generatePictureLoading
           "
         >
-          <span class="material-symbols-outlined">
-            {{ publishLoading ? 'timer' : 'keyboard_double_arrow_up' }}
-          </span>
+          <IconLoader class="w-4 animate-spin" v-if="publishLoading" />
+          <IconChevronsUp class="w-4" v-else />
           <span>{{ publishLoading ? 'Publishing...' : 'Publish' }}</span>
         </button>
       </div>
@@ -155,7 +150,7 @@
       class="button px-2 py-[3px] inline-flex gap-2 items-center !text-gray-800 !bg-primary-10/70 self-start"
       @click="deboost"
     >
-      <span class="material-symbols-outlined"> stat_minus_2 </span>
+      <IconChevronsDown class="w-5" />
       <span>Deboost</span>
     </button>
   </div>

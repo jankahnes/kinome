@@ -50,9 +50,7 @@
             @click="handleRequestFood(selectedText)"
             class="bg-primary-50 text-primary px-2 rounded-xl shadow-lg hover:bg-primary-dark transition-all duration-150 flex items-center gap-2 font-medium text-xs whitespace-nowrap animate-scale-in"
           >
-            <span class="material-symbols-outlined text-base!"
-              >database_search</span
-            >
+            <IconDatabase class="w-4" />
             Request "{{ capitalize(selectedText.slice(0, 20))
             }}{{ selectedText.length > 20 ? '...' : '' }}"
           </button>
@@ -89,7 +87,7 @@
         class="text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center"
         type="button"
       >
-        <span class="material-symbols-outlined">barcode_scanner</span>
+        <IconScanBarcode class="w-5" />
       </button>
     </div>
 
@@ -179,14 +177,14 @@
       </div>
       <button
         @click.stop="emit('deleteIngredient')"
-        class="material-symbols-outlined text-gray-500 hover:text-gray-700 transition-colors"
+        class="text-gray-500 hover:text-gray-700 transition-colors"
         :disabled="modelValue.brandedFoodState === 'matching'"
         :class="{
           'opacity-50 cursor-not-allowed':
             modelValue.brandedFoodState === 'matching',
         }"
       >
-        close
+        <IconX class="w-4" />
       </button>
     </div>
   </div>

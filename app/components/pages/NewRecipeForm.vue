@@ -6,7 +6,7 @@
         v-auto-resize
         rows="1"
         placeholder="✍️ New Recipe"
-        class="min-w-[40%] font-bold text-3xl border-box bg-primary-20/70! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto break-words scrollbar-hide"
+        class="w-full md:w-auto min-w-[40%] font-bold text-3xl border-box bg-primary-20/70! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto break-words scrollbar-hide"
       />
 
       <textarea
@@ -41,7 +41,7 @@
           class="bg-primary-20/70!"
         />
       </div>
-      <div class="flex gap-2 w-full justify-start mt-6">
+      <div class="flex gap-2 w-full justify-start md:mt-6">
         <button
           class="flex gap-2 items-center justify-center bg-primary text-white border-3 border-primary rounded-xl px-2 py-1 font-bold shadow-lg"
           @click="submit()"

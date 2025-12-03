@@ -23,10 +23,10 @@
           feedItem.type === 'RECIPE_CREATION'
         "
       >
-        <span class="material-symbols-outlined">add</span>
+        <IconPlus />
       </div>
       <div v-else class="w-10 h-10">
-        <span class="material-symbols-outlined">notifications</span>
+        <IconBell />
       </div>
     </div>
 

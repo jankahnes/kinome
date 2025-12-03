@@ -8,7 +8,7 @@
         class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/70 text-xs will-change-transform"
         @click="pasteInstructions"
       >
-        <span class="material-symbols-outlined !text-sm"> content_copy </span>
+        <IconCopy class="w-4" />
         <span>Paste</span>
       </button>
     </div>
@@ -36,9 +36,9 @@
                   <button
                     v-else
                     @click="modelValue.push('')"
-                    class="rounded-lg p-2 w-full h-full cursor-pointer"
+                    class="rounded-lg w-full h-full cursor-pointer"
                   >
-                    <span class="material-symbols-outlined !text-4xl">add</span>
+                    <IconPlus :size="30" />
                   </button>
                 </div>
               </div>

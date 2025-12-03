@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold">Foods Database</h1>
     <div class="flex gap-2 w-full">
       <div
-        class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10 shrink-1 min-w-0!"
+        class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10 shrink-1 min-w-0! flex-1"
       >
         <input
           type="text"
@@ -13,20 +13,20 @@
           class="flex-grow focus:outline-none py-2 min-w-0!"
         />
       </div>
-      <button class="button p-2 flex flex-shrink-0" @click="search">
-        <span class="material-symbols-outlined"> search </span>
+      <button class="button px-3 flex items-center justify-center flex-shrink-0" @click="search">
+        <IconSearch class="w-5" />
       </button>
       <button
-        class="button p-2 flex flex-shrink-0"
+        class="button px-3 flex items-center justify-center flex-shrink-0"
         @click="navigateTo('/foods/new')"
       >
-        <span class="material-symbols-outlined"> add </span>
+        <IconPlus class="w-5" />
       </button>
       <button
-        class="button p-2 flex flex-shrink-0"
+        class="button px-3 flex items-center justify-center flex-shrink-0"
         @click="navigateTo('/foods/scan')"
       >
-        <span class="material-symbols-outlined"> flip </span>
+        <IconFlipHorizontal class="w-5" />
       </button>
     </div>
     <div class="flex flex-col gap-4 w-full mb-10">

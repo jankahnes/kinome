@@ -7,11 +7,9 @@
             <ComponentHeader title="HEALTH SUMMARY" />
             <button
               @click="onReport"
-              class="button flex items-center gap-2 px-2 font-medium bg-primary! text-xs mt-3 text-white"
+              class="button flex items-center gap-2 px-2 py-1 font-medium bg-primary! text-xs mt-3 text-white"
             >
-              <span class="material-symbols-outlined !text-lg"
-                >open_in_new</span
-              >
+              <IconExternalLink class="w-5 h-5" />
               <span>Full Insights</span>
             </button>
           </div>
@@ -26,12 +24,10 @@
           <div
             v-for="grade of readableGrades"
             :key="grade.description"
-            class="flex gap-3 items-center py-1 px-2 rounded-lg"
+            class="flex gap-2 items-center py-1 px-2 rounded-lg"
             :class="`${grade.bgColor} ${grade.color}`"
           >
-            <span class="material-symbols-outlined !text-xl">{{
-              grade.icon
-            }}</span>
+            <Icon :name="grade.icon" :size="22"/>
             <div class="flex flex-col">
               <span class="font-semibold text-sm">{{ grade.description }}</span>
             </div>

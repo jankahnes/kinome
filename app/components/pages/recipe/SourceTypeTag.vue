@@ -10,7 +10,7 @@
       v-if="collection && collection.startsWith('traditional')"
       class="flex items-center gap-2"
     >
-      <span class="material-symbols-outlined !text-[1.5em]">award_meal</span>
+      <IconLibrary class="w-5" />
       From our Traditional
       {{
         capitalize(collection?.split('-')[1]?.replace('-', ' ') ?? '')
@@ -18,7 +18,7 @@
       Collection
     </span>
     <span v-else-if="sourceType === 'WEBSITE'" class="flex items-center gap-2">
-      <span class="material-symbols-outlined !text-[1.5em]">language</span>
+      <IconGlobe class="w-5" />
       Imported from {{ capitalize(getWebsiteName(source)) }}
     </span>
     <span v-else-if="sourceType === 'MEDIA'" class="flex items-center gap-2">

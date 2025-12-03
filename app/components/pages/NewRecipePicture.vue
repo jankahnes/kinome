@@ -46,7 +46,7 @@
           @click="cameraInput?.click()"
           class="flex-2/3 px-3 py-2 flex items-center justify-center gap-3 text-white bg-primary rounded-lg font-bold hover:bg-primary-dark transition-colors"
         >
-          <span class="material-symbols-outlined text-2xl">photo_camera</span>
+          <IconCamera class="w-6 h-6" />
           <span v-if="!isOnSafari">Take Picture</span>
           <span v-else>Take or choose picture</span>
         </button>
@@ -55,7 +55,7 @@
           @click="fileInput?.click()"
           class="flex-1/3 px-3 py-2 flex items-center justify-center gap-3 text-primary border border-primary rounded-lg font-bold hover:bg-primary-dark transition-colors"
         >
-          <span class="material-symbols-outlined text-2xl">file_upload</span>
+          <IconUpload class="w-5 h-5" />
           Upload
         </button>
       </div>

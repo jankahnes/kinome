@@ -13,11 +13,7 @@
       <div class="flex gap-4 items-center justify-center flex-col md:flex-row">
         <div class="flex-1">
           <div class="relative">
-            <span
-              class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 material-symbols-outlined"
-            >
-              grocery
-            </span>
+            <IconApple class="w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               v-model="foodName"
               type="text"
@@ -58,7 +54,7 @@
         class="flex items-center justify-between"
       >
         <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined"> grocery </span>
+          <IconApple class="w-5" />
           {{ request.food_name }}
         </div>
         <div class="flex items-center gap-2">
@@ -73,7 +69,7 @@
             :to="`/foods/${request.food_name_id}`"
             class="button flex items-center gap-2 px-4 py-2 rounded-lg !bg-green-300"
           >
-            <span class="material-symbols-outlined"> open_in_new </span>
+            <IconExternalLink class="w-5" />
             Accepted
           </NuxtLink>
           <NuxtLink
@@ -81,14 +77,14 @@
             :to="`/foods/${request.food_name_id}`"
             class="button flex items-center gap-2 px-4 py-2 rounded-lg !bg-green-200"
           >
-            <span class="material-symbols-outlined"> check </span>
+            <IconCheck class="w-5" />
             {{ request.status_info }}
           </NuxtLink>
           <span
             v-else
             class="button flex items-center gap-2 px-4 py-2 rounded-lg !bg-red-100"
           >
-            <span class="material-symbols-outlined"> close </span>
+            <IconX class="w-5" />
             {{ getStatusString(request.status, request.status_info) }}</span
           >
         </div>

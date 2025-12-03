@@ -11,7 +11,7 @@ export function useTruncateRow(
   elementRef: Ref<any | any[] | null | undefined>,
   padding: number = 0
 ): Ref<number> {
-  const height = ref(padding);
+  const height = ref(0);
   const ro = ref<ResizeObserver | null>(null);
 
   function measure() {

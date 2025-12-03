@@ -8,7 +8,7 @@
         @click="$emit('close')"
         class="p-2 hover:bg-gray-100 rounded-full transition-colors"
       >
-        <span class="material-symbols-outlined">close</span>
+        <IconX class="w-5 h-5" />
       </button>
     </div>
 
@@ -35,9 +35,7 @@
                 @click="removeItem(item.ingredientId)"
                 class="hover:bg-primary-50 rounded-full transition-colors w-6 h-6 flex items-center justify-center flex-shrink-0"
               >
-                <span class="material-symbols-outlined !text-base text-primary"
-                  >close</span
-                >
+                <IconX class="w-5 h-5 text-primary" />
               </button>
               <div class="flex items-center gap-2">
                 <span class="font-bold">{{
@@ -69,9 +67,7 @@
               v-else
               class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center"
             >
-              <span class="material-symbols-outlined !text-base text-primary"
-                >restaurant</span
-              >
+              <IconUtensilsCrossed class="w-5 h-5 text-primary" />
             </div>
           </NuxtLink>
         </div>

@@ -13,7 +13,7 @@
         class="button px-4 py-1 font-bold text-white !bg-primary rounded-lg flex items-center gap-2"
         @click="showDemo"
       >
-        <span class="material-symbols-outlined !text-lg">auto_awesome</span>
+        <IconSparkles class="w-5 h-5"/>
         Generate Instant Nutrition Label
       </button>
     </div>

@@ -1,8 +1,6 @@
 <template>
-  <div class="sm:mx-6">
-    <div
-      class="sm:px-12 px-4 py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl"
-    >
+  <div class="">
+    <div class="py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl">
       <div class="flex justify-between items-end gap-6">
         <div
           class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 min-w-0!"
@@ -15,7 +13,7 @@
             @blur="handleSearchBlur"
             @keyup.enter="refresh(true)"
           />
-          <span class="material-symbols-outlined">search</span>
+          <IconSearch class="w-5" />
         </div>
         <span class="text-gray-500 text-sm text-nowrap"
           >{{ totalCount }} Results</span
@@ -31,7 +29,7 @@
             }"
             class="flex button bg-main p-2 font-bold gap-1 items-center"
           >
-            <span class="material-symbols-outlined"> sell </span>
+            <IconTag class="w-5" />
             <span class="hidden lg:block">Tags</span>
           </button>
           <button
@@ -41,7 +39,7 @@
             }"
             class="flex button bg-main p-2 font-bold gap-1 items-center"
           >
-            <span class="material-symbols-outlined"> health_and_safety </span>
+            <IconShield class="w-5" />
             <span class="hidden lg:block">Health Score</span>
           </button>
           <button
@@ -51,7 +49,7 @@
             }"
             class="flex button bg-main p-2 font-bold gap-1 items-center"
           >
-            <span class="material-symbols-outlined"> bolt </span>
+            <IconZap class="w-5" />
             <span class="hidden lg:block">Kcal</span>
           </button>
           <button
@@ -61,7 +59,7 @@
             }"
             class="flex button bg-main p-2 font-bold gap-1 items-center"
           >
-            <span class="material-symbols-outlined"> euro </span>
+            <IconEuro class="w-5" />
             <span class="hidden lg:block">Cost</span>
           </button>
         </div>
@@ -168,37 +166,33 @@
           class="px-3 button flex items-center justify-center gap-2 group !shadow-none"
           @click="removeTag(index)"
         >
-          <span
-            class="material-symbols-outlined !text-base group-hover:!font-bold"
-          >
-            close
-          </span>
+          <IconX class="w-5" />
           <span>{{ tag }}</span>
         </button>
       </div>
     </div>
-    <div class="my-4 mx-2 sm:mx-10 z-2">
+    <div class="my-4 z-2">
       <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch">
         <RecipeCard
           :recipe="recipe"
-          class="min-w-70 basis-70 max-w-100 3xl:max-w-110 3xl:basis-85 flex-1 min-h-50 text-[30px]"
+          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 flex-1 min-h-50 text-[30px]"
           v-for="recipe in results"
           :key="recipe.id"
         />
         <div
           ref="sentinelElement"
           v-if="isLoading || hasMoreRecipes"
-          class="min-w-70 basis-70 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
+          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
         >
           <Skeleton
-            class="min-w-70 basis-70 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
+            class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
           />
         </div>
         <Skeleton
           v-if="isLoading || hasMoreRecipes"
           v-for="i in 10"
           :key="i"
-          class="min-w-70 basis-70 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
+          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
         />
       </div>
       <div class="flex flex-col gap-4 md:hidden justify-items-stretch">
@@ -629,7 +623,38 @@ function toggleTag(item: { name: string; icon: string; tag: number }) {
 }
 
 useHead({
-  title: 'Browse recipes | Kinome',
+  title:
+    'Browse All Recipes - Search & Filter by Health Score, Cuisine & More | Kinome',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Browse over 1000 recipes with advanced filtering by health score, calories, cuisine, and dietary preferences. Each recipe includes complete nutrition analysis and health ratings.',
+    },
+    {
+      property: 'og:title',
+      content: 'Browse All Recipes | Kinome',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Browse over 1000 recipes with advanced filtering by health score, calories, cuisine, and dietary preferences.',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      property: 'og:url',
+      content: 'https://kinome.app/kitchen/recipes',
+    },
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://kinome.app/kitchen/recipes',
+    },
+  ],
 });
 </script>
 

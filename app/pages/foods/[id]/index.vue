@@ -6,12 +6,10 @@
           @click="router.back()"
           class="button flex items-center justify-center p-2 text-2xl font-bold bg-primary-10"
         >
-          <span class="material-symbols-outlined"> arrow_back </span>
+          <IconChevronLeft class="w-5" />
         </button>
         <div class="space-y-2">
-          <div
-            class="px-4 py-3 rounded-2xl bg-primary-10 inline-flex"
-          >
+          <div class="px-4 py-3 rounded-2xl bg-primary-10 inline-flex">
             <h1 class="text-4xl font-bold">{{ foodName }}</h1>
           </div>
           <p v-if="refencingName" class="text-sm text-gray-500 mx-2 md:ml-8">
@@ -29,7 +27,7 @@
         >
           <span>Details</span>
 
-          <span class="material-symbols-outlined"> keyboard_arrow_down </span>
+          <IconChevronDown class="w-5" />
         </p>
         <transition name="swish-fade">
           <section v-if="expanded" class="max-w-200 space-y-4 mx-auto mb-10">
@@ -267,7 +265,51 @@ if (data.value) {
   }
 }
 
-useHead({
-  title: foodName.value + ' | Kinome',
+watchEffect(() => {
+  if (!foodName.value || !food.value) return;
+
+  const healthGrade = food.value.hidx ? getGrade(food.value.hidx, 'ovr') : null;
+  const healthText = healthGrade ? ` Health Score: ${healthGrade}.` : '';
+  const kcalText = food.value.kcal
+    ? ` ${Math.round(food.value.kcal)} calories per 100g.`
+    : '';
+  const proteinText = food.value.protein
+    ? ` ${food.value.protein.toFixed(1)}g protein.`
+    : '';
+
+  const description = `Complete nutrition information for ${foodName.value}.${kcalText}${proteinText}${healthText} Includes detailed micronutrients, vitamins, minerals, and health analysis.`;
+  const foodUrl = `https://kinome.app${getFoodUrl(Number(id), foodName.value)}`;
+
+  useHead({
+    title: `${foodName.value} - Complete Nutrition Facts & Health Analysis | Kinome`,
+    meta: [
+      {
+        name: 'description',
+        content: description.slice(0, 160),
+      },
+      {
+        property: 'og:title',
+        content: `${foodName.value} Nutrition Facts | Kinome`,
+      },
+      {
+        property: 'og:description',
+        content: description.slice(0, 200),
+      },
+      {
+        property: 'og:type',
+        content: 'article',
+      },
+      {
+        property: 'og:url',
+        content: foodUrl,
+      },
+    ],
+    link: [
+      {
+        rel: 'canonical',
+        href: foodUrl,
+      },
+    ],
+  });
 });
 </script>

@@ -71,10 +71,10 @@ export const gradeColors: Record<string, string> = {
 };
 
 export const gradeStickerColors: Record<string, string> = {
-  S: 'sticker-blue text-blue-900 border-2 border-white/40',
-  A: 'sticker-emerald text-emerald-900 border-2 border-white/40',
-  B: 'sticker-green text-green-900 border-2 border-white/40',
-  C: 'sticker-yellow text-yellow-900 border-2 border-white/40',
+  S: 'sticker-blue text-blue-900',
+  A: 'sticker-emerald text-emerald-900 ',
+  B: 'sticker-green text-green-900 ',
+  C: 'sticker-yellow text-yellow-900 ',
   D: 'bg-orange-200 text-orange-900',
   E: 'bg-red-200 text-red-900',
   F: 'bg-red-300 text-red-950',

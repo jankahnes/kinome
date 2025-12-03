@@ -9,13 +9,13 @@
       <div class="relative z-10 text-lg sm:text-xl">
         <NuxtImg
           v-if="recipe?.picture"
-          class="h-34 md:h-74 mt-6 md:mt-0 aspect-square object-cover bg-transparent shadow-[#00000044] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-4px] group-hover:scale-[1.015]"
+          class="h-34 md:h-74 mt-6 md:mt-0 aspect-square object-cover bg-transparent shadow-[#00000044] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-4px] group-hover:scale-[1.01]"
           :src="recipe?.picture || ''"
           fetchpriority="high"
           :alt="recipe?.title"
         />
         <div
-          class="absolute bottom-[6%] left-[72%] min-w-[16%] w-[2em] max-w-[25%] aspect-square rounded-xl z-20 flex items-center justify-center shrink-0 hover:scale-102 group-hover:scale-103 transition-transform will-change-transform duration-300"
+          class="hidden sm:flex absolute bottom-[6%] left-[72%] min-w-[16%] w-[2em] max-w-[25%] aspect-square rounded-xl z-20 items-center justify-center shrink-0 hover:scale-102 group-hover:scale-104 transition-transform will-change-transform duration-500"
           v-if="recipe?.hidx && recipe?.hidx >= 55"
           :class="gradeStickerColors[getGrade(recipe?.hidx, 'ovr')[0] as keyof typeof gradeStickerColors]"
         >
@@ -27,7 +27,7 @@
 
       <div class="z-0 h-full flex-1">
         <div
-          class="bg-primary-10 -ml-38 pl-44 md:-ml-64 md:pl-74 pr-4 md:pr-10 py-4 md:py-10 rounded-4xl h-full flex flex-col gap-2 md:gap-3 will-change-transform transition-transform duration-300 group-hover:translate-x-[2px]"
+          class="bg-primary-10 -ml-38 pl-44 md:-ml-64 md:pl-74 pr-4 md:pr-10 py-4 md:py-10 rounded-4xl h-full flex flex-col gap-2 md:gap-3"
         >
           <h2
             class="font-bold text-3xl md:text-5xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-none md:leading-14 max-w-2xl"
@@ -35,13 +35,10 @@
           >
             {{ recipe?.title }}
             <span
-              class="bg-primary text-base font-bold px-3.5 py-1 rounded-full inline-flex items-center justify-center tracking-tight gap-1"
-              v-if="false"
+              class="hidden sm:inline-flex bg-primary text-base font-bold px-3.5 py-1 rounded-full items-center justify-center tracking-tight gap-1 text-white"
             >
-              <span class="material-symbols-outlined text-xl! leading-none"
-                >local_fire_department</span
-              >
-              <span class="">TRENDING</span>
+              <IconFlame class="w-5 h-5" strokeWidth="3" />
+              <span>TRENDING</span>
             </span>
           </h2>
           <p
@@ -73,7 +70,7 @@
           </p>
           <div class="flex flex-col flex-1 gap-2 justify-end items-start">
             <PagesRecipeSourceTypeTag
-              class="hidden md:inline-flex !rounded-full text-sm flex-shrink-0 shadow px-2 py-1 bg-primary-20"
+              class="hidden md:inline-flex !rounded-full text-sm flex-shrink-0 px-2 py-1 bg-primary-20"
               :sourceType="recipe.source_type"
               :collection="recipe.collection ?? ''"
               :source="recipe.source ?? ''"

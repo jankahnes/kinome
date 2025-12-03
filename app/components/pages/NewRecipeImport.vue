@@ -7,9 +7,9 @@
       <div class="flex-1">
         <div class="relative">
           <span
-            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 material-symbols-outlined"
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
           >
-            link
+            <IconLink class="w-5 h-5" />
           </span>
           <input
             v-model="link"
@@ -31,12 +31,10 @@
     <span
       class="bg-primary-20 text-sm px-3 py-1.5 rounded-xl inline-flex gap-2 items-center mt-2"
     >
-      <span class="material-symbols-outlined text-xs !text-green-800"
-        >language</span
-      >
+      <IconGlobe class="w-5 h-5 text-green-800" />
       Most Recipe Websites: Supported
-      <span class="material-symbols-outlined text-xs">check</span></span
-    >
+      <IconCheck class="w-5 h-5 text-green-800" />
+    </span>
     <h3 class="text-lg font-bold text-gray-900 mt-6 flex items-center gap-2">
       Video Platforms
       <span
@@ -49,35 +47,35 @@
         class="bg-primary-20 text-sm px-3 py-1 rounded-xl flex gap-2 items-center"
       >
         <img src="/youtube.webp" class="w-5 h-3.5" /> YouTube: Supported
-        <span class="material-symbols-outlined text-xs">check</span></span
-      >
+        <IconCheck class="w-5 h-5 text-green-800" />
+      </span>
       <span
         class="bg-primary-20 text-sm px-3 py-1 rounded-xl flex gap-2 items-center"
       >
         <img src="/tiktok.webp" class="w-7 h-7" /> Tiktok: Supported
-        <span class="material-symbols-outlined text-xs">check</span></span
-      >
+        <IconCheck class="w-5 h-5 text-green-800" />
+      </span>
       <span
         class="bg-primary-20 text-sm px-3 py-1 rounded-xl flex gap-2 items-center"
       >
         <img src="/instagram.webp" class="w-6 h-6" /> Instagram: Supported
-        <span class="material-symbols-outlined text-xs">check</span></span
-      >
+        <IconCheck class="w-5 h-5 text-green-800" />
+      </span>
       <!--<div class="basis-full w-full"></div> -->
       <span
         class="bg-primary-20 text-sm px-3 py-1.5 rounded-xl inline-flex gap-2 items-center"
       >
-        <span class="material-symbols-outlined !text-base">ear_sound</span>
+        <IconAudioLines class="w-5 h-5" />
         Audio Analysis of Videos: Supported
-        <span class="material-symbols-outlined text-xs">check</span></span
-      >
+        <IconCheck class="w-5 h-5 text-green-800" />
+      </span>
       <span
         class="bg-primary-20 text-sm px-3 py-1.5 rounded-xl inline-flex gap-2 items-center opacity-50"
       >
-        <span class="material-symbols-outlined !text-base">visibility</span>
+        <IconEye class="w-5 h-5" />
         Visual Analysis of Videos: Not Supported Yet
-        <span class="material-symbols-outlined text-xs">close</span></span
-      >
+        <IconX class="w-5 h-5 text-red-800" />
+      </span>
     </div>
   </div>
 </template>

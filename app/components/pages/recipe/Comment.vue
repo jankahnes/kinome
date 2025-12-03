@@ -173,9 +173,7 @@
               @click="currentPage--"
               :disabled="currentPage === 1"
             >
-              <span class="material-symbols-outlined !text-base">
-                arrow_back_ios
-              </span>
+              <IconChevronLeft class="w-5 h-5" />
             </button>
             <span class="text-sm text-black"
               >{{ currentPage }} / {{ totalPages }}</span
@@ -185,9 +183,7 @@
               @click="currentPage++"
               :disabled="currentPage === totalPages"
             >
-              <span class="material-symbols-outlined !text-base">
-                arrow_forward_ios
-              </span>
+              <IconChevronRight class="w-5 h-5" />
             </button>
           </div>
         </div>

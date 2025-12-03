@@ -2,11 +2,11 @@
   <NuxtLink to="/" class="">
     <div class="flex items-center">
       <NuxtImg src="/leaves.png" class="w-10 h-10 object-contain" />
-      <h1
+      <span
         class="text-5xl font-bold text-primary-500 tracking-tighter z-10 -ml-1"
       >
         kinome
-      </h1>
+      </span>
     </div>
   </NuxtLink>
 </template>

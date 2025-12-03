@@ -5,7 +5,7 @@
   >
     <h2 class="text-xl font-semibold">Complete Product Info</h2>
     <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
-      <span class="material-symbols-outlined">close</span>
+      <IconX />
     </button>
   </div>
 
@@ -70,12 +70,8 @@
           :disabled="isProcessingImage"
           class="w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span
-            v-if="isProcessingImage"
-            class="material-symbols-outlined animate-spin"
-            >progress_activity</span
-          >
-          <span v-else class="material-symbols-outlined">photo_camera</span>
+          <IconLoaderCircle v-if="isProcessingImage" class="animate-spin" />
+          <IconCamera v-else />
           {{ isProcessingImage ? 'Processing...' : 'Scan Nutrition Label' }}
         </button>
         <p class="text-xs text-gray-500 text-center">

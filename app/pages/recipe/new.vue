@@ -1,6 +1,6 @@
 <template>
   <div class="w-full px-6 md:pl-14 md:pr-30">
-    <div class="flex lg:flex-row flex-col gap-10 items-center mt-10 md:mt-22 mx-auto">
+    <div class="flex lg:flex-row flex-col gap-10 items-center mt-12 md:mt-20 mx-auto">
       <FormsChoiceSlider
         v-if="currentView !== 'loading'"
         v-model="currentView"
@@ -9,40 +9,35 @@
         :class="'hidden lg:block min-w-36 flex-[0.2] max-w-45 self-start sticky top-22 left-0'"
         vertical
       />
-      <FormsChoiceSlider
-        v-if="currentView !== 'loading'"
-        v-model="currentView"
-        :choices="views"
-        buttonStyle=""
-        :class="'block lg:hidden w-full sticky top-10'"
-      />
-      <PagesNewRecipeForm
-        v-if="currentView === 'form'"
-        :submitFromPreparsed="submitFromPreparsed"
-        :submitFromNaturalLanguage="submitFromNaturalLanguage"
-        class="w-full"
-      />
-      <PagesNewRecipeImport
-        v-if="currentView === 'import'"
-        :submit="submitFromLink"
-        class="mt-4"
-      />
-      <PagesNewRecipePicture
-        v-if="currentView === 'picture'"
-        :submit="submitFromPicture"
-        class="mt-4"
-      />
-      <div
-        v-if="currentView === 'loading'"
-        class="flex flex-col w-full items-center mt-[20vh] gap-6"
-      >
-        <img src="/loading.png" class="h-8 w-8" />
-        <Transition name="fade-up">
-          <p class="italic" v-if="loadingMessage">
-            {{ loadingMessage }}
-          </p>
-        </Transition>
-      </div>
+      <Transition name="view-transition" mode="out-in">
+        <PagesNewRecipeForm
+          v-if="currentView === 'form'"
+          :submitFromPreparsed="submitFromPreparsed"
+          :submitFromNaturalLanguage="submitFromNaturalLanguage"
+          class="w-full"
+        />
+        <PagesNewRecipeImport
+          v-else-if="currentView === 'import'"
+          :submit="submitFromLink"
+          class="mt-4"
+        />
+        <PagesNewRecipePicture
+          v-else-if="currentView === 'picture'"
+          :submit="submitFromPicture"
+          class="mt-4"
+        />
+        <div
+          v-else-if="currentView === 'loading'"
+          class="flex flex-col w-full items-center mt-[20vh] gap-6"
+        >
+          <img src="/loading.png" class="h-8 w-8" />
+          <Transition name="fade-up">
+            <p class="italic" v-if="loadingMessage">
+              {{ loadingMessage }}
+            </p>
+          </Transition>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -59,7 +54,7 @@ const views: { value: string; displayName: string; icon?: string }[] = [
   {
     value: 'form',
     displayName: 'Create',
-    icon: 'edit',
+    icon: 'pencil',
   },
   {
     value: 'import',
@@ -69,11 +64,21 @@ const views: { value: string; displayName: string; icon?: string }[] = [
   {
     value: 'picture',
     displayName: 'Scan',
-    icon: 'visibility',
+    icon: 'eye',
   },
 ];
 const currentView = ref((route.query.view as string) || 'form');
 const loadingMessage = ref('');
+
+// Watch for query param changes and update currentView
+watch(
+  () => route.query.view,
+  (newView) => {
+    if (newView && typeof newView === 'string') {
+      currentView.value = newView;
+    }
+  }
+);
 
 const submitFromNaturalLanguage = async (recipe: BaseRecipe) => {
   currentView.value = 'loading';
@@ -278,6 +283,26 @@ useHead({
 }
 .fade-up-enter-to,
 .fade-up-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.view-transition-enter-active,
+.view-transition-leave-active {
+  transition: all 0.2s ease;
+}
+.view-transition-enter-from {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.view-transition-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+.view-transition-enter-to,
+.view-transition-leave-from {
   opacity: 1;
   transform: translateY(0);
 }

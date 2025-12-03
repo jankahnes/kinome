@@ -37,18 +37,18 @@
           {{ recipe.description }}
         </p>
         <div
-          class="gap-1.5 flex-wrap text-xs items-start py-0.5 flex [&>*:nth-child(n+3)]:hidden"
+          class="gap-1.5 flex-wrap text-xs sm:text-[14px] items-start py-0.5 flex [&>*:nth-child(n+3)]:hidden"
         >
           <div
             v-if="recipe.hidx && recipe.hidx >= 55"
-            class="flex tag items-center !text-black shadow-sm text-center min-w-[2em] subpixel-antialiased tabular-nums justify-center"
+            class="flex tag items-center !text-black text-center subpixel-antialiased tabular-nums justify-center"
             :class="gradeColors[getGrade(recipe.hidx, 'ovr')]"
           >
             {{ getGrade(recipe.hidx, 'ovr') }}
           </div>
           <div
             v-if="recipe.rating && recipe.rating >= 4"
-            class="tag flex items-center gap-1 shadow-sm"
+            class="tag flex items-center gap-1 bg-slate-50"
           >
             <FormsRatingField
               :model-value="recipe.rating"
@@ -61,7 +61,7 @@
           </div>
 
           <div
-            class="tag flex items-center justify-center text-nowrap shadow-sm"
+            class="tag flex items-center justify-center text-nowrap bg-slate-50"
             v-for="(tag, index) in top5Tags"
             :key="index"
           >
@@ -81,9 +81,7 @@
           class="flex items-center px-2 rounded-full text-xs font-medium bg-primary-20 gap-2 max-w-50 sm:max-w-70"
           v-if="recipe.original_creator_channel_name"
         >
-          <span class="material-symbols-outlined !text-sm flex-shrink-0"
-            >favorite</span
-          >
+          <IconHeart class="w-3.5 flex-shrink-0" />
           <span class="flex-shrink-0">Creator:</span>
           <span class="truncate">{{
             recipe.original_creator_channel_name

@@ -30,13 +30,11 @@
         v-if="!hasComment && auth.user"
         class="p-2 max-w-90 w-full relative flex items-center h-max"
       >
-        <span
+        <IconPlus
           v-if="!editingComment"
-          class="material-symbols-outlined !text-3xl w-full cursor-pointer"
+          class="w-8 h-8 cursor-pointer"
           @click="onClickNewComment"
-        >
-          add
-        </span>
+        />
         <div class="w-full" v-else>
           <textarea
             v-model="newComment"

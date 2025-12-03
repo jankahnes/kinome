@@ -38,23 +38,17 @@
             </h1>
             <div class="flex items-start mt-4 gap-2">
               <button class="p-1">
-                <span class="material-symbols-outlined !text-xl leading-none">
-                  share
-                </span>
+                <IconShare2 class="w-5 h-5" />
               </button>
               <button class="p-1">
-                <span class="material-symbols-outlined !text-xl leading-none">
-                  print
-                </span>
+                <IconPrinter class="w-5 h-5" />
               </button>
               <button class="p-1">
-                <span class="material-symbols-outlined !text-xl leading-none">
-                  edit
-                </span>
+                <IconPencil class="w-5 h-5" />
               </button>
             </div>
           </div>
-          <p class="flex items-center gap-2 mt-1">
+          <p class="flex items-center gap-2 mt-2">
             <FormsRatingField
               :model-value="recipe?.rating"
               :star-width="24"
@@ -76,18 +70,14 @@
             class="text-base mt-4 flex items-center gap-1"
             v-if="displayType === 'website'"
           >
-            <span class="material-symbols-outlined !text-lg leading-none"
-              >language</span
-            >
+            <IconGlobe class="w-4 h-4" />
             Imported from {{ capitalize(websiteName) }}
           </p>
           <p
             class="text-base mt-4 flex items-center gap-2"
             v-if="displayType === 'creator'"
           >
-            <span class="material-symbols-outlined !text-lg leading-none"
-              >videocam</span
-            >
+            <IconVideo class="w-4 h-4" />
             Created by {{ recipe?.original_creator_channel_name }}
           </p>
           <p
@@ -105,10 +95,7 @@
 
           <div class="flex items-center gap-2 justify-between mt-4 max-w-130">
             <div class="flex items-center gap-2">
-              <span
-                class="material-symbols-outlined !text-xl leading-none icon-fill text-gray-400"
-                >timer</span
-              >
+              <IconTimer class="w-5 h-5 text-gray-400" strokeWidth="2.3" />
               <div class="flex flex-col items-start">
                 <p class="text-xs leading-none text-gray-400">Effort</p>
                 <p class="text-[20px] leading-none">
@@ -117,10 +104,7 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span
-                class="material-symbols-outlined !text-xl leading-none icon-fill text-gray-400"
-                >bolt</span
-              >
+              <IconBolt class="w-5 h-5 text-gray-400" strokeWidth="2.3" />
               <div class="flex flex-col items-start">
                 <p class="text-xs leading-none text-gray-400">Difficulty</p>
                 <p class="text-[20px] leading-none">
@@ -129,10 +113,7 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span
-                class="material-symbols-outlined !text-xl leading-none icon-fill text-gray-400"
-                >payments</span
-              >
+              <IconBanknote class="w-5 h-5 text-gray-400" strokeWidth="2.3" />
               <div class="flex flex-col items-start">
                 <p class="text-xs leading-none text-gray-400">Price</p>
                 <p class="text-[20px] leading-none">
@@ -170,9 +151,7 @@
             v-if="false"
           >
             <div class="flex items-center gap-2 text-lg font-bold">
-              <span class="material-symbols-outlined !text-xl leading-none"
-                >close</span
-              >
+              <IconX class="w-6" />
               <span class="leading-none">Not vegan</span>
             </div>
             <p class="text-xs leading-none">
@@ -185,9 +164,7 @@
             v-else
           >
             <div class="flex items-center gap-2 text-lg font-bold">
-              <span class="material-symbols-outlined !text-xl leading-none"
-                >check</span
-              >
+              <IconCheck class="w-6" />
               <span class="leading-none">Fits your diet</span>
             </div>
           </div>
@@ -244,15 +221,13 @@
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
               <button
-                class="animated-button bg-primary-200 rounded-xl p-2 font-semibold flex items-center justify-center gap-1 transition-colors flex-1"
+                class="animated-button outline-2 outline-primary text-primary rounded-xl p-2 font-semibold flex items-center justify-center gap-1 transition-colors flex-1"
               >
-                <span class="material-symbols-outlined !text-xl leading-none"
-                  >insert_chart</span
-                >
+                <IconChartLine class="w-5 h-5" strokeWidth="3" />
                 Track
               </button>
               <button
-                class="animated-button bg-primary-200 rounded-xl p-2 font-semibold transition-colors flex-1"
+                class="animated-button outline-2 outline-primary text-primary rounded-xl p-2 font-semibold transition-colors flex-1"
                 :disabled="bookmarkLoading"
                 @click="bookmarkRecipe"
               >
@@ -260,42 +235,35 @@
                   class="flex items-center justify-center gap-1"
                   v-if="bookmarkState === 'not-bookmarked'"
                 >
-                  <span class="material-symbols-outlined !text-xl leading-none">
-                    bookmark
-                  </span>
+                  <IconBookmark class="w-5 h-5" strokeWidth="2.5" />
                   <span class="text-sm font-semibold"> Save </span>
                 </span>
                 <span
                   class="flex items-center justify-center gap-1"
                   v-else-if="bookmarkState === 'bookmarked'"
                 >
-                  <span class="material-symbols-outlined !text-xl leading-none">
-                    bookmark_added
-                  </span>
+                  <IconBookmarkCheck class="w-5 h-5" strokeWidth="2.5" />
                   <span class="text-sm font-semibold"> Saved </span>
                 </span>
                 <span
                   class="flex items-center justify-center gap-1"
                   v-else-if="bookmarkState === 'loading'"
                 >
-                  <span
-                    class="material-symbols-outlined !text-xl leading-none animate-spin"
-                  >
-                    progress_activity
-                  </span>
+                  <IconLoaderCircle
+                    class="w-5 h-5 animate-spin"
+                    strokeWidth="2.5"
+                  />
                   <span class="text-sm font-semibold"> Saving... </span>
                 </span>
               </button>
             </div>
             <!-- Main Action Area -->
             <button
-              class="animated-button bg-primary-500 rounded-2xl p-3 flex items-center justify-center gap-3"
+              class="animated-button bg-primary-500 rounded-2xl p-3 flex items-center justify-center gap-3 text-white"
             >
-              <span class="material-symbols-outlined !text-[28px] leading-none"
-                >rocket_launch</span
-              >
+              <IconRocket class="w-7 h-7" />
               <div class="flex flex-col items-start">
-                <span class="font-semibold text-lg">Start Cook Mode</span>
+                <span class="font-semibold text-lg ">Start Cook Mode</span>
               </div>
             </button>
           </div>
@@ -334,9 +302,7 @@
               target="_blank"
               @click.stop
             >
-              <span class="material-symbols-outlined !text-lg leading-none">
-                play_circle
-              </span>
+              <IconPlayCircle class="w-4 h-4"/>
               Watch
             </a>
           </div>

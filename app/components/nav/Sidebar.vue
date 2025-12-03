@@ -71,33 +71,27 @@
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/')"
         >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >explore</span
-          >
+          <IconCompass class="w-6 h-6" />
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
             >Discover</span
           >
         </NuxtLink>
         <NuxtLink
-          to="/collection"
+          to="/kitchen/home"
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
           :class="{
             'ring-2 ring-primary-500 ring-offset-2':
               focusedIndex === 4 && sidebarNavigationActive,
             'primary-gradient text-gray-800 px-3 py-2':
-              route.path.startsWith('/collection'),
+              route.path.startsWith('/kitchen'),
           }"
-          @click="onClickLink('/collection')"
+          @click="onClickLink('/kitchen/home')"
         >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >book_2</span
-          >
+          <IconChefHat class="w-6 h-6" />
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Collection</span
+            >Kitchen</span
           >
         </NuxtLink>
         <NuxtLink
@@ -110,10 +104,7 @@
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/recipe/new')"
         >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >add</span
-          >
+          <IconPlus class="w-6 h-6" />
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
             >Create</span
@@ -130,10 +121,7 @@
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/tracking')"
         >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >insert_chart</span
-          >
+          <IconChartLine class="w-6 h-6"/>
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
             >Meal tracking</span
@@ -150,10 +138,7 @@
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/community')"
         >
-          <span
-            class="material-symbols-outlined text-xl transition-all duration-300"
-            >people</span
-          >
+          <IconUsersRound class="w-6 h-6" />
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
             >Community</span
@@ -191,7 +176,7 @@ const accountLink = computed(() => {
 const linkPaths = computed(() => [
   auth.isUser() ? accountLink.value : '/onboarding',
   '/',
-  '/collection',
+  '/kitchen/home',
   '/recipe/new',
   '/tracking',
   '/community',

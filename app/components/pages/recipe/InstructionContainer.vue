@@ -11,7 +11,7 @@
           class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/50 text-xs will-change-transform"
           @click="formalize()"
         >
-          <span class="material-symbols-outlined !text-sm">auto_awesome</span>
+          <IconSparkles class="w-4" />
           <span>Analyze</span>
         </button>
       </div>
@@ -44,9 +44,7 @@
         <div
           class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"
         >
-          <span class="material-symbols-outlined text-2xl text-gray-400"
-            >menu_book</span
-          >
+          <IconBookOpen class="w-6 h-6 text-gray-400" />
         </div>
         <h3 class="text-lg font-medium text-gray-700 mb-2">
           No Instructions Available

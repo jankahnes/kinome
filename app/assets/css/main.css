@@ -1,10 +1,19 @@
 @import 'tailwindcss';
 
-.material-symbols-outlined {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
+@font-face {
+  font-family: 'Libertinus Sans';
+  src: url('/fonts/LibertinusSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Libertinus Sans';
+  src: url('/fonts/LibertinusSans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 @theme {
