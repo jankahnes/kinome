@@ -1,6 +1,6 @@
 <template>
-  <div :class="{ 'pb-16 m-4 sm:m-10 sm:ml-20': auth.isUser() }">
-    <div class="flex gap-4 flex-wrap" v-if="auth.isUser()">
+  <div :class="{ 'pb-20 lg:pb-0 m-4 sm:m-8 sm:ml-20': !isLandingPage }">
+    <div class="flex gap-4 flex-wrap" v-if="hasTracking">
       <NuxtLink
         v-for="view in views"
         :key="view.path"
@@ -18,6 +18,10 @@
 <script setup lang="ts">
 const auth = useAuthStore();
 const route = useRoute();
+
+const isLandingPage = computed(() => route.path === '/tracking/intro');
+//@ts-ignore
+const hasTracking = computed(() => auth.user?.user_data?.tracking);
 
 const views = computed(() => [
   {

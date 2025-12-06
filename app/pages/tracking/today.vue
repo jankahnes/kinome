@@ -1,173 +1,177 @@
 <template>
-  <div class="max-w-screen-lg space-y-6 pt-10 pb-20">
-    <div
-      class="fixed bottom-16 left-1/2 translate-x-[-50%] sm:translate-x-0 sm:bottom-4 sm:left-4 z-50"
-    >
-      <button
-        @click="saveMeals"
-        :disabled="isSaving || !hasUnsavedChanges"
-        class="button flex items-center gap-2 px-4 py-2 shadow-lg transition-all"
-        :class="{
-          'bg-primary-100! text-gray-800': hasUnsavedChanges,
-          'bg-gray-200! text-gray-500': !hasUnsavedChanges,
-          'opacity-50 cursor-not-allowed': isSaving,
-        }"
+  <Transition name="loaded-content">
+    <div class="max-w-screen-lg space-y-6 pt-10 pb-20" v-if="mounted">
+      <div
+        class="fixed bottom-16 left-1/2 translate-x-[-50%] sm:translate-x-0 sm:bottom-4 sm:left-4 z-50"
       >
-        <IconLoader class="w-4 animate-spin" v-if="isSaving" />
-        <IconSave class="w-4" v-else-if="hasUnsavedChanges" />
-        <IconCheck class="w-4" v-else />
-        <span class="text-sm font-medium">
-          {{ isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save' : 'Saved' }}
-        </span>
-
-        <span
-          v-if="lastSavedAt && !hasUnsavedChanges"
-          class="text-xs opacity-70"
+        <button
+          @click="saveMeals"
+          :disabled="isSaving || !hasUnsavedChanges"
+          class="button flex items-center gap-2 px-4 py-2 shadow-lg transition-all"
+          :class="{
+            'bg-primary-100! text-gray-800': hasUnsavedChanges,
+            'bg-gray-200! text-gray-500': !hasUnsavedChanges,
+            'opacity-50 cursor-not-allowed': isSaving,
+          }"
         >
-          {{ formatTimeAgo(lastSavedAt) }}
-        </span>
-      </button>
-    </div>
+          <IconLoader class="w-4 animate-spin" v-if="isSaving" />
+          <IconSave class="w-4" v-else-if="hasUnsavedChanges" />
+          <IconCheck class="w-4" v-else />
+          <span class="text-sm font-medium">
+            {{ isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save' : 'Saved' }}
+          </span>
 
-    <!-- Meal adding buttons -->
-    <div class="flex flex-wrap gap-4 select-none">
-      <button
-        class="button flex items-center gap-2 px-4 py-1 text-lg bg-primary-10!"
-        @click="showRecipeSearchModal = true"
-      >
-        <IconPlus class="w-4" />
-        Add Meal from Recipe
-      </button>
-      <button
-        v-for="mealPreset in mealPresets"
-        :key="mealPreset"
-        class="button flex items-center gap-2 px-4 py-1 text-lg"
-        @click="addMeal(mealPreset)"
-      >
-        {{ mealPreset }}
-      </button>
-      <button
-        v-if="!showCustomMealInput"
-        class="button flex items-center gap-2 px-4 py-1 text-lg"
-        @click="showCustomMealInput = true"
-      >
-        <IconPlus class="w-4" />
-        Add Other Meal
-      </button>
-      <div v-else class="flex items-center gap-2 button px-2 py-1 text-lg">
-        <input
-          v-model="customMealName"
-          placeholder="Enter meal name"
-          class="focus:outline-none"
-        />
-        <button @click="addMeal(customMealName)">
-          <IconCheck class="w-4" />
+          <span
+            v-if="lastSavedAt && !hasUnsavedChanges"
+            class="text-xs opacity-70"
+          >
+            {{ formatTimeAgo(lastSavedAt) }}
+          </span>
         </button>
       </div>
-    </div>
 
-    <!-- Meals list -->
-    <div class="flex flex-col gap-2">
-      <div
-        v-for="(meal, index) in trackedMeals"
-        class="flex flex-col gap-2 p-4 shadow-none! bg-primary-10/70 rounded-xl"
-        :class="{ 'bg-primary-100/70!': meal.recipe_id !== undefined }"
-      >
-        <div
-          class="flex items-center gap-2 button bg-transparent! outline-none! shadow-none! justify-between"
-          @click="meal.collapsed = !meal.collapsed"
+      <!-- Meal adding buttons -->
+      <div class="flex flex-wrap gap-4 select-none">
+        <button
+          class="button flex items-center gap-2 px-4 py-1 text-lg bg-primary-10!"
+          @click="showRecipeSearchModal = true"
         >
-          <div class="relative inline-block">
-            <span
-              class="text-lg font-bold py-2 px-3 invisible whitespace-pre"
-              aria-hidden="true"
-              >{{ trackedMeals[index].mealName || '✍️ Meal name' }}</span
-            >
-            <input
-              :class="{
-                'bg-primary-50/80!': meal.recipe_id !== undefined,
-              }"
-              v-model="trackedMeals[index].mealName"
-              class="text-lg font-bold focus:outline-none bg-primary-50 rounded-md py-2 px-3 absolute inset-0 w-full"
-              @click.stop
-              placeholder="✍️ Meal name"
-            />
-          </div>
-          <div class="flex items-center gap-2 text-gray-600">
-            <NuxtLink
-              :to="`/recipe/${meal.recipe_id}`"
-              class="flex items-center justify-center rounded-md px-2 py-1 gap-1"
-              v-if="meal.recipe_id !== undefined"
-              @click.stop
-            >
-              <span class="text-xs hidden sm:block">Jump to recipe</span>
-              <IconExternalLink class="w-5 text-base!" />
-            </NuxtLink>
-            <IconChevronDown class="w-5" v-if="meal.collapsed" />
-            <IconChevronUp class="w-5" v-else />
-            <button class="rounded-md p-1" @click="removeMeal(index)">
-              <IconTrash class="w-5" />
-            </button>
-          </div>
+          <IconPlus class="w-4" />
+          Add Meal from Recipe
+        </button>
+        <button
+          v-for="mealPreset in mealPresets"
+          :key="mealPreset"
+          class="button flex items-center gap-2 px-4 py-1 text-lg"
+          @click="addMeal(mealPreset)"
+        >
+          {{ mealPreset }}
+        </button>
+        <button
+          v-if="!showCustomMealInput"
+          class="button flex items-center gap-2 px-4 py-1 text-lg"
+          @click="showCustomMealInput = true"
+        >
+          <IconPlus class="w-4" />
+          Add Other Meal
+        </button>
+        <div v-else class="flex items-center gap-2 button px-2 py-1 text-lg">
+          <input
+            v-model="customMealName"
+            placeholder="Enter meal name"
+            class="focus:outline-none"
+          />
+          <button @click="addMeal(customMealName)">
+            <IconCheck class="w-4" />
+          </button>
         </div>
-        <div v-if="!meal.collapsed" class="min-h-12 flex flex-col gap-2">
+      </div>
+
+      <!-- Meals list -->
+      <div class="flex flex-col gap-2">
+        <div
+          v-for="(meal, index) in trackedMeals"
+          class="flex flex-col gap-2 p-4 shadow-none! bg-primary-10/70 rounded-xl"
+          :class="{ 'bg-primary-100/70!': meal.recipe_id !== undefined }"
+        >
           <div
-            v-for="(ingredient, ingredientIndex) in meal.editableIngredients"
-            :key="`${index}-${ingredientIndex}`"
+            class="flex items-center gap-2 button bg-transparent! outline-none! shadow-none! justify-between"
+            @click="meal.collapsed = !meal.collapsed"
           >
-            <TrackingInput
-              :ref="(el) => setInputRef(index, ingredientIndex, el)"
-              v-model="trackedMeals[index].editableIngredients[ingredientIndex]"
-              @focus-next="focusNextInput(index, ingredientIndex)"
-              @delete-ingredient="deleteIngredient(index, ingredientIndex)"
-            />
+            <div class="relative inline-block">
+              <span
+                class="text-lg font-bold py-2 px-3 invisible whitespace-pre"
+                aria-hidden="true"
+                >{{ trackedMeals[index].mealName || '✍️ Meal name' }}</span
+              >
+              <input
+                :class="{
+                  'bg-primary-50/80!': meal.recipe_id !== undefined,
+                }"
+                v-model="trackedMeals[index].mealName"
+                class="text-lg font-bold focus:outline-none bg-primary-50 rounded-md py-2 px-3 absolute inset-0 w-full"
+                @click.stop
+                placeholder="✍️ Meal name"
+              />
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+              <NuxtLink
+                :to="`/recipe/${meal.recipe_id}`"
+                class="flex items-center justify-center rounded-md px-2 py-1 gap-1"
+                v-if="meal.recipe_id !== undefined"
+                @click.stop
+              >
+                <span class="text-xs hidden sm:block">Jump to recipe</span>
+                <IconExternalLink class="w-5 text-base!" />
+              </NuxtLink>
+              <IconChevronDown class="w-5" v-if="meal.collapsed" />
+              <IconChevronUp class="w-5" v-else />
+              <button class="rounded-md p-1" @click="removeMeal(index)">
+                <IconTrash class="w-5" />
+              </button>
+            </div>
+          </div>
+          <div v-if="!meal.collapsed" class="min-h-12 flex flex-col gap-2">
+            <div
+              v-for="(ingredient, ingredientIndex) in meal.editableIngredients"
+              :key="`${index}-${ingredientIndex}`"
+            >
+              <TrackingInput
+                :ref="(el) => setInputRef(index, ingredientIndex, el)"
+                v-model="
+                  trackedMeals[index].editableIngredients[ingredientIndex]
+                "
+                @focus-next="focusNextInput(index, ingredientIndex)"
+                @delete-ingredient="deleteIngredient(index, ingredientIndex)"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Nutrition summary -->
-    <div
-      v-if="computedDailyNutrition?.hidx !== undefined"
-      class="flex flex-wrap gap-4 mt-8"
-    >
-      <NutritionLabel :nutritionData="computedDailyNutrition" />
-      <HealthFacts :recipe="computedDailyNutrition" />
-    </div>
+      <!-- Nutrition summary -->
+      <div
+        v-if="computedDailyNutrition?.hidx !== undefined"
+        class="flex flex-wrap gap-4 mt-8"
+      >
+        <NutritionLabel :nutritionData="computedDailyNutrition" />
+        <HealthFacts :recipe="computedDailyNutrition" />
+      </div>
 
-    <!-- Modal for adding a meal from a recipe-->
-    <BlocksResponsiveModal v-model="showRecipeSearchModal">
-      <template #default="{ isMobile }">
-        <div
-          class="flex flex-col gap-6 p-6 max-h-[50%] sm:min-w-120 mb-10 md:mb-0"
-          @click.stop
-        >
-          <div class="flex flex-col gap-2">
-            <h3 class="text-2xl font-bold">Add a meal from a recipe</h3>
-            <input
-              type="text"
-              placeholder="Search..."
-              class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:border-gray-500"
-              v-model="recipeSearchQuery"
-            />
-          </div>
+      <!-- Modal for adding a meal from a recipe-->
+      <BlocksResponsiveModal v-model="showRecipeSearchModal">
+        <template #default="{ isMobile }">
           <div
-            class="overflow-y-auto flex flex-col gap-2 scrollbar-hide"
-            v-if="recipeSearchResults.length > 0"
+            class="flex flex-col gap-6 p-6 max-h-[50%] sm:min-w-120 mb-10 md:mb-0"
+            @click.stop
           >
-            <RecipeCardHorizontal
-              v-for="recipe in recipeSearchResults"
-              :recipe="recipe"
-              class="w-full text-2xl"
-              :key="`${isMobile ? 'mobile' : 'desktop'}-${recipe.id}`"
-              :uniqueId="`${isMobile ? 'mobile' : 'desktop'}-${recipe.id}`"
-              @click.stop.prevent.capture="addMealFromRecipe(recipe.id)"
-            />
+            <div class="flex flex-col gap-2">
+              <h3 class="text-2xl font-bold">Add a meal from a recipe</h3>
+              <input
+                type="text"
+                placeholder="Search..."
+                class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:border-gray-500"
+                v-model="recipeSearchQuery"
+              />
+            </div>
+            <div
+              class="overflow-y-auto flex flex-col gap-2 scrollbar-hide"
+              v-if="recipeSearchResults.length > 0"
+            >
+              <RecipeCardHorizontal
+                v-for="recipe in recipeSearchResults"
+                :recipe="recipe"
+                class="w-full text-2xl"
+                :key="`${isMobile ? 'mobile' : 'desktop'}-${recipe.id}`"
+                :uniqueId="`${isMobile ? 'mobile' : 'desktop'}-${recipe.id}`"
+                @click.stop.prevent.capture="addMealFromRecipe(recipe.id)"
+              />
+            </div>
           </div>
-        </div>
-      </template>
-    </BlocksResponsiveModal>
-  </div>
+        </template>
+      </BlocksResponsiveModal>
+    </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -192,7 +196,7 @@ type TrackedMeal = {
 const supabase = useSupabaseClient<Database>();
 const user = useSupabaseUser();
 const auth = useAuthStore();
-
+const mounted = ref(false);
 const show = ref(false);
 const showHero = ref(false);
 
@@ -649,9 +653,7 @@ watch(recipeSearchQuery, () => {
 // Load meals on mount
 onMounted(() => {
   show.value = true;
-  setTimeout(() => {
-    showHero.value = true;
-  }, 100);
+  mounted.value = true;
   loadMeals(selectedDate.value);
 });
 </script>

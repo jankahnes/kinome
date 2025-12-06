@@ -18,13 +18,15 @@
     <div class="flex-1 flex justify-center text-white">
       <div class="relative">
         <div class="absolute inset-0 flex items-center justify-center">
-          <NuxtLink to="/recipe/new" v-slot="{ isActive }">
+          <NuxtLink to="/recipe/new?view=form" v-slot="{ isActive }">
             <button
               @click.prevent.stop="router.replace({ query: { view: 'form' } })"
-              class="flex items-center justify-center"
+              class="flex items-center justify-center sublink-circle sublink-circle-1 bg-primary-400 transition-colors duration-300"
               :class="[
-                'sublink-circle sublink-circle-1 bg-primary',
-                { 'sublink-active': isActive },
+                {
+                  'sublink-active': isActive,
+                  'bg-primary!': route.query.view === 'form',
+                },
               ]"
             >
               <IconPencil class="w-5 h-5" strokeWidth="2.5" />
@@ -33,10 +35,12 @@
               @click.prevent.stop="
                 router.replace({ query: { view: 'import' } })
               "
-              class="flex items-center justify-center"
+              class="flex items-center justify-center sublink-circle sublink-circle-2 bg-primary-400 transition-colors duration-300"
               :class="[
-                'sublink-circle sublink-circle-2 bg-primary',
-                { 'sublink-active': isActive },
+                {
+                  'sublink-active': isActive,
+                  'bg-primary!': route.query.view === 'import',
+                },
               ]"
             >
               <IconImport class="w-5 h-5" strokeWidth="2.5" />
@@ -45,10 +49,12 @@
               @click.prevent.stop="
                 router.replace({ query: { view: 'picture' } })
               "
-              class="flex items-center justify-center"
+              class="flex items-center justify-center sublink-circle sublink-circle-3 bg-primary-400 transition-colors duration-300"
               :class="[
-                'sublink-circle sublink-circle-3 bg-primary',
-                { 'sublink-active': isActive },
+                {
+                  'sublink-active': isActive,
+                  'bg-primary!': route.query.view === 'picture',
+                },
               ]"
             >
               <IconEye class="w-5 h-5" strokeWidth="2.5" />
@@ -118,7 +124,7 @@ const route = useRoute();
 
 .sublink-circle {
   position: absolute;
-  width: 38px;
+  width: 42px;
   aspect-ratio: 1/1;
   border-radius: 50%;
   top: 50%;
@@ -137,19 +143,19 @@ const route = useRoute();
 }
 
 .sublink-circle-1 {
-  --orbit-x: -44px;
+  --orbit-x: -48px;
   --orbit-y: -50px;
   transition-delay: 0s;
 }
 
 .sublink-circle-2 {
   --orbit-x: 0px;
-  --orbit-y: -70px;
+  --orbit-y: -74px;
   transition-delay: 0.05s;
 }
 
 .sublink-circle-3 {
-  --orbit-x: 44px;
+  --orbit-x: 48px;
   --orbit-y: -50px;
   transition-delay: 0.1s;
 }

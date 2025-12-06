@@ -257,7 +257,7 @@
 }
 
 .animated-button {
-  @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-all duration-200 cursor-pointer will-change-transform;
+  @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-transform duration-200 cursor-pointer select-none will-change-transform;
 }
 
 .page-slide-right-enter-active,

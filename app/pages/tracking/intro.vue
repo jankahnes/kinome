@@ -1,8 +1,8 @@
 <template>
   <Transition name="fade-slow" mode="out-in">
-    <div class="min-h-svh onboarding-gradient flex items-center justify-center pb-10">
+    <div class="min-h-svh onboarding-gradient pb-10 flex flex-col px-4">
       <Transition name="loaded-content">
-        <div class="flex-1 flex items-center justify-center pb-10 md:pb-0">
+        <div class="pb-10 md:pb-0 flex-1 flex items-center justify-center">
           <HerocardsTracking />
         </div>
       </Transition>
