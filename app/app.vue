@@ -3,6 +3,7 @@
     class="min-h-svh bg-[#f5eeee] font-main overflow-x-hidden"
     ref="swipeContainer"
   >
+    <Analytics />
     <div class="relative" @click="handleClickOutside">
       <Transition name="sidebar">
         <div
@@ -60,6 +61,8 @@
 
 <script setup lang="ts">
 //import { useDrag } from '@vueuse/gesture';
+import { Analytics } from '@vercel/analytics/vue';
+
 const auth = useAuthStore();
 
 //init sidebar state using header heuristic
