@@ -1,5 +1,5 @@
 <template>
-  <div class="my-6 mx-auto sm:ml-20 sm:mr-10 space-y-6">
+  <div class="space-y-6">
     <!-- Loading skeleton -->
     <div v-if="loading" class="space-y-10 mx-4">
       <Skeleton class="w-full h-142 shadow-sm rounded-2xl" />
@@ -14,15 +14,11 @@
 
     <div v-else class="mx-4 flex flex-col gap-10">
       <!-- Hero Card -->
-      <div class="p-6 card overview self-center sm:px-10 w-full md:w-auto">
+      <div class="p-6 card overview sm:px-10 w-full md:w-auto">
         <div class="flex gap-8 items-start">
           <div class="flex-1">
             <h1 class="text-2xl lg:text-4xl font-bold text-gray-800 mb-2">
-              {{
-                recipeComputed?.title ||
-                recipeStore.recipe?.title ||
-                'New Recipe'
-              }}
+              {{ title }}
             </h1>
             <p class="text-lg text-gray-600 mb-4">Nutritional Analysis 🔎</p>
 
@@ -33,7 +29,7 @@
                 class="flex gap-3 items-center"
                 :class="grade.color"
               >
-                <Icon :name="grade.icon" :size="28"/>
+                <Icon :name="grade.icon" :size="28" />
                 <div class="flex flex-col">
                   <span class="font-semibold">{{ grade.description }}</span>
                   <span class="text-xs font-light" v-if="grade.subtitle">{{
@@ -55,7 +51,7 @@
               v-if="report.percentiles.hidx"
               :class="report.percentiles.hidx.color"
             >
-              <Icon :name="report.percentiles.hidx.icon" :size="20"/>
+              <Icon :name="report.percentiles.hidx.icon" :size="20" />
               <span>{{ report.percentiles.hidx.description }}</span>
             </div>
             <Skeleton v-else class="w-52 h-10 rounded-xl" />
@@ -74,7 +70,7 @@
             :class="report.percentiles.hidx.color"
             v-if="report.percentiles.hidx"
           >
-            <Icon :name="report.percentiles.hidx.icon" :size="20"/>
+            <Icon :name="report.percentiles.hidx.icon" :size="20" />
             <span>{{ report.percentiles.hidx.description }}</span>
           </div>
           <Skeleton v-else class="w-52 h-8 rounded-xl" />
@@ -87,9 +83,9 @@
       </div>
 
       <!-- Readable Summary Cards -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10">
+      <div class="flex flex-wrap gap-10">
         <div
-          class="card p-5 space-y-4 flex flex-col"
+          class="card flex-1 p-5 space-y-4 flex flex-col"
           v-for="card in readableSummaryCards"
           :key="card.title"
           :class="card.class"
@@ -104,7 +100,7 @@
                 :class="card.percentile.color"
                 v-if="card.percentile"
               >
-                <Icon :name="card.percentile.icon" :size="20"/>
+                <Icon :name="card.percentile.icon" :size="20" />
                 <span>{{ card.percentile.description }}</span>
               </div>
               <Skeleton v-else class="w-52 h-8 rounded-xl" />
@@ -120,7 +116,7 @@
             :key="nutrient.description"
           >
             <div class="flex gap-2" :class="nutrient.color">
-              <Icon :name="nutrient.icon" :size="28"/>
+              <Icon :name="nutrient.icon" :size="28" />
               <div class="flex flex-col">
                 <span class="font-semibold">{{ nutrient.description }}</span>
                 <span class="text-xs font-light" v-if="nutrient.subtitle">{{
@@ -305,12 +301,18 @@ const readableSummaryCards = ref<any[]>([
   },
 ]);
 
-// Set up head early with basic info
-useHead({
-  title: 'Nutritional Report | Kinome',
+const micronutrientOverviewExpanded = ref(false);
+
+const title = computed(() => {
+  return (
+    recipeComputed.value?.title ||
+    recipeStore.recipe?.title ||
+    foodName.value ||
+    'New Recipe'
+  );
 });
 
-const micronutrientOverviewExpanded = ref(false);
+const foodName = ref<string | null>(null);
 
 function toggleMicronutrientOverview() {
   micronutrientOverviewExpanded.value = !micronutrientOverviewExpanded.value;
@@ -372,6 +374,8 @@ onMounted(async () => {
         eq: { id: id },
       });
 
+      foodName.value = food.name;
+
       // Check if report is preloaded in DB
       if (food.food.report && food.food.report.humanReadable) {
         recipeComputed.value = food.food;
@@ -390,10 +394,6 @@ onMounted(async () => {
         })) as { nutritionComputed: InsertableRecipe; nutrition: any };
         recipeComputed.value = response.nutritionComputed;
       }
-
-      useHead({
-        title: 'Nutritional Report for ' + food.name + ' | Kinome',
-      });
     } else if (props.id === 'new') {
       // Case 3: User is editing a new recipe - use calculate without convert
       const response = (await $fetch('/api/calculate/recipe', {
@@ -408,13 +408,6 @@ onMounted(async () => {
         },
       })) as { recipeRow: InsertableRecipe };
       recipeComputed.value = response.recipeRow;
-
-      useHead({
-        title:
-          'Nutritional Report for ' +
-          recipeStore.editingRecipe?.title +
-          ' | Kinome',
-      });
     } else {
       // Case 2: Recipe with ID
       // Fetch recipe if not already in store
@@ -449,11 +442,6 @@ onMounted(async () => {
         })) as { recipeRow: InsertableRecipe };
         recipeComputed.value = response.recipeRow;
       }
-
-      useHead({
-        title:
-          'Nutritional Report for ' + recipeStore.recipe?.title + ' | Kinome',
-      });
     }
   } catch (error) {
     console.error('Error loading recipe report:', error);
@@ -486,31 +474,11 @@ const mineralsRest = computed(() => sortedMinerals.value.slice(5));
 
 <style scoped>
 .card {
-  background: var(--color-primary-5);
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  background: var(--color-primary-10);
+  border-radius: 32px;
+  border: 1px solid var(--color-slate-100);
   transition: box-shadow 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.card.overview {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  background-color: var(--color-primary-20);
-}
-
-.card.highlight {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.13), 0 1px 2px 0 rgba(0, 0, 0, 0.09);
-  background-color: var(--color-primary-15);
-}
-
-.card.highlight-light {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.11), 0 1px 2px 0 rgba(0, 0, 0, 0.07);
-  background-color: var(--color-primary-10);
+  flex-basis: 310px;
 }
 
 .percentile-badge {

@@ -209,6 +209,10 @@ export const useAuthStore = defineStore('auth', () => {
     await syncShoppingList();
   }
 
+  function isAdmin() {
+    return user.value?.id == '4771c2f9-d8e8-44e7-967b-74d1f4468e23';
+  }
+
   return {
     user,
     authListenerSet,
@@ -222,6 +226,7 @@ export const useAuthStore = defineStore('auth', () => {
     signOut,
     listenToAuthChanges,
     isUser,
+    isAdmin,
     addToShoppingList,
     removeFromShoppingList,
     clearShoppingList,

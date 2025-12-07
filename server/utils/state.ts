@@ -21,14 +21,14 @@ let state: GlobalState =
         vision: { model: 'gpt-5-mini', reasoning: 'low' },
         default: { model: 'gpt-5-mini', reasoning: 'low' },
         defaultInsensitive: { model: 'gpt-5-mini', reasoning: 'minimal' },
-        accurate: { model: 'gpt-5', reasoning: 'low' },
+        accurate: { model: 'gpt-5.1', reasoning: 'low' },
       }
     : {
         quick: { model: 'gpt-5-nano', reasoning: 'low' }, //was low  for curated recipes
         vision: { model: 'gpt-5-mini', reasoning: 'low' }, //was medium  for curated recipes
         default: { model: 'gpt-5-mini', reasoning: 'low' }, //was medium  for curated recipes
         defaultInsensitive: { model: 'gpt-5-mini', reasoning: 'minimal' },
-        accurate: { model: 'gpt-5', reasoning: 'low' },
+        accurate: { model: 'gpt-5.1', reasoning: 'low' },
       };
 
 export function getModelConfig(type: keyof GlobalState) {

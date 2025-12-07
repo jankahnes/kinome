@@ -17,7 +17,7 @@
               <div class="flex flex-col items-center gap-1">
                 <Ring
                   class="w-26 h-26"
-                  :segments="[{ value: 0.6, color: 'var(--color-primary)' }]"
+                  :segments="[{ value: 0.6, color: 'stroke-primary' }]"
                   :strokeWidth="10"
                 >
                   <span class="text-xl font-bold text-gray-500">1450</span>
@@ -30,7 +30,7 @@
               <div class="flex flex-col items-center gap-1">
                 <Ring
                   class="w-26 h-26"
-                  :segments="[{ value: 0.4, color: 'var(--color-primary)' }]"
+                  :segments="[{ value: 0.4, color: 'stroke-primary' }]"
                   :strokeWidth="10"
                 >
                   <span class="text-xl font-bold text-gray-500">50g</span>
@@ -43,7 +43,7 @@
               <div class="flex flex-col items-center gap-1">
                 <Ring
                   class="w-26 h-26"
-                  :segments="[{ value: 0.7, color: 'var(--color-primary)' }]"
+                  :segments="[{ value: 0.7, color: 'stroke-primary' }]"
                   :strokeWidth="10"
                 >
                   <span class="text-xl font-bold text-gray-500">20g</span>

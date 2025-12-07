@@ -10,9 +10,9 @@
         cy="50"
         :r="radius"
         fill="none"
-        :stroke="ringBackground"
         :stroke-width="strokeWidth"
         stroke-linecap="round"
+        :class="ringBackground"
       />
 
       <!-- Segment rings -->
@@ -23,12 +23,12 @@
         cy="50"
         :r="radius"
         fill="none"
-        :stroke="segment.color"
         :stroke-width="strokeWidth"
         :stroke-dasharray="segment.dashArray"
         :stroke-dashoffset="segment.dashOffset"
         stroke-linecap="round"
         class="transition-all duration-300"
+        :class="segment.color"
         :style="{
           transform: `rotate(${segment.rotation}deg)`,
           transformOrigin: '50% 50%',
@@ -73,6 +73,9 @@ const segments = computed(() => {
   let currentRotation = 0;
 
   props.segments.forEach((segment, index) => {
+    if (!segment.value) {
+      return;
+    }
     const clampedValue = Math.max(0, Math.min(1, segment.value));
     const segmentLength = circumference.value * clampedValue;
     const halfLength = segmentLength / 2;

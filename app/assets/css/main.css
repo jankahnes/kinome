@@ -44,6 +44,14 @@
   --color-primary-800: color-mix(in srgb, var(--color-primary) 50%, black);
   --color-primary-900: color-mix(in srgb, var(--color-primary) 20%, black);
 
+  --color-carbs: #bddafe;
+  --color-sugar: #8fc0fc;
+  --color-protein: #fea1a2;
+  --color-fat: #d6c755;
+  --color-saturated-fat: #968c3f;
+  --color-fiber: #a7e0a5;
+  --color-salt: #dcdcdc;
+
   --color-secondary: #c75b7a;
   --color-secondary-500: #f4d9d0;
   --color-tertiary: #f4d9d0;

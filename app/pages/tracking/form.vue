@@ -380,7 +380,7 @@
               </div>
               <div class="w-full h-2 rounded-full overflow-hidden flex">
                 <div
-                  class="h-full bg-blue-200"
+                  class="h-full bg-carbs"
                   :style="{
                     width: `${
                       targetInputs.carbohydrates.selectedUnit === 'g'
@@ -395,7 +395,7 @@
                   }"
                 ></div>
                 <div
-                  class="h-full bg-red-300"
+                  class="h-full bg-protein"
                   :style="{
                     width: `${
                       targetInputs.protein.selectedUnit === 'g'
@@ -407,7 +407,7 @@
                   }"
                 ></div>
                 <div
-                  class="h-full bg-yellow-200"
+                  class="h-full bg-fat"
                   :style="{
                     width: `${
                       targetInputs.fat.selectedUnit === 'g'
@@ -471,7 +471,7 @@
                     >
                   </div>
                 </div>
-                <div class="w-full h-2 rounded-full bg-blue-200 mt-1"></div>
+                <div class="w-full h-2 rounded-full bg-carbs mt-1"></div>
               </div>
               <div class="w-0.5 bg-gray-200"></div>
               <div class="flex flex-col flex-1">
@@ -522,7 +522,7 @@
                     >
                   </div>
                 </div>
-                <div class="w-full h-2 rounded-full bg-red-300 mt-1"></div>
+                <div class="w-full h-2 rounded-full bg-protein mt-1"></div>
               </div>
               <div class="w-0.5 bg-gray-200 hidden xl:block"></div>
               <div class="flex flex-col flex-1">
@@ -573,7 +573,7 @@
                     >
                   </div>
                 </div>
-                <div class="w-full h-2 rounded-full bg-yellow-200 mt-1"></div>
+                <div class="w-full h-2 rounded-full bg-fat mt-1"></div>
               </div>
             </div>
             <div class="h-0.5 bg-gray-200 my-6"></div>

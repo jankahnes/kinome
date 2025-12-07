@@ -11,6 +11,8 @@ type NutritionEngineArgs = {
 type Response = {
   nutritionComputed: any;
   nutrition: any;
+  fullReport?: any;
+  report?: any;
 };
 
 export default defineEventHandler(async (event) => {
@@ -33,5 +35,10 @@ export default defineEventHandler(async (event) => {
     nutritionComputed: nutritionEngine.getRecipeRow(),
     nutrition: scores,
   };
+
+  if (nutritionEngineArgs.logToReport) {
+    response.fullReport = (nutritionEngine as any).recipe.fullReport;
+  }
+
   return response;
 });

@@ -1324,6 +1324,7 @@ export default class NutritionEngine {
       this.report.protein = {
         ...this.report.protein,
         proteinPer2000kcal,
+        proteinQualityScore: qualityRaw,
         proteinPer100g: this.recipe.protein.per100,
         proteinPerServing: this.recipe.protein.total,
         proteinKcalRatio:

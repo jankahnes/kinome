@@ -1,315 +1,357 @@
 <template>
-  <div class="mt-10 max-w-screen-lg mx-auto">
-    <div class="flex justify-center px-2">
-      <div class="space-y-5" v-if="food">
-        <button
-          @click="router.back()"
-          class="button flex items-center justify-center p-2 text-2xl font-bold bg-primary-10"
-        >
-          <IconChevronLeft class="w-5" />
-        </button>
-        <div class="space-y-2">
-          <div class="px-4 py-3 rounded-2xl bg-primary-10 inline-flex">
-            <h1 class="text-4xl font-bold">{{ foodName }}</h1>
+  <div class="m-4 lg:m-10 lg:ml-16">
+    <div class="flex flex-col 2xl:flex-row gap-6">
+      <div class="flex flex-col gap-6 lg:basis-1/3">
+        <div class="action-card p-1 flex flex-col items-center justify-center">
+          <div class="relative w-full mb-8">
+            <img
+              class="w-full h-full object-cover rounded-4xl"
+              src="/blurred-backdrop.webp"
+              :alt="foodName.name"
+            />
+
+            <div
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white h-1/2 aspect-square flex items-center justify-center"
+            >
+              <img :src="`/foods/${food.visual_category ?? 'herb_fresh'}.webp`" class="h-[60%] object-contain"/>
+            </div>
+            <div
+              class="absolute bottom-0 left-0 right-0 flex justify-center items-center gap-3 translate-y-1/2"
+            >
+              <div
+                class="flex justify-center items-center w-15 h-15 rounded-2xl border-2 border-white p-2"
+                :class="gradeColors[getGrade(food?.hidx, 'ovr')]"
+              >
+                <span class="text-3xl font-bold leading-none">{{
+                  getGrade(food?.hidx, 'ovr')
+                }}</span>
+              </div>
+            </div>
           </div>
-          <p v-if="refencingName" class="text-sm text-gray-500 mx-2 md:ml-8">
-            ↪ From {{ refencingName }}
+          <h1 class="text-4xl font-bold">{{ foodName.name }}</h1>
+          <p class="text-sm text-gray-500 mb-4">
+            {{ food.aisle || 'Grains' }}
           </p>
         </div>
-        <div class="flex justify-center gap-6 flex-col md:flex-row">
-          <NutritionLabel v-if="food" :nutritionData="food" class="flex-1" />
-          <HealthFacts v-if="food" :recipe="food" isFood class="flex-1" />
-        </div>
-
-        <p
-          class="text-sm select-none cursor-pointer flex items-center gap-2 ml-2"
-          @click="expanded = !expanded"
-        >
-          <span>Details</span>
-
-          <IconChevronDown class="w-5" />
-        </p>
-        <transition name="swish-fade">
-          <section v-if="expanded" class="max-w-200 space-y-4 mx-auto mb-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <!-- Physical Properties -->
-              <div class="space-y-2">
-                <h3 class="font-semibold text-lg border-b border-gray-300 pb-1">
-                  Physical Properties
-                </h3>
-                <div v-if="food?.density" class="flex justify-between">
-                  <span>Density</span>
-                  <span>{{ food.density.toFixed(2) }} g/ml</span>
-                </div>
-              </div>
-
-              <!-- Dietary Information -->
-              <div class="space-y-2">
-                <h3 class="font-semibold text-lg border-b border-gray-300 pb-1">
-                  Dietary Information
-                </h3>
-                <div v-if="food?.vegan != null" class="flex justify-between">
-                  <span>Vegan</span>
-                  <span
-                    class="font-semibold"
-                    :class="food?.vegan ? 'text-green-600' : 'text-red-600'"
-                  >
-                    {{ food?.vegan ? 'Yes' : 'No' }}
-                  </span>
-                </div>
-                <div
-                  v-if="food?.vegetarian != null"
-                  class="flex justify-between"
+        <div class="action-card p-6 flex flex-col">
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2"
+              :class="{ 'bg-primary text-white': selectedPortionSize === 100 }"
+              @click="selectedPortionSize = 100"
+            >
+              <span>100g</span>
+            </button>
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2"
+              :class="{
+                'bg-primary text-white':
+                  selectedPortionSize === food.countable_units[unit],
+              }"
+              v-for="unit in Object.keys(food.countable_units ?? {})"
+              :key="unit"
+              @click="selectedPortionSize = (food.countable_units as any)[unit]"
+            >
+              <span
+                >{{ unit ? capitalize(unit) : ("1 " + capitalize(foodName.name)) }} ({{
+                  (food.countable_units as any)[unit]
+                }}g)</span
+              >
+            </button>
+          </div>
+          <div class="w-full h-px bg-gray-200 my-6"></div>
+          <div class="flex gap-2 justify-between">
+            <div class="flex flex-col flex-1 gap-1">
+              <div class="flex justify-between">
+                <span class="text-8xl font-bold leading-14"
+                  >{{ scaledFood?.kcal?.toFixed(0) ?? 0
+                  }}<span class="text-xl text-gray-500">kcal</span></span
                 >
-                  <span>Vegetarian</span>
-                  <span
-                    class="font-semibold"
-                    :class="
-                      food?.vegetarian ? 'text-green-600' : 'text-red-600'
-                    "
-                  >
-                    {{ food?.vegetarian ? 'Yes' : 'No' }}
-                  </span>
-                </div>
-                <div
-                  v-if="food?.gluten_free != null"
-                  class="flex justify-between"
-                >
-                  <span>Gluten Free</span>
-                  <span
-                    class="font-semibold"
-                    :class="
-                      food?.gluten_free ? 'text-green-600' : 'text-red-600'
-                    "
-                  >
-                    {{ food?.gluten_free ? 'Yes' : 'No' }}
-                  </span>
-                </div>
-                <div v-if="food?.price" class="flex justify-between">
-                  <span>Estimated price per 100g</span>
-                  <span>€{{ food.price.toFixed(2) }}</span>
-                </div>
+                <Ring
+                  class="block lg:hidden w-14 h-14"
+                  :segments="[
+                    {
+                      value: macroRingPercentages?.carbsPercent ?? 0,
+                      color: 'stroke-carbs',
+                    },
+                    {
+                      value: macroRingPercentages?.proteinPercent ?? 0,
+                      color: 'stroke-protein',
+                    },
+                    { value: macroRingPercentages?.fatPercent ?? 0, color: 'stroke-fat' },
+                  ]"
+                  :strokeWidth="16"
+                />
               </div>
-
-              <!-- Minerals -->
-              <div class="space-y-2">
-                <h3 class="font-semibold text-lg border-b border-gray-300 pb-1">
-                  Minerals
-                </h3>
-                <div class="flex justify-between">
-                  <span>Iron</span>
-                  <span>{{ food.iron_mg?.toFixed(1) ?? '0' }} mg</span>
+              <div class="items-center gap-2 hidden lg:flex">
+                <div class="bg-carbs px-2 py-1 rounded-4xl">
+                  {{ scaledFood?.carbohydrates?.toFixed(0) ?? 0 }}g Carbs
                 </div>
-                <div class="flex justify-between">
-                  <span>Magnesium</span>
-                  <span>{{ food.magnesium_mg?.toFixed(1) ?? '0' }} mg</span>
+                <div class="bg-protein px-2 py-1 rounded-4xl">
+                  {{ scaledFood?.protein?.toFixed(0) ?? 0 }}g Protein
                 </div>
-                <div class="flex justify-between">
-                  <span>Zinc</span>
-                  <span>{{ food.zinc_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Calcium</span>
-                  <span>{{ food.calcium_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Potassium</span>
-                  <span>{{ food.potassium_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Selenium</span>
-                  <span>{{ food.selenium_ug?.toFixed(1) ?? '0' }} µg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Iodine</span>
-                  <span>{{ food.iodine_ug?.toFixed(1) ?? '0' }} µg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Copper</span>
-                  <span>{{ food.copper_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Manganese</span>
-                  <span>{{ food.manganese_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-              </div>
-
-              <!-- Vitamins -->
-              <div class="space-y-2">
-                <h3 class="font-semibold text-lg border-b border-gray-300 pb-1">
-                  Vitamins
-                </h3>
-                <div class="flex justify-between">
-                  <span>Vitamin A</span>
-                  <span
-                    >{{ food.vitamin_a_ug_rae?.toFixed(1) ?? '0' }} µg RAE</span
-                  >
-                </div>
-                <div class="flex justify-between">
-                  <span>Vitamin C</span>
-                  <span>{{ food.vitamin_c_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Vitamin D</span>
-                  <span>{{ food.vitamin_d_ug?.toFixed(1) ?? '0' }} µg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Vitamin E</span>
-                  <span
-                    >{{ food.vitamin_e_mg_alpha_te?.toFixed(1) ?? '0' }} mg
-                    α-TE</span
-                  >
-                </div>
-                <div class="flex justify-between">
-                  <span>Vitamin K</span>
-                  <span>{{ food.vitamin_k_ug?.toFixed(1) ?? '0' }} µg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Thiamine (B1)</span>
-                  <span>{{ food.thiamine_b1_mg?.toFixed(2) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Riboflavin (B2)</span>
-                  <span>{{ food.riboflavin_b2_mg?.toFixed(2) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Niacin (B3)</span>
-                  <span>{{ food.niacin_b3_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Vitamin B6</span>
-                  <span>{{ food.vitamin_b6_mg?.toFixed(2) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Folate</span>
-                  <span
-                    >{{ food.folate_ug_dfe?.toFixed(1) ?? '0' }} µg DFE</span
-                  >
-                </div>
-                <div class="flex justify-between">
-                  <span>Vitamin B12</span>
-                  <span>{{ food.vitamin_b12_ug?.toFixed(2) ?? '0' }} µg</span>
-                </div>
-              </div>
-
-              <!-- Fats & Other Nutrients -->
-              <div class="space-y-2">
-                <h3 class="font-semibold text-lg border-b border-gray-300 pb-1">
-                  Fats & Other Nutrients
-                </h3>
-                <div class="flex justify-between">
-                  <span>Saturated Fat</span>
-                  <span
-                    >{{
-                      (food.saturated_fat * 1000)?.toFixed(1) ?? '0'
-                    }}
-                    mg</span
-                  >
-                </div>
-                <div class="flex justify-between">
-                  <span>Trans Fats</span>
-                  <span>{{ food.trans_fats_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Monounsaturated Fats</span>
-                  <span>{{ food.mufas_total_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Choline</span>
-                  <span>{{ food.choline_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Omega-6</span>
-                  <span>{{ food.omega6_total_mg?.toFixed(1) ?? '0' }} mg</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Omega-3</span>
-                  <span>{{ food.omega3_total_mg?.toFixed(1) ?? '0' }} mg</span>
+                <div class="bg-fat px-2 py-1 rounded-4xl">
+                  {{ scaledFood?.fat?.toFixed(0) ?? 0 }}g Fat
                 </div>
               </div>
             </div>
-          </section>
-        </transition>
+            <span>
+              <Ring
+                class="hidden lg:block w-24 h-24"
+                :segments="[
+                  { value: macroRingPercentages?.carbsPercent ?? 0, color: 'stroke-carbs' },
+                  {
+                    value: macroRingPercentages?.proteinPercent ?? 0,
+                    color: 'stroke-protein',
+                  },
+                  { value: macroRingPercentages?.fatPercent ?? 0, color: 'stroke-fat' },
+                ]"
+                :strokeWidth="16"
+              />
+            </span>
+          </div>
+          <div class="flex items-center gap-2 mt-8 flex-wrap">
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2"
+            >
+              <IconPlus class="w-5" />
+              <span>Shopping List</span>
+            </button>
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2"
+            >
+              <IconChartLine class="w-5" />
+              <span>Track for today</span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="action-card p-6 flex flex-col gap-2"
+          v-if="food.suggested_swaps?.length > 0"
+        >
+          <h2 class="text-2xl font-bold mb-4">Healthy Swaps</h2>
+          <div
+            class="flex gap-4 justify-between items-center cursor-pointer hover:bg-slate-100 rounded-2xl p-1"
+            v-for="swap in food.suggested_swaps"
+            @click="navigateTo(getFoodUrl(swap.id, swap.name))"
+            :key="swap.id"
+          >
+            <div class="flex gap-3 items-center">
+              <div
+                class="w-12 h-12 rounded-2xl flex items-center justify-center"
+                :class="gradeColors[getGrade(swap.hidx, 'ovr')]"
+              >
+                <span class="text-2xl font-bold leading-none">{{
+                  getGrade(swap.hidx, 'ovr')
+                }}</span>
+              </div>
+              <div class="flex flex-col">
+                <p class="text-lg font-bold leading-none">{{ swap.name }}</p>
+                <span
+                  class="text-sm text-gray-500 leading-none flex items-center gap-1"
+                >
+                  <IconChevronsUp class="w-4" />
+                  <span>{{ getSwapReason(swap) }}</span>
+                </span>
+              </div>
+            </div>
+            <IconArrowLeftRight class="w-5 mr-2" />
+          </div>
+        </div>
+        <div class="action-card p-6 flex flex-col">
+          <h2 class="text-2xl font-bold mb-4">Found in</h2>
+          <RecipeCardHorizontal
+            v-for="recipe in containedInRecipes"
+            :key="recipe.id"
+            :recipe="recipe"
+            class="text-[22px] lg:text-[30px]"
+          />
+        </div>
+      </div>
+      <div class="flex flex-col gap-6 lg:flex-1 my-2">
+        <p class="text-lg mx-4">
+          <NuxtLink to="/" class="text-gray-500">Home</NuxtLink> >
+          <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> >
+          <span class="font-bold">{{ foodName.name }}</span>
+        </p>
+        <div class="action-card p-6 text-xl">
+          {{ food.description }}
+        </div>
+        <div class="action-card p-6 flex flex-col gap-4">
+          <!-- Tabs -->
+          <div class="flex gap-2 mb-2">
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1"
+              :class="{ 'bg-primary': activeTab === 'summary' }"
+              @click="activeTab = 'summary'"
+            >
+              Summary
+            </button>
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1"
+              :class="{ 'bg-primary': activeTab === 'full-nutrition' }"
+              @click="activeTab = 'full-nutrition'"
+            >
+              Full Nutrition
+            </button>
+            <button
+              class="animated-button ring ring-primary rounded-4xl px-4 py-1"
+              :class="{ 'bg-primary': activeTab === 'full-health-analysis' }"
+              @click="activeTab = 'full-health-analysis'"
+            >
+              Full Health Analyis
+            </button>
+          </div>
+
+          <!-- Summary -->
+          <div
+            v-show="activeTab === 'summary'"
+            class="flex gap-x-4 gap-y-12 flex-col lg:flex-row"
+          >
+            <!-- Nutrition Facts Component -->
+            <FoodNutritionFacts
+              :food="food"
+              :portionSize="selectedPortionSize"
+              :foodName="foodName.name ?? ''"
+              :referencingName="refencingName"
+            />
+            <div class="w-px h-full bg-gray-200 hidden lg:block"></div>
+            <!-- Health Summary Component -->
+            <FoodHealthSummary :food="food" />
+          </div>
+
+          <!-- Full Nutrition -->
+          <div v-show="activeTab === 'full-nutrition'"></div>
+
+          <!-- Full Health Analysis -->
+          <div v-show="activeTab === 'full-health-analysis'">
+            <PagesReport :id="id ?? ''" :isFood="true" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const router = useRouter();
+import { getGrade, gradeColors } from '~/utils/constants/grades';
+import capitalize from '~/utils/format/capitalize';
+import type { Food } from '~/types/types';
+
 const route = useRoute();
 const paramValue = route.params.id as string;
 const id = paramValue.split('-')[0];
-
-const food = ref<FullFoodRow>();
-const expanded = ref(false);
-const foodName = ref('');
-const refencingName = ref<string | null>(null);
 const supabase = useSupabaseClient<Database>();
 
-const { data } = await useAsyncData('foodname', () => {
-  return getFoodName(supabase, { eq: { id: Number(id) } });
-});
-if (data.value) {
-  foodName.value = data.value?.name ?? data.value?.food?.primary_name ?? '';
-  if (!data.value?.is_primary) {
-    refencingName.value = data.value?.food?.primary_name ?? '';
-  }
-  food.value = data.value.food;
-  food.value.id = data.value?.id;
-  food.value.processing_level_score = 100 - 17 * food.value.processing_level;
+const activeTab = ref('summary');
+const selectedPortionSize = ref(100);
 
-  //redirect from non-slugified URL to slugified URL
-  if (foodName.value && !paramValue.includes('-')) {
-    navigateTo(getFoodUrl(Number(id), foodName.value), { replace: true });
+// Get the swap reason by comparing scores
+function getSwapReason(swap: NonNullable<Food['suggested_swaps']>[0]): string {
+  if (!food) return '';
+
+  const categories = [
+    { key: 'fiber_score', label: 'More Fiber', reverse: false },
+    { key: 'protein_score', label: 'More Protein', reverse: false },
+    { key: 'fat_profile_score', label: 'Better Fats', reverse: false },
+    { key: 'salt_score', label: 'Less Salt', reverse: true },
+    { key: 'sugar_score', label: 'Less Sugar', reverse: true },
+    { key: 'satiety', label: 'More Satiating', reverse: false },
+    { key: 'mnidx', label: 'More Nutrients', reverse: false },
+    { key: 'protective_score', label: 'More Antioxidants', reverse: false },
+  ] as const;
+
+  let maxDiff = -Infinity;
+  let bestCategory = '';
+
+  for (const category of categories) {
+    const currentValue = (food as any)[category.key] ?? 0;
+    const swapValue = swap[category.key] ?? 0;
+    const diff = category.reverse
+      ? currentValue - swapValue
+      : swapValue - currentValue;
+
+    if (diff > maxDiff && diff > 5) {
+      maxDiff = diff;
+      bestCategory = category.label;
+    }
   }
+
+  return bestCategory || 'Healthier Overall';
 }
 
-watchEffect(() => {
-  if (!foodName.value || !food.value) return;
+const portionMultiplier = computed(() => selectedPortionSize.value / 100);
 
-  const healthGrade = food.value.hidx ? getGrade(food.value.hidx, 'ovr') : null;
-  const healthText = healthGrade ? ` Health Score: ${healthGrade}.` : '';
-  const kcalText = food.value.kcal
-    ? ` ${Math.round(food.value.kcal)} calories per 100g.`
-    : '';
-  const proteinText = food.value.protein
-    ? ` ${food.value.protein.toFixed(1)}g protein.`
-    : '';
+// Scaled food values for display in overview card
+const scaledFood = computed(() => {
+  if (!food) return null;
+  return {
+    kcal: food.kcal * portionMultiplier.value,
+    carbohydrates: food.carbohydrates * portionMultiplier.value,
+    protein: food.protein * portionMultiplier.value,
+    fat: food.fat * portionMultiplier.value,
+  };
+});
 
-  const description = `Complete nutrition information for ${foodName.value}.${kcalText}${proteinText}${healthText} Includes detailed micronutrients, vitamins, minerals, and health analysis.`;
-  const foodUrl = `https://kinome.app${getFoodUrl(Number(id), foodName.value)}`;
+// Macro percentages for ring display
+const macroRingPercentages = computed(() => {
+  if (!scaledFood.value) return null;
+  const f = scaledFood.value;
+  return {
+    carbsPercent: (f.carbohydrates * 4) / f.kcal,
+    proteinPercent: (f.protein * 4) / f.kcal,
+    fatPercent: (f.fat * 9) / f.kcal,
+  };
+});
 
-  useHead({
-    title: `${foodName.value} - Complete Nutrition Facts & Health Analysis | Kinome`,
-    meta: [
-      {
-        name: 'description',
-        content: description.slice(0, 160),
-      },
-      {
-        property: 'og:title',
-        content: `${foodName.value} Nutrition Facts | Kinome`,
-      },
-      {
-        property: 'og:description',
-        content: description.slice(0, 200),
-      },
-      {
-        property: 'og:type',
-        content: 'article',
-      },
-      {
-        property: 'og:url',
-        content: foodUrl,
-      },
-    ],
-    link: [
-      {
-        rel: 'canonical',
-        href: foodUrl,
-      },
-    ],
-  });
+const containedInRecipes = await getRecipeOverviews(supabase, {
+  in: { id: [247, 672, 805] },
+});
+
+const foodName = await getFoodName(supabase, { eq: { id: Number(id) } });
+const food = foodName.food;
+
+const refencingName = foodName.is_primary ? null : food?.primary_name ?? '';
+
+//redirect from non-slugified URL to slugified URL
+if (foodName.name && !paramValue.includes('-')) {
+  navigateTo(getFoodUrl(Number(id), foodName.name), { replace: true });
+}
+
+const healthGrade = food.hidx ? getGrade(food.hidx, 'ovr') : null;
+
+const description = `${foodName.name} nutrition facts: ${food.kcal} kcal/100g, HealthScore: ${healthGrade}. Discover in-depth nutritional analyis and healthy alternatives.`;
+const foodUrl = `https://kinome.app${getFoodUrl(Number(id), foodName.name)}`;
+
+useHead({
+  title: `${foodName.name} - Complete Nutrition Facts & Health Analysis | Kinome`,
+  meta: [
+    {
+      name: 'description',
+      content: description.slice(0, 160),
+    },
+    {
+      property: 'og:title',
+      content: `${foodName.name} Nutrition Facts | Kinome`,
+    },
+    {
+      property: 'og:description',
+      content: description.slice(0, 200),
+    },
+    {
+      property: 'og:type',
+      content: 'article',
+    },
+    {
+      property: 'og:url',
+      content: foodUrl,
+    },
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: foodUrl,
+    },
+  ],
 });
 </script>

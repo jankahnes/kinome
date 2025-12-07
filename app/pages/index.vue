@@ -20,6 +20,11 @@
           class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
           >All Recipes</NuxtLink
         >
+        <NuxtLink
+          to="/foods"
+          class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
+          >All Foods</NuxtLink
+        >
       </div>
       <div class="items-center gap-2 shrink-0 hidden sm:flex">
         <NuxtLink to="/" class="text-gray-500 items-center gap-2">
