@@ -42,6 +42,9 @@ const iconMap: Record<string, any> = {
   stat_2: LucideIcons.ChevronUp,
   stat_3: LucideIcons.ChevronsUp,
   star_rate: LucideIcons.Star,
+  weight: LucideIcons.Weight,
+  banknote: LucideIcons.Banknote,
+  factory: LucideIcons.Factory,
 };
 
 const icon = computed(() => iconMap[props.name]);

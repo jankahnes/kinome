@@ -20,6 +20,11 @@
           class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
           >All Recipes</NuxtLink
         >
+        <NuxtLink
+          to="/foods"
+          class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
+          >All Foods</NuxtLink
+        >
       </div>
       <div class="items-center gap-2 shrink-0 hidden sm:flex">
         <NuxtLink to="/" class="text-gray-500 items-center gap-2">
@@ -188,13 +193,12 @@ const loadingStore = useLoadingStore();
 const searchQuery = ref('');
 
 useHead({
-  title:
-    'Kinome - Smart Recipe Platform with Advanced Nutrition Analysis & Diet Tracking',
+  title: 'Kinome - Smart Recipe Platform with Nutrition Analysis',
   meta: [
     {
       name: 'description',
       content:
-        'Discover healthy recipes with detailed nutrition scores, save recipes from any website or social media, and track your diet with AI-powered ingredient parsing. Access 1000+ recipes with comprehensive health analysis.',
+        'Discover healthy recipes and import from any website or social media. Access 2000+ recipes with detailed health reports, based on the latest nutrition science.',
     },
     {
       property: 'og:title',

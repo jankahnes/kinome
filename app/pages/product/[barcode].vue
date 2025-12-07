@@ -66,6 +66,7 @@
                     v-if="updateNutritionFromPictureIsLoading"
                     src="/loading.png"
                     class="h-6 w-6"
+                    alt="Loading icon"
                   />
                   <IconEye class="w-5" v-else />
                   <span>Scan</span>

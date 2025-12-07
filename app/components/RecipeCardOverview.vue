@@ -29,7 +29,7 @@
         <div class="flex flex-col flex-1 max-w-3xl">
           <div class="flex justify-between items-start">
             <h1
-              class="font-bold text-[2.5rem] tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-12"
+              class="font-bold text-6xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between "
               :class="{
                 'underline decoration-primary underline-offset-4': true,
               }"
@@ -172,7 +172,7 @@
             <div class="flex flex-col items-center gap-1">
               <Ring
                 :segments="[
-                  { value: (recipe?.kcal ?? 0) / 2000, color: '#6a7282' },
+                  { value: (recipe?.kcal ?? 0) / 2000, color: 'stroke-carbs' },
                 ]"
                 class="w-15"
                 :strokeWidth="13"
@@ -188,7 +188,10 @@
             <div class="flex flex-col items-center gap-1">
               <Ring
                 :segments="[
-                  { value: (recipe?.protein ?? 0) / 120, color: '#6a7282' },
+                  {
+                    value: (recipe?.protein ?? 0) / 120,
+                    color: 'stroke-protein',
+                  },
                 ]"
                 class="w-15"
                 :strokeWidth="13"
@@ -204,7 +207,7 @@
             <div class="flex flex-col items-center gap-1">
               <Ring
                 :segments="[
-                  { value: (recipe?.fiber ?? 0) / 30, color: '#6a7282' },
+                  { value: (recipe?.fiber ?? 0) / 30, color: 'stroke-fat' },
                 ]"
                 :strokeWidth="13"
                 class="w-15"
@@ -263,7 +266,7 @@
             >
               <IconRocket class="w-7 h-7" />
               <div class="flex flex-col items-start">
-                <span class="font-semibold text-lg ">Start Cook Mode</span>
+                <span class="font-semibold text-lg">Start Cook Mode</span>
               </div>
             </button>
           </div>
@@ -277,6 +280,7 @@
             v-if="socialPicture"
             :src="socialPicture"
             class="rounded-4xl object-cover w-full h-full"
+            :alt="recipe?.title + ' video thumbnail'"
           />
           <Skeleton v-else class="rounded-4xl overflow-hidden w-full h-full" />
 
@@ -291,6 +295,7 @@
                 :src="`/${websiteName}.webp`"
                 class="leading-none"
                 :class="iconStyles?.[websiteName as keyof typeof iconStyles]"
+                :alt="websiteName"
               />
               <span class="truncate text-[12px] leading-none">
                 {{ capitalize(recipe.original_creator_channel_name) }}
@@ -302,7 +307,7 @@
               target="_blank"
               @click.stop
             >
-              <IconPlayCircle class="w-4 h-4"/>
+              <IconPlayCircle class="w-4 h-4" />
               Watch
             </a>
           </div>
@@ -365,23 +370,34 @@ function getTop7Tags(recipe: RecipeOverview) {
 }
 
 const cuisines = ref([
+  { name: 'basque', icon: '🏴🇪🇸🇫🇷' },
+  { name: 'eastern-european', icon: '🇵🇱🇨🇿🇭🇺' },
+  { name: 'greek', icon: '🇬🇷' },
   { name: 'italian', icon: '🇮🇹' },
+  { name: 'korean', icon: '🇰🇷' },
+  { name: 'malaysian', icon: '🇲🇾' },
+  { name: 'middle-eastern', icon: '🇱🇧🇹🇷🇯🇴' },
+  { name: 'portuguese', icon: '🇵🇹' },
+  { name: 'russian', icon: '🇷🇺' },
+  { name: 'scandinavian', icon: '🇸🇪🇳🇴🇩🇰' },
+  { name: 'thai', icon: '🇹🇭' },
+  { name: 'vietnamese', icon: '🇻🇳' },
   { name: 'german', icon: '🇩🇪' },
   { name: 'american', icon: '🇺🇸' },
-  { name: 'vietnamese', icon: '🇻🇳' },
-  { name: 'chinese', icon: '🇨🇳' },
-  { name: 'japanese', icon: '🇯🇵' },
-  { name: 'french', icon: '🇫🇷' },
-  { name: 'british', icon: '🇬🇧' },
   { name: 'indian', icon: '🇮🇳' },
-  { name: 'spanish', icon: '🇪🇸' },
-  { name: 'middle eastern', icon: '🌍' },
-  { name: 'thai', icon: '🇹🇭' },
-  { name: 'mediterranean', icon: '🌊' },
-  { name: 'greek', icon: '🇬🇷' },
-  { name: 'turkish', icon: '🇹🇷' },
-  { name: 'korean', icon: '🇰🇷' },
+  { name: 'japanese', icon: '🇯🇵' },
+  { name: 'chinese', icon: '🇨🇳' },
   { name: 'mexican', icon: '🇲🇽' },
+  { name: 'spanish', icon: '🇪🇸' },
+  { name: 'turkish', icon: '🇹🇷' },
+  { name: 'south-african', icon: '🇿🇦' },
+  { name: 'egyptian', icon: '🇪🇬' },
+  { name: 'moroccan-maghreb', icon: '🇲🇦🇩🇿🇹🇳' },
+  { name: 'west-african', icon: '🇳🇬🇬🇭🇸🇳' },
+  { name: 'ethiopian', icon: '🇪🇹' },
+  { name: 'brazilian', icon: '🇧🇷' },
+  { name: 'british', icon: '🇬🇧' },
+  { name: 'french', icon: '🇫🇷' },
 ]);
 
 const displayType = computed(() => {

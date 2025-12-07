@@ -30,7 +30,7 @@
           v-else-if="currentView === 'loading'"
           class="flex flex-col w-full items-center mt-[20vh] gap-6"
         >
-          <img src="/loading.png" class="h-8 w-8" />
+          <img src="/loading.png" class="h-8 w-8" alt="Loading icon" />
           <Transition name="fade-up">
             <p class="italic" v-if="loadingMessage">
               {{ loadingMessage }}

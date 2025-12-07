@@ -46,19 +46,19 @@
       <span
         class="bg-primary-20 text-sm px-3 py-1 rounded-xl flex gap-2 items-center"
       >
-        <img src="/youtube.webp" class="w-5 h-3.5" /> YouTube: Supported
+        <img src="/youtube.webp" class="w-5 h-3.5" alt="YouTube" /> YouTube: Supported
         <IconCheck class="w-5 h-5 text-green-800" />
       </span>
       <span
         class="bg-primary-20 text-sm px-3 py-1 rounded-xl flex gap-2 items-center"
       >
-        <img src="/tiktok.webp" class="w-7 h-7" /> Tiktok: Supported
+        <img src="/tiktok.webp" class="w-7 h-7" alt="Tiktok" /> Tiktok: Supported
         <IconCheck class="w-5 h-5 text-green-800" />
       </span>
       <span
         class="bg-primary-20 text-sm px-3 py-1 rounded-xl flex gap-2 items-center"
       >
-        <img src="/instagram.webp" class="w-6 h-6" /> Instagram: Supported
+        <img src="/instagram.webp" class="w-6 h-6" alt="Instagram" /> Instagram: Supported
         <IconCheck class="w-5 h-5 text-green-800" />
       </span>
       <!--<div class="basis-full w-full"></div> -->

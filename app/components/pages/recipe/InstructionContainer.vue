@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="flex-1 " v-if="instructions && instructions.length > 0">
-      <div class="max-w-2xl">
+      <div class="">
         <div
           v-for="(instruction, index) in instructions"
           :key="index"

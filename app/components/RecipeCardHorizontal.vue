@@ -11,7 +11,7 @@
     >
       <NuxtImg
         v-if="recipe?.picture"
-        class="h-28 xs:h-34 object-cover bg-transparent shadow-gray-200 [filter:drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]"
+        class="h-26 xs:h-32 object-cover bg-transparent shadow-gray-200 [filter:drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]"
         :src="recipe?.picture || ''"
         fetchpriority="high"
         :alt="recipe?.title"
@@ -19,7 +19,7 @@
 
       <div
         v-else-if="recipe?.social_picture"
-        class="relative w-28 xs:w-34 flex-shrink-0 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]"
+        class="relative w-26 xs:w-32 flex-shrink-0 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]"
       >
         <div
           class="bg-white rounded-full overflow-hidden relative z-10 aspect-square shadow-gray-200 [filter:drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))]"
@@ -31,7 +31,7 @@
               class="w-full h-full object-cover relative z-10 transition-all duration-300 white-fade-mask"
               :src="recipe?.social_picture"
               fetchpriority="high"
-              :alt="recipe?.title"
+              :alt="recipe?.title + ' video thumbnail'"
             />
           </div>
           <div
@@ -52,7 +52,7 @@
     </div>
     <div class="z-0 flex-1">
       <div
-        class="bg-primary-10 px-6 py-2 rounded-4xl min-h-32 xs:min-h-38 flex flex-col gap-3 justify-center flex-1 will-change-transform transition-transform duration-300 group-hover:translate-x-[1px]"
+        class="bg-primary-10 px-6 py-2 rounded-4xl min-h-30 xs:min-h-34 flex flex-col gap-3 justify-center flex-1 will-change-transform transition-transform duration-300 group-hover:translate-x-[1px]"
         :class="
           recipe?.picture || recipe?.social_picture ? '-ml-27 !pl-31' : ''
         "
@@ -65,7 +65,7 @@
           </h2>
         </div>
         <div
-          class="flex gap-1.5 flex-wrap text-[0.6em] md:text-[0.4em] max-h-[3.4rem] overflow-hidden items-start py-0.5"
+          class="flex gap-1.5 flex-wrap text-xs lg:text-sm max-h-[3.4rem] overflow-hidden items-start py-0.5"
         >
           <div
             v-if="recipe?.hidx && recipe?.hidx >= 55 && !recipe?.picture && !recipe?.social_picture"

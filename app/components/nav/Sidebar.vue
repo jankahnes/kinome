@@ -150,7 +150,7 @@
       <div
         class="flex-shrink-0 flex items-end justify-center w-full max-w-62 self-center flex-1"
       >
-        <NuxtImg src="/ill.webp" class="w-full" />
+        <NuxtImg src="/ill.webp" class="w-full" alt="Illustration of a home chef" />
       </div>
     </div>
   </aside>

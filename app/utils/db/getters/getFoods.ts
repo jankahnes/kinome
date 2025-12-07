@@ -9,6 +9,8 @@ import buildQuery from '~/utils/db/getters/buildQuery';
 import { expectSingle } from '~/utils/db/getters/expectSingle';
 import type { GetterOpts } from '~/types/types';
 import type { NonNullableProps } from '~/types/types';
+import pluralizeWord from '~/utils/format/pluralizeWord';
+import singularizeWord from '~/utils/format/singularizeWord';
 
 //TODO all of this can be removed once satiety is filled in DB
 function scale_by_points(value: number, points: [number, number][]) {
@@ -82,30 +84,142 @@ export async function getFood(
   return expectSingle(await getFoods(client, opts));
 }
 
+const formatDescription = (
+  rawDescription: string | null,
+  foodData: FoodRowNullable,
+  currentName: string
+): string => {
+  if (!rawDescription) return '';
+
+  // Check the second word of the description to determine if we should pluralize/singularize
+  const words = rawDescription.trim().split(/\s+/);
+  let nameToUse = currentName;
+
+  if (words.length >= 2) {
+    const secondWord = words[1].toLowerCase();
+    if (secondWord === 'are') {
+      nameToUse = pluralizeWord(currentName);
+    } else if (secondWord === 'is') {
+      nameToUse = singularizeWord(currentName);
+    }
+  }
+
+  let processed = rawDescription.replace(/\[name\]/g, nameToUse);
+
+  processed = processed.replace(/\[(.*?)\]/g, (match, key) => {
+    const val = foodData[key as keyof FoodRowNullable];
+    if (val !== undefined && val !== null) {
+      return val;
+    }
+    return match;
+  });
+
+  return processed;
+};
+
 export async function getFoodNames(
   client: SupabaseClient,
   opts: GetterOpts = {}
 ): Promise<Food[]> {
+  // Corrected Query: Fetches food -> joins swaps table -> joins food_names of swap -> joins food data of swap
   let query = client.from('food_names').select(`
     *,
-    food:foods(*)
+    food:foods(
+      *,
+      swaps:foods_healthier_swap_suggestions(
+          swap_food:food_names(*,
+          food:foods(
+            id,
+            hidx,
+            mnidx,
+            fiber_score,
+            protective_score,
+            protein_score,
+            fat_profile_score,
+            salt_score,
+            sugar_score,
+            satiety
+          )
+        )
+      )
+    )
   `);
+
   query = buildQuery(query, opts);
+
   const { data, error } = await query;
   if (error) throw error;
   if (!data) return [];
-  const foodNames = data as FoodNameRow & { food: FoodRowNullable }[];
+
+  // Type assertion for the complex join structure
+  const foodNames = data as (FoodNameRow & {
+    food: FoodRowNullable & {
+      swaps?: {
+        swap_food: FoodNameRow & {
+          food: {
+            id: number;
+            hidx: number;
+            mnidx: number;
+            fiber_score: number;
+            protective_score: number;
+            protein_score: number;
+            fat_profile_score: number;
+            salt_score: number;
+            sugar_score: number;
+            satiety: number;
+          };
+        };
+      }[];
+    };
+  })[];
+
   const foodNamesNonNull: Food[] = foodNames.map((foodName) => {
-    if (!foodName.food.satiety) {
-      foodName.food.satiety =
-        0.5 * getED(foodName.food.kcal ?? 0) + 0.5 * (foodName.food.sidx ?? 0);
+    const food = foodName.food;
+
+    if (!food.satiety) {
+      food.satiety = 0.5 * getED(food.kcal ?? 0) + 0.5 * (food.sidx ?? 0);
     }
-    foodName.food.countable_units = foodName.food.countable_units as Record<
-      string,
-      number
-    >;
+
+    food.countable_units = food.countable_units as Record<string, number>;
+
+    if (food.description) {
+      food.description = formatDescription(
+        food.description,
+        food,
+        foodName.name
+      );
+    }
+
+    const processedSwaps =
+      food.swaps
+        ?.map((joinRow) => {
+          const swapFoodName = joinRow.swap_food;
+          if (!swapFoodName || !swapFoodName.food) return null;
+
+          const swapFood = swapFoodName.food;
+
+          return {
+            id: swapFoodName.id,
+            name: swapFoodName.name,
+            hidx: swapFood.hidx,
+            mnidx: swapFood.mnidx,
+            fiber_score: swapFood.fiber_score,
+            protective_score: swapFood.protective_score,
+            protein_score: swapFood.protein_score,
+            fat_profile_score: swapFood.fat_profile_score,
+            salt_score: swapFood.salt_score,
+            sugar_score: swapFood.sugar_score,
+            satiety: swapFood.satiety,
+          };
+        })
+        .filter(Boolean) || [];
+
+    (food as any).suggested_swaps = processedSwaps;
+    delete (food as any).swaps;
+
     return fillNullNumbers(foodName) as Food;
   });
+
   return foodNamesNonNull satisfies Food[];
 }
 

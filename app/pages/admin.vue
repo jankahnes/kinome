@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto p-6 max-w-4xl">
+  <div class="container mx-auto p-6 max-w-4xl" v-if="auth.isAdmin()">
     <h1 class="text-3xl font-bold mb-8 text-center">AI Model Configuration</h1>
 
     <div class="grid gap-6 md:grid-cols-2">
@@ -72,15 +72,16 @@
 </template>
 
 <script setup lang="ts">
-import type { ModelConfig } from '~/server/utils/state';
+import type { ModelConfig } from '~~/server/utils/state';
 import type { ReasoningEffort } from 'openai/resources.mjs';
+const auth = useAuthStore();
 
 const types = ['quick', 'vision', 'default', 'accurate'];
 const possibleReasoning = ['minimal', 'low', 'medium', 'high'];
 const possibleModels = [
   'gpt-5-nano', //0.05$ Input, 0.40$ Output
   'gpt-5-mini', //0.25$ Input, 2$ Output
-  'gpt-5', //1.25$ Input, 10$ Output
+  'gpt-5.1', //1.25$ Input, 10$ Output
   'gpt-4.1', //2$ Input, 8$ Output
   'gpt-4.1-mini', //0.4$ Input, 1.60$ Output
   'gpt-4.1-nano', //0.1$ Input, 0.40$ Output
@@ -143,6 +144,9 @@ const setModelConfig = async (
   model: string,
   reasoning: string
 ) => {
+  if(!auth.isAdmin()) {
+    return;
+  }
   await $fetch(`/api/gpt/set-model-config`, {
     method: 'POST',
     body: { type: type, model: model, reasoning: reasoning },

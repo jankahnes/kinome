@@ -25,6 +25,7 @@
       <img
         :src="'/' + getWebsiteName(source) + '.webp'"
         :class="small ? iconStylesSmall?.[getWebsiteName(source) as keyof typeof iconStylesSmall] : iconStyles?.[getWebsiteName(source) as keyof typeof iconStyles]"
+        :alt="getWebsiteName(source)"
       />
       {{ small ? 'From ' : 'Imported from ' }}
       {{ capitalize(getWebsiteName(source)) }}

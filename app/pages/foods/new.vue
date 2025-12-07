@@ -40,6 +40,7 @@
           v-if="requestsStore.requestsLoading"
           src="/loading.png"
           class="h-6 w-6"
+          alt="Loading icon"
         />
       </ClientOnly>
       See recent requests
@@ -62,6 +63,7 @@
             <img
               src="/loading.png"
               class="h-6 w-6"
+              alt="Loading icon"
             />
           </ClientOnly>
           <NuxtLink

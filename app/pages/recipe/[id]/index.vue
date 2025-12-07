@@ -48,34 +48,34 @@
               :id="0"
               class="flex-1 basis-100"
             ></PagesRecipeCommentSection>
-            <div class="flex flex-col w-full gap-4">
-              <h2 class="text-2xl font-bold ml-4">Similar Recipes</h2>
-              <div class="flex gap-4">
-                <RecipeCard
-                  v-for="recipe in similarRecipes"
-                  :key="recipe.id"
-                  :recipe="recipe"
-                  class="basis-50 text-[28px] flex-shrink-0 transition-all duration-300"
-                />
-              </div>
+          </div>
+          <div class="shrink-0 lg:basis-125 flex flex-col gap-12">
+            <PagesRecipeIngredientList
+              :addedInfo="{
+                addedFat: recipeStore.recipe?.added_fat ?? 0,
+                addedSalt: recipeStore.recipe?.added_salt ?? 0,
+                batchSize: recipeStore.recipe?.batch_size ?? 1,
+              }"
+              :ingredients="recipeStore.recipe?.ingredients"
+              :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
+              :batchSize="recipeStore.recipe?.batch_size ?? undefined"
+              :recipeId="recipeStore.recipe?.id"
+              v-model:servingSize="servingSize"
+              class="shrink-0 lg:basis-125"
+              :formalizationLoading="job?.step === 'formalizing_ingredients'"
+              :displayFormalize="displayIngredientsFormalize"
+              :formalize="formalizeIngredients"
+            ></PagesRecipeIngredientList>
+            <div class="flex flex-col gap-4">
+              <h2 class="text-2xl font-bold ml-4 mb-4">Similar Recipes</h2>
+              <RecipeCardHorizontal
+                v-for="recipe in similarRecipes"
+                :key="recipe.id"
+                :recipe="recipe"
+                class="-ml-2"
+              />
             </div>
           </div>
-          <PagesRecipeIngredientList
-            :addedInfo="{
-              addedFat: recipeStore.recipe?.added_fat ?? 0,
-              addedSalt: recipeStore.recipe?.added_salt ?? 0,
-              batchSize: recipeStore.recipe?.batch_size ?? 1,
-            }"
-            :ingredients="recipeStore.recipe?.ingredients"
-            :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
-            :batchSize="recipeStore.recipe?.batch_size ?? undefined"
-            :recipeId="recipeStore.recipe?.id"
-            v-model:servingSize="servingSize"
-            class="shrink-0 lg:basis-125"
-            :formalizationLoading="job?.step === 'formalizing_ingredients'"
-            :displayFormalize="displayIngredientsFormalize"
-            :formalize="formalizeIngredients"
-          ></PagesRecipeIngredientList>
         </div>
       </main>
     </Transition>
@@ -260,12 +260,22 @@ const loadRecipe = async (recipeId: number, force: boolean = false) => {
         true
       );
     }
-    recipeStore.setRecipe(recipe);
     recipeShow.value = true;
+    recipeStore.setRecipe(recipe);
   } else if (recipeStore.recipe?.id === recipeId) {
     recipeShow.value = true;
   }
   servingSize.value = recipeStore.recipe?.batch_size ?? 2;
+  const recipes = await getRecipeOverviews(supabase, {
+    neq: { id },
+    or: 'picture.not.eq.null,source_type.eq.MEDIA',
+    trigram_search: {
+      query: recipeStore.recipe?.title ?? '',
+      column: 'title',
+    },
+    limit: 3,
+  });
+  similarRecipes.value = recipes as RecipeOverview[];
 };
 
 const loadRecipeWithoutLoading = async (
@@ -284,6 +294,16 @@ const loadRecipeWithoutLoading = async (
     }
     recipeStore.setRecipe(recipe as Recipe);
     servingSize.value = recipeStore.recipe?.batch_size ?? 2;
+    const recipes = await getRecipeOverviews(supabase, {
+      neq: { id },
+      or: 'picture.not.eq.null,source_type.eq.MEDIA',
+      trigram_search: {
+        query: recipeStore.recipe?.title ?? '',
+        column: 'title',
+      },
+      limit: 3,
+    });
+    similarRecipes.value = recipes as RecipeOverview[];
   }
 };
 
@@ -420,14 +440,6 @@ onMounted(async () => {
   const { track, trackTimeSpent } = useEngagement();
   track(id, 'click');
   trackTimeSpent(id);
-  const recipes = await getRecipeOverviews(supabase, {
-    //eq: { visibility: 'PUBLIC' },
-    neq: { id },
-    or: 'picture.not.eq.null,source_type.eq.MEDIA',
-    trigram_search: { query: recipeStore.recipe?.title ?? '', column: 'title' },
-    limit: 3,
-  });
-  similarRecipes.value = recipes as RecipeOverview[];
 });
 
 const deleteRecipe = async () => {

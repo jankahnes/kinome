@@ -94,6 +94,7 @@
                 v-if="reply.user.picture"
                 :src="reply.user.picture"
                 class="w-10 h-10 rounded-full shadow-lg"
+                :alt="reply.user.username + ' profile picture'"
               />
               <div v-else class="w-10 h-10 rounded-full bg-gray-300 shadow-lg">
                 {{

@@ -11,6 +11,7 @@
           v-if="!loadingStore.isTransient"
           src="/loading.png"
           class="h-4 w-4 opacity-50"
+          alt="Loading icon"
         />
         <p class="opacity-70 text-sm text-nowrap">
           {{ loadingStore.toastLoadingMessage }}
@@ -47,6 +48,7 @@
           v-if="!loadingStore.isTransient"
           src="/loading.png"
           class="h-4 w-4 opacity-60"
+          alt="Loading icon"
         />
         <p class="opacity-80 text-sm text-nowrap">
           {{ loadingStore.toastLoadingMessage }}

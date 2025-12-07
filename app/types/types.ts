@@ -43,6 +43,19 @@ export type Job = Database['public']['Tables']['jobs']['Row'];
 export type Food = Omit<FoodNameRow, 'created_at'> & {
   created_at?: string;
   food: FullFoodRow;
+  suggested_swaps?: {
+    id: number;
+    name: string;
+    hidx: number;
+    fiber_score: number;
+    protein_score: number;
+    fat_profile_score: number;
+    salt_score: number;
+    sugar_score: number;
+    satiety: number;
+    mnidx: number;
+    protective_score: number;
+  }[];
 };
 
 export type ShoppingListItem = {

@@ -158,6 +158,7 @@
               title="Matching to generic food..."
               src="/loading.png"
               class="w-4 h-4 inline-block"
+              alt="Loading icon"
             />
             <span
               v-else-if="modelValue.brandedFoodState === 'error'"
@@ -171,6 +172,7 @@
             v-else-if="part.type === 'request'"
             src="/loading.png"
             class="w-4 h-4 inline-block"
+            alt="Loading icon"
           />
           {{ part.text }}
         </span>

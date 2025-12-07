@@ -26,8 +26,8 @@
           >
             <NuxtImg
               class="w-full h-full object-cover relative z-10 white-fade-mask"
+              :alt="recipe?.title + ' video thumbnail'"
               :src="recipe?.social_picture!"
-              :alt="recipe?.title"
             />
           </div>
           <div
@@ -62,7 +62,12 @@
           class="flex gap-1.5 flex-wrap text-xs sm:text-[14px] h-14 overflow-y-hidden items-center justify-center py-0.5"
         >
           <div
-            v-if="recipe?.hidx && recipe?.hidx >= 55 && !recipe?.picture && !recipe?.social_picture"
+            v-if="
+              recipe?.hidx &&
+              recipe?.hidx >= 55 &&
+              !recipe?.picture &&
+              !recipe?.social_picture
+            "
             class="flex tag items-center justify-center !text-black text-center min-w-[2em] subpixel-antialiased tabular-nums"
             :class="gradeColors[getGrade(recipe?.hidx, 'ovr')]"
           >

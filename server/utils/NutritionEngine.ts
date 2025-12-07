@@ -854,6 +854,14 @@ export default class NutritionEngine {
 
   async getSIDX(water: number) {
     if (this.recipe.kcal.per100 == 0) {
+      if (this.logToReport) {
+        this.report.satiety = {
+          ff: 0,
+          giProxy: 0,
+          water: 0,
+          kcal: 0,
+        };
+      }
       return 50;
     }
     const liquid_keywords = [
@@ -963,7 +971,9 @@ export default class NutritionEngine {
       if (this.logToReport) {
         this.report.fiber = {
           fiberPer100g: this.recipe.fiber.per100,
+          fiberTotal: this.recipe.fiber.total,
           fiberPer2000kcal: 0,
+          fiberRDAPer2000kcal: 0,
           score: 0,
         };
       }
@@ -983,6 +993,7 @@ export default class NutritionEngine {
         fiberTotal: this.recipe.fiber.total,
         fiberPer2000kcal,
         fiberRDAPer2000kcal: fiberPer2000kcal / 30,
+        score: score,
       };
     }
     return Math.min(200, score);
@@ -1042,6 +1053,8 @@ export default class NutritionEngine {
         this.report.sugar = {
           totalSugarPer100: this.recipe.sugar.per100,
           sugarPer2000kcal: 0,
+          percentContributedFromNaturalSources: 0,
+          percentOfKcal: 0,
           score: 100,
         };
       }
@@ -1081,15 +1094,14 @@ export default class NutritionEngine {
     if (this.recipe.kcal.per100 === 0 || this.recipe.fat.per100 === 0) {
       if (this.logToReport) {
         this.report.fatProfile = {
-          saturated_score: 50,
-          omega3_score: 50,
-          omega6_score: 50,
-          mufa_score: 50,
-          trans_penalty: 1.0,
-          base_score: 50,
-          raw_score: 50,
-          weight: 0,
-          final_score: 50,
+          fatPer2000kcal: 0,
+          totalFatPer100g: 0,
+          satFatPercent: 0,
+          o3Percent: 0,
+          o6Percent: 0,
+          mufaPercent: 0,
+          transFatPercent: 0, // not used in score
+          score: 50,
         };
       }
       return 50;
@@ -1182,6 +1194,9 @@ export default class NutritionEngine {
           polyphenolsPer2000kcal: 0,
           carotenoidsPer2000kcal: 0,
           glucosinolatesPer2000kcal: 0,
+          polyphenols: 0,
+          carotenoids: 0,
+          glucosinolates: 0,
           compositeValue: 0,
           total_score: 0,
         };
@@ -1293,9 +1308,15 @@ export default class NutritionEngine {
       if (this.logToReport) {
         this.report.protein = {
           proteinPer2000kcal: 0,
+          proteinPer100g: 0,
+          proteinPerServing: 0,
+          proteinKcalRatio: 0,
           rawScore: 0,
           qualityMultiplier: 0,
           overall_score: 0,
+          proteinQualityScore: 0,
+          limitingAA: '',
+          limitingAA_ratio: 0,
         };
       }
       return 0;
@@ -1324,6 +1345,7 @@ export default class NutritionEngine {
       this.report.protein = {
         ...this.report.protein,
         proteinPer2000kcal,
+        proteinQualityScore: qualityRaw,
         proteinPer100g: this.recipe.protein.per100,
         proteinPerServing: this.recipe.protein.total,
         proteinKcalRatio:
