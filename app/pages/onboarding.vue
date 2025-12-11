@@ -272,6 +272,15 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
+
 const auth = useAuthStore();
 const imgUpload = ref(null as any);
 

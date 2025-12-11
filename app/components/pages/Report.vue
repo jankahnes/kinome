@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Loading skeleton -->
-    <div v-if="loading" class="space-y-10 mx-4">
+    <div v-if="loading" class="space-y-4 mx-4">
       <Skeleton class="w-full h-142 shadow-sm rounded-2xl" />
       <div class="flex flex-wrap gap-10 items-start w-full">
         <Skeleton
@@ -12,216 +12,101 @@
       </div>
     </div>
 
-    <div v-else class="mx-4 flex flex-col gap-10">
+    <div v-else class="flex flex-col gap-1">
       <!-- Hero Card -->
-      <div class="p-6 card overview sm:px-10 w-full md:w-auto">
-        <div class="flex gap-8 items-start">
-          <div class="flex-1">
-            <h1 class="text-2xl lg:text-4xl font-bold text-gray-800 mb-2">
-              {{ title }}
-            </h1>
-            <p class="text-lg text-gray-600 mb-4">Nutritional Analysis 🔎</p>
-
-            <div class="space-y-3">
+      <div class="p-5">
+        <div class="flex-1">
+          <p class="text-sm text-gray-500">NUTRITIONAL ANALYSIS</p>
+          <h2 class="text-4xl font-bold tracking-tight mb-2">
+            {{ title }}
+          </h2>
+          <div class="flex items-start justify-between mt-6 mb-4">
+            <div class="flex flex-col">
+              <h3 class="text-xl font-bold mb-1">🔎 Overview</h3>
               <div
-                v-for="grade of report.humanReadable.overall"
-                :key="grade.description"
-                class="flex gap-3 items-center"
-                :class="grade.color"
+                class="percentile-badge !py-1 px-1"
+                :class="report.percentiles.hidx.color"
+                v-if="report.percentiles.hidx"
               >
-                <Icon :name="grade.icon" :size="28" />
-                <div class="flex flex-col">
-                  <span class="font-semibold">{{ grade.description }}</span>
-                  <span class="text-xs font-light" v-if="grade.subtitle">{{
-                    grade.subtitle
-                  }}</span>
-                </div>
+                <Icon :name="report.percentiles.hidx.icon" :size="20" />
+                <span>{{ report.percentiles.hidx.description }}</span>
               </div>
             </div>
-          </div>
-
-          <div class="hidden md:flex flex-col items-end gap-4">
             <GradeContainer
               :score="report.overall.hidx"
               :type="'ovr'"
-              class="font-bold text-5xl p-4 rounded-xl shadow-sm"
-            />
-            <div
-              class="percentile-badge !py-2"
-              v-if="report.percentiles.hidx"
-              :class="report.percentiles.hidx.color"
-            >
-              <Icon :name="report.percentiles.hidx.icon" :size="20" />
-              <span>{{ report.percentiles.hidx.description }}</span>
-            </div>
-            <Skeleton v-else class="w-52 h-10 rounded-xl" />
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="flex md:hidden gap-4 card overview items-center justify-between pl-4"
-      >
-        <div class="">
-          <h2 class="text-lg font-bold text-gray-800 flex-1">Overall Grade</h2>
-
-          <div
-            class="percentile-badge !py-1 px-1"
-            :class="report.percentiles.hidx.color"
-            v-if="report.percentiles.hidx"
-          >
-            <Icon :name="report.percentiles.hidx.icon" :size="20" />
-            <span>{{ report.percentiles.hidx.description }}</span>
-          </div>
-          <Skeleton v-else class="w-52 h-8 rounded-xl" />
-        </div>
-        <GradeContainer
-          :score="report.overall.hidx"
-          :type="'ovr'"
-          class="font-bold text-3xl p-4 rounded-xl shadow-sm"
-        />
-      </div>
-
-      <!-- Readable Summary Cards -->
-      <div class="flex flex-wrap gap-10">
-        <div
-          class="card flex-1 p-5 space-y-4 flex flex-col"
-          v-for="card in readableSummaryCards"
-          :key="card.title"
-          :class="card.class"
-        >
-          <div class="flex items-start justify-between mb-4">
-            <div class="">
-              <h3 class="text-xl font-bold text-gray-800 mb-2">
-                {{ card.title }}
-              </h3>
-              <div
-                class="percentile-badge"
-                :class="card.percentile.color"
-                v-if="card.percentile"
-              >
-                <Icon :name="card.percentile.icon" :size="20" />
-                <span>{{ card.percentile.description }}</span>
-              </div>
-              <Skeleton v-else class="w-52 h-8 rounded-xl" />
-            </div>
-            <GradeContainer
-              :score="card.score"
-              :type="'single'"
               class="rounded-lg text-2xl"
             />
           </div>
-          <div
-            v-for="nutrient in card.humanReadable"
-            :key="nutrient.description"
-          >
-            <div class="flex gap-2" :class="nutrient.color">
-              <Icon :name="nutrient.icon" :size="28" />
+
+          <div class="space-y-3">
+            <div
+              v-for="grade of report.humanReadable.overall"
+              :key="grade.description"
+              class="flex gap-3 items-center"
+              :class="grade.color"
+            >
+              <Icon :name="grade.icon" :size="28" />
               <div class="flex flex-col">
-                <span class="font-semibold">{{ nutrient.description }}</span>
-                <span class="text-xs font-light" v-if="nutrient.subtitle">{{
-                  nutrient.subtitle
+                <span class="font-bold">{{ grade.description }}</span>
+                <span class="text-xs" v-if="grade.subtitle">{{
+                  grade.subtitle
                 }}</span>
               </div>
             </div>
           </div>
-          <button
-            class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20 text-primary text-xs will-change-transform self-start ml-8"
-            v-if="
-              card.name == 'micronutrients' &&
-              report.humanReadable.micronutrients.length > 5
-            "
-            @click="toggleMicronutrientOverview"
-          >
-            {{ micronutrientOverviewExpanded ? 'Show less' : 'Show more' }}
-          </button>
         </div>
+      </div>
 
-        <!-- Detail Card: Total Vitamins -->
-        <div class="card p-5 space-y-4 flex flex-col" v-if="!props.hideNutrition">
-          <h3 class="text-xl font-bold text-gray-800">Total Vitamins</h3>
-          <p class="text-sm text-gray-600 mb-3">Per Serving:</p>
-          <div class="space-y-2">
+      <!-- Readable Summary Cards -->
+      <div
+        class="basis-auto min-w-80 flex-1 p-5 space-y-4 flex flex-col"
+        v-for="card in readableSummaryCards"
+        :key="card.title"
+        :class="card.class"
+      >
+        <div class="flex items-start justify-between mb-4">
+          <div class="">
+            <h3 class="text-xl font-bold mb-1">
+              {{ card.title }}
+            </h3>
             <div
-              v-for="nutrient in vitaminsShort"
-              :key="nutrient.displayName"
-              class="flex justify-between items-center py-1"
+              class="percentile-badge"
+              :class="card.percentile.color"
+              v-if="card.percentile"
             >
-              <span class="text-sm">{{ nutrient.displayName }}</span>
-              <span class="font-semibold text-sm bg-gray-100 px-2 py-1 rounded"
-                >{{ nutrient.rdaPerServing }}% RDA</span
-              >
+              <Icon :name="card.percentile.icon" :size="20" />
+              <span>{{ card.percentile.description }}</span>
             </div>
-            <button
-              class="text-sm text-blue-600 hover:text-blue-800 underline mt-2"
-              v-show="!vitaminsExpanded"
-              @click="vitaminsExpanded = true"
-            >
-              Show {{ vitaminsRest.length }} more vitamins
-            </button>
-            <div
-              v-for="nutrient in vitaminsRest"
-              :key="nutrient.displayName"
-              class="flex justify-between items-center py-1 text-gray-600"
-              v-show="vitaminsExpanded"
-            >
-              <span class="text-sm">{{ nutrient.displayName }}</span>
-              <span class="font-medium text-sm bg-gray-50 px-2 py-1 rounded"
-                >{{ nutrient.rdaPerServing }}% RDA</span
-              >
+            <Skeleton v-else class="w-52 h-8 rounded-xl" />
+          </div>
+          <GradeContainer
+            :score="card.score"
+            :type="'single'"
+            class="rounded-lg text-2xl"
+          />
+        </div>
+        <div v-for="nutrient in card.humanReadable" :key="nutrient.description">
+          <div class="flex gap-2" :class="nutrient.color">
+            <Icon :name="nutrient.icon" :size="28" />
+            <div class="flex flex-col">
+              <span class="font-semibold">{{ nutrient.description }}</span>
+              <span class="text-xs font-light" v-if="nutrient.subtitle">{{
+                nutrient.subtitle
+              }}</span>
             </div>
-            <button
-              class="text-sm text-blue-600 hover:text-blue-800 underline mt-2"
-              v-show="vitaminsExpanded"
-              @click="vitaminsExpanded = false"
-            >
-              Show fewer vitamins
-            </button>
           </div>
         </div>
-
-        <!-- Detail Card: Total Minerals -->
-        <div class="card p-5 space-y-4 flex flex-col" v-if="!props.hideNutrition">
-          <h3 class="text-xl font-bold text-gray-800">Total Minerals</h3>
-          <p class="text-sm text-gray-600 mb-3">Per Serving:</p>
-          <div class="space-y-2">
-            <div
-              v-for="nutrient in mineralsShort"
-              :key="nutrient.displayName"
-              class="flex justify-between items-center py-1"
-            >
-              <span class="text-sm">{{ nutrient.displayName }}</span>
-              <span class="font-semibold text-sm bg-gray-100 px-2 py-1 rounded"
-                >{{ nutrient.rdaPerServing }}% RDA</span
-              >
-            </div>
-            <button
-              class="text-sm text-blue-600 hover:text-blue-800 underline mt-2"
-              v-show="!mineralsExpanded"
-              @click="mineralsExpanded = true"
-            >
-              Show {{ mineralsRest.length }} more minerals
-            </button>
-            <div
-              v-for="nutrient in mineralsRest"
-              :key="nutrient.displayName"
-              class="flex justify-between items-center py-1 text-gray-600"
-              v-show="mineralsExpanded"
-            >
-              <span class="text-sm">{{ nutrient.displayName }}</span>
-              <span class="font-medium text-sm bg-gray-50 px-2 py-1 rounded"
-                >{{ nutrient.rdaPerServing }}% RDA</span
-              >
-            </div>
-            <button
-              class="text-sm text-blue-600 hover:text-blue-800 underline mt-2"
-              v-show="mineralsExpanded"
-              @click="mineralsExpanded = false"
-            >
-              Show fewer minerals
-            </button>
-          </div>
-        </div>
+        <button
+          class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform self-start ml-8"
+          v-if="
+            card.name == 'micronutrients' &&
+            report.humanReadable.micronutrients.length > 5
+          "
+          @click="toggleMicronutrientOverview"
+        >
+          {{ micronutrientOverviewExpanded ? 'Show less' : 'Show more' }}
+        </button>
       </div>
     </div>
   </div>
@@ -455,8 +340,8 @@ onMounted(async () => {
 });
 
 const sortedMicros = computed(() => {
-  if (!report.value?.micronutrients?.details) return [];
-  return report.value.micronutrients.details.sort(
+  if (!report.value?.details?.micronutrients) return [];
+  return report.value.details.micronutrients.sort(
     (a: any, b: any) => b.rdaPerServing - a.rdaPerServing
   );
 });
@@ -474,14 +359,6 @@ const mineralsRest = computed(() => sortedMinerals.value.slice(5));
 </script>
 
 <style scoped>
-.card {
-  background: var(--color-primary-10);
-  border-radius: 32px;
-  border: 1px solid var(--color-slate-100);
-  transition: box-shadow 0.3s ease;
-  flex-basis: 310px;
-}
-
 .percentile-badge {
   font-size: 0.825rem !important;
   font-weight: 500;

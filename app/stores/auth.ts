@@ -11,9 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchProfile() {
     if (!user.value || !user.value.id) return;
-    const profile = expectSingleOrNull(
-      await getUsers(supabase, { eq: { id: user.value.id } })
-    );
+    const profile = await getUser(supabase, user.value.id);
     if (profile) {
       Object.assign(user.value, profile);
       // Load shopping list from profile

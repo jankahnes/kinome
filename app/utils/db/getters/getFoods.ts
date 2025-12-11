@@ -12,37 +12,6 @@ import type { NonNullableProps } from '~/types/types';
 import pluralizeWord from '~/utils/format/pluralizeWord';
 import singularizeWord from '~/utils/format/singularizeWord';
 
-//TODO all of this can be removed once satiety is filled in DB
-function scale_by_points(value: number, points: [number, number][]) {
-  if (value <= points[0][0]) {
-    return points[0][1];
-  }
-  if (value >= points[points.length - 1][0]) {
-    return points[points.length - 1][1];
-  }
-  for (let i = 0; i < points.length - 1; i++) {
-    const x1 = points[i][0];
-    const y1 = points[i][1];
-    const x2 = points[i + 1][0];
-    const y2 = points[i + 1][1];
-    if (x1 <= value && value <= x2) {
-      return y1 + ((value - x1) * (y2 - y1)) / (x2 - x1);
-    }
-  }
-  return 0;
-}
-
-function getED(kcal: number) {
-  return scale_by_points(kcal, [
-    [0, 100],
-    [50, 90],
-    [150, 70],
-    [200, 50],
-    [350, 30],
-    [550, 0],
-  ]);
-}
-
 function fillNullNumbers<T extends Record<string, any>>(
   obj: T
 ): NonNullableProps<T> {
@@ -67,9 +36,6 @@ export async function getFoods(
 
   const foods = data as FoodRowNullable[];
   const foodsNonNull: FoodRow[] = foods.map((food) => {
-    if (!food.satiety) {
-      food.satiety = 0.5 * getED(food.kcal ?? 0) + 0.5 * (food.sidx ?? 0);
-    }
     food.countable_units = food.countable_units as Record<string, number>;
     return fillNullNumbers(food) as FoodRow;
   });
@@ -106,13 +72,15 @@ const formatDescription = (
 
   let processed = rawDescription.replace(/\[name\]/g, nameToUse);
 
-  processed = processed.replace(/\[(.*?)\]/g, (match, key) => {
-    const val = foodData[key as keyof FoodRowNullable];
-    if (val !== undefined && val !== null) {
-      return val;
-    }
-    return match;
-  });
+  processed = processed
+    .replace(/\[(.*?)\]/g, (match, key) => {
+      const val = foodData[key as keyof FoodRowNullable];
+      if (val !== undefined && val !== null) {
+        return val;
+      }
+      return match;
+    })
+    .replace(/[\[\]]/g, '');
 
   return processed;
 };
@@ -175,10 +143,6 @@ export async function getFoodNames(
 
   const foodNamesNonNull: Food[] = foodNames.map((foodName) => {
     const food = foodName.food;
-
-    if (!food.satiety) {
-      food.satiety = 0.5 * getED(food.kcal ?? 0) + 0.5 * (food.sidx ?? 0);
-    }
 
     food.countable_units = food.countable_units as Record<string, number>;
 
@@ -253,10 +217,6 @@ export function postprocessBrandedFood(brandedFood: BrandedFood): BrandedFood {
           food: {
             ...brandedFood.food_name.food,
             id: brandedFood.food_name.id,
-            satiety: brandedFood.food_name.food.satiety
-              ? brandedFood.food_name.food.satiety
-              : 0.5 * getED(brandedFood.food_name.food.kcal ?? 0) +
-                0.5 * (brandedFood.food_name.food.sidx ?? 0),
             countable_units: brandedFood.food_name.food
               .countable_units as Record<string, number>,
           },

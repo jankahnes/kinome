@@ -105,49 +105,5 @@ export default defineEventHandler(async () => {
       hasMoreFoods = false;
     }
   }
-
-  // Fetch profiles in batches
-  let profileOffset = 0;
-  const profileBatchSize = 1000;
-  let hasMoreProfiles = true;
-
-  while (hasMoreProfiles) {
-    const { data: profiles, error } = await supabase
-      .from('profiles')
-      .select('id, username, created_at')
-      .not('username', 'is', null)
-      .range(profileOffset, profileOffset + profileBatchSize - 1);
-
-    if (error) {
-      console.error('Error fetching profiles:', error);
-      hasMoreProfiles = false;
-      continue;
-    }
-
-    if (profiles && profiles.length > 0) {
-      profiles.forEach((profile: any) => {
-        const slug = profile.username
-          .toString()
-          .toLowerCase()
-          .trim()
-          .replace(/\s+/g, '-')
-          .replace(/[^\w\-]+/g, '')
-          .replace(/\-\-+/g, '-')
-          .replace(/^-+/, '')
-          .replace(/-+$/, '');
-        urls.push({
-          loc: `/profile/${profile.id}-${slug}`,
-          lastmod: profile.created_at,
-          changefreq: 'weekly',
-          priority: 0.5,
-        });
-      });
-      profileOffset += profileBatchSize;
-      hasMoreProfiles = profiles.length === profileBatchSize;
-    } else {
-      hasMoreProfiles = false;
-    }
-  }
-
   return urls;
 });

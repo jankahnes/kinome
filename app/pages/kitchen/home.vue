@@ -10,13 +10,11 @@
           <h2 class="text-2xl font-bold tracking-tight mx-2">
             Today's Nutrition
           </h2>
-          <div
-            class="action-card p-6 flex flex-col justify-between gap-6 flex-1"
-          >
+          <div class="main-card p-4 md:p-6 flex flex-col justify-between gap-6 flex-1">
             <div class="flex gap-4">
               <div class="flex flex-col items-center gap-1">
                 <Ring
-                  class="w-26 h-26"
+                  class="w-22 h-22 md:w-26 md:h-26"
                   :segments="[{ value: 0.6, color: 'stroke-primary' }]"
                   :strokeWidth="10"
                 >
@@ -29,7 +27,7 @@
               </div>
               <div class="flex flex-col items-center gap-1">
                 <Ring
-                  class="w-26 h-26"
+                  class="w-22 h-22 md:w-26 md:h-26"
                   :segments="[{ value: 0.4, color: 'stroke-primary' }]"
                   :strokeWidth="10"
                 >
@@ -42,7 +40,7 @@
               </div>
               <div class="flex flex-col items-center gap-1">
                 <Ring
-                  class="w-26 h-26"
+                  class="w-22 h-22 md:w-26 md:h-26"
                   :segments="[{ value: 0.7, color: 'stroke-primary' }]"
                   :strokeWidth="10"
                 >
@@ -72,9 +70,7 @@
         <!-- Shopping List -->
         <div class="shrink-0 flex flex-col gap-6">
           <h2 class="text-2xl font-bold tracking-tight mx-2">Shopping List</h2>
-          <div
-            class="action-card p-6 flex flex-col justify-between gap-6 flex-1"
-          >
+          <div class="main-card p-6 flex flex-col justify-between gap-6 flex-1">
             <div class="flex flex-col gap-4">
               <div class="flex items-center gap-3">
                 <input type="checkbox" class="w-5 h-5" />
@@ -149,7 +145,7 @@
     </div>
     <div v-else-if="auth.profileFetched && !auth.isUser()">
       <HerocardsHome />
-      <div class="pt-20">
+      <div class="pt-10">
         <h2 class="text-2xl font-bold tracking-tight mx-2">For You</h2>
         <p
           class="text-sm text-gray-500 leading-none mx-2"

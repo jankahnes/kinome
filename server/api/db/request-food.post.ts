@@ -155,7 +155,7 @@ export default defineEventHandler(async (event) => {
     for (const searchTerm of searchResults.search_terms) {
       const similarFoods = (await client.rpc('search_foods_deduplicated', {
         query: searchTerm,
-        max: 3,
+        max: 4,
       })) as {
         data: {
           name: string;

@@ -64,9 +64,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-  submit: (file: File) => void;
-}>();
+const submitFromPicture = inject<(file: File) => void>('submitFromPicture')!;
 
 const cameraInput = ref<HTMLInputElement>();
 const fileInput = ref<HTMLInputElement>();
@@ -93,7 +91,7 @@ const processImage = async () => {
 
   processing.value = true;
   try {
-    props.submit(selectedFile.value);
+    submitFromPicture(selectedFile.value);
   } finally {
     processing.value = false;
   }

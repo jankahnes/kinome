@@ -62,11 +62,16 @@
     <p>Food searching and judging uses <strong>default</strong> model.</p>
     <p>Food creation uses <strong>accurate</strong> model.</p>
     <p>Vision uses <strong>vision</strong> model.</p>
-    <p>Description and instructions creation uses <strong>default</strong> model.</p>
-    <p>Formalizing ingredient string + splitting names uses <strong>default</strong> model.</p>
     <p>
-      For full nutri processing, uses <strong>accurate</strong> model for processing info,
-      <strong>default</strong> model for everything else.
+      Description and instructions creation uses <strong>default</strong> model.
+    </p>
+    <p>
+      Formalizing ingredient string + splitting names uses
+      <strong>default</strong> model.
+    </p>
+    <p>
+      For full nutri processing, uses <strong>accurate</strong> model for
+      processing info, <strong>default</strong> model for everything else.
     </p>
   </div>
 </template>
@@ -115,7 +120,7 @@ const updateReasoning = async (type: string, reasoning: string) => {
     try {
       await setModelConfig(type, config.model, reasoning);
       // Update local state
-      config.reasoning = reasoning as ReasoningEffort | "minimal";
+      config.reasoning = reasoning as ReasoningEffort | 'minimal';
     } catch (error) {
       console.error('Failed to update reasoning:', error);
     }
@@ -144,7 +149,7 @@ const setModelConfig = async (
   model: string,
   reasoning: string
 ) => {
-  if(!auth.isAdmin()) {
+  if (!auth.isAdmin()) {
     return;
   }
   await $fetch(`/api/gpt/set-model-config`, {
@@ -152,6 +157,15 @@ const setModelConfig = async (
     body: { type: type, model: model, reasoning: reasoning },
   });
 };
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>
 
 <style scoped></style>

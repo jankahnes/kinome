@@ -17,6 +17,7 @@ type NutritionEngineArgs = {
 
 type Response = {
   recipeRow: InsertableRecipe | null;
+  foodLike?: any | null;
   recipeFoodRows: Omit<InsertableRecipeFood, 'recipe_id'>[] | null;
   recipeTagRows: Omit<InsertableRecipeTag, 'recipe_id'>[] | null;
 };
@@ -37,6 +38,7 @@ export default defineEventHandler(async (event): Promise<Response> => {
   if (nutritionEngineArgs.nutritionLabelOnly) {
     return {
       recipeRow: nutritionEngine.getRecipeRow(),
+      foodLike: nutritionEngine.getFoodLike(),
       recipeFoodRows: null,
       recipeTagRows: null,
     };

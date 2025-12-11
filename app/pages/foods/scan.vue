@@ -18,4 +18,13 @@ function handleClose() {
   // Navigate back if user closes without scanning
   navigateTo('/');
 }
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>

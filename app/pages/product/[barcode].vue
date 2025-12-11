@@ -25,14 +25,15 @@
           </p>
         </div>
         <div class="flex justify-center gap-y-10 flex-col md:flex-row">
-          <NutritionLabel
+          <!--
+          <NutritionFacts
             :nutritionData="
               product && product?.kcal != null
                 ? product
                 : product?.food_name?.food ?? product
             "
             class="flex-1"
-          />
+          />-->
           <div
             class="flex flex-col gap-4 p2 md:p-6"
             v-if="!hasAllNutritionFields || !isMatchedToGenericFood"
@@ -121,12 +122,14 @@
               >
             </div>
           </div>
+          <!--
           <HealthFacts
             v-else-if="product?.food_name?.food"
             :recipe="product.food_name?.food"
             isFood
             class="flex-1"
           />
+          -->
         </div>
         <p class="text-sm text-gray-500 mx-2 md:ml-8">
           Nutri Score: {{ product?.nutri_score?.toUpperCase() ?? 'N/A' }}
@@ -250,5 +253,14 @@ watchEffect(() => {
       },
     ],
   });
+});
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
 });
 </script>

@@ -32,7 +32,7 @@
           starWidth / 24
         }, ${starHeight / 24})`"
       >
-        <path :d="starPath" fill="none" stroke="currentColor" />
+        <path :d="starPath" class="fill-slate-200" />
       </g>
     </g>
 

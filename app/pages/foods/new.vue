@@ -13,7 +13,9 @@
       <div class="flex gap-4 items-center justify-center flex-col md:flex-row">
         <div class="flex-1">
           <div class="relative">
-            <IconApple class="w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <IconApple
+              class="w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            />
             <input
               v-model="foodName"
               type="text"
@@ -60,11 +62,7 @@
         </div>
         <div class="flex items-center gap-2">
           <ClientOnly v-if="request.status === 'PROCESSING'">
-            <img
-              src="/loading.png"
-              class="h-6 w-6"
-              alt="Loading icon"
-            />
+            <img src="/loading.png" class="h-6 w-6" alt="Loading icon" />
           </ClientOnly>
           <NuxtLink
             v-else-if="request.status === 'CLOSED_INSERTED'"
@@ -179,6 +177,15 @@ const seeActiveRequests = async () => {
     requestsStore.requestsLoading = false;
   }
 };
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>
 
 <style scoped></style>

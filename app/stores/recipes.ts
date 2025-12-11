@@ -18,6 +18,7 @@ export const useRecipeStore = defineStore('recipe', () => {
     source: string,
     noFetch: boolean = false
   ): Promise<string | null> {
+    console.log('getSocialPicture', source, noFetch);
     if (!source || source === '') return null;
     if (cachedSocialPictures.value[source]) {
       return cachedSocialPictures.value[source];
@@ -165,6 +166,11 @@ export const useRecipeStore = defineStore('recipe', () => {
       for (const comment of recipe.value?.comments || []) {
         if (comment.user.id === userId) {
           comment.rating = rating;
+        }
+        for (const reply of comment.replies || []) {
+          if (reply.user.id === userId) {
+            reply.rating = rating;
+          }
         }
       }
     } catch (e) {

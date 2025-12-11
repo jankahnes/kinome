@@ -26,6 +26,15 @@ watchEffect(() => {
     error.value = null;
   }
 });
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>
 
 <style scoped></style>

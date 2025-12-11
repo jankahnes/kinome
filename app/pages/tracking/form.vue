@@ -161,7 +161,7 @@
             <h3 class="text-2xl font-bold">How active are you?</h3>
             <div class="flex gap-4 mt-4 flex-wrap">
               <div
-                class="p-4 bg-primary-10 rounded-4xl! border-2 border-gray-200 flex flex-col gap-2 items-center text-nowrap basis-50 shrink-0 flex-1 max-w-60 animated-button"
+                class="p-4 bg-primary-10 rounded-4xl! border-2 border-gray-200 flex flex-col gap-2 items-center text-nowrap basis-auto shrink-0 flex-1 animated-button"
                 v-for="(activity, index) in activityCards"
                 :key="activity.title"
                 :class="{

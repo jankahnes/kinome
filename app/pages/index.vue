@@ -1,6 +1,17 @@
 <template>
-  <div class="md:mx-20 space-y-4 sm:space-y-10 m-4 sm:m-10">
-    <div class="flex justify-between items-center gap-6">
+  <div class="mb-20 md:mx-20 space-y-4 sm:space-y-10 m-4 sm:m-10">
+    <div class="md:hidden flex justify-between items-center">
+      <Logo class="" />
+      <Avatar
+        :user="auth.user"
+        class="rounded-full w-10 h-10"
+        v-if="auth.isUser()"
+      />
+      <NuxtLink to="/login" class="animated-button mt-1" v-else>
+        <IconLogIn :size="26" />
+      </NuxtLink>
+    </div>
+    <div class="justify-between items-center gap-6 hidden md:flex">
       <div class="flex gap-4 flex-1">
         <div
           class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-2xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 flex-1 min-w-0! max-w-80"
@@ -32,13 +43,16 @@
         </NuxtLink>
       </div>
     </div>
-    <div class="flex items-center gap-2 justify-between">
+    <div class="items-center gap-2 justify-between hidden md:flex">
       <h1 class="text-5xl font-bold pt-4">
         🌟<span class="ml-0.5">Discover</span>
       </h1>
       <div class="items-center gap-4 hidden sm:flex">
         <div class="flex flex-col items-center">
-          <p class="text-3xl font-bold text-primary leading-none">1194</p>
+          <RollingNumber
+            :number="recipeCount"
+            class="text-3xl font-bold text-primary leading-none"
+          />
           <p class="text-xs text-gray-600 leading-none">Recipes</p>
         </div>
         <div class="flex flex-col items-center">
@@ -51,7 +65,7 @@
     <!-- Categories -->
     <BlocksCarousel>
       <div
-        class="flex items-center gap-x-1 px-3 py-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
+        class="flex items-center gap-x-1 pl-1 md:px-3 p-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
         @click="navigateTo('/kitchen/social')"
       >
         <span class="text-2xl">🔥</span>
@@ -62,7 +76,7 @@
       <div
         v-for="category in categories"
         :key="category.tag"
-        class="flex items-center gap-x-1 px-3 py-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
+        class="flex items-center gap-x-1 pl-1 md:px-3 p-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
         @click="onClickCategory(category.tag)"
       >
         <span class="text-2xl">{{ category.icon }}</span>
@@ -75,7 +89,7 @@
     <!-- Recommendations: Mobile -->
     <div
       class="2lg:hidden space-y-2"
-      v-if="recipeStore.indexRecipes.length > 0"
+      v-if="recipeStore.indexRecipes.length > 0 && false"
     >
       <BlocksCarousel class="" :flexClass="'!items-stretch'">
         <RecipeCard
@@ -94,6 +108,32 @@
       />
       <RecipeCardHorizontal
         v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
+        :key="recipe.id + 'mobile'"
+        :recipe="recipe"
+        :id="'mobile-' + index + '-' + recipe.id"
+        :uniqueId="'mobile-' + index + '-' + recipe.id"
+        class="text-[20px] basis-95 flex-1"
+      />
+    </div>
+
+    <div class="flex flex-wrap gap-x-2 gap-y-4 2lg:hidden justify-center">
+      <RecipeCard
+        v-for="(recipe, index) in recipeStore.indexRecipes.slice(1, 3)"
+        :key="recipe.id + 'mobile'"
+        :recipe="recipe"
+        :id="'mobile-' + index + '-' + recipe.id"
+        :uniqueId="'mobile-' + index + '-' + recipe.id"
+        class="text-[20px] basis-40 flex-1"
+      />
+      <RecipeCardHighlightMobile
+        :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
+        :recipe="recipeStore.indexRecipes[0]!"
+        :id="'mobile-0-0'"
+        :uniqueId="'mobile-0-0'"
+        class="text-[20px] basis-full"
+      />
+      <RecipeCardHorizontal
+        v-for="(recipe, index) in recipeStore.indexRecipes.slice(5, 7)"
         :key="recipe.id + 'mobile'"
         :recipe="recipe"
         :id="'mobile-' + index + '-' + recipe.id"
@@ -165,10 +205,11 @@
     <!-- Social Media Cards -->
     <Transition name="loaded-content">
       <div class="flex flex-wrap pt-4">
-        <div class="flex flex-col gap-4 items-start">
-          <h2 class="text-xl font-bold">
+        <div class="flex flex-col gap-6 items-start">
+          <h2 class="text-2xl font-bold">
             <NuxtLink to="/kitchen/social" class="inline-block">
-              Trending on Social Media
+              <span class="text-3xl">✨</span>
+              New on Social Media
             </NuxtLink>
           </h2>
           <div class="flex flex-wrap gap-4">
@@ -191,6 +232,9 @@ const supabase = useSupabaseClient<Database>();
 const recipeStore = useRecipeStore();
 const loadingStore = useLoadingStore();
 const searchQuery = ref('');
+const auth = useAuthStore();
+
+const recipeCount = ref(1226);
 
 useHead({
   title: 'Kinome - Smart Recipe Platform with Nutrition Analysis',
@@ -325,6 +369,10 @@ const handleSearch = () => {
   }
   navigateTo(`/kitchen/recipes?q=${searchQuery.value}&sort=Relevancy`);
 };
+
+onMounted(async () => {
+  recipeCount.value = await getCount(supabase);
+});
 
 const handleQuickImport = async () => {
   try {

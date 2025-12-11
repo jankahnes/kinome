@@ -10,8 +10,17 @@ const rawUrl = Array.isArray(route.params.url)
 
 try {
   new URL(rawUrl);
-  navigateTo(`/recipe/new?link=${encodeURIComponent(rawUrl)}&view=loading`);
+  navigateTo(`/recipe/new?link=${encodeURIComponent(rawUrl)}`);
 } catch {
   navigateTo('/');
 }
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>

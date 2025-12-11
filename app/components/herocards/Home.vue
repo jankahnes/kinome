@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex action-card py-10 shadow-lg mt-8 md:mt-12 justify-between items-center relative overflow-hidden"
+    class="flex main-card py-10 shadow-lg mt-8 md:mt-12 justify-between items-center relative overflow-hidden"
   >
     <div
       class="flex flex-col gap-2 flex-1 2xl:mr-84 min-w-0 mx-4 sm:mx-10 text-center sm:text-left"
@@ -17,7 +17,7 @@
         class="flex gap-4 mt-2 py-2 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide md:overflow-visible md:pr-10"
       >
         <div
-          class="flex flex-col items-center gap-2 p-6 action-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
+          class="flex flex-col items-center gap-2 p-6 main-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card1"
           @click="scrollTo(card1)"
         >
@@ -39,7 +39,7 @@
           </p>
         </div>
         <div
-          class="flex flex-col items-center gap-2 p-6 action-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
+          class="flex flex-col items-center gap-2 p-6 main-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card2"
           @click="scrollTo(card2)"
         >
@@ -62,7 +62,7 @@
           </p>
         </div>
         <div
-          class="flex flex-col items-center gap-2 p-6 action-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
+          class="flex flex-col items-center gap-2 p-6 main-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card3"
           @click="scrollTo(card3)"
         >

@@ -40,61 +40,43 @@
         </div>
         <div />
       </div>
-      <div
-        class="absolute bottom-[6%] left-[72%] w-[2em] max-w-[25%] aspect-square rounded-xl z-20 flex items-center justify-center shrink-0 hover:scale-102 group-hover:scale-103 transition-transform will-change-transform duration-300"
-        v-if="recipe?.hidx && recipe?.hidx >= 55"
-        :class="gradeStickerColors[getGrade(recipe?.hidx, 'ovr')[0] as keyof typeof gradeStickerColors]"
-      >
-        <span class="font-bold leading-none">
-          {{ getGrade(recipe?.hidx, 'ovr') }}
-        </span>
-      </div>
     </div>
-    <div class="z-0 flex-1">
-      <div
-        class="bg-primary-10 px-6 py-2 rounded-4xl min-h-30 xs:min-h-34 flex flex-col gap-3 justify-center flex-1 will-change-transform transition-transform duration-300 group-hover:translate-x-[1px]"
-        :class="
-          recipe?.picture || recipe?.social_picture ? '-ml-27 !pl-31' : ''
-        "
+    <div
+      class="z-0 flex-1 bg-primary-10 px-4 py-3 rounded-4xl flex flex-col gap-2 justify-center h-29 xs:h-35"
+      :class="
+        recipe?.picture || recipe?.social_picture
+          ? '-ml-22 !pl-25 xs:-ml-28 xs:!pl-31'
+          : ''
+      "
+    >
+      <h2
+        class="font-bold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-balance"
       >
-        <div class="w-full flex gap-6 justify-between items-start">
-          <h2
-            class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2"
-          >
-            {{ recipe?.title }}
-          </h2>
-        </div>
+        {{ recipe?.title }}
+      </h2>
+      <div
+        class="flex gap-1.5 flex-wrap text-xs max-h-[1.7rem] xs:max-h-[3.4rem] overflow-hidden items-start py-0.5"
+      >
         <div
-          class="flex gap-1.5 flex-wrap text-xs lg:text-sm max-h-[3.4rem] overflow-hidden items-start py-0.5"
+          v-if="recipe?.rating && recipe?.rating >= 4"
+          class="tag flex items-center gap-1 bg-slate-50"
         >
-          <div
-            v-if="recipe?.hidx && recipe?.hidx >= 55 && !recipe?.picture && !recipe?.social_picture"
-            class="flex tag items-center justify-center !text-black text-center min-w-[2em] subpixel-antialiased tabular-nums"
-            :class="gradeColors[getGrade(recipe?.hidx, 'ovr')]"
-          >
-            {{ getGrade(recipe?.hidx, 'ovr') }}
-          </div>
-          <div
-            v-if="recipe?.rating && recipe?.rating >= 4"
-            class="tag flex items-center gap-1 bg-slate-50"
-          >
-            <FormsRatingField
-              :model-value="recipe?.rating"
-              :star-width="13"
-              :star-height="13"
-              :select="false"
-              :uniqueId="`card-new-horizontal-${recipe?.id}-${uniqueId}`"
-            />
-            <span>{{ recipe?.rating.toFixed(1) }}</span>
-          </div>
+          <FormsRatingField
+            :model-value="recipe?.rating"
+            :star-width="13"
+            :star-height="13"
+            :select="false"
+            :uniqueId="`card-new-horizontal-${recipe?.id}-${uniqueId}`"
+          />
+          <span>{{ recipe?.rating.toFixed(1) }}</span>
+        </div>
 
-          <div
-            class="tag flex items-center justify-center text-nowrap bg-slate-50"
-            v-for="(tag, index) in top3Tags"
-            :key="index"
-          >
-            {{ tag?.name }}
-          </div>
+        <div
+          class="tag flex items-center justify-center text-nowrap bg-slate-50"
+          v-for="(tag, index) in top3Tags"
+          :key="index"
+        >
+          {{ tag?.name }}
         </div>
       </div>
     </div>

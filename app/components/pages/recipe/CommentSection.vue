@@ -1,71 +1,57 @@
 <template>
-  <div
-    class="action-card action-card-padding flex flex-col gap-6 items-start"
-    ref="root"
-  >
-    <div class="flex flex-col items-start">
-      <div class="!pb-3">
-        <ComponentHeader title="WHAT OTHERS SAY" />
+  <div class="main-card main-card-padding flex flex-col gap-8">
+    <div class="flex flex-col gap-2">
+      <div class="flex gap-4 justify-between">
+        <h3 class="text-2xl font-bold">Leave a comment</h3>
       </div>
-      <p class="text-gray-600 ml-1 text-sm font-light">
-        {{ recipe.recipe?.comments?.length }}
-        {{ recipe.recipe?.comments?.length === 1 ? 'comment' : 'comments' }}
-      </p>
-    </div>
-    <div class="relative flex flex-col gap-1 my-4">
-      <span class="text-bold text-xl">Your Rating:</span
-      ><FormsRatingField
-        class="text-primary"
-        v-model="userRating"
-        @update:model-value="updateRating"
-        :select="true"
-        :star-width="26"
-        :star-height="26"
-        :spacing="-2"
-        :uniqueId="'950' + id"
-      ></FormsRatingField>
-    </div>
-    <div class="flex flex-wrap gap-4 w-full gap-y-8">
-      <div
-        v-if="!hasComment && auth.user"
-        class="p-2 max-w-90 w-full relative flex items-center h-max"
-      >
-        <IconPlus
-          v-if="!editingComment"
-          class="w-8 h-8 cursor-pointer"
-          @click="onClickNewComment"
-        />
-        <div class="w-full" v-else>
-          <textarea
-            v-model="newComment"
-            v-auto-resize
-            class="w-full p-2 rounded-md border-2 border-gray-300 border-dashed resize-none scrollbar-hide bg-white overflow-hidden h-auto"
-            rows="1"
-          ></textarea>
-          <div class="flex justify-between mt-1">
-            <button
-              class="py-1 px-2 bg-white text-[#FF6900] border-2 border-[#FF6900] rounded-md hover:bg-[#faf4f0] transform transition-all duration-100 focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 shadow-lg shadow-orange-200/30"
-              @click="editingComment = false"
-            >
-              Cancel
-            </button>
-            <button
-              class="py-1 px-2 bg-white text-[#FF6900] border-2 border-[#FF6900] rounded-md hover:bg-[#faf4f0] transform transition-all duration-100 focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 shadow-lg shadow-orange-200/30 disabled:opacity-50 disabled:cursor-not-allowed"
-              @click="submitComment"
-              :disabled="!newComment"
-            >
-              Submit
-            </button>
+      <div class="flex gap-2 w-full">
+        <Avatar :user="auth.user" class="w-12 h-12" />
+        <div class="flex-1 flex flex-col gap-2 items-end">
+          <div class="flex gap-4 p-2 rounded-xl border border-slate-200 w-full flex-wrap">
+            <textarea
+              v-model="newComment"
+              v-auto-resize
+              placeholder="Add a comment"
+              class="flex-1 focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-28 shrink-0 min-w-40"
+              rows="5"
+            ></textarea>
+            <div class="flex flex-col-reverse new-comment-wrap:flex-col items-start new-comment-wrap:items-end">
+              <FormsRatingField
+                class="text-primary"
+                v-model="userRating"
+                @update:model-value="updateRating"
+                :select="true"
+                :star-width="28"
+                :star-height="28"
+                :spacing="-2"
+                :uniqueId="'950' + id"
+              ></FormsRatingField>
+              <span class="text-xs text-gray-500 mr-1">Click to rate</span>
+            </div>
           </div>
+          <button
+            class="animated-button bg-[#DCCAB2] px-4 py-0.5 text-lg"
+            @click="submitComment"
+          >
+            Post Comment
+          </button>
         </div>
       </div>
-      <PagesRecipeComment
-        v-for="(comment, index) in recipe.recipe?.comments"
-        :comment="comment"
-        :id="id"
-        :key="index + id"
-        :isReply="false"
-      ></PagesRecipeComment>
+    </div>
+    <div class="flex flex-col" v-if="recipeStore.recipe?.comments?.length">
+      <h3 class="text-2xl font-bold mb-4">Comments</h3>
+      <div v-for="(comment, index) in recipeStore.recipe.comments">
+        <PagesRecipeComment
+          :comment="comment"
+          :id="index + id"
+          :key="index + id"
+          :isReply="false"
+        ></PagesRecipeComment>
+        <div
+          class="h-px bg-slate-200 my-4"
+          v-if="index !== recipeStore.recipe.comments.length - 1"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
@@ -75,51 +61,22 @@ const props = defineProps<{
   id: number;
 }>();
 
-const root = ref<HTMLElement | null>(null);
-
 const auth = useAuthStore();
-const editingComment = ref(false);
 const newComment = ref('');
 const supabase = useSupabaseClient();
 
-const recipe = useRecipeStore();
+const recipeStore = useRecipeStore();
 
 const userRating = ref(0);
 
-const unsubscribeAuth = ref<(() => void) | null>(null);
-
-onMounted(() => {
-  if (!unsubscribeAuth.value) {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user?.id && recipe.recipe?.id) {
-        fetchRating();
-      }
-      if (event === 'SIGNED_OUT') {
-        userRating.value = 0;
-      }
-    });
-
-    unsubscribeAuth.value = () => subscription.unsubscribe();
-  }
-});
-
-onUnmounted(() => {
-  if (unsubscribeAuth.value) {
-    unsubscribeAuth.value();
-    unsubscribeAuth.value = null;
-  }
-});
-
 async function fetchRating() {
   const user = auth.user as any;
-  if (user?.id && recipe.recipe?.id) {
+  if (user?.id && recipeStore.recipe?.id) {
     const rating = expectSingleOrNull(
       await getRatings(supabase, {
         eq: {
           user_id: user.id,
-          recipe_id: recipe.recipe.id,
+          recipe_id: recipeStore.recipe.id,
         },
       })
     );
@@ -127,50 +84,38 @@ async function fetchRating() {
   }
 }
 
-fetchRating();
-
-const hasComment = computed(() => {
-  return recipe.recipe?.comments?.some(
-    (comment) => !comment.replying_to && comment.user.id === auth.user?.id
-  );
+watchEffect(() => {
+  void fetchRating();
 });
 
 function updateRating(rating: number) {
   if (!auth.user) {
     navigateTo('/login');
-  } else if (recipe.recipe?.id) {
-    upsertRating(supabase, rating, auth.user.id, recipe.recipe.id);
-    recipe.updateRating(rating, auth.user.id);
-  }
-}
-
-function onClickNewComment() {
-  if (auth.user) {
-    editingComment.value = true;
-  } else {
-    navigateTo('/login');
+  } else if (recipeStore.recipe?.id) {
+    upsertRating(supabase, rating, auth.user.id, recipeStore.recipe.id);
+    recipeStore.updateRating(rating, auth.user.id);
   }
 }
 
 function submitComment() {
   const user = auth.user as any;
-  if (user && recipe.recipe?.id) {
-    recipe.addNewComment({
-      user: user,
-      content: newComment.value,
-      recipe_id: recipe.recipe.id,
-      replying_to: null,
-    });
-    newComment.value = '';
-    editingComment.value = false;
+  if (!user) {
+    navigateTo('/login');
+    return;
   }
-}
+  if (!recipeStore.recipe?.id) return;
+  if (!newComment.value.trim()) return;
 
-function scrollIntoView() {
-  root.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  recipeStore.addNewComment({
+    user: user,
+    user_id: user.id,
+    content: newComment.value.trim(),
+    recipe_id: recipeStore.recipe.id,
+    replying_to: null,
+    rating: userRating.value,
+  });
+  newComment.value = '';
 }
-
-defineExpose({ scrollIntoView });
 </script>
 
 <style scoped></style>

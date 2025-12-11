@@ -28,9 +28,6 @@ export default defineEventHandler(async (event) => {
     false
   );
   const scores = await nutritionEngine.computeFood(nutritionEngineArgs.food);
-  if (nutritionEngineArgs.logToReport) {
-    nutritionEngine.generateReport();
-  }
   const response: Response = {
     nutritionComputed: nutritionEngine.getRecipeRow(),
     nutrition: scores,

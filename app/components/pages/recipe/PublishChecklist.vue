@@ -1,8 +1,7 @@
 <template>
   <div
-    class="action-card action-card-padding flex flex-col gap-4 !pb-3 items-start disabled:opacity-20 disabled:cursor-not-allowed"
+    class="main-card main-card-padding flex flex-col gap-4 !pb-3 items-start disabled:opacity-20 disabled:cursor-not-allowed"
   >
-    <ComponentHeader title="PUBLISH" />
     <div v-if="recipe.visibility === 'PUBLIC'" class="space-y-2 opacity-60">
       <div class="flex gap-2 items-center">
         <IconCheck class="w-6" />
@@ -47,7 +46,10 @@
             @click="generateInstructions"
             :disabled="generateInstructionsLoading || generatePictureLoading"
           >
-            <IconLoader class="w-4 animate-spin" v-if="generateInstructionsLoading" />
+            <IconLoader
+              class="w-4 animate-spin"
+              v-if="generateInstructionsLoading"
+            />
             <IconSparkles class="w-4" v-else />
             <span>{{
               generateInstructionsLoading ? 'Generating...' : 'Generate'

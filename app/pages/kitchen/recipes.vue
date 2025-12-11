@@ -3,7 +3,7 @@
     <div class="py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl">
       <div class="flex justify-between items-end gap-6">
         <div
-          class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 min-w-0!"
+          class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10/70 shrink-1 min-w-0!"
         >
           <input
             type="text"
@@ -65,10 +65,7 @@
         </div>
         <div class="flex items-center gap-4 z-100">
           <div class="relative inline-block min-w-45 z-20">
-            <FormsDropdown
-              v-model="selectedSorting"
-              :choices="sorts.map((sort) => sort.displayName)"
-            />
+            <FormsDropdown v-model="selectedSorting" :choices="sorts" :style="'bg-primary-10'" />
           </div>
         </div>
       </div>
@@ -111,7 +108,15 @@
                 }"
                 class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 button m-1"
               >
-                <span class="text-xl">{{ cuisine.icon }}</span>
+                <span class="flex gap-0.5 rounded-4xl overflow-hidden">
+                  <img
+                    v-for="flag in cuisine.flags"
+                    :key="flag"
+                    :src="`/flags/${flag}.svg`"
+                    :alt="flag"
+                    class="h-5 w-auto"
+                  />
+                </span>
                 <span
                   class="text-sm sm:text-base sm:tracking-wider text-nowrap"
                   >{{ cuisine.name }}</span
@@ -261,26 +266,29 @@ const categories = ref([
 ]);
 
 const cuisines = ref([
-  { name: 'Italian', icon: '🇮🇹', tag: 302 },
-  { name: 'German', icon: '🇩🇪', tag: 303 },
-  { name: 'American', icon: '🇺🇸', tag: 304 },
-  { name: 'Vietnamese', icon: '🇻🇳', tag: 305 },
-  { name: 'Chinese', icon: '🇨🇳', tag: 306 },
-  { name: 'Japanese', icon: '🇯🇵', tag: 307 },
-  { name: 'French', icon: '🇫🇷', tag: 308 },
-  { name: 'British', icon: '🇬🇧', tag: 309 },
-  { name: 'Indian', icon: '🇮🇳', tag: 310 },
-  { name: 'Spanish', icon: '🇪🇸', tag: 311 },
-  { name: 'Middle Eastern', icon: '🌍', tag: 312 },
-  { name: 'Thai', icon: '🇹🇭', tag: 313 },
-  { name: 'Mediterranean', icon: '🌊', tag: 314 },
-  { name: 'Greek', icon: '🇬🇷', tag: 315 },
-  { name: 'Turkish', icon: '🇹🇷', tag: 316 },
-  { name: 'Korean', icon: '🇰🇷', tag: 321 },
-  { name: 'Mexican', icon: '🇲🇽', tag: 326 },
+  { name: 'Italian', flags: ['it'], tag: 302 },
+  { name: 'German', flags: ['de'], tag: 303 },
+  { name: 'American', flags: ['us'], tag: 304 },
+  { name: 'Vietnamese', flags: ['vn'], tag: 305 },
+  { name: 'Chinese', flags: ['cn'], tag: 306 },
+  { name: 'Japanese', flags: ['jp'], tag: 307 },
+  { name: 'French', flags: ['fr'], tag: 308 },
+  { name: 'British', flags: ['gb'], tag: 309 },
+  { name: 'Indian', flags: ['in'], tag: 310 },
+  { name: 'Spanish', flags: ['es'], tag: 311 },
+  { name: 'Middle Eastern', flags: ['lb', 'tr', 'jo'], tag: 312 },
+  { name: 'Thai', flags: ['th'], tag: 313 },
+  { name: 'Mediterranean', flags: ['gr', 'it', 'es'], tag: 314 },
+  { name: 'Greek', flags: ['gr'], tag: 315 },
+  { name: 'Turkish', flags: ['tr'], tag: 316 },
+  { name: 'Korean', flags: ['kr'], tag: 321 },
+  { name: 'Mexican', flags: ['mx'], tag: 326 },
 ]);
 
-const selectedSorting = ref('Relevancy');
+const selectedSorting = ref({
+  value: { column: 'relevancy', ascending: false },
+  displayName: 'Relevancy',
+});
 const sorts = ref([
   {
     displayName: 'Relevancy',
@@ -317,13 +325,7 @@ async function loadMoreRecipes() {
   isLoading.value = true;
   try {
     const newRecipes = await getRecipeOverviews(supabase, {
-      orderBy:
-        sorts.value.find((sort) => sort.displayName === selectedSorting.value)
-          ?.value ??
-        ({ column: selectedSorting.value, ascending: false } as {
-          column: string;
-          ascending: boolean;
-        }),
+      orderBy: selectedSorting.value.value,
       or: 'picture.not.eq.null,source_type.eq.MEDIA',
       filtering: filtering.value,
       trigram_search: { column: 'title', query: searchQuery.value },
@@ -397,10 +399,6 @@ function updateUrlParams() {
     query.cost = `${costRange.value[0]}-${costRange.value[1]}`;
   }
 
-  if (selectedSorting.value !== 'Popularity') {
-    query.sort = selectedSorting.value;
-  }
-
   router.replace({ query });
 }
 
@@ -449,15 +447,6 @@ function loadFromUrlParams() {
     if (!isNaN(min) && !isNaN(max)) {
       costRange.value = [min, max];
       updateCostTag(min, max);
-    }
-  }
-
-  if (query.sort && typeof query.sort === 'string') {
-    const sortOption = sorts.value.find((s) => s.displayName === query.sort);
-    if (sortOption) {
-      selectedSorting.value = query.sort;
-    } else {
-      selectedSorting.value = query.sort;
     }
   }
 }
@@ -604,7 +593,12 @@ async function onSelect(button: string) {
   }
 }
 
-function toggleTag(item: { name: string; icon: string; tag: number }) {
+function toggleTag(item: {
+  name: string;
+  icon?: string;
+  flags?: string[];
+  tag: number;
+}) {
   const index = filteringTags.value.indexOf(item.tag);
   if (index > -1) {
     // Remove tag

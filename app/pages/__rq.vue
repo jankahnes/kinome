@@ -32,6 +32,15 @@ const { data: requests, error } = await supabase
   .not('user_agent', 'ilike', '%bot%')
   .order('ts', { ascending: false })
   .limit(100);
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>
 
 <style scoped></style>

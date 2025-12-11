@@ -10,7 +10,7 @@
     >
       <NuxtImg
         v-if="recipe.social_picture"
-        class="w-full xs:w-auto aspect-9/16 xs:h-full object-cover"
+        class="w-full xs:w-auto aspect-9/16 xs:h-full object-cover rounded-4xl"
         :src="recipe.social_picture"
         :alt="recipe?.title"
       />
@@ -21,7 +21,7 @@
     </a>
     <NuxtLink
       :to="getRecipeUrl(recipe.id, recipe.title)"
-      class="z-0 flex-1 h-full flex flex-col px-6 py-2"
+      class="z-0 flex-1 h-full flex flex-col px-6 py-3"
     >
       <div class="flex flex-col gap-3 justify-center flex-1">
         <h2
@@ -39,13 +39,6 @@
         <div
           class="gap-1.5 flex-wrap text-xs sm:text-[14px] items-start py-0.5 flex [&>*:nth-child(n+3)]:hidden"
         >
-          <div
-            v-if="recipe.hidx && recipe.hidx >= 55"
-            class="flex tag items-center !text-black text-center subpixel-antialiased tabular-nums justify-center"
-            :class="gradeColors[getGrade(recipe.hidx, 'ovr')]"
-          >
-            {{ getGrade(recipe.hidx, 'ovr') }}
-          </div>
           <div
             v-if="recipe.rating && recipe.rating >= 4"
             class="tag flex items-center gap-1 bg-slate-50"
@@ -71,14 +64,14 @@
       </div>
       <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap my-2">
         <PagesRecipeSourceTypeTag
-          class="inline-flex !rounded-full text-xs flex-shrink-0"
+          class="!rounded-full text-xs flex-shrink-0 hidden xs:inline-flex"
           :sourceType="recipe.source_type"
           :collection="recipe.collection ?? ''"
           :source="recipe.source ?? ''"
           :small="true"
         />
         <div
-          class="flex items-center px-2 rounded-full text-xs font-medium bg-primary-20 gap-2 max-w-50 sm:max-w-70"
+          class="flex items-center px-2 rounded-full text-xs font-medium bg-slate-100 gap-2 max-w-50 sm:max-w-70"
           v-if="recipe.original_creator_channel_name"
         >
           <IconHeart class="w-3.5 flex-shrink-0" />

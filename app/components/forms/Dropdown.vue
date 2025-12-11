@@ -5,11 +5,11 @@
       @click.stop="toggle"
       :aria-expanded="isOpen"
       :class="style"
-      class="flex items-center justify-between z-10 relative w-full h-full gap-1 p-2 button"
+      class="animated-button flex items-center justify-between z-10 relative w-full h-full gap-1 p-2"
     >
-      <span>{{ modelValue }}</span>
+      <span class="font-bold">{{ modelValue.displayName }}</span>
       <IconChevronDown
-        class="transition-transform duration-300"
+        class="transition-transform duration-300 w-4"
         :class="{ 'rotate-180': isOpen }"
       />
     </button>
@@ -19,10 +19,10 @@
         v-if="isOpen"
         ref="panelRef"
         :class="style"
-        class="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 w-full border-t-0 z-99 overflow-hidden rounded-xl bg-primary-10 shadow-md"
+        class="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 w-full z-99 overflow-hidden animated-button shadow-md"
       >
         <ul class="">
-          <li v-for="choice in choices" class="rounded-xl cursor-pointer">
+          <li v-for="choice in choices" class="cursor-pointer">
             <button
               class="flex w-full h-full items-center justify-between p-2"
               @click="
@@ -30,8 +30,11 @@
                 isOpen = false;
               "
             >
-              <span class="font-bold">{{ choice }}</span>
-              <IconCheck class="w-4" v-if="modelValue === choice" />
+              <span class="">{{ choice.displayName }}</span>
+              <IconCheck
+                class="w-4"
+                v-if="modelValue.displayName == choice.displayName"
+              />
             </button>
           </li>
         </ul>
@@ -50,8 +53,11 @@ const toggle = () => {
 };
 
 const props = defineProps({
-  choices: Array<string>,
-  modelValue: String,
+  choices: { type: Array<{ value: any; displayName: string }> },
+  modelValue: {
+    type: Object as PropType<{ value: any; displayName: string }>,
+    required: true,
+  },
   style: String,
 });
 const emit = defineEmits(['update:modelValue']);

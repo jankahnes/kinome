@@ -36,43 +36,24 @@
         </div>
         <div />
       </div>
-      <div
-        class="absolute bottom-[6%] left-[72%] w-[2.1em] max-w-[22%] aspect-square rounded-xl z-20 flex items-center justify-center shrink-0 hover:scale-102 group-hover:scale-103 transition-transform will-change-transform duration-300"
-        v-if="recipe?.hidx && recipe?.hidx >= 55"
-        :class="gradeStickerColors[getGrade(recipe?.hidx, 'ovr')[0] as keyof typeof gradeStickerColors]"
-      >
-        <span class="font-bold leading-none">
-          {{ getGrade(recipe?.hidx, 'ovr') }}
-        </span>
-      </div>
     </div>
 
     <!-- was originally pt-[60%] -->
     <div
-      class="w-full relative pt-[60%] px-6 pb-[5%] z-0 will-change-transform transition-transform duration-300 group-hover:translate-y-[1px] bg-primary-10 rounded-4xl min-h-40 max-h-100"
+      class="w-full relative pt-[60%] px-2 sm:px-6 pb-[5%] z-0 will-change-transform transition-transform duration-300 group-hover:translate-y-[1px] bg-primary-10 rounded-4xl min-h-40 max-h-100"
       :class="{ '-mt-[60%] ': recipe.picture || recipe.source }"
     >
-      <div class="pt-4 flex flex-col gap-4 justify-between h-full items-center">
+      <div
+        class="pt-4 flex flex-col gap-2 sm:gap-4 justify-between h-full items-center"
+      >
         <h2
-          class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-center h-12 grid place-items-center"
+          class="font-bold leading-5 sm:leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-center text-balance h-10 sm:h-12 grid place-items-center"
         >
           {{ recipe?.title }}
         </h2>
         <div
-          class="flex gap-1.5 flex-wrap text-xs sm:text-[14px] h-14 overflow-y-hidden items-center justify-center py-0.5"
+          class="flex gap-1.5 flex-wrap text-xs sm:text-[14px] h-7 sm:h-14 overflow-y-hidden items-center justify-center py-0.5"
         >
-          <div
-            v-if="
-              recipe?.hidx &&
-              recipe?.hidx >= 55 &&
-              !recipe?.picture &&
-              !recipe?.social_picture
-            "
-            class="flex tag items-center justify-center !text-black text-center min-w-[2em] subpixel-antialiased tabular-nums"
-            :class="gradeColors[getGrade(recipe?.hidx, 'ovr')]"
-          >
-            {{ getGrade(recipe?.hidx, 'ovr') }}
-          </div>
           <div
             class="tag flex items-center gap-1 bg-slate-50"
             v-if="recipe?.rating && recipe?.rating >= 4"

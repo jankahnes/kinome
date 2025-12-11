@@ -31,3 +31,4 @@ notes.txt
 ignored/
 server/assets/
 server/utils/foods.csv
+scripts/syncPromptsToBucket.js

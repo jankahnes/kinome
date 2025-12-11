@@ -1,36 +1,28 @@
 <template>
-  <div
-    class="action-card action-card-padding flex flex-col items-start"
-  >
-    <div class="flex justify-between items-center w-full mb-2">
-      <ComponentHeader title="METHOD" />
-      <button
-        class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/70 text-xs will-change-transform"
-        @click="pasteInstructions"
-      >
-        <IconCopy class="w-4" />
-        <span>Paste</span>
-      </button>
-    </div>
-    <ol class="w-full">
+  <div class="main-card main-card-padding flex items-start">
+    <ol class="w-full flex-1 mt-2">
       <li v-for="i in modelValue.length + 1" :key="i">
-        <div class="flex gap-2 items-center w-full">
+        <div class="flex gap-2 w-full">
           <div class="flex-1 flex flex-col rounded-lg w-full">
             <div
               class="relative min-h-20 flex items-center justify-start w-full h-full"
             >
               <div
-                class="flex gap-4 rounded-lg p-3 w-full h-full justify-start"
+                class="flex gap-4 rounded-lg px-3 w-full h-full justify-start"
               >
-                <span v-if="i <= modelValue.length" class="text-xl font-bold"
-                  >{{ i }}.</span
+                <div
+                  v-if="i <= modelValue.length"
+                  class="min-w-9 h-9 p-1 rounded-xl flex items-center text-xl font-bold justify-center bg-primary-500 text-white flex-shrink-0 leading-none"
                 >
+                  {{ i }}
+                </div>
 
                 <div class="w-full h-full">
                   <textarea
                     v-if="i <= modelValue.length"
                     v-model="modelValue[i - 1]"
                     v-auto-resize
+                    :placeholder="`Step ${i}...`"
                     class="w-full h-full bg-transparent border-none outline-none resize-none overflow-hidden break-words scrollbar-hide flex-1 text-gray-800 leading-relaxed"
                   />
                   <button
@@ -47,6 +39,13 @@
         </div>
       </li>
     </ol>
+    <button
+      class="animated-button bg-slate-50 flex items-center gap-1 px-2 py-1 text-xs leading-none"
+      @click="pasteInstructions"
+    >
+      <IconCopy class="w-4" />
+      <span>Paste</span>
+    </button>
   </div>
 </template>
 

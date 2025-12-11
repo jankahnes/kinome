@@ -1,16 +1,5 @@
 <template>
   <div class="flex-1">
-    <div class="flex gap-4 justify-between items-center">
-      <div class="flex flex-col gap-1">
-        <h2 class="text-3xl font-bold leading-none">Nutrition Facts</h2>
-        <p class="text-sm text-gray-500 flex items-center gap-1 leading-none">
-          Per {{ (portionMultiplier * 100).toFixed(0) }}g /
-          {{ scaledFood.kcal.toFixed(0) }}kcal
-        </p>
-      </div>
-    </div>
-    <div class="w-full bg-gray-200 h-0.5 rounded-full my-4"></div>
-
     <!-- Nutrients with sub-nutrients (carbs+sugar, fat+saturated) -->
     <template
       v-for="(nutrient, index) in nutrientsWithSub"
@@ -128,22 +117,21 @@
 import type { FullFoodRow } from '~/types/types';
 
 const props = defineProps<{
-  food: FullFoodRow;
-  portionMultiplier: number;
-  foodName: string;
-  referencingName: string | null;
+  computable: Recipe | FullFoodRow;
+  portionMultiplier?: number;
+  referencingName?: string | null;
 }>();
 
 const scaledFood = computed(() => {
   return {
-    kcal: props.food.kcal * props.portionMultiplier,
-    carbohydrates: props.food.carbohydrates * props.portionMultiplier,
-    protein: props.food.protein * props.portionMultiplier,
-    fat: props.food.fat * props.portionMultiplier,
-    sugar: props.food.sugar * props.portionMultiplier,
-    saturated_fat: props.food.saturated_fat * props.portionMultiplier,
-    fiber: props.food.fiber * props.portionMultiplier,
-    salt: props.food.salt * props.portionMultiplier,
+    kcal: props.computable.kcal ?? 0 * (props.portionMultiplier ?? 1) ,
+    carbohydrates: props.computable.carbohydrates ?? 0 * (props.portionMultiplier ?? 1) ,
+    protein: props.computable.protein ?? 0 * (props.portionMultiplier ?? 1) ,
+    fat: props.computable.fat ?? 0 * (props.portionMultiplier ?? 1),
+    sugar: props.computable.sugar ?? 0 * (props.portionMultiplier ?? 1),
+    saturated_fat: props.computable.saturated_fat ?? 0 * (props.portionMultiplier ?? 1),
+    fiber: props.computable.fiber ?? 0 * (props.portionMultiplier ?? 1),
+    salt: props.computable.salt ?? 0 * (props.portionMultiplier ?? 1),
   };
 });
 
@@ -175,6 +163,6 @@ const simpleNutrients = [
 ] as const;
 
 function getPercentage(value: number, reference: number): number {
-  return value / reference * (2200/scaledFood.value.kcal);
+  return (value / reference) * (2200 / scaledFood.value.kcal);
 }
 </script>

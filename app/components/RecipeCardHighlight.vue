@@ -14,15 +14,6 @@
           fetchpriority="high"
           :alt="recipe?.title"
         />
-        <div
-          class="hidden sm:flex absolute bottom-[6%] left-[72%] min-w-[16%] w-[2em] max-w-[25%] aspect-square rounded-xl z-20 items-center justify-center shrink-0 hover:scale-102 group-hover:scale-104 transition-transform will-change-transform duration-500"
-          v-if="recipe?.hidx && recipe?.hidx >= 55"
-          :class="gradeStickerColors[getGrade(recipe?.hidx, 'ovr')[0] as keyof typeof gradeStickerColors]"
-        >
-          <span class="font-bold leading-none">
-            {{ getGrade(recipe?.hidx, 'ovr') }}
-          </span>
-        </div>
       </div>
 
       <div class="z-0 h-full flex-1">
@@ -70,7 +61,7 @@
           </p>
           <div class="flex flex-col flex-1 gap-2 justify-end items-start">
             <PagesRecipeSourceTypeTag
-              class="hidden md:inline-flex !rounded-full text-sm flex-shrink-0 px-2 py-1 bg-primary-20"
+              class="hidden md:inline-flex !rounded-full text-sm flex-shrink-0 px-2 py-0.5 bg-slate-100"
               :sourceType="recipe.source_type"
               :collection="recipe.collection ?? ''"
               :source="recipe.source ?? ''"

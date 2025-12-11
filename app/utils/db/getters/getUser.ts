@@ -2,48 +2,51 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { FullUser } from '~/types/types';
 import { getRecipeOverviews } from '~/utils/db/getters/getRecipes';
 
-export async function getUsers(
+export async function getUser(
   client: SupabaseClient,
-  opts: GetterOpts = {}
-): Promise<FullUser[]> {
-  let query = client.from('profiles').select(`*`);
-  query = buildQuery(query, opts);
+  userID: string | undefined | null
+): Promise<FullUser | null> {
+  if (!userID) {
+    return null;
+  }
+  let query = client.from('profiles').select(`*`).eq('id', userID);
   const { data, error } = await query;
   if (error) throw error;
-  const users = data;
-  const ids = users.map((user) => user.id);
-  const ownRecipes = await getRecipeOverviews(client, { in: { user_id: ids } });
+  const user = data[0];
+  const ownRecipes = await getRecipeOverviews(client, {
+    eq: { user_id: userID },
+  });
   const activity = await getActivity(client, {
-    in: { user_id: ids },
+    eq: { user_id: userID },
     orderBy: { column: 'created_at', ascending: false },
   });
   const { data: bookmarks, error: bookmarksError } = await client
     .from('bookmarks')
     .select('recipe_id')
-    .eq('user_id', ids);
+    .eq('user_id', userID);
   if (bookmarksError) throw bookmarksError;
   const bookmarkRecipeIds = bookmarks.map((bookmark) => bookmark.recipe_id);
-  const bookmarkRecipes = await getRecipeOverviews(client, {
-    in: { id: bookmarkRecipeIds },
-  });
+  let bookmarkRecipes: RecipeOverview[] = [];
+  if (bookmarkRecipeIds.length > 0) {
+    bookmarkRecipes = await getRecipeOverviews(client, {
+      in: { id: bookmarkRecipeIds },
+    });
+  }
   const stats = {
     recipesCount: ownRecipes.length,
     activityCount: activity.length,
     bookmarksCount: bookmarkRecipes.length,
   };
 
-  const processedUsers = await Promise.all(
-    users.map(async (user) => ({
-      ...user,
-      recipes: ownRecipes,
-      activity: activity,
-      bookmarks: bookmarkRecipes,
-      settings: user.settings as Record<string, any>,
-      stats,
-    }))
-  );
+  const processedUser = {
+    ...user,
+    recipes: ownRecipes,
+    activity: activity,
+    bookmarks: bookmarkRecipes,
+    stats,
+  };
 
-  return processedUsers as FullUser[];
+  return processedUser as FullUser;
 }
 
 export async function getUsersPartial(
@@ -55,13 +58,6 @@ export async function getUsersPartial(
   const { data, error } = await query;
   if (error) throw error;
   return data as User[];
-}
-
-export async function getUser(
-  client: SupabaseClient,
-  opts: GetterOpts = {}
-): Promise<FullUser> {
-  return expectSingle(await getUsers(client, opts));
 }
 
 export async function getUserPartial(

@@ -91,7 +91,7 @@ export async function getRecipesContaining(
     in: { id: Array.from(matchingRecipeIds) },
     limit: 5,
     orderBy: { column: 'relevancy', ascending: false },
-    not: { picture: null },
+    or: 'picture.not.eq.null,source_type.eq.MEDIA',
   });
 
   return recipes;

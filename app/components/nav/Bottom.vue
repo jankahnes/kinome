@@ -18,56 +18,41 @@
     <div class="flex-1 flex justify-center text-white">
       <div class="relative">
         <div class="absolute inset-0 flex items-center justify-center">
-          <NuxtLink to="/recipe/new?view=form" v-slot="{ isActive }">
-            <button
-              @click.prevent.stop="router.replace({ query: { view: 'form' } })"
-              class="flex items-center justify-center sublink-circle sublink-circle-1 bg-primary-400 transition-colors duration-300"
-              :class="[
-                {
-                  'sublink-active': isActive,
-                  'bg-primary!': route.query.view === 'form',
-                },
-              ]"
-            >
-              <IconPencil class="w-5 h-5" strokeWidth="2.5" />
-            </button>
-            <button
-              @click.prevent.stop="
-                router.replace({ query: { view: 'import' } })
-              "
-              class="flex items-center justify-center sublink-circle sublink-circle-2 bg-primary-400 transition-colors duration-300"
-              :class="[
-                {
-                  'sublink-active': isActive,
-                  'bg-primary!': route.query.view === 'import',
-                },
-              ]"
-            >
-              <IconImport class="w-5 h-5" strokeWidth="2.5" />
-            </button>
-            <button
-              @click.prevent.stop="
-                router.replace({ query: { view: 'picture' } })
-              "
-              class="flex items-center justify-center sublink-circle sublink-circle-3 bg-primary-400 transition-colors duration-300"
-              :class="[
-                {
-                  'sublink-active': isActive,
-                  'bg-primary!': route.query.view === 'picture',
-                },
-              ]"
-            >
-              <IconEye class="w-5 h-5" strokeWidth="2.5" />
-            </button>
+          <NuxtLink
+            to="/recipe/new"
+            class="flex items-center justify-center sublink-circle sublink-circle-1 bg-primary-400 transition-colors duration-300"
+            exact-active-class="bg-primary!"
+            :class="isNewRouteActive ? 'sublink-active' : ''"
+          >
+            <IconPencil class="w-5 h-5" strokeWidth="2.5" />
+          </NuxtLink>
+          <NuxtLink
+            to="/recipe/new/import"
+            class="flex items-center justify-center sublink-circle sublink-circle-2 bg-primary-400 transition-colors duration-300"
+            active-class="bg-primary!"
+            :class="isNewRouteActive ? 'sublink-active' : ''"
+          >
+            <IconImport class="w-5 h-5" strokeWidth="2.5" />
+          </NuxtLink>
+          <NuxtLink
+            to="/recipe/new/scan"
+            class="flex items-center justify-center sublink-circle sublink-circle-3 bg-primary-400 transition-colors duration-300"
+            active-class="bg-primary!"
+            :class="isNewRouteActive ? 'sublink-active' : ''"
+          >
+            <IconEye class="w-5 h-5" strokeWidth="2.5" />
           </NuxtLink>
         </div>
         <NuxtLink
           to="/recipe/new"
           class="rounded-full bg-primary h-15 w-15 flex items-center justify-center -mt-7 button-shadow shadow-primary-600 transition-all duration-300 will-change-transform relative z-2"
           active-class="scale-110"
-          v-slot="{ isActive }"
         >
-          <Icon name="add" :size="isActive ? 30 : 26" strokeWidth="2.2" />
+          <Icon
+            name="add"
+            :size="isNewRouteActive ? 30 : 26"
+            strokeWidth="2.2"
+          />
         </NuxtLink>
       </div>
     </div>
@@ -89,7 +74,6 @@
 </template>
 
 <script setup lang="ts">
-const router = useRouter();
 const sideLinks = [
   {
     name: 'Discover',
@@ -115,6 +99,10 @@ const sideLinks = [
 ];
 
 const route = useRoute();
+
+const isNewRouteActive = computed(() => {
+  return route.path.startsWith('/recipe/new');
+});
 </script>
 
 <style scoped>

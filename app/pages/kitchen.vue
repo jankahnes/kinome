@@ -1,6 +1,6 @@
 <template>
   <div class="pb-16 m-4 sm:m-10 sm:ml-20">
-    <div class="flex gap-4 flex-wrap" v-if="auth.isUser()">
+    <div class="flex gap-4 flex-wrap">
       <NuxtLink
         v-for="view in views"
         :key="view.path"
@@ -34,16 +34,16 @@ const views = computed(() => [
           path: '/cookbook',
           displayName: 'Your Cookbook',
         },
-        {
-          path: '/recipes',
-          displayName: 'All Recipes',
-        },
-        {
-          path: '/social',
-          displayName: 'Trending',
-        },
       ]
     : []),
+  {
+    path: '/recipes',
+    displayName: 'All Recipes',
+  },
+  {
+    path: '/social',
+    displayName: 'Trending',
+  },
 ]);
 
 useHead({

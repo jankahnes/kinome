@@ -2,9 +2,7 @@
   <div class="h-200 flex items-center justify-center p-4 pb-8">
     <div class="w-full max-w-md">
       <!-- Card Container -->
-      <div
-        class="bg-main rounded-xl p-8 space-y-6"
-      >
+      <div class="bg-main rounded-xl p-8 space-y-6">
         <!-- Header Section -->
         <div class="text-center space-y-2">
           <div
@@ -109,6 +107,15 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
+
 const username = ref('');
 const password = ref('');
 const auth = useAuthStore();

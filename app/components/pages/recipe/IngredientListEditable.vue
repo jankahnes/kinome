@@ -1,9 +1,17 @@
 <template>
-  <div class="action-card action-card-padding flex flex-col items-start">
-    <div class="flex justify-between items-center w-full gap-2 mb-2">
-      <ComponentHeader title="INGREDIENTS" />
+  <div class="main-card main-card-padding flex flex-col items-start">
+    <div class="flex justify-between items-start w-full gap-2 mb-2">
+      <div>
+        <p class="ml-1">Servings:</p>
+        <FormsSlidingSelector
+          v-model="model.serves"
+          :choices="[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20]"
+          :expanded="false"
+          class="max-w-[150px]"
+        />
+      </div>
       <button
-        class="button flex items-center gap-1 px-2 py-1 font-medium !bg-primary-20/70 text-xs will-change-transform leading-none"
+        class="animated-button bg-slate-50 flex items-center gap-1 px-2 py-1 text-xs leading-none"
         @click="model.useNaturalLanguage = !model.useNaturalLanguage"
       >
         <IconRefreshCcw class="w-4" />
@@ -14,13 +22,6 @@
         }}</span>
       </button>
     </div>
-    <p class="text-sm text-gray-600 ml-1 font-light mt-2">Servings:</p>
-    <FormsSlidingSelector
-      v-model="model.serves"
-      :choices="[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20]"
-      :expanded="false"
-      class="max-w-[150px]"
-    />
 
     <textarea
       v-if="model.useNaturalLanguage"
@@ -131,7 +132,7 @@
         </div>
         <div
           v-if="addingCategory"
-          class="flex items-center justify-between gap-2 w-full px-4 outline outline-gray-100 hover:outline-gray-200  rounded-lg"
+          class="flex items-center justify-between gap-2 w-full px-4 outline outline-gray-100 hover:outline-gray-200 rounded-lg"
         >
           <input
             v-model="newCategoryName"

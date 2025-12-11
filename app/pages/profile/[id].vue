@@ -90,6 +90,15 @@ watchEffect(async () => {
   }
   loading.value = false;
 });
+
+useHead({
+  meta: [
+    {
+      name: 'robots',
+      content: 'noindex, nofollow',
+    },
+  ],
+});
 </script>
 
 <style scoped></style>

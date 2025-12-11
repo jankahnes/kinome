@@ -1,9 +1,9 @@
 <template>
   <div
-    class="flex action-card xl:mr-20 pb-4 pt-8 md:py-10 shadow-xl xl:max-w-6xl justify-between items-center relative overflow-hidden"
+    class="flex md:bg-primary-10 rounded-4xl xl:mr-20 pb-4 pt-8 md:py-10 md:shadow-xl xl:max-w-6xl justify-between items-center relative overflow-hidden"
   >
     <div
-      class="flex flex-col gap-2 flex-1 min-w-0 mx-4 sm:mx-10 text-center md:items-center"
+      class="flex flex-col gap-2 flex-1 min-w-0 mx-4 md:mx-10 text-center md:items-center"
     >
       <h2
         class="text-4xl sm:text-5xl font-bold tracking-tight leading-9 sm:leading-12"
@@ -16,10 +16,10 @@
         seconds.
       </p>
       <div
-        class="flex gap-4 mt-2 py-2 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide md:overflow-visible md:pr-10 min-w-0"
+        class="flex gap-4 mt-2 py-2 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide md:overflow-visible md:pr-10 min-w-0 -mr-4 md:mr-0"
       >
         <div
-          class="flex flex-col items-center gap-2 p-6 action-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
+          class="flex flex-col items-center gap-2 p-6 main-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card1"
           @click="scrollTo(card1)"
         >
@@ -45,7 +45,7 @@
           </p>
         </div>
         <div
-          class="flex flex-col items-center gap-2 p-6 action-card shadow-sm flex-1 min-w-76 snap-start md:min-w-0 shrink-0"
+          class="flex flex-col items-center gap-2 p-6 main-card shadow-sm flex-1 min-w-76 snap-start md:min-w-0 shrink-0"
           ref="card2"
           @click="scrollTo(card2)"
         >
@@ -70,7 +70,7 @@
           </p>
         </div>
         <div
-          class="flex flex-col items-center gap-2 p-6 action-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
+          class="flex flex-col items-center gap-2 p-6 main-card shadow-sm flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card3"
           @click="scrollTo(card3)"
         >

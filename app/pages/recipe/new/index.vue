@@ -17,29 +17,39 @@
         class="min-w-[60%] bg-primary-20/70! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto break-words scrollbar-hide text-sm"
       ></textarea>
       <div class="flex w-full flex-wrap gap-4 mt-8">
-        <PagesRecipeIngredientListEditable
-          v-model="ingredientListEditableInformation"
-          class="bg-primary-20/70! flex-1"
-        ></PagesRecipeIngredientListEditable>
-
-        <PagesRecipeInstructionContainerEditable
-          v-model="instructionsEditableInformation.instructions"
-          class="bg-primary-20/70! flex-1"
-        ></PagesRecipeInstructionContainerEditable>
+        <div class="space-y-2 flex-1">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Ingredients
+          </h2>
+          <PagesRecipeIngredientListEditable
+            v-model="ingredientListEditableInformation"
+          ></PagesRecipeIngredientListEditable>
+        </div>
+        <div class="space-y-2 flex-1">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Instructions
+          </h2>
+          <PagesRecipeInstructionContainerEditable
+            v-model="instructionsEditableInformation.instructions"
+          ></PagesRecipeInstructionContainerEditable>
+        </div>
       </div>
       <div class="flex w-full flex-wrap gap-4">
+        <!--
         <NutritionLabel
           v-if="computedRecipe?.hidx !== undefined"
           :nutritionData="computedRecipe"
           class="bg-primary-20/70!"
         />
-
+        -->
+        <!--
         <HealthFacts
           v-if="computedRecipe?.hidx !== undefined"
           :recipe="computedRecipe"
           :on-report="onClickReport"
           class="bg-primary-20/70!"
         />
+        -->
       </div>
       <div class="flex gap-2 w-full justify-start md:mt-6">
         <button
@@ -56,10 +66,12 @@
 <script setup lang="ts">
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
 
-const props = defineProps<{
-  submitFromPreparsed: (recipe: ComputableRecipe) => void;
-  submitFromNaturalLanguage: (recipe: BaseRecipe) => void;
-}>();
+const submitFromPreparsed = inject<(recipe: ComputableRecipe) => void>(
+  'submitFromPreparsed'
+)!;
+const submitFromNaturalLanguage = inject<(recipe: BaseRecipe) => void>(
+  'submitFromNaturalLanguage'
+)!;
 
 const originalRecipeId = ref<number | null>(null);
 const originalUserId = ref<string | null>(null);
@@ -132,9 +144,9 @@ const naturalLanguageBaseRecipe = computed<BaseRecipe>(() => ({
 
 function submit() {
   if (ingredientListEditableInformation.value.useNaturalLanguage) {
-    props.submitFromNaturalLanguage(naturalLanguageBaseRecipe.value);
+    submitFromNaturalLanguage(naturalLanguageBaseRecipe.value);
   } else {
-    props.submitFromPreparsed(parsingRecipe.value);
+    submitFromPreparsed(parsingRecipe.value);
   }
 }
 

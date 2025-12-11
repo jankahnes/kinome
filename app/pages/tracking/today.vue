@@ -9,7 +9,7 @@
           :disabled="isSaving || !hasUnsavedChanges"
           class="button flex items-center gap-2 px-4 py-2 shadow-lg transition-all"
           :class="{
-            'bg-primary-100! text-gray-800': hasUnsavedChanges,
+            'bg-primary-50! text-gray-800': hasUnsavedChanges,
             'bg-gray-200! text-gray-500': !hasUnsavedChanges,
             'opacity-50 cursor-not-allowed': isSaving,
           }"
@@ -72,7 +72,7 @@
         <div
           v-for="(meal, index) in trackedMeals"
           class="flex flex-col gap-2 p-4 shadow-none! bg-primary-10/70 rounded-xl"
-          :class="{ 'bg-primary-100/70!': meal.recipe_id !== undefined }"
+          :class="{ 'bg-primary-10/70!': meal.recipe_id !== undefined }"
         >
           <div
             class="flex items-center gap-2 button bg-transparent! outline-none! shadow-none! justify-between"
@@ -86,10 +86,10 @@
               >
               <input
                 :class="{
-                  'bg-primary-50/80!': meal.recipe_id !== undefined,
+                  'bg-primary-10/80!': meal.recipe_id !== undefined,
                 }"
                 v-model="trackedMeals[index].mealName"
-                class="text-lg font-bold focus:outline-none bg-primary-50 rounded-md py-2 px-3 absolute inset-0 w-full"
+                class="text-lg font-bold focus:outline-none bg-primary-10 rounded-md py-2 px-3 absolute inset-0 w-full"
                 @click.stop
                 placeholder="✍️ Meal name"
               />
@@ -134,8 +134,12 @@
         v-if="computedDailyNutrition?.hidx !== undefined"
         class="flex flex-wrap gap-4 mt-8"
       >
+        <!--
         <NutritionLabel :nutritionData="computedDailyNutrition" />
+        -->
+        <!--
         <HealthFacts :recipe="computedDailyNutrition" />
+        -->
       </div>
 
       <!-- Modal for adding a meal from a recipe-->

@@ -142,6 +142,35 @@ export default class NutritionEngine {
     }
   }
 
+  private async safeFetch<T>(
+    url: string,
+    opts: { method?: string; body?: any }
+  ): Promise<T> {
+    const nuxtFetch = (globalThis as any).$fetch as
+      | undefined
+      | ((url: string, opts: any) => Promise<T>);
+    if (typeof nuxtFetch === 'function') {
+      return await nuxtFetch(url, opts);
+    }
+
+    if (typeof fetch !== 'function') {
+      throw new Error(
+        'No $fetch (Nuxt) and no global fetch available. Run under Nuxt/Nitro, upgrade Node (>=18), or set disableSatiety=true.'
+      );
+    }
+
+    const res = await fetch(url, {
+      method: opts.method ?? 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      body: opts.body != null ? JSON.stringify(opts.body) : undefined,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Fetch failed (${res.status}) for ${url}: ${text}`);
+    }
+    return (await res.json()) as T;
+  }
+
   initializeCumulativeFields(recipe: any) {
     for (const field of this.cumulativeFields) {
       recipe[field] = {
@@ -269,6 +298,9 @@ export default class NutritionEngine {
     }
     this.recipe = foodAsRecipe as ComputedRecipe;
     this.recipe.scores = await this.getScoring();
+    if (this.logToReport) {
+      this.generateReport();
+    }
     return this.recipe.scores;
   }
 
@@ -334,7 +366,7 @@ export default class NutritionEngine {
         utility: true,
         category: null,
         preparation_description: null,
-      } as FullIngredient;
+      } as unknown as FullIngredient;
       this.recipe.fullIngredients.push(oilIngredient);
     }
     this.recipe.fullIngredients = ingredients;
@@ -650,6 +682,7 @@ export default class NutritionEngine {
     // proposed: recursive approach to increase serving size until its reasonable
     if (
       !this.nutritionLabelOnly &&
+      !this.isFood &&
       this.recipe.kcal.total > this.UNUSUAL_KCAL_THRESHOLD
     ) {
       this.UNUSUAL_KCAL_THRESHOLD = 800;
@@ -692,7 +725,7 @@ export default class NutritionEngine {
     const ed = this.getED();
     const sidx = this.disableSatiety ? null : await this.getSIDX(water);
     const satiety = this.disableSatiety
-      ? Math.min(ed, 80)
+      ? this.recipe.sidx ?? Math.min(ed, 80)
       : 0.5 * ed + 0.5 * sidx!;
     const mnidx = this.getMNIDX();
     const fiber_score = this.getFiberScore();
@@ -953,11 +986,27 @@ export default class NutritionEngine {
       kcal: this.recipe.kcal.per100,
     };
 
-    const prediction = (await $fetch('/api/predict/satiety', {
-      method: 'POST',
-      body: body,
-    })) satisfies { prediction: number };
-    return this.scaleWithPoints(prediction.prediction, [
+    // temp
+    const hasNuxtFetch = typeof (globalThis as any).$fetch === 'function';
+    const prediction = await this.safeFetch<{ prediction: number } | number>(
+      hasNuxtFetch
+        ? '/api/predict/satiety'
+        : 'https://jk-api.onrender.com/predict-satiety',
+      {
+        method: 'POST',
+        body: hasNuxtFetch
+          ? body
+          : {
+              ff: body.ff,
+              gi_proxy: body.giProxy,
+              waterE: body.waterE,
+              kcal: body.kcal,
+            },
+      }
+    );
+    const predictionValue =
+      typeof prediction === 'number' ? prediction : prediction.prediction;
+    return this.scaleWithPoints(predictionValue, [
       [10, 0],
       [40, 50],
       [50, 72],
@@ -1102,6 +1151,10 @@ export default class NutritionEngine {
           mufaPercent: 0,
           transFatPercent: 0, // not used in score
           score: 50,
+          mufaScore: 0,
+          o3Score: 0,
+          o6Score: 0,
+          satFatScore: 0,
         };
       }
       return 50;
@@ -1174,6 +1227,10 @@ export default class NutritionEngine {
         o6Percent,
         mufaPercent,
         transFatPercent: 0, // not used in score
+        o3Score,
+        o6Score,
+        mufaScore,
+        satFatScore,
       };
     }
 
@@ -1751,12 +1808,27 @@ export default class NutritionEngine {
         rdaPerServing: nutrient.rdaPerServing,
       })
     );
-    return {
+    const trimmedReport = {
       overall: this.report.overall,
       humanReadable: this.report.humanReadable,
-      micronutrients: {
-        details: trimmedMicronutrients,
+      details: {
+        satiety: this.report.satiety,
+        fatProfile: this.report.fatProfile,
+        protectiveCompounds: this.report.protectiveCompounds,
+        sugar: this.report.sugar,
+        fiber: this.report.fiber,
+        protein: this.report.protein,
+        processingLevel: this.report.processingLevel,
+        salt: this.report.salt,
+        micronutrients: trimmedMicronutrients,
       },
+      cumulative: {} as Record<cumulativeKeys, number>,
     };
+    if (!this.isFood) {
+      for (const field of this.cumulativeFields) {
+        trimmedReport.cumulative[field] = this.recipe[field].total;
+      }
+    }
+    return trimmedReport;
   }
 }

@@ -1,34 +1,22 @@
 <template>
-  <div class="w-full px-6 md:pl-14 md:pr-30">
-    <div class="flex lg:flex-row flex-col gap-10 items-center mt-12 md:mt-20 mx-auto">
+  <div class="px-4 md:pl-14 md:pr-30 overflow-y-visible">
+    <div
+      class="flex lg:flex-row flex-col gap-10 items-center mt-12 md:mt-20 mx-auto"
+    >
       <FormsChoiceSlider
-        v-if="currentView !== 'loading'"
-        v-model="currentView"
+        v-if="!isLoading"
+        :model-value="currentView"
         :choices="views"
         buttonStyle=""
         :class="'hidden lg:block min-w-36 flex-[0.2] max-w-45 self-start sticky top-22 left-0'"
         vertical
+        @update:model-value="navigateToView"
       />
       <Transition name="view-transition" mode="out-in">
-        <PagesNewRecipeForm
-          v-if="currentView === 'form'"
-          :submitFromPreparsed="submitFromPreparsed"
-          :submitFromNaturalLanguage="submitFromNaturalLanguage"
-          class="w-full"
-        />
-        <PagesNewRecipeImport
-          v-else-if="currentView === 'import'"
-          :submit="submitFromLink"
-          class="mt-4"
-        />
-        <PagesNewRecipePicture
-          v-else-if="currentView === 'picture'"
-          :submit="submitFromPicture"
-          class="mt-4"
-        />
         <div
-          v-else-if="currentView === 'loading'"
-          class="flex flex-col w-full items-center mt-[20vh] gap-6"
+          v-if="isLoading"
+          key="loading"
+          class="flex flex-col items-center mt-[20vh] gap-6"
         >
           <img src="/loading.png" class="h-8 w-8" alt="Loading icon" />
           <Transition name="fade-up">
@@ -36,6 +24,9 @@
               {{ loadingMessage }}
             </p>
           </Transition>
+        </div>
+        <div v-else key="page" class="flex-1">
+          <NuxtPage :transition="false" />
         </div>
       </Transition>
     </div>
@@ -47,41 +38,53 @@ const auth = useAuthStore();
 const supabase = useSupabaseClient<Database>();
 const job = ref<{ id: number } | null>(null);
 const route = useRoute();
-const router = useRouter();
 const publish = ref(false);
 
-const views: { value: string; displayName: string; icon?: string }[] = [
+const views: {
+  value: string;
+  displayName: string;
+  icon?: string;
+  route: string;
+}[] = [
   {
     value: 'form',
     displayName: 'Create',
     icon: 'pencil',
+    route: '/recipe/new',
   },
   {
     value: 'import',
     displayName: 'Import',
     icon: 'download',
+    route: '/recipe/new/import',
   },
   {
     value: 'picture',
     displayName: 'Scan',
     icon: 'eye',
+    route: '/recipe/new/scan',
   },
 ];
-const currentView = ref((route.query.view as string) || 'form');
+
+const currentView = computed(() => {
+  const path = route.path;
+  if (path === '/recipe/new/import') return 'import';
+  if (path === '/recipe/new/scan') return 'picture';
+  return 'form';
+});
+
+const isLoading = ref(false);
 const loadingMessage = ref('');
 
-// Watch for query param changes and update currentView
-watch(
-  () => route.query.view,
-  (newView) => {
-    if (newView && typeof newView === 'string') {
-      currentView.value = newView;
-    }
+const navigateToView = (value: string) => {
+  const view = views.find((v) => v.value === value);
+  if (view) {
+    navigateTo(view.route);
   }
-);
+};
 
 const submitFromNaturalLanguage = async (recipe: BaseRecipe) => {
-  currentView.value = 'loading';
+  isLoading.value = true;
   job.value = await createJob(
     supabase,
     'natural-language',
@@ -94,7 +97,7 @@ const submitFromNaturalLanguage = async (recipe: BaseRecipe) => {
 };
 
 const submitFromPreparsed = async (recipe: ComputableRecipe) => {
-  currentView.value = 'loading';
+  isLoading.value = true;
   recipe.batch_size = recipe.serves > 1 ? recipe.serves : null;
   const response = await $fetch('/api/create-recipe/upload-processed-recipe', {
     method: 'POST',
@@ -104,6 +107,7 @@ const submitFromPreparsed = async (recipe: ComputableRecipe) => {
     },
   });
   if (response.status !== 'ok') {
+    isLoading.value = false;
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to create recipe',
@@ -146,7 +150,7 @@ const generateUrlVariations = (url: string | null | undefined) => {
 };
 
 const submitFromLink = async (link: string) => {
-  currentView.value = 'loading';
+  isLoading.value = true;
   const urlVariations = [
     ...new Set([
       ...generateUrlVariations(link),
@@ -159,6 +163,7 @@ const submitFromLink = async (link: string) => {
   });
   if (recipes.length > 0) {
     const recipe = recipes[0]!;
+    isLoading.value = false;
     navigateTo(getRecipeUrl(recipe.id, recipe.title ?? ''));
     return;
   }
@@ -200,7 +205,7 @@ const submitFromLink = async (link: string) => {
 };
 
 const submitFromPicture = async (file: File) => {
-  currentView.value = 'loading';
+  isLoading.value = true;
   job.value = await createJob(supabase, 'picture', 'formalizing_ingredients');
   setTimeout(() => {
     loadingMessage.value = '🔍 Analyzing your picture...';
@@ -251,19 +256,20 @@ const submitBaseRecipe = async (baseRecipe: BaseRecipe) => {
   );
 };
 
+provide('submitFromPreparsed', submitFromPreparsed);
+provide('submitFromNaturalLanguage', submitFromNaturalLanguage);
+provide('submitFromLink', submitFromLink);
+provide('submitFromPicture', submitFromPicture);
+
 onMounted(async () => {
   if (route.query.link) {
     const validUrl = new URL(route.query.link as string);
     if (validUrl.protocol === 'http:' || validUrl.protocol === 'https:') {
-      router.replace({ query: { view: 'loading' } });
+      isLoading.value = true;
       await auth.fetchUser();
       submitFromLink(validUrl.href);
     }
   }
-});
-
-watchEffect(() => {
-  router.replace({ query: { view: currentView.value } });
 });
 
 useHead({
@@ -281,8 +287,7 @@ useHead({
   opacity: 0;
   transform: translateY(10px);
 }
-.fade-up-enter-to,
-.fade-up-leave-from {
+.fade-up-enter-to {
   opacity: 1;
   transform: translateY(0);
 }
@@ -291,14 +296,10 @@ useHead({
 .view-transition-leave-active {
   transition: all 0.2s ease;
 }
-.view-transition-enter-from {
-  opacity: 0;
-  transform: translateY(5px);
-}
-
+.view-transition-enter-from,
 .view-transition-leave-to {
   opacity: 0;
-  transform: translateY(-5px);
+  transform: translateY(5px);
 }
 
 .view-transition-enter-to,

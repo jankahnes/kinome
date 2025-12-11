@@ -56,6 +56,7 @@ export default defineNuxtConfig({
       'utils/directives',
       'utils/constants',
       'utils/format/toHumanReadable',
+      'utils/nutrition',
     ],
   },
   components: [
@@ -83,5 +84,6 @@ export default defineNuxtConfig({
   },
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
+    exclude: [],
   },
 });

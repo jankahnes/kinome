@@ -1,86 +1,78 @@
 <template>
-  <div
-    class="action-card action-card-padding flex flex-col relative overflow-hidden"
-    :class="{ '!bg-primary-20/80': formalizationLoading }"
-  >
-    <div class="mb-2" v-if="!hideHeader">
-      <div class="flex justify-between items-center w-full mb-2">
-        <ComponentHeader title="METHOD" v-if="!hideHeader" />
-        <button
-          v-if="displayFormalize"
-          class="button flex items-center gap-2 px-2 py-1 font-medium !bg-primary-20/50 text-xs will-change-transform"
-          @click="formalize()"
-        >
-          <IconSparkles class="w-4" />
-          <span>Analyze</span>
-        </button>
-      </div>
-    </div>
-    <div class="flex-1 " v-if="instructions && instructions.length > 0">
-      <div class="">
-        <div
-          v-for="(instruction, index) in instructions"
-          :key="index"
-          class="flex gap-5 py-5 items-start"
-        >
-          <div
-            class="min-w-9 h-9 p-1 rounded-xl flex items-center text-xl font-bold justify-center bg-primary-300/60 flex-shrink-0 mt-1"
-          >
-            {{ index + 1 }}
-          </div>
-
-          <div class="flex-1 min-w-0 relative">
-            <p
-              class="leading-relaxed"
-              v-html="renderInstructionWithLinks(instruction)"
-            ></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-else class="flex-1 flex items-center justify-center p-6 pb-32">
-      <div class="text-center max-w-sm">
-        <div
-          class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"
-        >
-          <IconBookOpen class="w-6 h-6 text-gray-400" />
-        </div>
-        <h3 class="text-lg font-medium text-gray-700 mb-2">
-          No Instructions Available
-        </h3>
-        <p class="text-sm text-gray-500">
-          Step-by-step instructions for this recipe haven't been added yet.
-        </p>
-      </div>
-    </div>
-
-    <!-- Dynamic Tooltip -->
-    <transition name="fade" mode="out-in">
-      <Teleport to="body" v-if="activeTooltip">
-        <div
-          class="fixed z-50 pointer-events-none transition-all duration-200"
-          :style="{
-            left: activeTooltip.x + 'px',
-            top: activeTooltip.y + 'px',
-            transform: 'translate(-50%, -100%)',
-          }"
-        >
-          <div
-            class="bg-primary-20 px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-center border border-gray-200"
-          >
-            {{ activeTooltip.amount }}
-            <div
-              class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-200"
-            ></div>
-          </div>
-        </div>
-      </Teleport>
-    </transition>
+  <div class="space-y-2" ref="root">
+    <h2 class="text-4xl font-bold tracking-tighter ml-2" v-if="!hideHeader">
+      Method
+    </h2>
     <div
-      class="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent p-4 pointer-events-none"
-      v-if="formalizationLoading"
-    />
+      class="main-card main-card-padding flex flex-col relative overflow-hidden"
+      :class="{ '!bg-primary-20/80': formalizationLoading }"
+    >
+      <div class="flex-1" v-if="instructions && instructions.length > 0">
+        <div class="space-y-10">
+          <div
+            v-for="(instruction, index) in instructions"
+            :key="index"
+            class="flex gap-5 items-start"
+          >
+            <div
+              class="min-w-9 h-9 p-1 rounded-xl flex items-center text-xl font-bold justify-center bg-primary-500 text-white flex-shrink-0 leading-none mt-1"
+            >
+              {{ index + 1 }}
+            </div>
+
+            <div class="flex-1 min-w-0 relative">
+              <p
+                class="leading-relaxed"
+                v-html="renderInstructionWithLinks(instruction)"
+              ></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="flex-1 flex items-center justify-center p-6 pb-32">
+        <div class="text-center max-w-sm">
+          <div
+            class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"
+          >
+            <IconBookOpen class="w-6 h-6 text-gray-400" />
+          </div>
+          <h3 class="text-lg font-medium text-gray-700 mb-2">
+            No Instructions Available
+          </h3>
+          <p class="text-sm text-gray-500">
+            Step-by-step instructions for this recipe haven't been added yet.
+          </p>
+        </div>
+      </div>
+
+      <!-- Dynamic Tooltip -->
+      <transition name="fade" mode="out-in">
+        <Teleport to="body" v-if="activeTooltip">
+          <div
+            class="fixed z-50 pointer-events-none transition-all duration-200"
+            :style="{
+              left: activeTooltip.x + 'px',
+              top: activeTooltip.y + 'px',
+              transform: 'translate(-50%, -100%)',
+            }"
+          >
+            <div
+              class="bg-slate-100 px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-center border border-gray-200"
+            >
+              {{ activeTooltip.amount }}
+              <div
+                class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-200"
+              ></div>
+            </div>
+          </div>
+        </Teleport>
+      </transition>
+      <div
+        class="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent p-4 pointer-events-none"
+        v-if="formalizationLoading"
+      />
+    </div>
   </div>
 </template>
 
@@ -91,11 +83,15 @@ interface Props {
   ingredients?: any[];
   servingSize?: number;
   formalizationLoading: Boolean;
-  displayFormalize: Boolean;
-  formalize: Function;
 }
 
 const props = defineProps<Props>();
+
+const root = ref(null);
+
+defineExpose({
+  root,
+});
 
 // Tooltip state
 const activeTooltip = ref<{
@@ -121,7 +117,7 @@ function renderInstructionWithLinks(instruction: string): string {
     /\[([^\]]+)\]\((\d+)\)/g,
     (match, ingredient, ingredientId) => {
       return `<span 
-      class="cursor-pointer relative ingredient-link px-1 bg-primary-200/40 rounded-md hover:bg-primary-300 transition-colors duration-400" 
+      class="cursor-pointer relative ingredient-link px-1 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors duration-400" 
       data-ingredient="${ingredient}"
       data-ingredient-id="${ingredientId}"
       role="button"

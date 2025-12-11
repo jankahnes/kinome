@@ -17,6 +17,7 @@
 }
 
 @theme {
+  --breakpoint-new-comment-wrap: 485px;
   --breakpoint-4xl: 2200px;
   --breakpoint-3xl: 1921px;
   --breakpoint-2lg: 1130px;
@@ -116,11 +117,11 @@
   opacity: 0.7;
 }
 
-.action-card {
+.main-card {
   @apply bg-primary-10 rounded-4xl;
 }
 
-.action-card-padding {
+.main-card-padding {
   @apply p-4 md:p-6;
 }
 
@@ -268,28 +269,46 @@
   @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-transform duration-200 cursor-pointer select-none will-change-transform;
 }
 
+.blurred-backdrop {
+  @apply fixed inset-0 bg-black/30 backdrop-blur-xs z-150;
+}
+
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.2s ease-out;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+.w-120 {
+  @apply w-120;
+}
+
+.w-150 {
+  @apply w-150;
+}
+
 .page-slide-right-enter-active,
 .page-slide-right-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .page-slide-right-leave-from {
   opacity: 1;
-  transform: translateX(0);
 }
 .page-slide-right-leave-to {
   opacity: 0;
-  transform: translateX(10px);
 }
 
 .page-slide-right-enter-from {
   opacity: 0;
-  transform: translateX(-10px);
 }
 
 .page-slide-right-enter-to {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .sidebar-enter-active,
@@ -317,7 +336,7 @@
     rgba(219, 234, 254, 1) 0%,
     rgba(191, 219, 254, 1) 25%,
     rgba(147, 197, 253, 1) 55%,
-    rgba(191, 219, 254, 1) 65%,
+    rgb(180, 209, 245) 65%,
     rgba(96, 165, 250, 1) 85%,
     rgba(59, 130, 246, 1) 100%
   );
@@ -331,7 +350,7 @@
     rgba(209, 250, 229, 1) 0%,
     rgba(167, 243, 208, 1) 25%,
     rgba(110, 231, 183, 1) 55%,
-    rgba(167, 243, 208, 1) 65%,
+    rgb(120, 235, 181) 65%,
     rgba(52, 211, 153, 1) 85%,
     rgba(16, 185, 129, 1) 100%
   );
@@ -345,7 +364,7 @@
     rgba(220, 252, 231, 1) 0%,
     rgba(187, 247, 208, 1) 25%,
     rgba(134, 239, 172, 1) 55%,
-    rgba(187, 247, 208, 1) 65%,
+    rgb(150, 235, 179) 65%,
     rgba(74, 222, 128, 1) 85%,
     rgba(34, 197, 94, 1) 100%
   );

@@ -13,144 +13,175 @@
       </defs>
     </svg>
     <div class="flex flex-col h-full justify-between">
-      <div class="flex flex-col gap-10 my-8 pr-4 items-center flex-1">
-        <Logo />
-        <!-- Account View -->
-        <div
-          class="flex flex-col gap-4 items-center w-full transition-all duration-300"
-        >
-          <Avatar
-            :user="auth.user"
-            class="rounded-full w-1/2"
-            :placeholder="!auth.profileFetched"
-            :halo="focusedIndex !== 0"
-            :ring="focusedIndex === 0 && sidebarNavigationActive"
-            @click="onClickLink(accountLink)"
-          />
-          <Transition name="fade" mode="out-in">
-            <Skeleton
-              v-if="!auth.profileFetched"
-              class="rounded-4xl w-2/3 h-8"
-            />
-            <span
-              class="text-xl font-bold text-wrap tracking-normal leading-none transition-all duration-300"
-              :class="{ 'text-3xl!': expanded }"
-              v-else-if="auth.isUser()"
-              >{{ auth.user!.username }}</span
-            >
-            <div class="flex gap-2" v-else>
-              <NuxtLink
-                to="/login"
-                @click="onClickLink('/login')"
-                class="animated-button bg-primary-50 text-gray-800 px-4 py-2 font-bold tracking-tight leading-none flex items-center justify-center gap-2"
-                >Login</NuxtLink
-              >
-              <NuxtLink
-                to="/onboarding"
-                @click="onClickLink('/onboarding')"
-                class="animated-button bg-primary-200 text-gray-800 px-4 py-2 font-bold tracking-tight leading-none flex items-center justify-center gap-2"
-                >Register</NuxtLink
-              >
-            </div>
-          </Transition>
+      <div class="flex flex-col gap-16 pb-20">
+        <div class="my-8 mx-auto pr-4">
+          <Logo />
         </div>
-      </div>
 
-      <!-- Navigation Links -->
-      <div
-        class="flex flex-col gap-4 p-6 transition-all duration-300"
-        :class="{ 'mt-4': expanded }"
-      >
-        <NuxtLink
-          to="/"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 2 && sidebarNavigationActive,
-          }"
-          active-class="primary-gradient text-gray-800 px-3 py-2"
-          @click="onClickLink('/')"
-        >
-          <IconCompass class="w-6 h-6" />
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Discover</span
+        <div class="px-4">
+          <div
+            class="flex rounded-4xl gap-4 p-2 pr-6 items-center"
+            v-if="auth.isUser()"
           >
-        </NuxtLink>
-        <NuxtLink
-          to="/kitchen/home"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 4 && sidebarNavigationActive,
-            'primary-gradient text-gray-800 px-3 py-2':
-              route.path.startsWith('/kitchen'),
-          }"
-          @click="onClickLink('/kitchen/home')"
-        >
-          <IconChefHat class="w-6 h-6" />
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Kitchen</span
+            <Avatar
+              :user="auth.user"
+              class="rounded-full w-14"
+              :placeholder="!auth.profileFetched"
+              :ring="focusedIndex === 0 && sidebarNavigationActive"
+              @click="onClickLink(accountLink)"
+            />
+            <div class="flex flex-col">
+              <span
+                class="text-lg text-wrap tracking-normal leading-none transition-all duration-300"
+                >{{ auth.user?.username }}</span
+              >
+              <NuxtLink
+                :to="`/profile/${auth.user?.id}`"
+                class="flex items-center gap-1 text-gray-600"
+              >
+                <IconSettings class="w-4" />
+                <span class="text-sm">Settings</span>
+              </NuxtLink>
+            </div>
+          </div>
+          <div
+            class="flex gap-4 items-center transition-all duration-300"
+            v-else
           >
-        </NuxtLink>
-        <NuxtLink
-          to="/recipe/new?view=form"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 3 && sidebarNavigationActive,
-          }"
-          active-class="primary-gradient text-gray-800 px-3 py-2"
-          @click="onClickLink('/recipe/new')"
+            <Avatar
+              :user="auth.user"
+              class="rounded-full w-20 h-20"
+              :placeholder="!auth.profileFetched"
+              :ring="focusedIndex === 0 && sidebarNavigationActive"
+              @click="onClickLink(accountLink)"
+            />
+            <Transition name="fade" mode="out-in">
+              <Skeleton
+                v-if="!auth.profileFetched"
+                class="rounded-4xl w-2/3 h-8"
+              />
+              <span
+                class="text-xl font-bold text-wrap tracking-normal leading-none transition-all duration-300"
+                :class="{ 'text-3xl!': expanded }"
+                v-else-if="auth.isUser()"
+                >{{ auth.user!.username }}</span
+              >
+              <div class="flex flex-col gap-2" v-else>
+                <NuxtLink
+                  to="/login"
+                  @click="onClickLink('/login')"
+                  class="animated-button bg-primary-50 text-gray-800 px-4 py-2 font-bold tracking-tight leading-none flex items-center justify-center gap-2"
+                  >Login</NuxtLink
+                >
+                <NuxtLink
+                  to="/onboarding"
+                  @click="onClickLink('/onboarding')"
+                  class="animated-button bg-primary-200 text-gray-800 px-4 py-2 font-bold tracking-tight leading-none flex items-center justify-center gap-2"
+                  >Register</NuxtLink
+                >
+              </div>
+            </Transition>
+          </div>
+        </div>
+        <div
+          class="flex flex-col gap-4 p-6 transition-all duration-300"
+          :class="{ 'mt-4': expanded }"
         >
-          <IconPlus class="w-6 h-6" />
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Create</span
+          <NuxtLink
+            to="/"
+            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
+            :class="{
+              'ring-2 ring-primary-500 ring-offset-2':
+                focusedIndex === 1 && sidebarNavigationActive,
+            }"
+            active-class="primary-gradient text-gray-800 px-3 py-2"
+            @click="onClickLink('/')"
           >
-        </NuxtLink>
+            <IconCompass class="w-6 h-6" />
+            <span
+              class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
+              >Discover</span
+            >
+          </NuxtLink>
+          <NuxtLink
+            to="/kitchen/home"
+            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
+            :class="{
+              'ring-2 ring-primary-500 ring-offset-2':
+                focusedIndex === 2 && sidebarNavigationActive,
+              'primary-gradient text-gray-800 px-3 py-2':
+                route.path.startsWith('/kitchen'),
+            }"
+            @click="onClickLink('/kitchen/home')"
+          >
+            <IconChefHat class="w-6 h-6" />
+            <span
+              class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
+              >Kitchen</span
+            >
+          </NuxtLink>
+          <NuxtLink
+            to="/recipe/new"
+            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
+            :class="{
+              'ring-2 ring-primary-500 ring-offset-2':
+                focusedIndex === 3 && sidebarNavigationActive,
+            }"
+            active-class="primary-gradient text-gray-800 px-3 py-2"
+            @click="onClickLink('/recipe/new')"
+          >
+            <IconPlus class="w-6 h-6" />
+            <span
+              class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
+              >Create</span
+            >
+          </NuxtLink>
 
-        <NuxtLink
-          to="/tracking"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 5 && sidebarNavigationActive,
-          }"
-          active-class="primary-gradient text-gray-800 px-3 py-2"
-          @click="onClickLink('/tracking')"
-        >
-          <IconChartLine class="w-6 h-6"/>
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Meal tracking</span
+          <NuxtLink
+            to="/tracking"
+            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
+            :class="{
+              'ring-2 ring-primary-500 ring-offset-2':
+                focusedIndex === 4 && sidebarNavigationActive,
+            }"
+            active-class="primary-gradient text-gray-800 px-3 py-2"
+            @click="onClickLink('/tracking')"
           >
-        </NuxtLink>
+            <IconChartLine class="w-6 h-6" />
+            <span
+              class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
+              >Meal tracking</span
+            >
+          </NuxtLink>
 
-        <NuxtLink
-          to="/community"
-          class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-          :class="{
-            'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 6 && sidebarNavigationActive,
-          }"
-          active-class="primary-gradient text-gray-800 px-3 py-2"
-          @click="onClickLink('/community')"
-        >
-          <IconUsersRound class="w-6 h-6" />
-          <span
-            class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
-            >Community</span
+          <NuxtLink
+            to="/community"
+            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
+            :class="{
+              'ring-2 ring-primary-500 ring-offset-2':
+                focusedIndex === 5 && sidebarNavigationActive,
+            }"
+            active-class="primary-gradient text-gray-800 px-3 py-2"
+            @click="onClickLink('/community')"
           >
-        </NuxtLink>
+            <IconUsersRound class="w-6 h-6" />
+            <span
+              class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
+              >Community</span
+            >
+          </NuxtLink>
+        </div>
       </div>
 
       <!-- Illustration -->
       <div
-        class="flex-shrink-0 flex items-end justify-center w-full max-w-62 self-center flex-1"
+        class="flex-shrink-0 flex items-end justify-center w-full max-w-62 self-center"
       >
-        <NuxtImg src="/ill.webp" class="w-full" alt="Illustration of a home chef" />
+        <NuxtImg
+          src="/ill.webp"
+          class="w-full"
+          alt="Illustration of a home chef"
+        />
       </div>
     </div>
   </aside>
@@ -174,13 +205,31 @@ const accountLink = computed(() => {
 });
 
 const linkPaths = computed(() => [
-  auth.isUser() ? accountLink.value : '/onboarding',
-  '/',
-  '/kitchen/home',
-  '/recipe/new',
-  '/tracking',
-  '/community',
+  {
+    linkPath: auth.isUser() ? accountLink.value : '/onboarding',
+    focusPath: auth.isUser() ? accountLink.value : '/onboarding',
+  },
+  {
+    linkPath: '/',
+  },
+  {
+    linkPath: '/kitchen/home',
+    focusPath: '/kitchen',
+  },
+  {
+    linkPath: '/recipe/new',
+    focusPath: '/recipe/new',
+  },
+  {
+    linkPath: '/tracking',
+    focusPath: '/tracking',
+  },
+  {
+    linkPath: '/community',
+    focusPath: '/community',
+  },
 ]);
+
 const focusedIndex = ref(-1);
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -191,26 +240,22 @@ const handleKeydown = (e: KeyboardEvent) => {
     );
     e.preventDefault();
     const linkPath = linkPaths.value[focusedIndex.value];
-    navigateTo(linkPath);
+    navigateTo(linkPath.linkPath);
   } else if (e.key === 'ArrowUp') {
     focusedIndex.value = Math.max(focusedIndex.value - 1, 0);
     e.preventDefault();
     const linkPath = linkPaths.value[focusedIndex.value];
-    navigateTo(linkPath);
+    navigateTo(linkPath.linkPath);
   }
 };
 
 const focusActiveLink = () => {
-  const index = linkPaths.value.indexOf(route.path);
+  const index = linkPaths.value.findIndex(
+    (path) =>
+      path.linkPath === route.path || route.path.startsWith(path.focusPath)
+  );
   if (index == -1) {
-    const startsWithIndex = linkPaths.value.findIndex(
-      (path) => path !== '/' && route.path.startsWith(path)
-    );
-    if (startsWithIndex !== -1) {
-      focusedIndex.value = startsWithIndex;
-    } else {
-      focusedIndex.value = 1;
-    }
+    focusedIndex.value = 1;
   } else {
     focusedIndex.value = index;
   }
