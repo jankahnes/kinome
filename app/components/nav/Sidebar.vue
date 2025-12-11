@@ -66,7 +66,7 @@
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
           :class="{
             'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 2 && sidebarNavigationActive,
+              focusedIndex === 1 && sidebarNavigationActive,
           }"
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/')"
@@ -82,7 +82,7 @@
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
           :class="{
             'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 4 && sidebarNavigationActive,
+              focusedIndex === 2 && sidebarNavigationActive,
             'primary-gradient text-gray-800 px-3 py-2':
               route.path.startsWith('/kitchen'),
           }"
@@ -116,12 +116,12 @@
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
           :class="{
             'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 5 && sidebarNavigationActive,
+              focusedIndex === 4 && sidebarNavigationActive,
           }"
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/tracking')"
         >
-          <IconChartLine class="w-6 h-6"/>
+          <IconChartLine class="w-6 h-6" />
           <span
             class="text-lg font-bold! tracking-tight leading-none transition-all duration-300"
             >Meal tracking</span
@@ -133,7 +133,7 @@
           class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
           :class="{
             'ring-2 ring-primary-500 ring-offset-2':
-              focusedIndex === 6 && sidebarNavigationActive,
+              focusedIndex === 5 && sidebarNavigationActive,
           }"
           active-class="primary-gradient text-gray-800 px-3 py-2"
           @click="onClickLink('/community')"
@@ -150,7 +150,11 @@
       <div
         class="flex-shrink-0 flex items-end justify-center w-full max-w-62 self-center flex-1"
       >
-        <NuxtImg src="/ill.webp" class="w-full" alt="Illustration of a home chef" />
+        <NuxtImg
+          src="/ill.webp"
+          class="w-full"
+          alt="Illustration of a home chef"
+        />
       </div>
     </div>
   </aside>
@@ -174,13 +178,31 @@ const accountLink = computed(() => {
 });
 
 const linkPaths = computed(() => [
-  auth.isUser() ? accountLink.value : '/onboarding',
-  '/',
-  '/kitchen/home',
-  '/recipe/new',
-  '/tracking',
-  '/community',
+  {
+    linkPath: auth.isUser() ? accountLink.value : '/onboarding',
+    focusPath: auth.isUser() ? accountLink.value : '/onboarding',
+  },
+  {
+    linkPath: '/',
+  },
+  {
+    linkPath: '/kitchen/home',
+    focusPath: '/kitchen',
+  },
+  {
+    linkPath: '/recipe/new',
+    focusPath: '/recipe/new',
+  },
+  {
+    linkPath: '/tracking',
+    focusPath: '/tracking',
+  },
+  {
+    linkPath: '/community',
+    focusPath: '/community',
+  },
 ]);
+
 const focusedIndex = ref(-1);
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -191,26 +213,22 @@ const handleKeydown = (e: KeyboardEvent) => {
     );
     e.preventDefault();
     const linkPath = linkPaths.value[focusedIndex.value];
-    navigateTo(linkPath);
+    navigateTo(linkPath.linkPath);
   } else if (e.key === 'ArrowUp') {
     focusedIndex.value = Math.max(focusedIndex.value - 1, 0);
     e.preventDefault();
     const linkPath = linkPaths.value[focusedIndex.value];
-    navigateTo(linkPath);
+    navigateTo(linkPath.linkPath);
   }
 };
 
 const focusActiveLink = () => {
-  const index = linkPaths.value.indexOf(route.path);
+  const index = linkPaths.value.findIndex(
+    (path) =>
+      path.linkPath === route.path || route.path.startsWith(path.focusPath)
+  );
   if (index == -1) {
-    const startsWithIndex = linkPaths.value.findIndex(
-      (path) => path !== '/' && route.path.startsWith(path)
-    );
-    if (startsWithIndex !== -1) {
-      focusedIndex.value = startsWithIndex;
-    } else {
-      focusedIndex.value = 1;
-    }
+    focusedIndex.value = 1;
   } else {
     focusedIndex.value = index;
   }

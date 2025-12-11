@@ -40,7 +40,7 @@
             </div>
           </div>
 
-          <div class="hidden md:flex flex-col items-end gap-4">
+          <div class="hidden flex-col items-end gap-4">
             <GradeContainer
               :score="report.overall.hidx"
               :type="'ovr'"
@@ -83,9 +83,9 @@
       </div>
 
       <!-- Readable Summary Cards -->
-      <div class="flex flex-wrap gap-10">
+      <div class="flex flex-wrap gap-6">
         <div
-          class="card flex-1 p-5 space-y-4 flex flex-col"
+          class="card basis-auto min-w-80 flex-1 p-5 space-y-4 flex flex-col"
           v-for="card in readableSummaryCards"
           :key="card.title"
           :class="card.class"
@@ -138,7 +138,10 @@
         </div>
 
         <!-- Detail Card: Total Vitamins -->
-        <div class="card p-5 space-y-4 flex flex-col" v-if="!props.hideNutrition">
+        <div
+          class="card basis-auto min-w-60 flex-1 p-5 space-y-4 flex flex-col"
+          v-if="!props.hideNutrition"
+        >
           <h3 class="text-xl font-bold text-gray-800">Total Vitamins</h3>
           <p class="text-sm text-gray-600 mb-3">Per Serving:</p>
           <div class="space-y-2">
@@ -181,7 +184,10 @@
         </div>
 
         <!-- Detail Card: Total Minerals -->
-        <div class="card p-5 space-y-4 flex flex-col" v-if="!props.hideNutrition">
+        <div
+          class="card basis-auto min-w-60 flex-1 p-5 space-y-4 flex flex-col"
+          v-if="!props.hideNutrition"
+        >
           <h3 class="text-xl font-bold text-gray-800">Total Minerals</h3>
           <p class="text-sm text-gray-600 mb-3">Per Serving:</p>
           <div class="space-y-2">
@@ -479,7 +485,6 @@ const mineralsRest = computed(() => sortedMinerals.value.slice(5));
   border-radius: 32px;
   border: 1px solid var(--color-slate-100);
   transition: box-shadow 0.3s ease;
-  flex-basis: 310px;
 }
 
 .percentile-badge {

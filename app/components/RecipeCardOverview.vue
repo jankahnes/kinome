@@ -23,13 +23,13 @@
         </span>
       </div>
       <div
-        class="action-card z-0 flex-1 p-10 flex gap-8 justify-between"
+        class="main-card z-0 flex-1 p-10 flex gap-8 justify-between"
         :class="{ '-ml-64! pl-76!': recipe?.picture }"
       >
         <div class="flex flex-col flex-1 max-w-3xl">
           <div class="flex justify-between items-start">
             <h1
-              class="font-bold text-6xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between "
+              class="font-bold text-6xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between"
               :class="{
                 'underline decoration-primary underline-offset-4': true,
               }"

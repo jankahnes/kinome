@@ -1,66 +1,22 @@
 <template>
   <div
-    class="action-card action-card-padding flex flex-col gap-6 items-start"
+    class="main-card main-card-padding flex flex-col gap-2 items-start"
     ref="root"
   >
-    <div class="flex flex-col items-start">
-      <div class="!pb-3">
-        <ComponentHeader title="WHAT OTHERS SAY" />
-      </div>
-      <p class="text-gray-600 ml-1 text-sm font-light">
-        {{ recipe.recipe?.comments?.length }}
-        {{ recipe.recipe?.comments?.length === 1 ? 'comment' : 'comments' }}
-      </p>
-    </div>
-    <div class="relative flex flex-col gap-1 my-4">
-      <span class="text-bold text-xl">Your Rating:</span
-      ><FormsRatingField
-        class="text-primary"
-        v-model="userRating"
-        @update:model-value="updateRating"
-        :select="true"
-        :star-width="26"
-        :star-height="26"
-        :spacing="-2"
-        :uniqueId="'950' + id"
-      ></FormsRatingField>
-    </div>
-    <div class="flex flex-wrap gap-4 w-full gap-y-8">
-      <div
-        v-if="!hasComment && auth.user"
-        class="p-2 max-w-90 w-full relative flex items-center h-max"
-      >
-        <IconPlus
-          v-if="!editingComment"
-          class="w-8 h-8 cursor-pointer"
-          @click="onClickNewComment"
-        />
-        <div class="w-full" v-else>
-          <textarea
-            v-model="newComment"
-            v-auto-resize
-            class="w-full p-2 rounded-md border-2 border-gray-300 border-dashed resize-none scrollbar-hide bg-white overflow-hidden h-auto"
-            rows="1"
-          ></textarea>
-          <div class="flex justify-between mt-1">
-            <button
-              class="py-1 px-2 bg-white text-[#FF6900] border-2 border-[#FF6900] rounded-md hover:bg-[#faf4f0] transform transition-all duration-100 focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 shadow-lg shadow-orange-200/30"
-              @click="editingComment = false"
-            >
-              Cancel
-            </button>
-            <button
-              class="py-1 px-2 bg-white text-[#FF6900] border-2 border-[#FF6900] rounded-md hover:bg-[#faf4f0] transform transition-all duration-100 focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 shadow-lg shadow-orange-200/30 disabled:opacity-50 disabled:cursor-not-allowed"
-              @click="submitComment"
-              :disabled="!newComment"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
+    <FormsRatingField
+      class="text-primary"
+      v-model="userRating"
+      @update:model-value="updateRating"
+      :select="true"
+      :star-width="26"
+      :star-height="26"
+      :spacing="-2"
+      :uniqueId="'950' + id"
+    ></FormsRatingField>
+    <PagesRecipeNewComment @submit="submitComment" />
+    <div class="flex flex-col w-full gap-4 mt-6">
       <PagesRecipeComment
-        v-for="(comment, index) in recipe.recipe?.comments"
+        v-for="(comment, index) in mockComments"
         :comment="comment"
         :id="id"
         :key="index + id"
@@ -86,31 +42,46 @@ const recipe = useRecipeStore();
 
 const userRating = ref(0);
 
-const unsubscribeAuth = ref<(() => void) | null>(null);
-
-onMounted(() => {
-  if (!unsubscribeAuth.value) {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user?.id && recipe.recipe?.id) {
-        fetchRating();
-      }
-      if (event === 'SIGNED_OUT') {
-        userRating.value = 0;
-      }
-    });
-
-    unsubscribeAuth.value = () => subscription.unsubscribe();
-  }
-});
-
-onUnmounted(() => {
-  if (unsubscribeAuth.value) {
-    unsubscribeAuth.value();
-    unsubscribeAuth.value = null;
-  }
-});
+const mockComments = [
+  {
+    user: {
+      id: '1',
+      username: 'John Doe',
+      picture: 'https://smovbezqgvxljtvdzvhp.supabase.co/storage/v1/object/public/profile//4771c2f9-d8e8-44e7-967b-74d1f4468e23.jpg',
+    },
+    content: 'Wonderful recipe!',
+    created_at: new Date().toISOString(),
+    recipe_id: 1,
+    replying_to: null,
+    user_id: '1',
+  },
+  {
+    user: {
+      id: '2',
+      username: 'Jane Doe',
+      picture: 'https://smovbezqgvxljtvdzvhp.supabase.co/storage/v1/object/public/profile//4771c2f9-d8e8-44e7-967b-74d1f4468e23.jpg',
+    },
+    content: 'I love this recipe!',
+    rating: 5,
+    created_at: new Date().toISOString(),
+    recipe_id: 1,
+    replying_to: null,
+    user_id: '2',
+  },
+  {
+    user: {
+      id: '3',
+      username: 'Jim Doe',
+      picture: 'https://smovbezqgvxljtvdzvhp.supabase.co/storage/v1/object/public/profile//4771c2f9-d8e8-44e7-967b-74d1f4468e23.jpg',
+    },
+    content: 'I hate this recipe!',
+    rating: 1,
+    created_at: new Date().toISOString(),
+    recipe_id: 1,
+    replying_to: null,
+    user_id: '3',
+  },
+];
 
 async function fetchRating() {
   const user = auth.user as any;
@@ -144,33 +115,21 @@ function updateRating(rating: number) {
   }
 }
 
-function onClickNewComment() {
-  if (auth.user) {
-    editingComment.value = true;
-  } else {
-    navigateTo('/login');
-  }
-}
-
 function submitComment() {
   const user = auth.user as any;
   if (user && recipe.recipe?.id) {
     recipe.addNewComment({
       user: user,
+      user_id: user.id,
       content: newComment.value,
       recipe_id: recipe.recipe.id,
       replying_to: null,
+      rating: userRating.value,
     });
     newComment.value = '';
     editingComment.value = false;
   }
 }
-
-function scrollIntoView() {
-  root.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-defineExpose({ scrollIntoView });
 </script>
 
 <style scoped></style>

@@ -1174,6 +1174,10 @@ export default class NutritionEngine {
         o6Percent,
         mufaPercent,
         transFatPercent: 0, // not used in score
+        o3Score,
+        o6Score,
+        mufaScore,
+        satFatScore,
       };
     }
 

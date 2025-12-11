@@ -1,5 +1,5 @@
 <template>
-  <div class="action-card action-card-padding flex flex-col items-start">
+  <div class="main-card main-card-padding flex flex-col items-start">
     <div class="flex justify-between items-center w-full gap-2 mb-2">
       <ComponentHeader title="INGREDIENTS" />
       <button
@@ -131,7 +131,7 @@
         </div>
         <div
           v-if="addingCategory"
-          class="flex items-center justify-between gap-2 w-full px-4 outline outline-gray-100 hover:outline-gray-200  rounded-lg"
+          class="flex items-center justify-between gap-2 w-full px-4 outline outline-gray-100 hover:outline-gray-200 rounded-lg"
         >
           <input
             v-model="newCategoryName"

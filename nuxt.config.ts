@@ -56,6 +56,7 @@ export default defineNuxtConfig({
       'utils/directives',
       'utils/constants',
       'utils/format/toHumanReadable',
+      'utils/nutrition',
     ],
   },
   components: [

@@ -1,7 +1,7 @@
 <template>
   <div
     ref="root"
-    class="action-card action-card-padding flex-[1_1_20rem] overflow-hidden"
+    class="main-card main-card-padding flex-[1_1_20rem] overflow-hidden"
   >
     <div class="flex flex-col items-start">
       <div v-if="!headless">

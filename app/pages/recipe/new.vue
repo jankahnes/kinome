@@ -1,6 +1,8 @@
 <template>
-  <div class="w-full px-6 md:pl-14 md:pr-30">
-    <div class="flex lg:flex-row flex-col gap-10 items-center mt-12 md:mt-20 mx-auto">
+  <div class="px-4 md:pl-14 md:pr-30 overflow-y-visible">
+    <div
+      class="flex lg:flex-row flex-col gap-10 items-center mt-12 md:mt-20 mx-auto"
+    >
       <FormsChoiceSlider
         v-if="currentView !== 'loading'"
         v-model="currentView"
@@ -14,7 +16,7 @@
           v-if="currentView === 'form'"
           :submitFromPreparsed="submitFromPreparsed"
           :submitFromNaturalLanguage="submitFromNaturalLanguage"
-          class="w-full"
+          class=""
         />
         <PagesNewRecipeImport
           v-else-if="currentView === 'import'"
@@ -28,7 +30,7 @@
         />
         <div
           v-else-if="currentView === 'loading'"
-          class="flex flex-col w-full items-center mt-[20vh] gap-6"
+          class="flex flex-col items-center mt-[20vh] gap-6"
         >
           <img src="/loading.png" class="h-8 w-8" alt="Loading icon" />
           <Transition name="fade-up">
@@ -281,14 +283,12 @@ useHead({
   opacity: 0;
   transform: translateY(10px);
 }
-.fade-up-enter-to,
-.fade-up-leave-from {
+.fade-up-enter-to {
   opacity: 1;
   transform: translateY(0);
 }
 
-.view-transition-enter-active,
-.view-transition-leave-active {
+.view-transition-enter-active {
   transition: all 0.2s ease;
 }
 .view-transition-enter-from {
@@ -296,13 +296,7 @@ useHead({
   transform: translateY(5px);
 }
 
-.view-transition-leave-to {
-  opacity: 0;
-  transform: translateY(-5px);
-}
-
-.view-transition-enter-to,
-.view-transition-leave-from {
+.view-transition-enter-to {
   opacity: 1;
   transform: translateY(0);
 }

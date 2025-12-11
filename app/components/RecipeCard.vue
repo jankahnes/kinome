@@ -54,7 +54,7 @@
     >
       <div class="pt-4 flex flex-col gap-4 justify-between h-full items-center">
         <h2
-          class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-center h-12 grid place-items-center"
+          class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-center text-balance h-12 grid place-items-center"
         >
           {{ recipe?.title }}
         </h2>

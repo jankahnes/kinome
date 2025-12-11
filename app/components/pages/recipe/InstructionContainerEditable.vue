@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="action-card action-card-padding flex flex-col items-start"
-  >
+  <div class="main-card main-card-padding flex flex-col items-start">
     <div class="flex justify-between items-center w-full mb-2">
       <ComponentHeader title="METHOD" />
       <button

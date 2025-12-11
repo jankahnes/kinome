@@ -116,11 +116,11 @@
   opacity: 0.7;
 }
 
-.action-card {
+.main-card {
   @apply bg-primary-10 rounded-4xl;
 }
 
-.action-card-padding {
+.main-card-padding {
   @apply p-4 md:p-6;
 }
 
@@ -268,6 +268,18 @@
   @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-transform duration-200 cursor-pointer select-none will-change-transform;
 }
 
+.blurred-backdrop {
+  @apply fixed inset-0 bg-black/40 backdrop-blur-xs z-150;
+}
+
+.max-w-120 {
+  @apply w-120;
+}
+
+.w-160 {
+  @apply w-160;
+}
+
 .page-slide-right-enter-active,
 .page-slide-right-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -275,21 +287,17 @@
 
 .page-slide-right-leave-from {
   opacity: 1;
-  transform: translateX(0);
 }
 .page-slide-right-leave-to {
   opacity: 0;
-  transform: translateX(10px);
 }
 
 .page-slide-right-enter-from {
   opacity: 0;
-  transform: translateX(-10px);
 }
 
 .page-slide-right-enter-to {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .sidebar-enter-active,

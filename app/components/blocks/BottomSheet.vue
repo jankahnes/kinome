@@ -12,19 +12,18 @@
       <div
         v-if="isOpen"
         ref="sheetRef"
-        class="fixed left-0 right-0 bottom-0 bg-white rounded-t-3xl z-50 flex flex-col will-change-transform sheet-content"
+        class="fixed left-0 right-0 bottom-0 bg-white rounded-t-3xl z-100 flex flex-col will-change-transform sheet-content"
         :style="sheetStyle"
-        style="touch-action: none"
         @touchstart.passive="onDragStart"
         @touchmove.prevent="onDragMove"
         @touchend.passive="onDragEnd"
         @mousedown="onDragStart"
       >
-        <div class="flex justify-center pt-3 pb-2 select-none">
+        <div class="flex justify-center pt-4 pb-3 select-none">
           <div class="w-10 h-1.5 bg-gray-300 rounded-full" />
         </div>
 
-        <div class="px-6">
+        <div ref="contentRef" class="px-4 overflow-hidden pb-6">
           <slot />
         </div>
       </div>
@@ -33,24 +32,59 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, nextTick, onMounted, onUnmounted } from 'vue';
 
 const sheetRef = ref<HTMLElement | null>(null);
-const dragOffset = ref(0);
+const contentRef = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startY = ref(0);
 const currentY = ref(0);
 
-const CLOSE_THRESHOLD = 50; // wie viele px man nach unten ziehen muss, um Sheet zu schließen
+const maxHeightVh = ref(0); // 80% of viewport height
+const contentHeight = ref(0); // Actual content height
+const currentSheetHeight = ref(0); // Current height of sheet (used during dragging)
+const baseSheetHeight = ref(0); // The "80%" height baseline
+const dragStartHeight = ref(0); // Height when drag started
+
+const dragOffsetY = ref(0); // For close gesture - translates sheet down
+
+// Velocity tracking for momentum
+const lastTouchTime = ref(0);
+const lastTouchY = ref(0);
+const velocityY = ref(0);
+const momentumRAF = ref<number | null>(null);
+
+const CLOSE_THRESHOLD = 50;
+const MAX_HEIGHT_PERCENTAGE = 0.8;
+const FRICTION = 0.98; // Deceleration factor (higher = less friction, more momentum)
+const MIN_VELOCITY = 0.1;
+
+const calculateHeights = () => {
+  maxHeightVh.value = window.innerHeight * MAX_HEIGHT_PERCENTAGE;
+
+  if (contentRef.value) {
+    // Get the actual scrollHeight of content
+    const handleHeight = 44; // pt-3 + pb-2 + handle
+    contentHeight.value = contentRef.value.scrollHeight + handleHeight;
+
+    // Base height is minimum of content or 80%
+    baseSheetHeight.value = Math.min(contentHeight.value, maxHeightVh.value);
+    currentSheetHeight.value = baseSheetHeight.value;
+  }
+};
 
 const sheetStyle = computed(() => {
-  if (isDragging.value && dragOffset.value > 0) {
-    return {
-      transform: `translateY(${dragOffset.value}px)`,
-      transition: 'none',
-    };
+  const styles: any = {
+    maxHeight: `${currentSheetHeight.value}px`,
+  };
+
+  // Apply drag offset for close gesture (dragging down)
+  if (isDragging.value && dragOffsetY.value > 0) {
+    styles.transform = `translateY(${dragOffsetY.value}px)`;
+    styles.transition = 'none';
   }
-  return {};
+
+  return styles;
 });
 
 const props = defineProps<{
@@ -69,22 +103,65 @@ const isOpen = computed({
 const open = () => {
   isOpen.value = true;
 };
+
 const close = () => {
   isOpen.value = false;
 };
 
 defineExpose({ open, close });
 
-const onDragStart = (e: TouchEvent | MouseEvent) => {
-  isDragging.value = true;
+const stopMomentum = () => {
+  if (momentumRAF.value !== null) {
+    cancelAnimationFrame(momentumRAF.value);
+    momentumRAF.value = null;
+  }
+};
 
+const applyMomentum = () => {
+  // Apply velocity to height (negative velocity = dragging up = increase height)
+  const deltaHeight = -velocityY.value * 16; // Approximate frame time
+  const newHeight = currentSheetHeight.value + deltaHeight;
+
+  // Clamp to boundaries
+  const clampedHeight = Math.max(
+    baseSheetHeight.value,
+    Math.min(newHeight, contentHeight.value)
+  );
+
+  currentSheetHeight.value = clampedHeight;
+
+  // Apply friction
+  velocityY.value *= FRICTION;
+
+  // Check if we hit boundaries - apply stronger friction/bounce
+  if (
+    clampedHeight === baseSheetHeight.value ||
+    clampedHeight === contentHeight.value
+  ) {
+    velocityY.value *= 0.5; // Extra friction at boundaries
+  }
+
+  // Continue animation
+  momentumRAF.value = requestAnimationFrame(applyMomentum);
+};
+
+const onDragStart = (e: TouchEvent | MouseEvent) => {
+  stopMomentum(); // Stop any ongoing momentum
+  isDragging.value = true;
+  dragStartHeight.value = currentSheetHeight.value; // Remember current height
+
+  const now = Date.now();
   if (e instanceof TouchEvent) {
     startY.value = e.touches[0]?.clientY ?? 0;
+    lastTouchY.value = startY.value;
   } else {
     startY.value = e.clientY;
+    lastTouchY.value = startY.value;
     document.addEventListener('mousemove', onDragMove as any);
     document.addEventListener('mouseup', onDragEnd as any);
   }
+  lastTouchTime.value = now;
+  velocityY.value = 0;
 };
 
 const onDragMove = (e: TouchEvent | MouseEvent) => {
@@ -98,9 +175,38 @@ const onDragMove = (e: TouchEvent | MouseEvent) => {
     currentY.value = e.clientY;
   }
 
-  const diff = currentY.value - startY.value;
+  const now = Date.now();
+  const deltaTime = now - lastTouchTime.value;
 
-  dragOffset.value = diff > 0 ? diff : 0;
+  if (deltaTime > 0) {
+    const deltaYMove = currentY.value - lastTouchY.value;
+    velocityY.value = deltaYMove / deltaTime; // px per ms
+  }
+
+  lastTouchY.value = currentY.value;
+  lastTouchTime.value = now;
+
+  const deltaY = currentY.value - startY.value;
+
+  if (deltaY < 0) {
+    // Dragging up - expand sheet if there's more content
+    const newHeight = dragStartHeight.value - deltaY;
+    // Cap at content height
+    currentSheetHeight.value = Math.min(newHeight, contentHeight.value);
+    dragOffsetY.value = 0;
+  } else {
+    // Dragging down
+    // Only allow down drag if we're at baseSheetHeight (80%)
+    if (dragStartHeight.value <= baseSheetHeight.value) {
+      // We're at or below 80%, allow close gesture
+      dragOffsetY.value = deltaY;
+    } else {
+      // We're expanded beyond 80%, shrink the sheet back toward 80%
+      const newHeight = dragStartHeight.value - deltaY;
+      currentSheetHeight.value = Math.max(newHeight, baseSheetHeight.value);
+      dragOffsetY.value = 0;
+    }
+  }
 };
 
 const onDragEnd = () => {
@@ -111,20 +217,48 @@ const onDragEnd = () => {
   document.removeEventListener('mousemove', onDragMove as any);
   document.removeEventListener('mouseup', onDragEnd as any);
 
-  const dragDistance = dragOffset.value;
-
-  if (dragDistance > CLOSE_THRESHOLD) {
+  // Check if we should close (dragged down from 80% position)
+  if (dragOffsetY.value > CLOSE_THRESHOLD) {
     close();
+    dragOffsetY.value = 0;
+    return;
   }
 
-  dragOffset.value = 0;
+  // Reset drag offset
+  dragOffsetY.value = 0;
+
+  // Start momentum scrolling if velocity is significant
+  if (Math.abs(velocityY.value) > MIN_VELOCITY) {
+    momentumRAF.value = requestAnimationFrame(applyMomentum);
+  }
 };
 
-watch(isOpen, (open) => {
+const resizeHandler = () => {
+  calculateHeights();
+};
+
+watch(isOpen, async (open) => {
   if (!open) {
-    dragOffset.value = 0;
+    stopMomentum();
     isDragging.value = false;
+    dragOffsetY.value = 0;
+    currentSheetHeight.value = 0;
+  } else {
+    await nextTick();
+    await nextTick(); // Double nextTick to ensure slot content is rendered
+    calculateHeights();
   }
+});
+
+onMounted(() => {
+  window.addEventListener('resize', resizeHandler);
+});
+
+onUnmounted(() => {
+  stopMomentum();
+  window.removeEventListener('resize', resizeHandler);
+  document.removeEventListener('mousemove', onDragMove as any);
+  document.removeEventListener('mouseup', onDragEnd as any);
 });
 </script>
 

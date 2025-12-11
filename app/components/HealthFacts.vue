@@ -1,5 +1,5 @@
 <template>
-  <div class="action-card action-card-padding flex-[1_1_22rem]">
+  <div class="main-card main-card-padding flex-[1_1_22rem]">
     <div class="flex flex-col lg:flex-row gap-8 h-full">
       <div class="flex-1 items-start flex flex-col">
         <div class="flex justify-between items-start w-full flex-wrap gap-4">
@@ -27,7 +27,7 @@
             class="flex gap-2 items-center py-1 px-2 rounded-lg"
             :class="`${grade.bgColor} ${grade.color}`"
           >
-            <Icon :name="grade.icon" :size="22"/>
+            <Icon :name="grade.icon" :size="22" />
             <div class="flex flex-col">
               <span class="font-semibold text-sm">{{ grade.description }}</span>
             </div>

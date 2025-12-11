@@ -1,22 +1,19 @@
 <template>
-  <div class="py-4 rounded-md relative h-max text-sm flex-[0_1_250px]">
+  <div class="rounded-md text-base">
     <div class="flex gap-4 w-full">
-      <NuxtLink
-        class="flex items-start min-w-10"
-        :to="`/profile/${comment.user.id}`"
-      >
-        <Avatar :user="comment.user" class="w-10 h-10" />
-      </NuxtLink>
-      <div class="flex-1 w-full min-w-0">
-        <div class="flex justify-between w-full items-center">
-          <span class="text-lg text-wrap">{{ comment.user.username }}</span>
-          <span class="text-[10px] text-gray-500">{{
+      <Avatar :user="comment.user" class="w-10 h-10" />
+      <div class="flex-1">
+        <div class="flex items-center gap-1">
+          <span class="font-bold text-sm">{{
+            comment.user.username
+          }}</span>
+          <span class="text-sm text-gray-400 ">{{
             timeAgo(comment.created_at)
           }}</span>
         </div>
         <FormsRatingField
           v-if="comment.rating"
-          class="-mt-[6px]"
+          class="-mt-1"
           v-model="comment.rating"
           :select="false"
           :starWidth="14"
@@ -24,7 +21,7 @@
           :uniqueId="comment.id?.toString() ?? '' + id"
         />
         <div
-          class="mt-2 overflow-hidden break-words"
+          class="overflow-hidden break-words mt-1"
           v-if="!isEditing(comment.id ?? 0)"
         >
           {{ comment.content }}
@@ -59,14 +56,14 @@
         </div>
         <div
           v-if="!isEditing(comment.id ?? 0)"
-          class="flex gap-2 mt-1 text-gray-500"
+          class="flex gap-2 mt-1 text-gray-600"
         >
           <div
             v-if="auth?.user && !replying"
-            class="text-[10px] cursor-pointer select-none"
+            class="text-xs font-bold cursor-pointer select-none"
             @click="replying = true"
           >
-            Add Reply
+            Reply
           </div>
           <div
             v-if="auth?.user?.id == comment.user_id"

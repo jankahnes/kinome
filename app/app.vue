@@ -1,8 +1,6 @@
 <template>
-  <div
-    class="min-h-svh bg-[#f5eeee] font-main overflow-x-hidden"
-    ref="swipeContainer"
-  >
+  <div class="min-h-svh bg-[#f5eeee] font-main" ref="swipeContainer">
+    <Analytics />
     <div class="relative" @click="handleClickOutside">
       <Transition name="sidebar">
         <div
@@ -29,7 +27,7 @@
       <!-- Toggle button in blob notch -->
       <button
         @click.stop="toggleSidebar"
-        class="hidden lg:flex text-2xl! fixed z-[100] text-white hover:text-primary transition-all duration-300 w-8 h-8 items-center justify-center cursor-pointer top-[11%] -translate-y-1/2"
+        class="hidden lg:flex text-2xl! fixed z-100 text-white hover:text-primary transition-all duration-300 w-8 h-8 items-center justify-center cursor-pointer top-[11%] -translate-y-1/2"
         :class="[
           buttonMarginLeft,
           sidebarOpen && !sidebarExpanded
@@ -42,7 +40,7 @@
           class="transition-all duration-300 inline-block leading-none"
         />
       </button>
-      <div class="flex-1 flex flex-col min-h-svh overflow-x-hidden">
+      <div class="flex-1 flex flex-col min-h-svh">
         <div
           class="transition-all duration-300 flex-1 flex flex-col"
           :class="pageMarginLeft"
@@ -61,6 +59,7 @@
 <script setup lang="ts">
 //import { useDrag } from '@vueuse/gesture';
 const auth = useAuthStore();
+import { Analytics } from '@vercel/analytics/vue';
 
 //init sidebar state using header heuristic
 const headers = useRequestHeaders();
@@ -68,14 +67,6 @@ const userAgent = headers['user-agent'] || navigator.userAgent;
 const isMobile = /iphone|android.+mobile|ipad|ipod/i.test(userAgent || '');
 
 const sidebarOpen = ref(!isMobile);
-
-if (!import.meta.client) {
-  console.log(
-    'INFO: Rendered ' +
-      (sidebarOpen.value ? 'WITH' : 'WITHOUT') +
-      ' sidebar on SSR'
-  );
-}
 
 const sidebarExpanded = ref(false);
 const sidebarRef = ref<HTMLElement | null>(null);

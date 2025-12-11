@@ -111,7 +111,15 @@
                 }"
                 class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 button m-1"
               >
-                <span class="text-xl">{{ cuisine.icon }}</span>
+                <span class="flex gap-0.5 rounded-4xl overflow-hidden">
+                  <img
+                    v-for="flag in cuisine.flags"
+                    :key="flag"
+                    :src="`/flags/${flag}.svg`"
+                    :alt="flag"
+                    class="h-5 w-auto"
+                  />
+                </span>
                 <span
                   class="text-sm sm:text-base sm:tracking-wider text-nowrap"
                   >{{ cuisine.name }}</span
@@ -261,23 +269,23 @@ const categories = ref([
 ]);
 
 const cuisines = ref([
-  { name: 'Italian', icon: '🇮🇹', tag: 302 },
-  { name: 'German', icon: '🇩🇪', tag: 303 },
-  { name: 'American', icon: '🇺🇸', tag: 304 },
-  { name: 'Vietnamese', icon: '🇻🇳', tag: 305 },
-  { name: 'Chinese', icon: '🇨🇳', tag: 306 },
-  { name: 'Japanese', icon: '🇯🇵', tag: 307 },
-  { name: 'French', icon: '🇫🇷', tag: 308 },
-  { name: 'British', icon: '🇬🇧', tag: 309 },
-  { name: 'Indian', icon: '🇮🇳', tag: 310 },
-  { name: 'Spanish', icon: '🇪🇸', tag: 311 },
-  { name: 'Middle Eastern', icon: '🌍', tag: 312 },
-  { name: 'Thai', icon: '🇹🇭', tag: 313 },
-  { name: 'Mediterranean', icon: '🌊', tag: 314 },
-  { name: 'Greek', icon: '🇬🇷', tag: 315 },
-  { name: 'Turkish', icon: '🇹🇷', tag: 316 },
-  { name: 'Korean', icon: '🇰🇷', tag: 321 },
-  { name: 'Mexican', icon: '🇲🇽', tag: 326 },
+  { name: 'Italian', flags: ['it'], tag: 302 },
+  { name: 'German', flags: ['de'], tag: 303 },
+  { name: 'American', flags: ['us'], tag: 304 },
+  { name: 'Vietnamese', flags: ['vn'], tag: 305 },
+  { name: 'Chinese', flags: ['cn'], tag: 306 },
+  { name: 'Japanese', flags: ['jp'], tag: 307 },
+  { name: 'French', flags: ['fr'], tag: 308 },
+  { name: 'British', flags: ['gb'], tag: 309 },
+  { name: 'Indian', flags: ['in'], tag: 310 },
+  { name: 'Spanish', flags: ['es'], tag: 311 },
+  { name: 'Middle Eastern', flags: ['lb', 'tr', 'jo'], tag: 312 },
+  { name: 'Thai', flags: ['th'], tag: 313 },
+  { name: 'Mediterranean', flags: ['gr', 'it', 'es'], tag: 314 },
+  { name: 'Greek', flags: ['gr'], tag: 315 },
+  { name: 'Turkish', flags: ['tr'], tag: 316 },
+  { name: 'Korean', flags: ['kr'], tag: 321 },
+  { name: 'Mexican', flags: ['mx'], tag: 326 },
 ]);
 
 const selectedSorting = ref('Relevancy');
@@ -604,7 +612,12 @@ async function onSelect(button: string) {
   }
 }
 
-function toggleTag(item: { name: string; icon: string; tag: number }) {
+function toggleTag(item: {
+  name: string;
+  icon?: string;
+  flags?: string[];
+  tag: number;
+}) {
   const index = filteringTags.value.indexOf(item.tag);
   if (index > -1) {
     // Remove tag

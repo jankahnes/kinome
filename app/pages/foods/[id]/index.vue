@@ -1,38 +1,38 @@
 <template>
-  <div class="mb-20 m-4 lg:m-10 lg:ml-16">
+  <div class="mb-20 m-4 lg:m-10 lg:ml-16" v-if="food">
     <p class="text-lg m-4">
       <NuxtLink to="/" class="text-gray-500">Home</NuxtLink> >
       <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> >
-      <span class="font-bold">{{ foodName.name }}</span>
+      <span class="font-bold">{{ foodName }}</span>
     </p>
     <div class="flex flex-col 2xl:flex-row gap-6">
-      <div class="contents 2xl:flex 2xl:flex-col gap-6 lg:flex-1">
+      <div class="contents xl:flex flex-col gap-6 lg:flex-1">
         <div
-          class="action-card p-4 xl:pr-10 flex gap-4 xl:gap-8 flex-col xl:flex-row order-1 2xl:order-none"
+          class="main-card p-4 xl:pr-10 flex gap-4 xl:gap-8 flex-col xl:flex-row order-1 xl:order-none"
         >
           <div class="relative xl:basis-1/3">
             <img
               class="w-full h-full object-cover rounded-4xl"
               src="/blurred-backdrop.webp"
-              :alt="foodName.name"
+              :alt="foodName"
             />
 
             <div
               class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white w-[45%] aspect-square flex items-center justify-center"
             >
               <img
-                :src="`/foods/${food.visual_category ?? 'herb_fresh'}.webp`"
+                :src="`/foods/${food?.visual_category ?? 'herb_fresh'}.webp`"
                 class="h-[60%] object-contain"
-                :alt="(food.visual_category ?? 'herb_fresh') + ' illustration'"
+                :alt="(food?.visual_category ?? 'herb_fresh') + ' illustration'"
               />
             </div>
           </div>
           <div class="flex-1 flex flex-col my-4 gap-4">
             <div class="flex justify-between items-start">
               <div class="">
-                <h1 class="text-4xl font-bold">{{ foodName.name }}</h1>
+                <h1 class="text-5xl font-bold">{{ foodName }}</h1>
                 <p class="text-xs text-gray-400">
-                  {{ food.aisle.toUpperCase() || 'Food' }}
+                  {{ food?.aisle?.toUpperCase() || 'Food' }}
                 </p>
               </div>
               <div
@@ -45,11 +45,14 @@
               </div>
             </div>
 
-            <p v-if="food.description" class="text-lg hidden 2xl:block leading-normal">
+            <p
+              v-if="food?.description"
+              class="text-lg hidden 2xl:block leading-normal"
+            >
               {{ food.description }}
             </p>
             <p
-              v-if="food.description"
+              v-if="food?.description"
               class="text-lg block 2xl:hidden leading-snug"
             >
               {{
@@ -70,57 +73,212 @@
             </div>
           </div>
         </div>
-        <div class="action-card p-6 flex flex-col gap-4 order-3 2xl:order-none">
-          <!-- Tabs -->
-          <div class="flex gap-2 mb-2 flex-wrap">
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 bg-primary-10"
-              :class="{ 'bg-primary!': activeTab === 'summary' }"
-              @click="activeTab = 'summary'"
+        <div
+          class="space-y-2 order-2 xl:order-none"
+          v-if="nutritionHighlights.length > 0"
+        >
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Nutrition Highlights
+          </h2>
+          <div class="flex flex-wrap gap-2 md:gap-4">
+            <div
+              v-for="highlight in nutritionHighlights"
+              :key="highlight.title"
+              class="bg-primary-10 flex flex-col p-2 md:p-4 rounded-4xl items-center flex-1 basis-auto sm:basis-1/4"
             >
-              Summary
-            </button>
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 bg-primary-10"
-              :class="{ 'bg-primary!': activeTab === 'full-health-analysis' }"
-              @click="activeTab = 'full-health-analysis'"
-            >
-              Full Health Analyis
-            </button>
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 bg-primary-10"
-              :class="{ 'bg-primary!': activeTab === 'full-nutrition' }"
-              @click="activeTab = 'full-nutrition'"
-            >
-              Full Nutrition
-            </button>
-          </div>
-
-          <!-- Summary -->
-          <div v-show="activeTab === 'summary'">
-            <!-- Nutrition Facts Component -->
-
-            <div class="flex gap-x-4 gap-y-12 flex-col lg:flex-row">
-              <FoodNutritionFacts
-                :food="food"
-                :portionMultiplier="portionMultiplier"
-                :foodName="foodName.name ?? ''"
-                :referencingName="refencingName"
+              <NuxtImg
+                :src="`/nutrition-highlights/${highlight.illustration}`"
+                :alt="highlight.title"
+                class="w-14 h-14 object-contain"
               />
-              <div class="w-px h-full bg-gray-200 hidden lg:block"></div>
-              <!-- Health Summary Component -->
-              <FoodHealthSummary :food="food" />
-            </div>
-            <div class="flex flex-wrap gap-2 mt-4">
-              <div
-                v-for="pill in bottomMetaPillsGeneric"
-                :key="pill.text"
-                :class="pill.class"
-                class="flex items-center gap-2 rounded-4xl px-4 py-1"
+              <span
+                class="text-lg font-bold tracking-tighter leading-none mt-1"
+                >{{ highlight.title }}</span
               >
-                <Icon :name="pill.icon" :size="20" />
-                <span>{{ pill.text }}</span>
+              <span
+                class="text-sm text-gray-600 text-center px-2"
+                v-if="highlight.subtitle"
+              >
+                {{ highlight.subtitle }}
+              </span>
+              <div
+                class="px-3 py-0.5 rounded-full text-sm font-semibold mt-2"
+                :class="highlight.background"
+              >
+                {{ highlight.rating }}
               </div>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-2 order-3 xl:order-none">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Nutrition Overview
+          </h2>
+          <div class="space-y-2 main-card p-6 order-2 2xl:order-none">
+            <div class="flex flex-col lg:flex-row gap-8">
+              <div class="flex flex-col flex-1 justify-between">
+                <div class="flex flex-col">
+                  <div class="flex gap-2 justify-between">
+                    <div class="flex flex-col flex-1 gap-1">
+                      <div class="flex justify-between">
+                        <span class="text-8xl font-bold leading-14">
+                          <RollingNumber
+                            :number="scaledFood?.kcal ?? 0"
+                            class="inline-block"
+                            :refDist="35"
+                          />
+                          <span class="text-xl text-gray-500">kcal</span>
+                        </span>
+                        <Ring
+                          class="block lg:hidden w-14 h-14"
+                          :segments="[
+                            {
+                              value: macroRingPercentages?.carbsPercent ?? 0,
+                              color: 'stroke-carbs',
+                            },
+                            {
+                              value: macroRingPercentages?.proteinPercent ?? 0,
+                              color: 'stroke-protein',
+                            },
+                            {
+                              value: macroRingPercentages?.fatPercent ?? 0,
+                              color: 'stroke-fat',
+                            },
+                          ]"
+                          :strokeWidth="16"
+                        />
+                      </div>
+                      <div class="items-center gap-2 hidden lg:flex">
+                        <div class="bg-carbs px-2 py-1 rounded-4xl">
+                          <RollingNumber
+                            :number="scaledFood?.carbohydrates ?? 0"
+                            class="inline-block"
+                          />
+                          <span>g Carbs</span>
+                        </div>
+                        <div class="bg-protein px-2 py-1 rounded-4xl">
+                          <RollingNumber
+                            :number="scaledFood?.protein ?? 0"
+                            class="inline-block"
+                          />
+                          <span>g Protein</span>
+                        </div>
+                        <div class="bg-fat px-2 py-1 rounded-4xl">
+                          <RollingNumber
+                            :number="scaledFood?.fat ?? 0"
+                            class="inline-block"
+                          />
+                          <span>g Fat</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span>
+                      <Ring
+                        class="hidden lg:block w-24 h-24"
+                        :segments="[
+                          {
+                            value: macroRingPercentages?.carbsPercent ?? 0,
+                            color: 'stroke-carbs',
+                          },
+                          {
+                            value: macroRingPercentages?.proteinPercent ?? 0,
+                            color: 'stroke-protein',
+                          },
+                          {
+                            value: macroRingPercentages?.fatPercent ?? 0,
+                            color: 'stroke-fat',
+                          },
+                        ]"
+                        :strokeWidth="16"
+                      />
+                    </span>
+                  </div>
+                  <div
+                    class="flex flex-wrap gap-2 mt-6"
+                    :class="{
+                      'max-h-8.5 overflow-hidden': !servingPillsExpanded,
+                    }"
+                  >
+                    <button
+                      class="animated-button border border-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10"
+                      :class="{
+                        'bg-primary! text-white': selectedUnit === '100g',
+                      }"
+                      @click="selectedUnit = '100g'"
+                    >
+                      <span>100g</span>
+                    </button>
+                    <button
+                      class="animated-button border border-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10"
+                      :class="{
+                        'bg-primary! text-white': selectedUnit === unit,
+                      }"
+                      v-for="unit in Object.keys(food?.countable_units ?? {})"
+                      :key="unit"
+                      @click="selectedUnit = unit"
+                    >
+                      <span
+                        >{{
+                          unit ? capitalize(unit) : '1 ' + capitalize(foodName)
+                        }}
+                        ({{ food?.countable_units?.[unit] ?? 100 }}g)</span
+                      >
+                    </button>
+                  </div>
+                  <button
+                    class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10 self-start mt-2"
+                    @click="servingPillsExpanded = !servingPillsExpanded"
+                  >
+                    <span>{{
+                      servingPillsExpanded ? 'Show less' : 'Show more'
+                    }}</span>
+                  </button>
+                  <div class="flex items-center gap-2 flex-wrap mt-2">
+                    <button
+                      class="animated-button rounded-4xl px-4 py-1 flex items-center gap-2 bg-slate-100"
+                    >
+                      <IconPlus class="w-5" />
+                      <span>Shopping List</span>
+                    </button>
+                    <button
+                      class="animated-button rounded-4xl px-4 py-1 flex items-center gap-2 bg-slate-100"
+                    >
+                      <IconChartLine class="w-5" />
+                      <span>Track for today</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2 mt-4">
+                  <div class="flex flex-wrap gap-2">
+                    <div
+                      v-for="pill in bottomMetaPillsGeneric.slice(0, 2)"
+                      :key="pill.text"
+                      :class="pill.class"
+                      class="flex items-center gap-2 rounded-4xl px-4 py-1"
+                    >
+                      <Icon :name="pill.icon" :size="20" />
+                      <span>{{ pill.text }}</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <div
+                      v-for="pill in bottomMetaPillsGeneric.slice(2)"
+                      :key="pill.text"
+                      :class="pill.class"
+                      class="flex items-center gap-2 rounded-4xl px-4 py-1"
+                    >
+                      <Icon :name="pill.icon" :size="20" />
+                      <span>{{ pill.text }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <FoodNutritionFacts
+                :computable="food"
+                :portionMultiplier="portionMultiplier"
+                :referencingName="refencingName"
+                class="flex-1"
+              />
             </div>
             <div class="flex flex-wrap gap-2 mt-2">
               <div
@@ -134,186 +292,64 @@
               </div>
             </div>
           </div>
-
-          <!-- Full Nutrition -->
-          <div v-show="activeTab === 'full-nutrition'">
-            <FoodFullNutritionFacts
-              :food="food"
-              :portionMultiplier="portionMultiplier"
-            />
-          </div>
-
-          <!-- Full Health Analysis -->
-          <div v-show="activeTab === 'full-health-analysis'">
-            <PagesReport :id="id ?? ''" :isFood="true" :hideNutrition="true" />
-          </div>
         </div>
       </div>
-      <div class="contents 2xl:flex 2xl:flex-col gap-6 lg:basis-1/3">
-        <!-- Overview & Controls Card -->
-        <div class="action-card p-6 flex flex-col order-2 2xl:order-none">
-          <div class="flex flex-wrap gap-2">
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10"
-              :class="{ 'bg-primary! text-white': selectedUnit === '100g' }"
-              @click="selectedUnit = '100g'"
-            >
-              <span>100g</span>
-            </button>
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10"
-              :class="{
-                'bg-primary! text-white': selectedUnit === unit,
-              }"
-              v-for="unit in Object.keys(food.countable_units ?? {})"
-              :key="unit"
-              @click="selectedUnit = unit"
-            >
-              <span
-                >{{
-                  unit ? capitalize(unit) : '1 ' + capitalize(foodName.name)
-                }}
-                ({{ food.countable_units?.[unit] ?? 100 }}g)</span
-              >
-            </button>
-          </div>
-          <div class="w-full h-px bg-gray-200 my-6"></div>
-          <div class="flex gap-2 justify-between">
-            <div class="flex flex-col flex-1 gap-1">
-              <div class="flex justify-between">
-                <span class="text-8xl font-bold leading-14">
-                  <RollingNumber
-                    :number="scaledFood?.kcal ?? 0"
-                    class="inline-block"
-                    :refDist="35"
-                  />
-                  <span class="text-xl text-gray-500">kcal</span>
-                </span>
-                <Ring
-                  class="block lg:hidden w-14 h-14"
-                  :segments="[
-                    {
-                      value: macroRingPercentages?.carbsPercent ?? 0,
-                      color: 'stroke-carbs',
-                    },
-                    {
-                      value: macroRingPercentages?.proteinPercent ?? 0,
-                      color: 'stroke-protein',
-                    },
-                    {
-                      value: macroRingPercentages?.fatPercent ?? 0,
-                      color: 'stroke-fat',
-                    },
-                  ]"
-                  :strokeWidth="16"
-                />
-              </div>
-              <div class="items-center gap-2 hidden lg:flex">
-                <div class="bg-carbs px-2 py-1 rounded-4xl">
-                  <RollingNumber
-                    :number="scaledFood?.carbohydrates ?? 0"
-                    class="inline-block"
-                  />
-                  <span>g Carbs</span>
-                </div>
-                <div class="bg-protein px-2 py-1 rounded-4xl">
-                  <RollingNumber
-                    :number="scaledFood?.protein ?? 0"
-                    class="inline-block"
-                  />
-                  <span>g Protein</span>
-                </div>
-                <div class="bg-fat px-2 py-1 rounded-4xl">
-                  <RollingNumber
-                    :number="scaledFood?.fat ?? 0"
-                    class="inline-block"
-                  />
-                  <span>g Fat</span>
-                </div>
-              </div>
-            </div>
-            <span>
-              <Ring
-                class="hidden lg:block w-24 h-24"
-                :segments="[
-                  {
-                    value: macroRingPercentages?.carbsPercent ?? 0,
-                    color: 'stroke-carbs',
-                  },
-                  {
-                    value: macroRingPercentages?.proteinPercent ?? 0,
-                    color: 'stroke-protein',
-                  },
-                  {
-                    value: macroRingPercentages?.fatPercent ?? 0,
-                    color: 'stroke-fat',
-                  },
-                ]"
-                :strokeWidth="16"
-              />
-            </span>
-          </div>
-          <div class="flex items-center gap-2 mt-8 flex-wrap">
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10"
-            >
-              <IconPlus class="w-5" />
-              <span>Shopping List</span>
-            </button>
-            <button
-              class="animated-button ring ring-primary rounded-4xl px-4 py-1 flex items-center gap-2 bg-primary-10"
-            >
-              <IconChartLine class="w-5" />
-              <span>Track for today</span>
-            </button>
-          </div>
-        </div>
+      <div class="contents xl:flex xl:flex-col gap-6 lg:basis-1/3">
         <!-- Healthy Swaps Card -->
         <div
-          class="action-card p-6 flex flex-col gap-2 order-4 2xl:order-none"
-          v-if="food.suggested_swaps.length > 0"
+          class="space-y-2 order-4 xl:order-none"
+          v-if="(food as any)?.suggested_swaps && (food as any).suggested_swaps.length > 0"
         >
-          <h2 class="text-2xl font-bold mb-4">Healthy Swaps</h2>
-          <div
-            class="flex gap-4 justify-between items-center cursor-pointer hover:bg-slate-100 rounded-2xl p-1"
-            v-for="swap in food.suggested_swaps"
-            @click="navigateTo(getFoodUrl(swap.id, swap.name))"
-            :key="swap.id"
-          >
-            <div class="flex gap-3 items-center">
-              <div
-                class="w-12 h-12 rounded-2xl flex items-center justify-center"
-                :class="gradeColors[getGrade(swap.hidx, 'ovr')]"
-              >
-                <span class="text-2xl font-bold leading-none">{{
-                  getGrade(swap.hidx, 'ovr')
-                }}</span>
-              </div>
-              <div class="flex flex-col">
-                <p class="text-lg font-bold leading-none">{{ swap.name }}</p>
-                <span
-                  class="text-sm text-gray-500 leading-none flex items-center gap-1"
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Healthy Swaps
+          </h2>
+          <div class="main-card p-6 flex flex-col gap-2 order-4 2xl:order-none">
+            <div
+              class="flex gap-4 justify-between items-center cursor-pointer hover:bg-slate-100 rounded-2xl p-1"
+              v-for="swap in (food as any)?.suggested_swaps"
+              @click="navigateTo(getFoodUrl(swap.id, swap.name))"
+              :key="swap.id"
+            >
+              <div class="flex gap-3 items-center">
+                <div
+                  class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                  :class="gradeColors[getGrade(swap.hidx, 'ovr')]"
                 >
-                  <IconChevronsUp class="w-4" />
-                  <span>{{ getSwapReason(swap) }}</span>
-                </span>
+                  <span class="text-2xl font-bold leading-none">{{
+                    getGrade(swap.hidx, 'ovr')
+                  }}</span>
+                </div>
+                <div class="flex flex-col">
+                  <p class="text-lg font-bold leading-none">{{ swap.name }}</p>
+                  <span
+                    class="text-sm text-gray-500 leading-none flex items-center gap-1"
+                  >
+                    <IconChevronsUp class="w-4" />
+                    <span>{{ getSwapReason(swap) }}</span>
+                  </span>
+                </div>
               </div>
+              <IconArrowLeftRight class="w-5 mr-2" />
             </div>
-            <IconArrowLeftRight class="w-5 mr-2" />
           </div>
         </div>
+
         <!-- Found in Card -->
         <div
-          class="action-card p-6 flex flex-col order-5 2xl:order-none gap-2"
-          v-if="containedInRecipes.length > 0"
+          class="space-y-2 order-5 xl:order-none"
+          v-if="containedInRecipes?.length"
         >
-          <h2 class="text-2xl font-bold mb-2">Found in</h2>
-          <RecipeCardHorizontal
-            v-for="recipe in containedInRecipes"
-            :key="recipe.id"
-            :recipe="recipe"
-            class="text-[22px] lg:text-[30px]"
-          />
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Found in
+          </h2>
+          <div class="main-card p-6 flex flex-col order-5 2xl:order-none gap-2">
+            <RecipeCardHorizontal
+              v-for="recipe in containedInRecipes"
+              :key="recipe.id"
+              :recipe="recipe"
+              class="text-[22px] lg:text-[30px]"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -332,37 +368,44 @@ const supabase = useSupabaseClient<Database>();
 
 const activeTab = ref('summary');
 const selectedUnit = ref('100g');
-
-const foodName = await getFoodName(supabase, { eq: { id: Number(id) } });
-
-const food = foodName.food;
-
 const mobileDescExpanded = ref(false);
+
+const { data: foodData } = await useAsyncData(
+  `food-details-${id}`,
+  () => getFoodName(supabase, { eq: { id: Number(id) } }),
+  {
+    lazy: import.meta.client,
+  }
+);
+
+const foodName = computed(() => foodData.value?.name || '');
+const isPrimary = computed(() => foodData.value?.is_primary ?? false);
+const food = computed(() => foodData.value?.food);
+
+const servingPillsExpanded = ref(false);
 
 // Get the swap reason by comparing scores
 function getSwapReason(swap: NonNullable<Food['suggested_swaps']>[0]): string {
-  if (!food) return '';
+  if (!food.value) return '';
 
   const categories = [
-    { key: 'fiber_score', label: 'More Fiber', reverse: false },
-    { key: 'protein_score', label: 'More Protein', reverse: false },
-    { key: 'fat_profile_score', label: 'Better Fats', reverse: false },
-    { key: 'salt_score', label: 'Less Salt', reverse: true },
-    { key: 'sugar_score', label: 'Less Sugar', reverse: true },
-    { key: 'satiety', label: 'More Satiating', reverse: false },
-    { key: 'mnidx', label: 'More Nutrients', reverse: false },
-    { key: 'protective_score', label: 'More Antioxidants', reverse: false },
+    { key: 'fiber_score', label: 'More Fiber'},
+    { key: 'protein_score', label: 'More Protein'},
+    { key: 'fat_profile_score', label: 'Better Fats'},
+    { key: 'salt_score', label: 'Less Salt'},
+    { key: 'sugar_score', label: 'Less Sugar'},
+    { key: 'satiety', label: 'Less Calories'},
+    { key: 'mnidx', label: 'More Nutrients'},
+    { key: 'protective_score', label: 'More Antioxidants'},
   ] as const;
 
   let maxDiff = -Infinity;
   let bestCategory = '';
 
   for (const category of categories) {
-    const currentValue = (food as any)[category.key] ?? 0;
+    const currentValue = (food.value as any)[category.key] ?? 0;
     const swapValue = swap[category.key] ?? 0;
-    const diff = category.reverse
-      ? currentValue - swapValue
-      : swapValue - currentValue;
+    const diff = swapValue - currentValue;
 
     if (diff > maxDiff && diff > 5) {
       maxDiff = diff;
@@ -375,7 +418,7 @@ function getSwapReason(swap: NonNullable<Food['suggested_swaps']>[0]): string {
 
 const portionMultiplier = computed(() => {
   if (selectedUnit.value === '100g') return 1;
-  return (food.countable_units?.[selectedUnit.value] ?? 100) / 100;
+  return (food.value?.countable_units?.[selectedUnit.value] ?? 100) / 100;
 });
 
 const bottomMetaGenerics: (keyof FullFoodRow)[] = [
@@ -386,52 +429,54 @@ const bottomMetaGenerics: (keyof FullFoodRow)[] = [
 ];
 
 const bottomMetaPillsGeneric = computed(() => {
+  if (!food.value) return [];
   const pills = [];
   for (const generic of bottomMetaGenerics) {
     const formattedGeneric = capitalize(generic.replace('_', ' '));
     pills.push({
-      text: food[generic] ? formattedGeneric : `Not ${formattedGeneric}`,
-      class: food[generic] ? 'bg-green-200' : 'bg-red-200',
-      icon: food[generic] ? 'check' : 'x',
+      text: food.value[generic] ? formattedGeneric : `Not ${formattedGeneric}`,
+      class: food.value[generic] ? 'bg-green-200' : 'bg-red-200',
+      icon: food.value[generic] ? 'check' : 'x',
     });
   }
   return pills;
 });
 
 const bottomMetaPillsSpecific = computed(() => {
+  if (!food.value) return [];
   const pills = [];
   pills.push({
-    text: `NOVA Classification: ${food.nova}`,
+    text: `NOVA Classification: ${food.value.nova}`,
     class: 'bg-slate-200',
     icon: 'factory',
   });
   pills.push({
-    text: `Estimated Price: ${formatMoney(food.price)}/100g`,
+    text: `Estimated Price: ${formatMoney(food.value.price)}/100g`,
     class: 'bg-slate-200',
     icon: 'banknote',
   });
   pills.push({
-    text: `Density: ${food.density} g/ml`,
+    text: `Density: ${food.value.density} g/ml`,
     class: 'bg-slate-200',
     icon: 'weight',
   });
   return pills;
 });
 
-const containedInRecipes = ref<RecipeOverview[]>([]);
-
-getRecipesContaining(supabase, [Number(id)]).then((recipes) => {
-  containedInRecipes.value = recipes;
-});
+// Load recipes containing this food - non-blocking
+const { data: containedInRecipes } = useAsyncData(
+  `recipes-containing-${id}`,
+  () => getRecipesContaining(supabase, [Number(id)])
+);
 
 // Scaled food values for display in overview card
 const scaledFood = computed(() => {
-  if (!food) return null;
+  if (!food.value) return null;
   return {
-    kcal: food.kcal * portionMultiplier.value,
-    carbohydrates: food.carbohydrates * portionMultiplier.value,
-    protein: food.protein * portionMultiplier.value,
-    fat: food.fat * portionMultiplier.value,
+    kcal: food.value.kcal * portionMultiplier.value,
+    carbohydrates: food.value.carbohydrates * portionMultiplier.value,
+    protein: food.value.protein * portionMultiplier.value,
+    fat: food.value.fat * portionMultiplier.value,
   };
 });
 
@@ -453,32 +498,49 @@ const macroRingPercentages = computed(() => {
   return percentages;
 });
 
-const refencingName = foodName.is_primary ? null : food?.primary_name ?? '';
+const refencingName = computed(() =>
+  isPrimary.value ? null : food.value?.primary_name ?? ''
+);
 
-//redirect from non-slugified URL to slugified URL
-if (foodName.name && !paramValue.includes('-')) {
-  navigateTo(getFoodUrl(Number(id), foodName.name), { replace: true });
-}
+// Redirect from non-slugified URL to slugified URL
+watchEffect(() => {
+  if (foodName.value && !paramValue.includes('-')) {
+    navigateTo(getFoodUrl(Number(id), foodName.value), { replace: true });
+  }
+});
 
-const healthGrade = food.hidx ? getGrade(food.hidx, 'ovr') : null;
+// SEO meta data - computed for reactive updates
+const healthGrade = computed(() =>
+  food.value?.hidx ? getGrade(food.value.hidx, 'ovr') : null
+);
 
-const description = `${foodName.name} nutrition facts: ${food.kcal} kcal/100g, HealthScore: ${healthGrade}. Discover in-depth nutritional analyis and healthy alternatives.`;
-const foodUrl = `https://kinome.app${getFoodUrl(Number(id), foodName.name)}`;
+const description = computed(
+  () =>
+    `${foodName.value} nutrition facts: ${food.value?.kcal} kcal/100g, Nutrition Quality: ${healthGrade.value}. Discover in-depth nutritional analyis and healthy alternatives.`
+);
 
-useHead({
-  title: `${foodName.name} - Complete Nutrition Facts & Analysis`,
+const foodUrl = computed(
+  () => `https://kinome.app${getFoodUrl(Number(id), foodName.value)}`
+);
+
+const nutritionHighlights = computed(() => {
+  return getNutritionHighlightCards(food.value);
+});
+
+useHead(() => ({
+  title: `${foodName.value} - Complete Nutrition Facts & Analysis`,
   meta: [
     {
       name: 'description',
-      content: description.slice(0, 160),
+      content: description.value.slice(0, 160),
     },
     {
       property: 'og:title',
-      content: `${foodName.name} - Complete Nutrition Facts & Analysis`,
+      content: `${foodName.value} - Complete Nutrition Facts & Analysis`,
     },
     {
       property: 'og:description',
-      content: description.slice(0, 200),
+      content: description.value.slice(0, 200),
     },
     {
       property: 'og:type',
@@ -486,14 +548,14 @@ useHead({
     },
     {
       property: 'og:url',
-      content: foodUrl,
+      content: foodUrl.value,
     },
   ],
   link: [
     {
       rel: 'canonical',
-      href: foodUrl,
+      href: foodUrl.value,
     },
   ],
-});
+}));
 </script>
