@@ -18,7 +18,7 @@
 
       <div class="z-0 h-full flex-1">
         <div
-          class="bg-primary-10 -ml-38 pl-44 md:-ml-64 md:pl-74 pr-4 md:pr-10 py-4 md:py-10 rounded-4xl h-full flex flex-col gap-2 md:gap-3"
+          class="main-card -ml-38 pl-44 md:-ml-64 md:pl-74 pr-4 md:pr-10 py-4 md:py-10 rounded-4xl h-full flex flex-col gap-2 md:gap-3"
         >
           <h2
             class="font-bold text-3xl md:text-5xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-none md:leading-14 max-w-2xl"
@@ -61,7 +61,7 @@
           </p>
           <div class="flex flex-col flex-1 gap-2 justify-end items-start">
             <PagesRecipeSourceTypeTag
-              class="hidden md:inline-flex !rounded-full text-sm flex-shrink-0 px-2 py-0.5 bg-slate-100"
+              class="hidden md:inline-flex !rounded-full text-sm flex-shrink-0 px-2 py-0.5 bg-secondary"
               :sourceType="recipe.source_type"
               :collection="recipe.collection ?? ''"
               :source="recipe.source ?? ''"
@@ -71,7 +71,7 @@
               class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-xs md:text-sm"
             >
               <div
-                class="tag flex items-center justify-center text-nowrap bg-slate-50"
+                class="tag flex items-center justify-center text-nowrap bg-secondary"
                 v-for="(tag, index) in top3Tags"
                 :key="index"
               >

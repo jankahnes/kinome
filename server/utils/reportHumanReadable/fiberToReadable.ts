@@ -39,7 +39,7 @@ export default function fiberToReadable(report: any, isFood: boolean) {
     subtitle: "Aiming for " + (report.fiber.fiberRDAPer2000kcal * 100).toFixed(0) + '% of RDA',
   });
   if (!isFood) {
-    const contributors = report.contributors['fiber']?.contributors || [];
+    const contributors = report.contributors['fiber'] || [];
     for (const contributor of contributors) {
       if (contributor.totalContribution > 5) {
         items.push({

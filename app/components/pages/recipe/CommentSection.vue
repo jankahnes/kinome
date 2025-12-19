@@ -1,9 +1,6 @@
 <template>
   <div class="main-card main-card-padding flex flex-col gap-8">
     <div class="flex flex-col gap-2">
-      <div class="flex gap-4 justify-between">
-        <h3 class="text-2xl font-bold">Leave a comment</h3>
-      </div>
       <div class="flex gap-2 w-full">
         <Avatar :user="auth.user" class="w-12 h-12" />
         <div class="flex-1 flex flex-col gap-2 items-end">
@@ -39,7 +36,6 @@
       </div>
     </div>
     <div class="flex flex-col" v-if="recipeStore.recipe?.comments?.length">
-      <h3 class="text-2xl font-bold mb-4">Comments</h3>
       <div v-for="(comment, index) in recipeStore.recipe.comments">
         <PagesRecipeComment
           :comment="comment"

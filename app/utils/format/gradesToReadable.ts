@@ -114,14 +114,14 @@ const scoreDescriptors: Record<string, ScoreDescriptor> = {
 export default function gradesToReadable(
   report: any,
   recipe: Recipe | FullFoodRow | InsertableRecipe,
-  isFood: boolean
+  isFood: boolean,
 ) {
   // Create a copy to avoid mutating the global object
   const descriptors = isFood
     ? Object.fromEntries(
         Object.entries(scoreDescriptors).filter(
-          ([key]) => key !== 'processing_level_score'
-        )
+          ([key]) => key !== 'processing_level_score',
+        ),
       )
     : scoreDescriptors;
 
@@ -134,7 +134,7 @@ export default function gradesToReadable(
       item.descriptor[roundedGrade as keyof typeof item.descriptor];
     if (!descriptor) {
       throw new Error(
-        `No descriptor found for score category: ${scoreCategory} for ${roundedGrade}`
+        `No descriptor found for score category: ${scoreCategory} for ${roundedGrade}`,
       );
     }
     const description = descriptor.description + ' ' + item.appendName;
@@ -142,7 +142,7 @@ export default function gradesToReadable(
     let display_subtitle = false;
     if (!isFood) {
       const contributors =
-        report?.contributors?.[item?.contributor_col ?? '']?.contributors || [];
+        report?.contributors?.[item?.contributor_col ?? ''] || [];
       subtitle = contributorsToReadable(contributors);
       const display_subtitle_thresh = item.display_subtitle_thresh;
       const display_if = item.display_if;

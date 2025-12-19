@@ -64,42 +64,11 @@
             </div>
           </div>
         </div>
-        <div
-          class="space-y-2 order-2 xl:order-none"
-          v-if="nutritionHighlights.length > 0"
-        >
+        <div class="space-y-2 order-2 xl:order-none" v-if="food">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
             Nutrition Highlights
           </h2>
-          <div class="flex flex-wrap gap-2 md:gap-4">
-            <div
-              v-for="highlight in nutritionHighlights"
-              :key="highlight.title"
-              class="bg-primary-10 flex flex-col p-2 md:p-4 rounded-4xl items-center flex-1 basis-auto sm:basis-1/4 max-w-90"
-            >
-              <NuxtImg
-                :src="`/nutrition-highlights/${highlight.illustration}`"
-                :alt="highlight.title"
-                class="w-14 h-14 object-contain"
-              />
-              <span
-                class="text-lg font-bold tracking-tighter leading-none mt-1"
-                >{{ highlight.title }}</span
-              >
-              <span
-                class="text-sm text-gray-600 text-center px-2"
-                v-if="highlight.subtitle"
-              >
-                {{ highlight.subtitle }}
-              </span>
-              <div
-                class="px-3 py-0.5 rounded-full text-sm font-semibold mt-2"
-                :class="highlight.background"
-              >
-                {{ highlight.rating }}
-              </div>
-            </div>
-          </div>
+          <NutritionHighlightGrid :nutrition-data="food" type="highlights" />
         </div>
         <div class="space-y-2 order-3 xl:order-none">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
@@ -114,85 +83,25 @@
                     :choices="dropdownChoices"
                     v-model="selectedUnit"
                     class="min-w-60"
-                    :style="'bg-slate-100'"
+                    :style="'bg-secondary'"
                   />
                 </div>
-                <div class="flex gap-4 justify-between items-center">
-                  <div class="flex flex-col gap-2 flex-1">
-                    <div class="flex items-center gap-2 justify-between">
-                      <span class="text-8xl font-bold leading-14">
-                        <RollingNumber
-                          :number="scaledFood?.kcal ?? 0"
-                          class="inline-block"
-                          :refDist="35"
-                        />
-                        <span class="text-2xl text-gray-500">kcal</span>
-                      </span>
-                      <Ring
-                        class="w-20 h-20 block xl:hidden"
-                        :segments="[
-                          {
-                            value: macroRingPercentages?.carbsPercent ?? 0,
-                            color: 'stroke-carbs',
-                          },
-                          {
-                            value: macroRingPercentages?.proteinPercent ?? 0,
-                            color: 'stroke-protein',
-                          },
-                          {
-                            value: macroRingPercentages?.fatPercent ?? 0,
-                            color: 'stroke-fat',
-                          },
-                        ]"
-                        :strokeWidth="16"
-                      />
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <div class="bg-carbs px-2 py-1 rounded-4xl text-center">
-                        <span>{{
-                          scaledFood?.carbohydrates.toFixed(0) ?? 0
-                        }}</span>
-                        <span>g Carbs</span>
-                      </div>
-                      <div class="bg-protein px-2 py-1 rounded-4xl text-center">
-                        <span>{{ scaledFood?.protein.toFixed(0) ?? 0 }}</span>
-                        <span>g Protein</span>
-                      </div>
-                      <div class="bg-fat px-2 py-1 rounded-4xl text-center">
-                        <span>{{ scaledFood?.fat.toFixed(0) ?? 0 }}</span>
-                        <span>g Fat</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Ring
-                    class="w-26 h-26 hidden xl:block"
-                    :segments="[
-                      {
-                        value: macroRingPercentages?.carbsPercent ?? 0,
-                        color: 'stroke-carbs',
-                      },
-                      {
-                        value: macroRingPercentages?.proteinPercent ?? 0,
-                        color: 'stroke-protein',
-                      },
-                      {
-                        value: macroRingPercentages?.fatPercent ?? 0,
-                        color: 'stroke-fat',
-                      },
-                    ]"
-                    :strokeWidth="16"
-                  />
-                </div>
+                <NutritionMacroCard
+                  :kcal="scaledFood?.kcal ?? 0"
+                  :carbohydrates="scaledFood?.carbohydrates ?? 0"
+                  :protein="scaledFood?.protein ?? 0"
+                  :fat="scaledFood?.fat ?? 0"
+                />
                 <div class="flex flex-col gap-2">
                   <div class="flex flex-wrap gap-2">
                     <button
-                      class="animated-button bg-slate-100 rounded-4xl px-4 py-1 flex items-center gap-2"
+                      class="animated-button bg-secondary rounded-4xl px-4 py-1 flex items-center gap-2"
                     >
                       <IconShoppingBag class="w-5" />
                       <span>Shopping List</span>
                     </button>
                     <button
-                      class="animated-button bg-slate-100 rounded-4xl px-4 py-1 flex items-center gap-2"
+                      class="animated-button bg-secondary rounded-4xl px-4 py-1 flex items-center gap-2"
                     >
                       <IconChartLine class="w-5" />
                       <span>Track for today</span>
@@ -200,7 +109,7 @@
                   </div>
                   <div class="flex gap-2 flex-wrap">
                     <button
-                      class="animated-button bg-slate-200 rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
+                      class="animated-button bg-secondary rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
                       @click="
                         contextMode = 'nutrition';
                         contextModalOpen = true;
@@ -210,7 +119,7 @@
                       <span>View Full Nutrition</span>
                     </button>
                     <button
-                      class="animated-button bg-slate-200 rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
+                      class="animated-button bg-secondary rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
                       @click="
                         contextMode = 'health';
                         contextModalOpen = true;
@@ -222,7 +131,7 @@
                   </div>
                 </div>
               </div>
-              <div class="w-px bg-gray-200 mx-6 hidden xl:block"></div>
+              <div class="w-px bg-secondary mx-6 hidden xl:block"></div>
               <div class="flex flex-1 mt-4">
                 <FoodNutritionFacts
                   :computable="food"
@@ -232,7 +141,7 @@
                 />
               </div>
             </div>
-            <div class="h-px bg-gray-200 w-full"></div>
+            <div class="h-px bg-secondary w-full"></div>
             <div
               class="flex gap-6 justify-between items-center flex-wrap text-sm"
             >
@@ -273,7 +182,7 @@
           </h2>
           <div class="main-card p-6 flex flex-col gap-2 order-4 2xl:order-none">
             <div
-              class="flex gap-4 justify-between items-center cursor-pointer hover:bg-slate-100 rounded-2xl p-1"
+              class="flex gap-4 justify-between items-center cursor-pointer hover:bg-secondary rounded-2xl p-1"
               v-for="swap in (food as any)?.suggested_swaps"
               @click="navigateTo(getFoodUrl(swap.id, swap.name))"
               :key="swap.id"
@@ -454,17 +363,17 @@ const bottomMetaPillsSpecific = computed(() => {
   const pills = [];
   pills.push({
     text: `NOVA ${food.value.nova}`,
-    class: 'bg-slate-100',
+    class: 'bg-secondary',
     icon: 'factory',
   });
   pills.push({
     text: `~${formatMoney(food.value.price)}/100g`,
-    class: 'bg-slate-100',
+    class: 'bg-secondary',
     icon: 'banknote',
   });
   pills.push({
     text: `${food.value.density}g/ml`,
-    class: 'bg-slate-100',
+    class: 'bg-secondary',
     icon: 'weight',
   });
   return pills;
@@ -485,24 +394,6 @@ const scaledFood = computed(() => {
     protein: food.value.protein * portionMultiplier.value,
     fat: food.value.fat * portionMultiplier.value,
   };
-});
-
-// Macro percentages for ring display
-const macroRingPercentages = computed(() => {
-  if (!scaledFood.value) return null;
-  const f = scaledFood.value;
-  const usedKcal = 4 * f.carbohydrates + 4 * f.protein + 9 * f.fat;
-  const percentages = {
-    carbsPercent: (f.carbohydrates * 4) / usedKcal,
-    proteinPercent: (f.protein * 4) / usedKcal,
-    fatPercent: (f.fat * 9) / usedKcal,
-  };
-  for (const [key, value] of Object.entries(percentages)) {
-    if (value > 0) {
-      percentages[key as keyof typeof percentages] = value;
-    }
-  }
-  return percentages;
 });
 
 const refencingName = computed(() =>
@@ -529,10 +420,6 @@ const description = computed(
 const foodUrl = computed(
   () => `https://kinome.app${getFoodUrl(Number(id), foodName.value)}`
 );
-
-const nutritionHighlights = computed(() => {
-  return getNutritionHighlightCards(food.value);
-});
 
 useHead(() => ({
   title: `${foodName.value} - Complete Nutrition Facts & Analysis`,

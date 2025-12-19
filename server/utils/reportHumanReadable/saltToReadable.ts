@@ -61,7 +61,7 @@ export default function saltToReadable(report: any, isFood: boolean) {
   });
   if (!isFood) {
     const contributors =
-      report.contributors['salt_without_added']?.contributors || [];
+      report.contributors['salt_without_added'] || [];
     for (const contributor of contributors) {
       if (contributor.value > 0.3) {
         items.push({

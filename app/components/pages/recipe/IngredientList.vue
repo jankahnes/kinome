@@ -44,7 +44,7 @@
         </div>
         <div class="flex items-center gap-2">
           <button
-            class="animated-button flex items-center gap-2 px-3 py-1 bg-slate-100 text-xs"
+            class="animated-button flex items-center gap-2 px-3 py-1 bg-secondary text-xs"
             @click="copyIngredients"
           >
             <IconCopy class="w-4" />
@@ -53,7 +53,7 @@
           <transition name="fade-slide" mode="out-in">
             <button
               v-if="notOnDefaultUnits"
-              class="animated-button flex items-center gap-2 px-2 py-1 bg-slate-100 text-xs will-change-transform"
+              class="animated-button flex items-center gap-2 px-2 py-1 bg-secondary text-xs will-change-transform"
               @click="resetUnits"
             >
               <IconRefreshCcw class="w-4" />
@@ -74,7 +74,7 @@
           >
             <div v-if="category !== 'uncategorized' && group.length > 0">
               <h3
-                class="text-lg font-semibold text-gray-800 mb-3 border-b-2 border-slate-100"
+                class="text-lg font-semibold text-gray-800 mb-3 border-b-2 border-secondary"
               >
                 {{ category }}
               </h3>
@@ -169,7 +169,7 @@
               >
             </div>
           </div>
-          <div class="w-full h-px bg-gray-100"></div>
+          <div class="w-full h-px bg-secondary"></div>
           <div class="flex items-center gap-2">
             <span class="ml-2"
               >= ~<strong>{{ formatMoney(price) }}</strong> per Serving</span

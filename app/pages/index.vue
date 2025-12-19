@@ -2,40 +2,24 @@
   <div class="mb-20 md:mx-20 space-y-4 sm:space-y-10 m-4 sm:m-10">
     <div class="md:hidden flex justify-between items-center">
       <Logo class="" />
-      <Avatar
-        :user="auth.user"
-        class="rounded-full w-10 h-10"
-        v-if="auth.isUser()"
-      />
+      <Avatar :user="auth.user" class="rounded-full w-10 h-10" v-if="auth.isUser()" />
       <NuxtLink to="/login" class="animated-button mt-1" v-else>
         <IconLogIn :size="26" />
       </NuxtLink>
     </div>
     <div class="justify-between items-center gap-6 hidden md:flex">
-      <div class="flex gap-4 flex-1">
-        <div
-          class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-2xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 flex-1 min-w-0! max-w-80"
-        >
-          <input
-            type="text"
-            placeholder="Search for a recipe"
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-            @blur="handleSearch"
-            class="flex-1 focus:outline-none py-2 min-w-0! max-w-none! w-0"
-          />
-          <IconSearch class="w-5 shrink-0" />
+      <div class="flex gap-2 flex-1 items-center">
+        <div class="ai-ring rounded-2xl p-px flex items-center">
+          <div class="flex items-center py-2 rounded-[15px] px-2 bg-primary-10">
+            <IconSearch class="w-5 text-gray-400" />
+            <input type="text" :placeholder="'Describe what you\'re looking for…'" v-model="searchQuery"
+              @keyup.enter="handleSearch" @blur="handleSearch" class="flex-grow focus:outline-none  min-w-0! px-2" />
+          </div>
         </div>
-        <NuxtLink
-          to="/kitchen/recipes"
-          class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
-          >All Recipes</NuxtLink
-        >
-        <NuxtLink
-          to="/foods"
-          class="animated-button bg-primary-10/40 ring-1 ring-primary px-3 py-2 shrink-0"
-          >All Foods</NuxtLink
-        >
+        <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10 px-3 py-2 shrink-0">
+          All Recipes</NuxtLink>
+        <NuxtLink to="/foods" class="animated-button bg-primary-10 px-3 py-2 shrink-0">All Foods
+        </NuxtLink>
       </div>
       <div class="items-center gap-2 shrink-0 hidden sm:flex">
         <NuxtLink to="/" class="text-gray-500 items-center gap-2">
@@ -49,10 +33,7 @@
       </h1>
       <div class="items-center gap-4 hidden sm:flex">
         <div class="flex flex-col items-center">
-          <RollingNumber
-            :number="recipeCount"
-            class="text-3xl font-bold text-primary leading-none"
-          />
+          <RollingNumber :number="recipeCount" class="text-3xl font-bold text-primary leading-none" />
           <p class="text-xs text-gray-600 leading-none">Recipes</p>
         </div>
         <div class="flex flex-col items-center">
@@ -66,138 +47,71 @@
     <BlocksCarousel>
       <div
         class="flex items-center gap-x-1 pl-1 md:px-3 p-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
-        @click="navigateTo('/kitchen/social')"
-      >
+        @click="navigateTo('/kitchen/social')">
         <span class="text-2xl">🔥</span>
-        <span class="text-sm sm:text-base sm:tracking-wider text-nowrap"
-          >Trending</span
-        >
+        <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">Trending</span>
       </div>
-      <div
-        v-for="category in categories"
-        :key="category.tag"
+      <div v-for="category in categories" :key="category.tag"
         class="flex items-center gap-x-1 pl-1 md:px-3 p-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
-        @click="onClickCategory(category.tag)"
-      >
+        @click="onClickCategory(category.tag)">
         <span class="text-2xl">{{ category.icon }}</span>
         <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{
           category.name
-        }}</span>
+          }}</span>
       </div>
     </BlocksCarousel>
 
     <!-- Recommendations: Mobile -->
-    <div
-      class="2lg:hidden space-y-2"
-      v-if="recipeStore.indexRecipes.length > 0 && false"
-    >
+    <div class="2lg:hidden space-y-2" v-if="recipeStore.indexRecipes.length > 0 && false">
       <BlocksCarousel class="" :flexClass="'!items-stretch'">
-        <RecipeCard
-          v-for="(recipe, index) in recipeStore.indexRecipes.slice(1)"
-          :key="recipe.id + 'mobile'"
-          :id="'mobile'"
-          :recipe="recipe"
-          class="w-50 min-h-60 text-[20px] sm:w-70 sm:min-h-95 sm:text-[30px] flex-shrink-0 mb-2 mr-4"
-        />
+        <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(1)" :key="recipe.id + 'mobile'"
+          :id="'mobile'" :recipe="recipe"
+          class="w-50 min-h-60 text-[20px] sm:w-70 sm:min-h-95 sm:text-[30px] flex-shrink-0 mb-2 mr-4" />
       </BlocksCarousel>
-      <RecipeCardHighlight
-        v-if="recipeStore.indexRecipes[0]"
-        :recipe="recipeStore.indexRecipes[0]"
-        :uniqueId="'mobile-0-0'"
-        class="md:-ml-10! text-[20px] md:text-[30px]"
-      />
-      <RecipeCardHorizontal
-        v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
-        :key="recipe.id + 'mobile'"
-        :recipe="recipe"
-        :id="'mobile-' + index + '-' + recipe.id"
-        :uniqueId="'mobile-' + index + '-' + recipe.id"
-        class="text-[20px] basis-95 flex-1"
-      />
+      <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
+        :uniqueId="'mobile-0-0'" class="md:-ml-10! text-[20px] md:text-[30px]" />
+      <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)" :key="recipe.id + 'mobile'"
+        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
+        class="text-[20px] basis-95 flex-1" />
     </div>
 
     <div class="flex flex-wrap gap-x-2 gap-y-4 2lg:hidden justify-center">
-      <RecipeCard
-        v-for="(recipe, index) in recipeStore.indexRecipes.slice(1, 3)"
-        :key="recipe.id + 'mobile'"
-        :recipe="recipe"
-        :id="'mobile-' + index + '-' + recipe.id"
-        :uniqueId="'mobile-' + index + '-' + recipe.id"
-        class="text-[20px] basis-40 flex-1"
-      />
-      <RecipeCardHighlightMobile
-        :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
-        :recipe="recipeStore.indexRecipes[0]!"
-        :id="'mobile-0-0'"
-        :uniqueId="'mobile-0-0'"
-        class="text-[20px] basis-full"
-      />
-      <RecipeCardHorizontal
-        v-for="(recipe, index) in recipeStore.indexRecipes.slice(5, 7)"
-        :key="recipe.id + 'mobile'"
-        :recipe="recipe"
-        :id="'mobile-' + index + '-' + recipe.id"
-        :uniqueId="'mobile-' + index + '-' + recipe.id"
-        class="text-[20px] basis-95 flex-1"
-      />
+      <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(1, 3)" :key="recipe.id + 'mobile'"
+        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
+        class="text-[20px] basis-40 flex-1" />
+      <RecipeCardHighlightMobile :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
+        :recipe="recipeStore.indexRecipes[0]!" :id="'mobile-0-0'" :uniqueId="'mobile-0-0'"
+        class="text-[20px] basis-full" />
+      <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(5, 7)" :key="recipe.id + 'mobile'"
+        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
+        class="text-[20px] basis-95 flex-1" />
     </div>
 
     <!-- Recommendations: Desktop -->
-    <div
-      class="hidden 2lg:block transition-all duration-150"
-      :class="
-        rowMaxHeight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-x-2'
-      "
-    >
-      <div
-        class="flex gap-8 py-1 overflow-hidden"
-        :class="rowMaxHeight ? 'flex-wrap' : 'flex-nowrap'"
-        :style="{
-          maxHeight: rowMaxHeight ? rowMaxHeight + 'px' : undefined,
-        }"
-      >
-        <RecipeCard
-          v-for="(recipe, index) in desktopRecipes"
-          :key="recipe.id + 'desktop'"
-          :recipe="recipe"
-          :id="'desktop-' + (index - 1) + '-' + recipe.id"
-          :uniqueId="
-            index === 0
-              ? 'desktop-0-0'
-              : 'desktop-' + (index - 1) + '-' + recipe.id
-          "
-          class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110"
-          :ref="
-            (el) => {
-              if (el) desktopCards[index] = el;
-            }
-          "
-        />
+    <div class="hidden 2lg:block transition-all duration-150" :class="rowMaxHeight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-x-2'
+      ">
+      <div class="flex gap-8 py-1 overflow-hidden" :class="rowMaxHeight ? 'flex-wrap' : 'flex-nowrap'" :style="{
+        maxHeight: rowMaxHeight ? rowMaxHeight + 'px' : undefined,
+      }">
+        <RecipeCard v-for="(recipe, index) in desktopRecipes" :key="recipe.id + 'desktop'" :recipe="recipe"
+          :id="'desktop-' + (index - 1) + '-' + recipe.id" :uniqueId="index === 0
+            ? 'desktop-0-0'
+            : 'desktop-' + (index - 1) + '-' + recipe.id
+            " class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110" :ref="(el) => {
+            if (el) desktopCards[index] = el;
+          }
+            " />
       </div>
       <div class="flex mt-6 flex-wrap gap-8 items-stretch">
-        <RecipeCardHighlight
-          v-if="recipeStore.indexRecipes[0]"
-          :recipe="recipeStore.indexRecipes[0]"
-          :uniqueId="'desktop-0-0'"
-          class="-ml-10! flex-1 basis-220 3xl:max-w-5xl"
-        />
+        <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
+          :uniqueId="'desktop-0-0'" class="-ml-10! flex-1 basis-220 3xl:max-w-5xl" />
         <div class="flex flex-wrap gap-4 shrink-0 basis-80 flex-1 items-center">
-          <RecipeCardHorizontal
-            v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
-            :key="recipe.id + 'desktop'"
-            :recipe="recipe"
-            :id="'desktop-' + index + '-' + recipe.id"
-            :uniqueId="'desktop-' + index + '-' + recipe.id"
-            class="text-[30px] basis-95 flex-1"
-          />
-          <RecipeCardHorizontal
-            v-for="(recipe, index) in recipeStore.indexRecipes.slice(9, 11)"
-            :key="recipe.id + 'desktop'"
-            :recipe="recipe"
-            :id="'desktop-' + index + '-' + recipe.id"
-            :uniqueId="'desktop-' + index + '-' + recipe.id"
-            class="text-[30px] hide-below-2200 basis-95 flex-1"
-          />
+          <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
+            :key="recipe.id + 'desktop'" :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"
+            :uniqueId="'desktop-' + index + '-' + recipe.id" class="text-[30px] basis-95 flex-1" />
+          <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(9, 11)"
+            :key="recipe.id + 'desktop'" :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"
+            :uniqueId="'desktop-' + index + '-' + recipe.id" class="text-[30px] hide-below-2200 basis-95 flex-1" />
         </div>
       </div>
     </div>
@@ -213,13 +127,8 @@
             </NuxtLink>
           </h2>
           <div class="flex flex-wrap gap-4">
-            <RecipeCardSocialMedia
-              v-for="recipe in recipeStore.socialIndexRecipes"
-              :key="recipe.id"
-              :recipe="recipe"
-              :uniqueId="'social-' + recipe.id"
-              class="max-h-60 max-w-240 basis-150"
-            />
+            <RecipeCardSocialMedia v-for="recipe in recipeStore.socialIndexRecipes" :key="recipe.id" :recipe="recipe"
+              :uniqueId="'social-' + recipe.id" class="max-h-60 max-w-240 basis-150" />
           </div>
         </div>
       </div>
@@ -234,7 +143,7 @@ const loadingStore = useLoadingStore();
 const searchQuery = ref('');
 const auth = useAuthStore();
 
-const recipeCount = ref(1226);
+const recipeCount = ref(1248);
 
 useHead({
   title: 'Kinome - Smart Recipe Platform with Nutrition Analysis',
@@ -367,7 +276,8 @@ const handleSearch = () => {
   if (!searchQuery.value.trim()) {
     return;
   }
-  navigateTo(`/kitchen/recipes?q=${searchQuery.value}&sort=Relevancy`);
+  const params = new URLSearchParams({ q: searchQuery.value });
+  navigateTo(`/kitchen/recipes?${params.toString()}`);
 };
 
 onMounted(async () => {
@@ -399,6 +309,7 @@ const handleQuickImport = async () => {
 .hide-below-2200 {
   display: none;
 }
+
 @media (min-width: 2199px) {
   .hide-below-2200 {
     display: flex;

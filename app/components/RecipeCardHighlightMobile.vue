@@ -22,7 +22,7 @@
         class="pt-4 flex flex-col gap-2 justify-between h-full items-center"
       >
         <span
-          class=" flex text-sm font-bold px-2 py-0.5 rounded-full items-center justify-center tracking-tight gap-1 bg-primary-10"
+          class=" flex text-sm font-bold px-2 py-0.5 rounded-full items-center justify-center tracking-tight gap-1 main-card"
         >
           <IconFlame class="w-4" strokeWidth="3" />
           <span class="leading-none mt-0.5">TRENDING</span>

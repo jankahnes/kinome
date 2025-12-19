@@ -26,7 +26,7 @@
   --breakpoint-2xs: 400px;
   --font-main: 'Libertinus Sans', sans-serif;
   --color-main: #f5eeee;
-  --color-primary: #ffbc2b;
+  --color-primary: #FFC340;
   --color-primary-gradient: #fdd835;
   --color-primary-5: color-mix(in srgb, var(--color-primary) 2%, white);
   --color-primary-10: color-mix(in srgb, var(--color-primary) 4%, white);
@@ -51,9 +51,9 @@
   --color-fat: #d6c755;
   --color-saturated-fat: #968c3f;
   --color-fiber: #a7e0a5;
-  --color-salt: #dcdcdc;
+  --color-salt: #cecccc;
 
-  --color-secondary: #c75b7a;
+  --color-secondary: #E6FDEC;
   --color-secondary-500: #f4d9d0;
   --color-tertiary: #f4d9d0;
   --rounded-main: 10px;
@@ -71,11 +71,11 @@
   --text-5xl: calc(3rem * var(--text-scale));
   --text-6xl: calc(3.75rem * var(--text-scale));
 
-  --color-halo-green: rgb(182, 255, 209);
+  --color-halo-green: rgb(32, 185, 89);
   --color-halo-emerald: rgb(208, 255, 196);
   --color-halo-blue: rgb(213, 212, 253);
 
-  --shadow-halo: drop-shadow(0 0 5px var(--tw-shadow-color))
+  --shadow-halo: drop-shadow(0 0 10px var(--tw-shadow-color))
     drop-shadow(0 0 2px var(--tw-shadow-color));
 }
 @layer base {
@@ -118,7 +118,7 @@
 }
 
 .main-card {
-  @apply bg-primary-10 rounded-4xl;
+  @apply bg-primary-10/70 md:bg-primary-10 rounded-4xl;
 }
 
 .main-card-padding {
@@ -150,14 +150,56 @@
 
 .ai-gradient {
   background-image: linear-gradient(to right, #a855f7, #ec4899);
-  color: white;
-  border-radius: 0.5rem;
-  font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .ai-gradient:hover {
   background-image: linear-gradient(to right, #9333ea, #db2777);
+}
+
+.ai-ring {
+  background-image: linear-gradient(135deg, #fdd835, #ffc340, #eea72c);
+  transition:
+    box-shadow 0.45s ease,
+    background-size 0.45s ease,
+    background-position 0.45s ease;
+}
+
+.ai-ring:focus-within {
+  background-image: linear-gradient(
+    105deg,
+    #fdd835 0%,
+    #ffb347 18%,
+    #f472b6 40%,
+    #a78bfa 58%,
+    #ffc340 78%,
+    #eea72c 100%
+  );
+  background-size: 280% 100%;
+  background-position: 0% 50%;
+  animation: ai-ring-drift 3s ease-in-out infinite;
+  box-shadow: 0 12px 40px -10px color-mix(in srgb, #f472b6 20%, transparent);
+}
+
+@keyframes ai-ring-drift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-ring:focus-within {
+    animation: none;
+    background-size: 100% 100%;
+    background-image: linear-gradient(135deg, #fdd835, #ffc340, #eea72c);
+    box-shadow: 0 8px 24px -12px color-mix(in srgb, black 18%, transparent);
+  }
 }
 
 .mask-fade-bottom {
@@ -266,7 +308,7 @@
 }
 
 .animated-button {
-  @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-transform duration-200 cursor-pointer select-none will-change-transform;
+  @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-all duration-200 cursor-pointer select-none will-change-transform;
 }
 
 .blurred-backdrop {
@@ -293,22 +335,26 @@
 
 .page-slide-right-enter-active,
 .page-slide-right-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease-out;
 }
 
 .page-slide-right-leave-from {
+  transform: translateY(0);
   opacity: 1;
 }
 .page-slide-right-leave-to {
+  transform: translateY(-10px);
   opacity: 0;
 }
 
 .page-slide-right-enter-from {
   opacity: 0;
+  transform: translateY(10px);
 }
 
 .page-slide-right-enter-to {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .sidebar-enter-active,
@@ -384,4 +430,8 @@
   );
   box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.3),
     0 2px 8px rgba(255, 255, 255, 0.4) inset;
+}
+
+.apexcharts-canvas *:focus {
+  outline: none !important;
 }

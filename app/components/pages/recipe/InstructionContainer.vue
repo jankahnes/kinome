@@ -58,7 +58,7 @@
             }"
           >
             <div
-              class="bg-slate-100 px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-center border border-gray-200"
+              class="bg-secondary px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-center border border-gray-200"
             >
               {{ activeTooltip.amount }}
               <div
@@ -117,7 +117,7 @@ function renderInstructionWithLinks(instruction: string): string {
     /\[([^\]]+)\]\((\d+)\)/g,
     (match, ingredient, ingredientId) => {
       return `<span 
-      class="cursor-pointer relative ingredient-link px-1 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors duration-400" 
+      class="cursor-pointer relative ingredient-link px-1 bg-secondary rounded-md hover:bg-secondary/80 transition-colors duration-400" 
       data-ingredient="${ingredient}"
       data-ingredient-id="${ingredientId}"
       role="button"

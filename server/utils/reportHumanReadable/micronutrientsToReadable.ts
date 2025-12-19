@@ -38,7 +38,7 @@ export default function micronutrientsToReadable(report: any, isFood: boolean) {
     let subtitle = null;
     if (!isFood) {
       const contributors =
-        report?.contributors?.[nutrient.name]?.contributors || [];
+        report?.contributors?.[nutrient.name] || [];
       subtitle = contributorsToReadable(contributors);
     }
     const description =

@@ -3,19 +3,19 @@
     <Transition name="fade" mode="out-in">
       <Skeleton
         v-if="placeholder"
-        class="rounded-full aspect-square transition-all duration-300"
+        class="rounded-3xl aspect-square transition-all duration-300"
       />
 
       <NuxtImg
         v-else-if="user?.picture"
-        class="rounded-full aspect-square transition-all duration-300"
+        class="rounded-3xl aspect-square transition-all duration-300"
         :class="ring ? 'ring-2 ring-primary-500 ring-offset-2' : ''"
         :src="user.picture"
         :alt="user.username + '\'s profile picture'"
       />
       <div
         v-else-if="user?.username"
-        class="rounded-full bg-primary-10 flex items-center justify-center aspect-square p-2 h-full transition-all duration-300"
+        class="rounded-3xl bg-primary-10 flex items-center justify-center aspect-square p-2 h-full transition-all duration-300"
         :class="ring ? 'ring-2 ring-primary-500 ring-offset-2' : ''"
       >
         <span class="font-semibold text-primary text-[100%]">
@@ -24,7 +24,7 @@
       </div>
       <div
         v-else
-        class="rounded-full bg-primary-10 flex items-center justify-center aspect-square overflow-hidden transition-all duration-300"
+        class="rounded-3xl bg-primary-10 flex items-center justify-center aspect-square overflow-hidden transition-all duration-300"
         :class="ring ? 'ring-2 ring-primary-500 ring-offset-2' : ''"
       >
         <img

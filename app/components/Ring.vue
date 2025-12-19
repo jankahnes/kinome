@@ -73,9 +73,6 @@ const segments = computed(() => {
   let currentRotation = 0;
 
   props.segments.forEach((segment, index) => {
-    if (!segment.value) {
-      return;
-    }
     const clampedValue = Math.max(0, Math.min(1, segment.value));
     const segmentLength = circumference.value * clampedValue;
     const halfLength = segmentLength / 2;
@@ -103,7 +100,4 @@ const segments = computed(() => {
 </script>
 
 <style scoped>
-svg circle {
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
-}
 </style>

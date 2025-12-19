@@ -13,32 +13,36 @@ type NutritionEngineArgs = {
   considerProcessing: boolean;
   nutritionLabelOnly: boolean;
   disableSatiety: boolean;
+  isDiet: boolean;
+  fullReport: boolean;
 };
 
 type Response = {
   recipeRow: InsertableRecipe | null;
-  foodLike?: any | null;
   recipeFoodRows: Omit<InsertableRecipeFood, 'recipe_id'>[] | null;
   recipeTagRows: Omit<InsertableRecipeTag, 'recipe_id'>[] | null;
+  fullReport?: any;
 };
 
 export default defineEventHandler(async (event): Promise<Response> => {
   const body = await readBody(event);
-  const { nutritionEngineArgs } = body as { nutritionEngineArgs: NutritionEngineArgs };
+  const { nutritionEngineArgs } = body as {
+    nutritionEngineArgs: NutritionEngineArgs;
+  };
 
   const nutritionEngine = new NutritionEngine(
     nutritionEngineArgs.useGpt,
     nutritionEngineArgs.logToReport,
     nutritionEngineArgs.considerProcessing,
     nutritionEngineArgs.nutritionLabelOnly,
-    nutritionEngineArgs.disableSatiety
+    nutritionEngineArgs.disableSatiety,
+    nutritionEngineArgs.isDiet,
   );
   await nutritionEngine.computeRecipe(nutritionEngineArgs.recipe);
 
   if (nutritionEngineArgs.nutritionLabelOnly) {
     return {
       recipeRow: nutritionEngine.getRecipeRow(),
-      foodLike: nutritionEngine.getFoodLike(),
       recipeFoodRows: null,
       recipeTagRows: null,
     };
@@ -54,10 +58,18 @@ export default defineEventHandler(async (event): Promise<Response> => {
       recipeTagRows: null,
     };
   }
+  const recipeRow = nutritionEngine.getRecipeRow();
+  if (nutritionEngineArgs.isDiet) {
+    (recipeRow as any).report.dailyTotals = nutritionEngine.report.dailyTotals;
+  }
+
   const response: Response = {
-    recipeRow: nutritionEngine.getRecipeRow(),
+    recipeRow: recipeRow,
     recipeFoodRows: nutritionEngine.getRecipeFoodRows(),
     recipeTagRows: nutritionEngine.getRecipeTagRows(),
   };
+  if (nutritionEngineArgs.fullReport) {
+    response.fullReport = nutritionEngine.recipe.fullReport;
+  }
   return response as Response;
 });

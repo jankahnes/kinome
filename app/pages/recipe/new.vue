@@ -1,23 +1,16 @@
 <template>
-  <div class="px-4 md:pl-14 md:pr-30 overflow-y-visible">
-    <div
-      class="flex lg:flex-row flex-col gap-10 items-center mt-12 md:mt-20 mx-auto"
-    >
-      <FormsChoiceSlider
-        v-if="!isLoading"
-        :model-value="currentView"
-        :choices="views"
-        buttonStyle=""
-        :class="'hidden lg:block min-w-36 flex-[0.2] max-w-45 self-start sticky top-22 left-0'"
-        vertical
-        @update:model-value="navigateToView"
-      />
+  <div class="lg:ml-20 overflow-y-visible max-w-screen-xl m-4 lg:m-8">
+    <div class="flex flex-col gap-10 ">
+      <div class="flex items-center gap-2 flex-wrap">
+        <NuxtLink v-for="view in views" :key="view.value" :to="view.route"
+          class="animated-button bg-primary-10 px-3 py-2"
+          exact-active-class="primary-gradient text-gray-800 px-3 py-2">
+          {{ view.displayName }}
+        </NuxtLink>
+      </div>
+
       <Transition name="view-transition" mode="out-in">
-        <div
-          v-if="isLoading"
-          key="loading"
-          class="flex flex-col items-center mt-[20vh] gap-6"
-        >
+        <div v-if="isLoading" key="loading" class="flex flex-col items-center mt-[20vh] gap-6 flex-1">
           <img src="/loading.png" class="h-8 w-8" alt="Loading icon" />
           <Transition name="fade-up">
             <p class="italic" v-if="loadingMessage">
@@ -46,42 +39,25 @@ const views: {
   icon?: string;
   route: string;
 }[] = [
-  {
-    value: 'form',
-    displayName: 'Create',
-    icon: 'pencil',
-    route: '/recipe/new',
-  },
-  {
-    value: 'import',
-    displayName: 'Import',
-    icon: 'download',
-    route: '/recipe/new/import',
-  },
-  {
-    value: 'picture',
-    displayName: 'Scan',
-    icon: 'eye',
-    route: '/recipe/new/scan',
-  },
-];
-
-const currentView = computed(() => {
-  const path = route.path;
-  if (path === '/recipe/new/import') return 'import';
-  if (path === '/recipe/new/scan') return 'picture';
-  return 'form';
-});
+    {
+      value: 'form',
+      displayName: 'Create',
+      route: '/recipe/new',
+    },
+    {
+      value: 'import',
+      displayName: 'Import',
+      route: '/recipe/new/import',
+    },
+    {
+      value: 'picture',
+      displayName: 'Scan',
+      route: '/recipe/new/scan',
+    },
+  ];
 
 const isLoading = ref(false);
 const loadingMessage = ref('');
-
-const navigateToView = (value: string) => {
-  const view = views.find((v) => v.value === value);
-  if (view) {
-    navigateTo(view.route);
-  }
-};
 
 const submitFromNaturalLanguage = async (recipe: BaseRecipe) => {
   isLoading.value = true;
@@ -282,11 +258,13 @@ useHead({
 .fade-up-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease-out;
 }
+
 .fade-up-enter-from,
 .fade-up-leave-to {
   opacity: 0;
   transform: translateY(10px);
 }
+
 .fade-up-enter-to {
   opacity: 1;
   transform: translateY(0);
@@ -296,6 +274,7 @@ useHead({
 .view-transition-leave-active {
   transition: all 0.2s ease;
 }
+
 .view-transition-enter-from,
 .view-transition-leave-to {
   opacity: 0;

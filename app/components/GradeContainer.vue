@@ -1,15 +1,17 @@
 <template>
   <div
     class="font-bold w-[2em] aspect-square text-center flex items-center justify-center rounded-[0.5em]!"
-    :class="gradeStickerColors[getGrade(props.score, props.type)[0] as keyof typeof gradeStickerColors]"
+    :class="props.score != null
+      ? gradeColors[getGrade(props.score, props.type)[0] as keyof typeof gradeColors]
+      : 'bg-gray-100 text-gray-300'"
   >
-    {{ getGrade(props.score, props.type) }}
+    {{ props.score != null ? getGrade(props.score, props.type) : '-' }}
   </div>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  score: number;
+  score: number | null | undefined;
   type: 'single' | 'ovr';
 }>();
 </script>

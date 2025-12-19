@@ -7,7 +7,7 @@
         :class="isReply ? 'w-10! h-10!' : ''"
       />
       <div
-        class="w-px h-full bg-slate-200"
+        class="w-px h-full bg-secondary"
         v-if="comment.replies?.length"
       ></div>
     </div>

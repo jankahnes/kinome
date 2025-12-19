@@ -67,7 +67,7 @@ export default class NutritionEngine {
   logToReport = false;
   nutritionLabelOnly = false;
   disableSatiety = false;
-
+  isDiet = false;
   gptInformation: GptInformation = {
     tags: [],
     processing: [],
@@ -130,13 +130,15 @@ export default class NutritionEngine {
     logToReport = false,
     considerProcessing = false,
     nutritionLabelOnly = false,
-    disableSatiety = false
+    disableSatiety = false,
+    isDiet = false,
   ) {
     this.useGpt = useGpt;
     this.logToReport = logToReport;
     this.considerProcessing = considerProcessing;
     this.nutritionLabelOnly = nutritionLabelOnly;
     this.disableSatiety = disableSatiety;
+    this.isDiet = isDiet;
     if (this.logToReport) {
       this.initializeReport();
     }
@@ -144,7 +146,7 @@ export default class NutritionEngine {
 
   private async safeFetch<T>(
     url: string,
-    opts: { method?: string; body?: any }
+    opts: { method?: string; body?: any },
   ): Promise<T> {
     const nuxtFetch = (globalThis as any).$fetch as
       | undefined
@@ -155,7 +157,7 @@ export default class NutritionEngine {
 
     if (typeof fetch !== 'function') {
       throw new Error(
-        'No $fetch (Nuxt) and no global fetch available. Run under Nuxt/Nitro, upgrade Node (>=18), or set disableSatiety=true.'
+        'No $fetch (Nuxt) and no global fetch available. Run under Nuxt/Nitro, upgrade Node (>=18), or set disableSatiety=true.',
       );
     }
 
@@ -172,14 +174,23 @@ export default class NutritionEngine {
   }
 
   initializeCumulativeFields(recipe: any) {
+    if (this.logToReport) {
+      this.report.dietContributors = {};
+      this.report.contributors = {};
+    }
     for (const field of this.cumulativeFields) {
       recipe[field] = {
         totalBeforeAlpha: 0,
         total: 0,
         per100: 0,
         alphaFunction: alphaFunctions[field],
-        contributors: [],
       };
+      if (this.logToReport) {
+        if (this.isDiet) {
+          this.report.dietContributors[field] = new Map<number, number>();
+        }
+        this.report.contributors[field] = [];
+      }
     }
   }
 
@@ -257,22 +268,20 @@ export default class NutritionEngine {
       return;
     }
 
-    console.log('🔍 Starting scoring');
     const scores = await this.getScoring();
     this.recipe.scores = scores;
     if (this.recipe.total_weight > 1200) {
       this.addNote(
-        'Total weight is extremely high at ' + this.recipe.total_weight + 'g'
+        'Total weight is extremely high at ' + this.recipe.total_weight + 'g',
       );
     } else if (this.recipe.total_weight > 800) {
       this.addNote(
-        'Total weight is unusually high at ' + this.recipe.total_weight + 'g'
+        'Total weight is unusually high at ' + this.recipe.total_weight + 'g',
       );
     }
     if (this.logToReport) {
       this.generateReport();
     }
-    console.log('🔍 Scoring done');
   }
 
   async computeFood(food: Food) {
@@ -331,16 +340,16 @@ export default class NutritionEngine {
       return;
     }
     const ingredients = this.recipe.fullIngredients.filter(
-      (ingredient) => ingredient.amount != null && !isNaN(ingredient.amount)
+      (ingredient) => ingredient.amount != null && !isNaN(ingredient.amount),
     );
     for (const ingredient of ingredients) {
       if (this.useGpt) {
         const gptIngredientInfo = this.gptInformation.processing.find(
-          (info) => Number(info.ingredient_id) === Number(ingredient.id)
+          (info) => Number(info.ingredient_id) === Number(ingredient.id),
         );
         const gptConsumptionInfo =
           this.gptInformation.ingredients_not_fully_consumed.find(
-            (info) => Number(info.ingredient_id) === Number(ingredient.id)
+            (info) => Number(info.ingredient_id) === Number(ingredient.id),
           );
         if (gptConsumptionInfo) {
           ingredient.consumption_factor =
@@ -548,7 +557,7 @@ export default class NutritionEngine {
         ingredient.amount,
         ingredient.unit,
         ingredient.density,
-        ingredient.countable_units?.[ingredient.unit] ?? 0
+        ingredient.countable_units?.[ingredient.unit] ?? 0,
       );
     }
     return totalWeight / this.recipe!.serves;
@@ -556,6 +565,7 @@ export default class NutritionEngine {
 
   getCumulativeData(ingredients: FullIngredient[]) {
     this.recipe.total_weight = 0;
+    this.report.dailyTotals = {} as Record<string, number>;
 
     // First pass: calculate basic totals and weight
     for (const ingredient of ingredients) {
@@ -565,7 +575,7 @@ export default class NutritionEngine {
           ingredient.amount,
           ingredient.unit,
           ingredient.density,
-          unit_weight
+          unit_weight,
         ) / this.recipe.serves;
       this.recipe.total_weight += originalGrams; // total_weight gets multiplied by yield factor later, where consumption is already accounted for
 
@@ -620,7 +630,7 @@ export default class NutritionEngine {
           ingredient.amount,
           ingredient.unit,
           ingredient.density,
-          unit_weight
+          unit_weight,
         ) / this.recipe.serves;
 
       const consumptionFactor = ingredient.consumption_factor ?? 1;
@@ -633,7 +643,7 @@ export default class NutritionEngine {
           nutrientsPer100,
           ingredient.thermal_intensity,
           ingredient.heat_medium,
-          ingredient.mechanical_disruption
+          ingredient.mechanical_disruption,
         );
 
         const nutrientValue = ingredient[field] || 0;
@@ -641,22 +651,47 @@ export default class NutritionEngine {
         const per100 = (total / this.recipe.total_weight) * 100;
         const contributionPercentage =
           Math.round((total / this.recipe[field].totalBeforeAlpha) * 100) / 100;
-        if (field == 'sugar') {
-          this.recipe[field].contributors.push({
+        if (
+          this.logToReport &&
+          (field == 'sugar' || field == 'kcal' || contributionPercentage > 0.1)
+        ) {
+          this.report.contributors[field].push({
             name: ingredient.name,
             value: contributionPercentage,
             totalContribution: total,
             processingLevel: ingredient.nova,
           });
-        } else if (contributionPercentage > 0.1 || field == 'kcal') {
-          this.recipe[field].contributors.push({
-            name: ingredient.name,
-            value: contributionPercentage,
-            totalContribution: total,
-          });
+        }
+        if (this.isDiet) {
+          const existing = this.report.dietContributors[field].get(
+            ingredient.id,
+          );
+          if (existing) {
+            this.report.dietContributors[field].set(ingredient.id, {
+              total: existing.total + total,
+              percentage: existing.percentage + contributionPercentage,
+            });
+          } else {
+            this.report.dietContributors[field].set(ingredient.id, {
+              total: total,
+              percentage: contributionPercentage,
+            });
+          }
         }
         this.recipe[field].total += alpha * total;
         this.recipe[field].per100 += alpha * per100;
+        if (ingredient.loggedDate != null) {
+          if (!this.report.dailyTotals[ingredient.loggedDate]) {
+            this.report.dailyTotals[ingredient.loggedDate] = {} as Record<
+              string,
+              number
+            >;
+          }
+          if (!this.report.dailyTotals[ingredient.loggedDate][field]) {
+            this.report.dailyTotals[ingredient.loggedDate][field] = 0;
+          }
+          this.report.dailyTotals[ingredient.loggedDate][field] += total;
+        }
       }
     }
 
@@ -682,13 +717,14 @@ export default class NutritionEngine {
     // proposed: recursive approach to increase serving size until its reasonable
     if (
       !this.nutritionLabelOnly &&
+      !this.isDiet &&
       !this.isFood &&
       this.recipe.kcal.total > this.UNUSUAL_KCAL_THRESHOLD
     ) {
       this.UNUSUAL_KCAL_THRESHOLD = 800;
       const probableYieldSizes = [2, 3, 4, 5, 6, 8, 10, 12, 15, 18, 24, 32, 64];
       const nextBiggest = probableYieldSizes.find(
-        (size) => size > this.recipe.serves
+        (size) => size > this.recipe.serves,
       );
       if (!nextBiggest) {
         throw new Error('Serving size is too large');
@@ -698,15 +734,39 @@ export default class NutritionEngine {
       this.getCumulativeData(this.recipe.fullIngredients);
     }
 
-    for (const col of this.cumulativeFields) {
-      if (this.recipe[col].contributors) {
-        this.recipe[col].contributors.sort(
-          (a: any, b: any) => b.value - a.value
-        );
-      }
-    }
     if (this.logToReport) {
-      this.report.contributors = this.recipe;
+      if (this.isDiet) {
+        this.report.dietContributorSummary = {};
+        for (const [field, contributors] of Object.entries(
+          this.report.dietContributors,
+        )) {
+          this.report.dietContributorSummary[field] = [];
+          const top3 = Array.from(contributors.entries())
+            .sort((a, b) => b[1].total - a[1].total)
+            .slice(0, 3);
+          for (const [id, value] of top3) {
+            const ingredient = ingredients.find(
+              (ingredient) => ingredient.id === id,
+            );
+            if (ingredient) {
+              this.report.dietContributorSummary[field].push({
+                name: ingredient.name,
+                visualCategory: ingredient.visual_category,
+                value: value.percentage,
+                total: value.total,
+              });
+            }
+          }
+        }
+        delete this.report.dietContributors;
+      }
+      for (const field of this.cumulativeFields) {
+        if (this.report.contributors[field].contributors) {
+          this.report.contributors[field].contributors.sort(
+            (a: any, b: any) => b.value - a.value,
+          );
+        }
+      }
     }
   }
 
@@ -719,14 +779,15 @@ export default class NutritionEngine {
           this.recipe.fat.per100 +
           this.recipe.carbohydrates.per100 +
           this.recipe.fiber.per100 +
-          processing_level_factor)
+          processing_level_factor),
     );
 
     const ed = this.getED();
-    const sidx = this.disableSatiety ? null : await this.getSIDX(water);
-    const satiety = this.disableSatiety
-      ? this.recipe.sidx ?? Math.min(ed, 80)
-      : 0.5 * ed + 0.5 * sidx!;
+    const sidx = await this.getSIDX(water);
+    const satiety =
+      sidx == null
+        ? (this.recipe.sidx ?? Math.min(ed, 80))
+        : 0.5 * ed + 0.5 * sidx;
     const mnidx = this.getMNIDX();
     const fiber_score = this.getFiberScore();
     const protein_score = this.getProteinScoreOvr();
@@ -744,26 +805,8 @@ export default class NutritionEngine {
       salt_score,
       mnidx,
       processing_level_score,
-      protective_score
+      protective_score,
     );
-
-    // Store detailed scoring data for reporting
-    if (this.logToReport) {
-      this.report.scoringDetails = {
-        ed,
-        sidx,
-        satiety,
-        mnidx,
-        fiber_score,
-        protein_score,
-        salt_score,
-        sugar_score,
-        fat_profile_score,
-        protective_score,
-        processing_level_score,
-        hidx,
-      };
-    }
 
     const scores: ComputedRecipeScores = {
       hidx: Math.round(hidx),
@@ -778,6 +821,12 @@ export default class NutritionEngine {
       processing_level_score: Math.round(processing_level_score),
       protective_score: Math.round(protective_score),
     };
+    this.getGutHealthScore(
+      fiber_score,
+      salt_score,
+      sugar_score,
+      processing_level_score,
+    );
     return scores;
   }
 
@@ -864,7 +913,7 @@ export default class NutritionEngine {
           percentRDA: Math.round(percentRDA * 100) / 100,
           rdaPer100: Math.round((rawValue * 100) / rda),
           rdaPerServing: Math.round(
-            (rawValue * this.recipe.total_weight) / rda
+            (rawValue * this.recipe.total_weight) / rda,
           ),
           nutrientScore: Math.round(nutrientScore * 100) / 100,
           weightedScore: Math.round(weightedScore * 100) / 100,
@@ -940,7 +989,7 @@ export default class NutritionEngine {
                 this.recipe.sugar.per100 +
                 this.recipe.fiber.per100 +
                 0.2929598406929533 * this.recipe.protein.per100 -
-                1.054166862782954)
+                1.054166862782954),
           ));
       waterE = waterE * sigmoid;
     }
@@ -948,7 +997,7 @@ export default class NutritionEngine {
       0,
       this.recipe.carbohydrates.per100 -
         this.recipe.sugar.per100 -
-        this.recipe.fiber.per100
+        this.recipe.fiber.per100,
     );
     const giProxy =
       (1.2693123441054426 * this.recipe.sugar.per100 + starch_grams) /
@@ -965,8 +1014,8 @@ export default class NutritionEngine {
             0.05 * this.recipe.protein.per100 +
             0.000617 * this.recipe.fiber.per100 ** 3 -
             0.00000725 * this.recipe.fat.per100 ** 3 +
-            0.617
-        )
+            0.617,
+        ),
       );
     }
 
@@ -977,6 +1026,10 @@ export default class NutritionEngine {
         water: water,
         kcal: this.recipe.kcal.per100,
       };
+    }
+
+    if (this.disableSatiety) {
+      return null;
     }
 
     const body = {
@@ -1002,7 +1055,7 @@ export default class NutritionEngine {
               waterE: body.waterE,
               kcal: body.kcal,
             },
-      }
+      },
     );
     const predictionValue =
       typeof prediction === 'number' ? prediction : prediction.prediction;
@@ -1120,9 +1173,9 @@ export default class NutritionEngine {
 
     if (this.logToReport) {
       let percentContributedFromNaturalSources = 0;
-      if (this.recipe.sugar.contributors) {
-        for (const contributor of this.recipe.sugar.contributors) {
-          if (contributor?.processingLevel ?? 10 <= 2) {
+      if (this.logToReport && this.report.contributors.sugar) {
+        for (const contributor of this.report.contributors.sugar) {
+          if ((contributor?.processingLevel ?? 10) <= 2) {
             percentContributedFromNaturalSources += contributor.value;
           }
         }
@@ -1205,7 +1258,7 @@ export default class NutritionEngine {
     // rawScore = baseScore * transPenalty
     const baseScore =
       0.4 * satFatScore + 0.4 * o3Score + 0.25 * mufaScore + 0.1 * o6Score;
-    const rawScore = baseScore; // * transPenalty;
+    const rawScore = 0.9 * baseScore; // * transPenalty;
 
     // Relevance weighting to avoid low-fat paradox
     // weight = min(1, fatPer2000kcal / 40) where fatPer2000kcal = (fat_per100g / kcal_per100g) * 2000
@@ -1226,11 +1279,12 @@ export default class NutritionEngine {
         o3Percent,
         o6Percent,
         mufaPercent,
-        transFatPercent: 0, // not used in score
+        transFatPercent,
         o3Score,
         o6Score,
         mufaScore,
         satFatScore,
+        overall: clampedScore,
       };
     }
 
@@ -1307,9 +1361,8 @@ export default class NutritionEngine {
     return Math.max(0, Math.min(150, score));
   }
 
-  getProteinQualityScore() {
-    const protein = this.recipe.protein.per100;
-    if (protein <= 0) return 0;
+  getProteinQualityScore(protein: number, eaas: Record<string, number>) {
+    if (protein <= 0) return { score: 0, ratios: {} };
 
     const ref = {
       Histidine: 15,
@@ -1323,41 +1376,32 @@ export default class NutritionEngine {
       Valine: 39,
     };
 
-    const actual = {
-      Histidine: this.recipe.histidine_mg.per100,
-      Isoleucine: this.recipe.isoleucine_mg.per100,
-      Leucine: this.recipe.leucine_mg.per100,
-      Lysine: this.recipe.lysine_mg.per100,
-      SAA: this.recipe.methionine_mg.per100 + this.recipe.cysteine_mg.per100,
-      AAA: this.recipe.phenylalanine_mg.per100 + this.recipe.tyrosine_mg.per100,
-      Threonine: this.recipe.threonine_mg.per100,
-      Tryptophan: this.recipe.tryptophan_mg.per100,
-      Valine: this.recipe.valine_mg.per100,
-    };
+    const ratios = Object.fromEntries(
+      Object.entries(ref).map(([aa, refValue]) => [
+        aa,
+        eaas[aa as keyof typeof eaas] / protein / refValue,
+      ]),
+    );
 
-    const ratios = Object.keys(ref).map((aa) => ({
-      aa,
-      ratio:
-        actual[aa as keyof typeof actual] /
-        this.recipe.protein.per100 /
-        ref[aa as keyof typeof ref],
-    }));
-
-    const limitingAA = ratios.reduce((min, current) =>
-      current.ratio < min.ratio ? current : min
+    const [limitingAA, limitingRatio] = Object.entries(ratios).reduce(
+      (min, current) => (current[1] < min[1] ? current : min),
     );
 
     if (this.logToReport) {
-      this.report.protein.limitingAA = limitingAA.aa;
-      this.report.protein.limitingAA_ratio = limitingAA.ratio;
+      this.report.protein.limitingAA = limitingAA;
+      this.report.protein.limitingAA_ratio = limitingRatio;
     }
-    return this.scaleWithPoints(limitingAA.ratio, [
-      [0, 0],
-      [0.5, 30],
-      [1, 100],
-      [1.5, 120],
-      [2, 130],
-    ]);
+
+    return {
+      score: this.scaleWithPoints(limitingRatio, [
+        [0, 0],
+        [0.5, 30],
+        [1, 100],
+        [1.5, 120],
+        [2, 130],
+      ]),
+      ratios,
+    };
   }
 
   getProteinScoreOvr() {
@@ -1374,6 +1418,7 @@ export default class NutritionEngine {
           proteinQualityScore: 0,
           limitingAA: '',
           limitingAA_ratio: 0,
+          dailyEAARange: {},
         };
       }
       return 0;
@@ -1393,7 +1438,64 @@ export default class NutritionEngine {
 
     // Get quality score and normalize to 0-1 scale
     // Current quality score ranges from 0-130, where 100 = meeting reference pattern
-    const qualityRaw = this.getProteinQualityScore();
+
+    const eaas = {
+      Histidine: this.recipe.histidine_mg.per100,
+      Isoleucine: this.recipe.isoleucine_mg.per100,
+      Leucine: this.recipe.leucine_mg.per100,
+      Lysine: this.recipe.lysine_mg.per100,
+      SAA: this.recipe.methionine_mg.per100 + this.recipe.cysteine_mg.per100,
+      AAA: this.recipe.phenylalanine_mg.per100 + this.recipe.tyrosine_mg.per100,
+      Threonine: this.recipe.threonine_mg.per100,
+      Tryptophan: this.recipe.tryptophan_mg.per100,
+      Valine: this.recipe.valine_mg.per100,
+    };
+    const qualityRaw = this.getProteinQualityScore(
+      this.recipe.protein.per100,
+      eaas,
+    ).score;
+
+    if (this.isDiet) {
+      this.report.protein.dailyEAARange = {};
+      for (const aa of Object.keys(eaas)) {
+        this.report.protein.dailyEAARange[aa] = {
+          min: Infinity,
+          max: -Infinity,
+        };
+      }
+      for (const [day, totals] of Object.entries(this.report.dailyTotals)) {
+        const dailyEaas = {
+          Histidine: totals.histidine_mg,
+          Isoleucine: totals.isoleucine_mg,
+          Leucine: totals.leucine_mg,
+          Lysine: totals.lysine_mg,
+          SAA: totals.methionine_mg + totals.cysteine_mg,
+          AAA: totals.phenylalanine_mg + totals.tyrosine_mg,
+          Threonine: totals.threonine_mg,
+          Tryptophan: totals.tryptophan_mg,
+          Valine: totals.valine_mg,
+        };
+        const { score: dailyQualityScore, ratios: dailyEAARatios } =
+          this.getProteinQualityScore(totals.protein, dailyEaas);
+        for (const aa of Object.keys(dailyEAARatios)) {
+          if (
+            dailyEAARatios[aa as keyof typeof dailyEAARatios] <
+            this.report.protein.dailyEAARange[aa].min
+          ) {
+            this.report.protein.dailyEAARange[aa].min =
+              dailyEAARatios[aa as keyof typeof dailyEAARatios];
+          }
+          if (
+            dailyEAARatios[aa as keyof typeof dailyEAARatios] >
+            this.report.protein.dailyEAARange[aa].max
+          ) {
+            this.report.protein.dailyEAARange[aa].max =
+              dailyEAARatios[aa as keyof typeof dailyEAARatios];
+          }
+        }
+      }
+    }
+
     const qualityMultiplier = Math.min(1.0, qualityRaw / 100);
 
     const score = Math.min(200, rawScore * qualityMultiplier);
@@ -1449,6 +1551,12 @@ export default class NutritionEngine {
     let weightFromNOVA1 = 0;
     let kcalFromNOVA1 = 0;
 
+    let weightFromNOVA2 = 0;
+    let kcalFromNOVA2 = 0;
+
+    let weightFromNOVA3 = 0;
+    let kcalFromNOVA3 = 0;
+
     let maxNOVA = 0;
     let upfCount = 0;
     let wholeCount = 0;
@@ -1465,7 +1573,7 @@ export default class NutritionEngine {
           ingredient.amount,
           ingredient.unit,
           ingredient.density,
-          unit_weight
+          unit_weight,
         ) / this.recipe.serves;
       const consumptionFactor = ingredient.consumption_factor ?? 1;
       const consumedGrams =
@@ -1475,14 +1583,6 @@ export default class NutritionEngine {
       const nova = ingredient.nova || 1;
 
       // Track UPF contributions
-      if (nova === 4) {
-        weightFromNOVA4 += consumedGrams;
-        kcalFromNOVA4 += ingredientKcal;
-        upfCount++;
-        if (this.logToReport) {
-          upfIngredients.push({ name: ingredient.name, weight: consumedGrams });
-        }
-      }
       if (nova === 1) {
         weightFromNOVA1 += consumedGrams;
         kcalFromNOVA1 += ingredientKcal;
@@ -1493,7 +1593,21 @@ export default class NutritionEngine {
             weight: consumedGrams,
           });
         }
+      } else if (nova === 2) {
+        weightFromNOVA2 += consumedGrams;
+        kcalFromNOVA2 += ingredientKcal;
+      } else if (nova === 3) {
+        weightFromNOVA3 += consumedGrams;
+        kcalFromNOVA3 += ingredientKcal;
+      } else if (nova === 4) {
+        weightFromNOVA4 += consumedGrams;
+        kcalFromNOVA4 += ingredientKcal;
+        upfCount++;
+        if (this.logToReport) {
+          upfIngredients.push({ name: ingredient.name, weight: consumedGrams });
+        }
       }
+
       if (nova > maxNOVA) {
         maxNOVA = nova;
       }
@@ -1519,7 +1633,17 @@ export default class NutritionEngine {
       totalWeight > 0 ? (weightFromNOVA1 / totalWeight) * 100 : 0;
     const pctWholeKcal = totalKcal > 0 ? (kcalFromNOVA1 / totalKcal) * 100 : 0;
     const pctWhole = 0.5 * pctWholeWeight + 0.5 * pctWholeKcal;
-
+    const pctCulinaryProcessedWeight =
+      totalWeight > 0 ? (weightFromNOVA2 / totalWeight) * 100 : 0;
+    const pctCulinaryProcessedKcal =
+      totalKcal > 0 ? (kcalFromNOVA2 / totalKcal) * 100 : 0;
+    const pctCulinaryProcessed =
+      0.5 * pctCulinaryProcessedWeight + 0.5 * pctCulinaryProcessedKcal;
+    const pctProcessedWeight =
+      totalWeight > 0 ? (weightFromNOVA3 / totalWeight) * 100 : 0;
+    const pctProcessedKcal =
+      totalKcal > 0 ? (kcalFromNOVA3 / totalKcal) * 100 : 0;
+    const pctProcessed = 0.5 * pctProcessedWeight + 0.5 * pctProcessedKcal;
     // Calculate pctUPFCt: percentage of UPF ingredients by count
     const pctUPFCt =
       this.recipe.fullIngredients.length > 0
@@ -1540,6 +1664,9 @@ export default class NutritionEngine {
         pctWhole,
         wholeCount,
         upfCount,
+        pctCulinaryProcessed,
+        pctProcessed,
+        overall: novaScore,
       };
       this.report.processingLevel.upfIngredients = upfIngredients
         .sort((a, b) => b.weight - a.weight)
@@ -1562,7 +1689,7 @@ export default class NutritionEngine {
     salt: number,
     mnidx: number,
     pl: number,
-    protective_compound_score: number
+    protective_compound_score: number,
   ) {
     const hidx =
       0.17 * pl + //processing level, proxy for additives or unwanted processing side effects.
@@ -1580,10 +1707,295 @@ export default class NutritionEngine {
     return scaled;
   }
 
+  private isPlant(food: FullIngredient) {
+    if (!food.visual_category) return false;
+    const plant_categories = [
+      'veg',
+      'fruit',
+      'grain',
+      'legume',
+      'nut',
+      'seed',
+      'herb',
+      'spice',
+    ];
+    let is_plant_aisle = plant_categories.some((cat) =>
+      food.visual_category.toLowerCase().startsWith(cat),
+    );
+
+    if (!is_plant_aisle) return false;
+
+    if (food.nova === 4) return false;
+
+    if (food.nova >= 2) {
+      let total_carbs = food.carbohydrates > 0 ? food.carbohydrates : 1;
+      let fiber_to_carb_ratio = food.fiber / total_carbs;
+
+      if (fiber_to_carb_ratio < 0.1) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  getGutHealthScore(
+    fiber_score: number,
+    salt_score: number,
+    sugar_score: number,
+    processing_level_score: number,
+  ) {
+    const kcal = Math.max(this.recipe.kcal.per100, 1);
+
+    if (
+      kcal < 5 &&
+      this.recipe.fiber.per100 === 0 &&
+      this.recipe.polyphenols.per100 === 0
+    ) {
+      this.report.gutHealth = { overallScore: 0 };
+      return;
+    }
+
+    // === Sub-score 1: Fiber density (weight: 0.28) ===
+    const fiberPer2000 = (this.recipe.fiber.per100 / kcal) * 2000;
+    //const fiberSubScore = this.scaleWithPoints(fiberPer2000, [
+    //  [0, 0],
+    //  [10, 30],
+    //  [20, 55],
+    //  [30, 75],
+    //  [50, 100],
+    //  [80, 120],
+    //]);
+    const fiberSubScore = fiber_score;
+
+    // === Sub-score 2: Polyphenol content (weight: 0.17) ===
+    const polyRaw = this.recipe.polyphenols.per100 || 0;
+    const polyphenolSubScore = this.scaleWithPoints(polyRaw, [
+      [0, 5],
+      [1, 20],
+      [3, 45],
+      [5, 65],
+      [8, 90],
+      [10, 115],
+    ]);
+
+    // === Sub-score 3: Sugar concentration (weight: 0.15) ===
+    //const sugarSubScore = this.scaleWithPoints(this.recipe.sugar.per100, [
+    //  [0, 55],
+    //  [5, 50],
+    //  [15, 35],
+    //  [30, 15],
+    //  [50, 0],
+    //]);
+    const sugarSubScore = sugar_score;
+
+    // === Sub-score 4: Processing level (weight: 0.18) ===
+    const novaVal = this.recipe.nova.per100;
+    const processingSubScore = processing_level_score;
+
+    // === Sub-score 5: Saturated fat concentration (weight: 0.12) ===
+    const sfatSubScore = this.scaleWithPoints(
+      this.recipe.saturated_fat.per100,
+      [
+        [0, 100],
+        [3, 0],
+        [6, -80],
+      ],
+    );
+
+    // === Sub-score 6: Sodium concentration (weight: 0.10) ===
+    //const sodiumSubScore = this.scaleWithPoints(this.recipe.salt.per100, [
+    //  [0, 55],
+    //  [0.5, 50],
+    //  [1.5, 35],
+    //  [3, 5],
+    //  [5, -20],
+    //  [10, -40],
+    //]);
+    const sodiumSubScore = salt_score;
+
+    const overallRaw =
+      0.28 * fiberSubScore +
+      0.17 * polyphenolSubScore +
+      0.15 * sugarSubScore +
+      0.18 * processingSubScore +
+      0.1 * sodiumSubScore +
+      0.06 * sfatSubScore;
+
+    // --- Ingredient-level metrics (recipes/diets only, for reporting) ---
+    let uniquePlantCount = 0;
+    let uniquePlantCountRolling7dAvg = 0;
+
+    const unique_plants = new Set<number | string>();
+    const unique_plants_this_week = new Map<number | string, number>();
+
+    let addedSugarG = 0;
+    let animalProteinG = 0;
+    let upfKcalPct = 0;
+
+    if (!this.isFood && this.recipe.fullIngredients.length > 0) {
+      const totalKcal = Math.max(this.recipe.kcal.total, 1);
+      let upfKcal = 0;
+
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const thisWeekCutoff = new Date(today);
+      thisWeekCutoff.setDate(today.getDate() - diffToMonday);
+      thisWeekCutoff.setHours(0, 0, 0, 0);
+
+      // dayKey -> set of plant ids logged on that day
+      const plantsByDay = new Map<string, Set<number | string>>();
+
+      for (const ingredient of this.recipe.fullIngredients) {
+        const unit_weight =
+          ingredient?.countable_units?.[ingredient.unit!] ?? 0;
+        const originalGrams =
+          convertToGrams(
+            ingredient.amount!,
+            ingredient.unit!,
+            ingredient.density,
+            unit_weight,
+          ) / this.recipe.serves;
+        const consumptionFactor = ingredient.consumption_factor ?? 1;
+        const consumedGrams =
+          originalGrams * consumptionFactor * this.recipe.yield_factor;
+        const factor = consumedGrams / 100;
+        const nova = ingredient.nova || 1;
+
+        if (nova > 2) {
+          addedSugarG += (ingredient.sugar || 0) * factor;
+        }
+        if (!ingredient.vegan) {
+          animalProteinG += (ingredient.protein || 0) * factor;
+        }
+        if (nova === 4) {
+          upfKcal += (ingredient.kcal || 0) * factor;
+        }
+
+        if (this.isPlant(ingredient)) {
+          const ingredientIds = ingredient as any;
+          const plantId =
+            ingredientIds.foodId ??
+            ingredientIds.food_id ??
+            ingredientIds.canonicalFoodId ??
+            ingredientIds.canonical_food_id ??
+            ingredient.id;
+
+          if (plantId != null) {
+            unique_plants.add(plantId);
+
+            const loggedDateObj = ingredient?.loggedDate
+              ? new Date(ingredient.loggedDate)
+              : undefined;
+
+            if (loggedDateObj && !isNaN(loggedDateObj.getTime())) {
+              const dayKey = loggedDateObj.toISOString().slice(0, 10);
+
+              if (!plantsByDay.has(dayKey)) {
+                plantsByDay.set(dayKey, new Set());
+              }
+              plantsByDay.get(dayKey)!.add(plantId);
+
+              if (loggedDateObj > thisWeekCutoff) {
+                const prev = unique_plants_this_week.get(plantId) || 0;
+                unique_plants_this_week.set(plantId, prev + consumedGrams);
+              }
+            }
+          }
+        }
+      }
+
+      uniquePlantCount = unique_plants.size;
+      upfKcalPct = (upfKcal / totalKcal) * 100;
+
+      // --- 7-day rolling diversity average ---
+      // Only include windows that have at least 5 distinct logged days.
+      const sortedDayKeys = Array.from(plantsByDay.keys()).sort();
+      const rollingCounts: number[] = [];
+
+      for (let i = 0; i < sortedDayKeys.length; i++) {
+        const windowStart = new Date(`${sortedDayKeys[i]}T00:00:00.000Z`);
+        const windowEnd = new Date(windowStart);
+        windowEnd.setUTCDate(windowEnd.getUTCDate() + 6);
+
+        const windowPlants = new Set<number | string>();
+        let loggedDayCount = 0;
+
+        for (const [dayKey, dayPlants] of plantsByDay.entries()) {
+          const dayDate = new Date(`${dayKey}T00:00:00.000Z`);
+
+          if (dayDate >= windowStart && dayDate <= windowEnd) {
+            loggedDayCount += 1;
+            for (const plantId of dayPlants) {
+              windowPlants.add(plantId);
+            }
+          }
+        }
+
+        if (loggedDayCount >= 5) {
+          rollingCounts.push(windowPlants.size);
+        }
+      }
+
+      if (rollingCounts.length > 0) {
+        uniquePlantCountRolling7dAvg =
+          rollingCounts.reduce((sum, count) => sum + count, 0) /
+          rollingCounts.length;
+      }
+    }
+
+    const hasRollingAvg =
+      Number.isFinite(uniquePlantCountRolling7dAvg) &&
+      uniquePlantCountRolling7dAvg > 0;
+
+    const diversityPlantCountForBonus = hasRollingAvg
+      ? uniquePlantCountRolling7dAvg
+      : uniquePlantCount;
+
+    const diversityBonus =
+      !this.isFood && diversityPlantCountForBonus > 0
+        ? this.scaleWithPoints(diversityPlantCountForBonus, [
+            [0, 0],
+            [3, 5],
+            [5, 10],
+            [30, 20],
+          ])
+        : 0;
+
+    const overallScore = Math.max(
+      0,
+      Math.min(100, Math.round(overallRaw * 1.08 + diversityBonus)),
+    );
+
+    this.report.gutHealth = {
+      overallScore,
+      fiberPer2000kcal: Math.round(fiberPer2000 * 10) / 10,
+      fiberSubScore: Math.round(fiberSubScore),
+      polyphenolRaw: Math.round(polyRaw * 10) / 10,
+      polyphenolSubScore: Math.round(polyphenolSubScore),
+      sugarPer100g: Math.round(this.recipe.sugar.per100 * 10) / 10,
+      sugarSubScore: Math.round(sugarSubScore),
+      novaValue: Math.round(novaVal * 10) / 10,
+      processingSubScore: Math.round(processingSubScore),
+      sfatPer100g: Math.round(this.recipe.saturated_fat.per100 * 10) / 10,
+      sfatSubScore: Math.round(sfatSubScore),
+      saltPer100g: Math.round(this.recipe.salt.per100 * 10) / 10,
+      sodiumSubScore: Math.round(sodiumSubScore),
+      uniquePlantCount,
+      uniquePlantCountRolling7dAvg: Math.round(uniquePlantCountRolling7dAvg),
+      diversityBonus: Math.round(diversityBonus),
+      uniquePlantsThisWeek: Array.from(unique_plants_this_week),
+      addedSugarG: Math.round(addedSugarG * 10) / 10,
+      animalProteinG: Math.round(animalProteinG * 10) / 10,
+      upfKcalPct: Math.round(upfKcalPct * 10) / 10,
+    };
+  }
+
   // Helper function to analyze processing effects for an ingredient
   analyzeProcessingEffects(
     ingredient: FullIngredient,
-    recipePer100: Record<cumulativeKeys, number>
+    recipePer100: Record<cumulativeKeys, number>,
   ) {
     const effects: any = {
       ingredient: ingredient.name,
@@ -1600,14 +2012,14 @@ export default class NutritionEngine {
         recipePer100,
         null,
         null,
-        null
+        null,
       );
       const actualAlpha = callAlphaFunction(
         alphaFunction,
         recipePer100,
         ingredient.thermal_intensity,
         ingredient.heat_medium,
-        ingredient.mechanical_disruption
+        ingredient.mechanical_disruption,
       );
 
       // Calculate individual effects
@@ -1616,21 +2028,21 @@ export default class NutritionEngine {
         recipePer100,
         ingredient.thermal_intensity,
         null,
-        null
+        null,
       );
       const mediumOnlyAlpha = callAlphaFunction(
         alphaFunction,
         recipePer100,
         null,
         ingredient.heat_medium,
-        null
+        null,
       );
       const mechanicalOnlyAlpha = callAlphaFunction(
         alphaFunction,
         recipePer100,
         null,
         null,
-        ingredient.mechanical_disruption
+        ingredient.mechanical_disruption,
       );
 
       // Calculate percentage changes
@@ -1684,13 +2096,13 @@ export default class NutritionEngine {
 
     // Sort by effect magnitude and limit
     effects.thermal.sort(
-      (a: any, b: any) => Math.abs(b.effect) - Math.abs(a.effect)
+      (a: any, b: any) => Math.abs(b.effect) - Math.abs(a.effect),
     );
     effects.medium.sort(
-      (a: any, b: any) => Math.abs(b.effect) - Math.abs(a.effect)
+      (a: any, b: any) => Math.abs(b.effect) - Math.abs(a.effect),
     );
     effects.mechanical.sort(
-      (a: any, b: any) => Math.abs(b.effect) - Math.abs(a.effect)
+      (a: any, b: any) => Math.abs(b.effect) - Math.abs(a.effect),
     );
 
     effects.thermal = effects.thermal.slice(0, this.MOVER_DISPLAY_LIMIT);
@@ -1730,7 +2142,7 @@ export default class NutritionEngine {
             ? effect.intensity.replace(/↑/g, '↓')
             : effect.intensity;
         parts.push(
-          `${ingredient.heat_medium} medium ${arrows} ${effect.displayName}`
+          `${ingredient.heat_medium} medium ${arrows} ${effect.displayName}`,
         );
       });
     }
@@ -1759,6 +2171,7 @@ export default class NutritionEngine {
       total_weight: Math.round(this.recipe.total_weight),
       kcal_per_100g: Math.round(this.recipe.kcal.per100),
       serving_size: this.recipe.serves,
+      gutHealth: this.report.gutHealth?.overallScore,
     };
 
     if (!this.isFood) {
@@ -1767,7 +2180,7 @@ export default class NutritionEngine {
 
       for (const ingredientData of this.report.ingredientNutrients) {
         const ingredient = this.recipe.fullIngredients.find(
-          (ing) => ing.name === ingredientData.name
+          (ing) => ing.name === ingredientData.name,
         );
         if (!ingredient) continue;
 
@@ -1778,7 +2191,7 @@ export default class NutritionEngine {
         const effects = this.analyzeProcessingEffects(ingredient, recipePer100);
         const description = this.formatProcessingDescription(
           ingredient,
-          effects
+          effects,
         );
 
         if (description) {
@@ -1794,7 +2207,7 @@ export default class NutritionEngine {
     this.report.humanReadable = getReportHumanReadable(
       this.report,
       this.getRecipeRow() as Recipe,
-      this.isFood
+      this.isFood,
     );
     this.recipe.report = this.getTrimmedReport();
     this.recipe.fullReport = this.report;
@@ -1806,7 +2219,7 @@ export default class NutritionEngine {
         name: nutrient.name,
         displayName: nutrient.displayName,
         rdaPerServing: nutrient.rdaPerServing,
-      })
+      }),
     );
     const trimmedReport = {
       overall: this.report.overall,
@@ -1814,6 +2227,7 @@ export default class NutritionEngine {
       details: {
         satiety: this.report.satiety,
         fatProfile: this.report.fatProfile,
+        gutHealth: this.report.gutHealth,
         protectiveCompounds: this.report.protectiveCompounds,
         sugar: this.report.sugar,
         fiber: this.report.fiber,

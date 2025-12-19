@@ -4,11 +4,7 @@
     <div v-if="loading" class="space-y-4 mx-4">
       <Skeleton class="w-full h-142 shadow-sm rounded-2xl" />
       <div class="flex flex-wrap gap-10 items-start w-full">
-        <Skeleton
-          v-for="i in 9"
-          :key="i"
-          class="min-w-80 max-w-120 h-80 shadow-sm rounded-2xl flex-1"
-        />
+        <Skeleton v-for="i in 9" :key="i" class="min-w-80 max-w-120 h-80 shadow-sm rounded-2xl flex-1" />
       </div>
     </div>
 
@@ -20,32 +16,21 @@
           <h2 class="text-4xl font-bold tracking-tight mb-2">
             {{ title }}
           </h2>
-          <div class="flex items-start justify-between mt-6 mb-4">
+          <div class="flex items-center justify-between mt-6 mb-4">
             <div class="flex flex-col">
               <h3 class="text-xl font-bold mb-1">🔎 Overview</h3>
-              <div
-                class="percentile-badge !py-1 px-1"
-                :class="report.percentiles.hidx.color"
-                v-if="report.percentiles.hidx"
-              >
+              <div class="percentile-badge !py-1 px-1" :class="report.percentiles?.hidx?.color"
+                v-if="report.percentiles?.hidx">
                 <Icon :name="report.percentiles.hidx.icon" :size="20" />
                 <span>{{ report.percentiles.hidx.description }}</span>
               </div>
             </div>
-            <GradeContainer
-              :score="report.overall.hidx"
-              :type="'ovr'"
-              class="rounded-lg text-2xl"
-            />
+            <GradeContainer :score="report.overall.hidx" :type="'ovr'" class="rounded-lg text-2xl" />
           </div>
 
           <div class="space-y-3">
-            <div
-              v-for="grade of report.humanReadable.overall"
-              :key="grade.description"
-              class="flex gap-3 items-center"
-              :class="grade.color"
-            >
+            <div v-for="grade of report.humanReadable.overall" :key="grade.description" class="flex gap-3 items-center"
+              :class="grade.color">
               <Icon :name="grade.icon" :size="28" />
               <div class="flex flex-col">
                 <span class="font-bold">{{ grade.description }}</span>
@@ -59,32 +44,20 @@
       </div>
 
       <!-- Readable Summary Cards -->
-      <div
-        class="basis-auto min-w-80 flex-1 p-5 space-y-4 flex flex-col"
-        v-for="card in readableSummaryCards"
-        :key="card.title"
-        :class="card.class"
-      >
-        <div class="flex items-start justify-between mb-4">
+      <div class="basis-auto min-w-80 flex-1 p-5 space-y-4 flex flex-col" v-for="card in readableSummaryCards"
+        :key="card.title" :class="card.class">
+        <div class="flex items-center justify-between mb-4">
           <div class="">
             <h3 class="text-xl font-bold mb-1">
               {{ card.title }}
             </h3>
-            <div
-              class="percentile-badge"
-              :class="card.percentile.color"
-              v-if="card.percentile"
-            >
+            <div class="percentile-badge" :class="card.percentile?.color" v-if="card.percentile">
               <Icon :name="card.percentile.icon" :size="20" />
               <span>{{ card.percentile.description }}</span>
             </div>
-            <Skeleton v-else class="w-52 h-8 rounded-xl" />
+            <Skeleton v-else-if="!computedRecipe" class="w-52 h-8 rounded-xl" />
           </div>
-          <GradeContainer
-            :score="card.score"
-            :type="'single'"
-            class="rounded-lg text-2xl"
-          />
+          <GradeContainer :score="card.score" :type="'single'" class="rounded-lg text-2xl" />
         </div>
         <div v-for="nutrient in card.humanReadable" :key="nutrient.description">
           <div class="flex gap-2" :class="nutrient.color">
@@ -97,14 +70,11 @@
             </div>
           </div>
         </div>
-        <button
-          class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform self-start ml-8"
+        <button class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform self-start ml-8"
           v-if="
             card.name == 'micronutrients' &&
             report.humanReadable.micronutrients.length > 5
-          "
-          @click="toggleMicronutrientOverview"
-        >
+          " @click="toggleMicronutrientOverview">
           {{ micronutrientOverviewExpanded ? 'Show less' : 'Show more' }}
         </button>
       </div>
@@ -120,12 +90,11 @@ const props = defineProps<{
   id: string;
   isFood: boolean;
   hideNutrition?: boolean;
+  computedRecipe?: ComputedRecipe;
 }>();
 
 const id = isNaN(Number(props.id)) ? props.id : Number(props.id);
 const recipeStore = useRecipeStore();
-const vitaminsExpanded = ref(false);
-const mineralsExpanded = ref(false);
 const loading = ref(true);
 const recipeComputed = ref<any>(null);
 const supabase = useSupabaseClient();
@@ -253,8 +222,12 @@ function addPercentilesToSummaryCards() {
 
 // Load everything on client side
 onMounted(async () => {
+
   try {
-    if (props.isFood) {
+    if (props.computedRecipe) {
+      recipeComputed.value = props.computedRecipe;
+    }
+    else if (props.isFood) {
       // Case 1: Food
       const food = await getFoodName(supabase, {
         eq: { id: id },
@@ -334,28 +307,13 @@ onMounted(async () => {
   } finally {
     fillReadableSummaryCards();
     loading.value = false;
-    await fillReportPercentiles(supabase, report.value, props.isFood);
-    addPercentilesToSummaryCards();
+    if (!props.computedRecipe) {
+      await fillReportPercentiles(supabase, report.value, props.isFood);
+      addPercentilesToSummaryCards();
+    }
   }
 });
 
-const sortedMicros = computed(() => {
-  if (!report.value?.details?.micronutrients) return [];
-  return report.value.details.micronutrients.sort(
-    (a: any, b: any) => b.rdaPerServing - a.rdaPerServing
-  );
-});
-
-const sortedVitamins = computed(() =>
-  sortedMicros.value.filter((nutrient: any) => VITAMINS.includes(nutrient.name))
-);
-const sortedMinerals = computed(() =>
-  sortedMicros.value.filter((nutrient: any) => MINERALS.includes(nutrient.name))
-);
-const vitaminsShort = computed(() => sortedVitamins.value.slice(0, 5));
-const vitaminsRest = computed(() => sortedVitamins.value.slice(5));
-const mineralsShort = computed(() => sortedMinerals.value.slice(0, 5));
-const mineralsRest = computed(() => sortedMinerals.value.slice(5));
 </script>
 
 <style scoped>

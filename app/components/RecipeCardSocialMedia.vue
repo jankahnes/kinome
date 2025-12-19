@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="recipe?.id"
-    class="flex flex-row items-stretch transition-all duration-300 bg-primary-10 rounded-4xl overflow-hidden flex-1"
+    class="flex flex-row items-stretch transition-all duration-300 main-card rounded-4xl overflow-hidden flex-1"
   >
     <a
       :href="recipe.source ?? undefined"
@@ -41,7 +41,7 @@
         >
           <div
             v-if="recipe.rating && recipe.rating >= 4"
-            class="tag flex items-center gap-1 bg-slate-50"
+            class="tag flex items-center gap-1 bg-secondary"
           >
             <FormsRatingField
               :model-value="recipe.rating"
@@ -54,7 +54,7 @@
           </div>
 
           <div
-            class="tag flex items-center justify-center text-nowrap bg-slate-50"
+            class="tag flex items-center justify-center text-nowrap bg-secondary"
             v-for="(tag, index) in top5Tags"
             :key="index"
           >
@@ -71,7 +71,7 @@
           :small="true"
         />
         <div
-          class="flex items-center px-2 rounded-full text-xs font-medium bg-slate-100 gap-2 max-w-50 sm:max-w-70"
+          class="flex items-center px-2 rounded-full text-xs font-medium bg-secondary gap-2 max-w-50 sm:max-w-70"
           v-if="recipe.original_creator_channel_name"
         >
           <IconHeart class="w-3.5 flex-shrink-0" />

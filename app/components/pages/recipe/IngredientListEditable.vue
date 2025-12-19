@@ -1,19 +1,13 @@
 <template>
-  <div class="main-card main-card-padding flex flex-col items-start">
+  <div class="main-card bg-primary-20/70! main-card-padding flex flex-col items-start">
     <div class="flex justify-between items-start w-full gap-2 mb-2">
       <div>
         <p class="ml-1">Servings:</p>
-        <FormsSlidingSelector
-          v-model="model.serves"
-          :choices="[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20]"
-          :expanded="false"
-          class="max-w-[150px]"
-        />
+        <FormsSlidingSelector v-model="model.serves" :choices="[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20]"
+          :expanded="false" class="max-w-[150px]" />
       </div>
-      <button
-        class="animated-button bg-slate-50 flex items-center gap-1 px-2 py-1 text-xs leading-none"
-        @click="model.useNaturalLanguage = !model.useNaturalLanguage"
-      >
+      <button class="animated-button bg-secondary flex items-center gap-1 px-2 py-1 text-xs leading-none"
+        @click="model.useNaturalLanguage = !model.useNaturalLanguage">
         <IconRefreshCcw class="w-4" />
         <span>{{
           model.useNaturalLanguage
@@ -23,106 +17,63 @@
       </button>
     </div>
 
-    <textarea
-      v-if="model.useNaturalLanguage"
-      v-model="model.base_ingredients"
-      v-auto-resize
-      rows="4"
-      placeholder="For the dough:
+    <textarea v-if="model.useNaturalLanguage" v-model="model.base_ingredients" v-auto-resize rows="4" placeholder="For the dough:
 100g of flour
 2 tablespoons of olive oil"
-      class="md:ml-1 w-full bg-transparent rounded-xl p-2 outline outline-gray-100 hover:outline-gray-200 focus:outline-gray-300 resize-none flex-1 text-sm mt-4"
-    ></textarea>
+      class="md:ml-1 w-full bg-transparent rounded-xl p-2 outline outline-gray-100 hover:outline-gray-200 focus:outline-gray-300 resize-none flex-1 text-sm mt-4"></textarea>
     <!-- Ingredients List -->
     <div class="flex flex-col rounded-lg px-2 z-15" v-else>
       <div class="space-y-3 mt-4">
-        <div
-          v-for="[category, ingredients] in Object.entries(groupedIngredients)"
-          :key="category"
-          class="flex flex-col gap-2 relative min-h-12"
-        >
-          <div
-            class="flex justify-between items-center mb-3"
-            v-if="category !== 'uncategorized'"
-          >
+        <div v-for="[category, ingredients] in Object.entries(groupedIngredients)" :key="category"
+          class="flex flex-col gap-2 relative min-h-12">
+          <div class="flex justify-between items-center mb-3" v-if="category !== 'uncategorized'">
             <h3 class="py-2 font-semibold flex items-center gap-2">
               <IconFolder class="w-4" />
               {{ category }}
             </h3>
-            <button
-              @click="removeCategory(category)"
-              class="cursor-pointer text-red-500 hover:text-red-700"
-            >
+            <button @click="removeCategory(category)" class="cursor-pointer text-red-500 hover:text-red-700">
               <IconX class="w-4" />
             </button>
           </div>
 
           <div class="space-y-2">
-            <div
-              v-for="(ingredient, index) in ingredients"
-              :key="`input-${index}`"
-              class="ingredient-input-container"
-            >
+            <div v-for="(ingredient, index) in ingredients" :key="`input-${index}`" class="ingredient-input-container">
               <div class="flex flex-col gap-1">
                 <div class="flex items-center gap-2">
-                  <input
-                    v-if="ingredient.isEditing"
-                    :ref="(el: any) => setInputRef(el, category, index)"
-                    v-model="ingredient.rawText"
-                    @input="handleInput(category, index)"
-                    @blur="handleBlur(category, index)"
-                    @keydown.enter="handleEnter(category, index)"
+                  <input v-if="ingredient.isEditing" :ref="(el: any) => setInputRef(el, category, index)"
+                    v-model="ingredient.rawText" @input="handleInput(category, index)"
+                    @blur="handleBlur(category, index)" @keydown.enter="handleEnter(category, index)"
                     class="flex-1 px-3 py-2 bg-primary-20/70! rounded-md focus:outline-none ring focus:ring-2 ring-primary-300 transition-all"
-                    placeholder="e.g. 100g flour or 2 tbsp olive oil"
-                  />
+                    placeholder="e.g. 100g flour or 2 tbsp olive oil" />
 
-                  <div
-                    v-else
-                    @click="startEditing(category, index)"
+                  <div v-else @click="startEditing(category, index)"
                     class="flex-1 px-3 py-2 border border-transparent rounded-md cursor-text hover:border-gray-300 transition-colors min-h-[2.5rem] flex flex-wrap gap-1 items-center"
-                    :class="
-                      ingredient.parsed && ingredient.parsed.length > 0
+                    :class="ingredient.parsed && ingredient.parsed.length > 0
                         ? ''
                         : 'text-gray-400 italic'
-                    "
-                  >
-                    <template
-                      v-if="ingredient.parsed && ingredient.parsed.length > 0"
-                    >
-                      <span
-                        v-for="(part, partIndex) in ingredient.parsed"
-                        :key="partIndex"
-                        :class="part.styling"
-                      >
+                      ">
+                    <template v-if="ingredient.parsed && ingredient.parsed.length > 0">
+                      <span v-for="(part, partIndex) in ingredient.parsed" :key="partIndex" :class="part.styling">
                         {{ part.text }}
                       </span>
                     </template>
                     <span v-else>e.g. 100g flour or 2 tbsp olive oil</span>
                   </div>
 
-                  <button
-                    v-if="!isLastEmptyIngredient(category, index)"
-                    @click="removeIngredient(category, index)"
-                    class="cursor-pointer text-gray-500 hover:text-gray-700"
-                  >
+                  <button v-if="!isLastEmptyIngredient(category, index)" @click="removeIngredient(category, index)"
+                    class="cursor-pointer text-gray-500 hover:text-gray-700">
                     <IconX class="w-4" />
                   </button>
                 </div>
 
                 <!-- Live preview while editing -->
-                <div
-                  v-if="
-                    ingredient.isEditing &&
-                    ingredient.parsed &&
-                    ingredient.parsed.length > 0
-                  "
-                  class="px-3 py-1 bg-gray-50 rounded-md text-sm flex flex-wrap gap-1 items-center border-l-2 border-blue-200"
-                >
-                  <span
-                    v-for="(part, partIndex) in ingredient.parsed"
-                    :key="partIndex"
-                    :class="part.styling"
-                  >
+                <div v-if="
+                  ingredient.isEditing &&
+                  ingredient.parsed &&
+                  ingredient.parsed.length > 0
+                "
+                  class="px-3 py-1 bg-gray-50 rounded-md text-sm flex flex-wrap gap-1 items-center border-l-2 border-blue-200">
+                  <span v-for="(part, partIndex) in ingredient.parsed" :key="partIndex" :class="part.styling">
                     {{ part.text }}
                   </span>
                 </div>
@@ -130,43 +81,29 @@
             </div>
           </div>
         </div>
-        <div
-          v-if="addingCategory"
-          class="flex items-center justify-between gap-2 w-full px-4 outline outline-gray-100 hover:outline-gray-200 rounded-lg"
-        >
-          <input
-            v-model="newCategoryName"
-            class="w-full focus:outline-none"
-            placeholder="For the sauce..."
-          />
-          <button
-            @click="
-              addingCategory = false;
-              newCategoryName = '';
-            "
-          >
+        <div v-if="addingCategory"
+          class="flex items-center justify-between gap-2 w-full px-4 outline outline-gray-100 hover:outline-gray-200 rounded-lg">
+          <input v-model="newCategoryName" class="w-full focus:outline-none" placeholder="For the sauce..." />
+          <button @click="
+            addingCategory = false;
+          newCategoryName = '';
+          ">
             <IconX class="w-4" />
           </button>
-          <button
-            @click="
-              model.fullIngredients.push(
-                createEmptyIngredient(newCategoryName)
-              );
-              addingCategory = false;
-              newCategoryName = '';
-            "
-          >
+          <button @click="
+            model.fullIngredients.push(
+              createEmptyIngredient(newCategoryName)
+            );
+          addingCategory = false;
+          newCategoryName = '';
+          ">
             <IconCheck class="w-4" />
           </button>
         </div>
-        <button
-          class="flex items-center gap-2 opacity-70 cursor-pointer select-none"
-          v-else
-          @click="
-            addingCategory = true;
-            newCategoryName = '';
-          "
-        >
+        <button class="flex items-center gap-2 opacity-70 cursor-pointer select-none" v-else @click="
+          addingCategory = true;
+        newCategoryName = '';
+        ">
           <IconPlus class="w-4" />
           <span class="text-base">Add Category</span>
         </button>

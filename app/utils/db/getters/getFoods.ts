@@ -50,7 +50,7 @@ export async function getFood(
   return expectSingle(await getFoods(client, opts));
 }
 
-const formatDescription = (
+export const formatDescription = (
   rawDescription: string | null,
   foodData: FoodRowNullable,
   currentName: string

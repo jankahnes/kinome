@@ -74,7 +74,7 @@ export default function satietyToReadable(report: any, isFood: boolean) {
         })
     }
     if(!isFood) {
-    const contributors = report.contributors["sidx"]?.contributors || []
+    const contributors = report.contributors["sidx"] || []
     for(const contributor of contributors) {
         if(contributor.totalContribution > 75) {
             items.push({

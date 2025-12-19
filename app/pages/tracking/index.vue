@@ -10,7 +10,7 @@ const hasTracking = computed(() => auth.user?.user_data?.tracking);
 watchEffect(() => {
   if (auth.profileFetched) {
     if (hasTracking.value) {
-      navigateTo('/tracking/today');
+      navigateTo('/tracking/daily');
     } else {
       navigateTo('/tracking/intro');
     }

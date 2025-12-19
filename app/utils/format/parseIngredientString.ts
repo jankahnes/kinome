@@ -1,18 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ParsedPart } from '~/types/types';
+import type { BrandedFoodState, FullFoodRow, FoodVariant } from '~/types/types';
 import singularizeWord from './singularizeWord';
 import pluralizeWord from './pluralizeWord';
 
-export const amountStyling =
-  'font-semibold py-1 px-2 rounded-md bg-primary-100/70';
-export const unitStyling =
-  'font-semibold italic py-1 px-2 rounded-md bg-primary-100/70';
-export const ingredientStyling =
-  'font-bold text-gray-800 py-1 px-2 rounded-md bg-primary-100';
-export const preparationDescriptionStyling =
-  'font-light italic text-gray-600 py-1 px-2 rounded-md bg-primary-100/50';
-export const ignoredStyling =
-  'font-normal text-gray-600 py-1 px-2 rounded-md bg-primary-100/50';
+function stripReport(food: any): FullFoodRow {
+  if (!food) return food;
+  const { report: _report, ...rest } = food;
+  return rest as FullFoodRow;
+}
 
 const ignoreWords = ['a', 'an', 'the', 'of'];
 
@@ -163,42 +158,56 @@ function parseNumberUnit(word: string): {
   return null;
 }
 
+export type ParseResult = {
+  // Extracted data
+  amount: number | null;
+  unit: string;
+  preparationDescription: string | null;
+
+  // Display text (raw text with ingredient autocompleted, [barcode] replaced with product name)
+  displayText: string;
+  displayTextContext: string;
+  displayTextIngredient: string;
+  displayTextExtra: string;
+
+  // Resolved food
+  foodNameId?: number;
+  ingredientName?: string;
+  foodData?: FullFoodRow;
+  foodVariants?: FoodVariant[];
+
+  // Branded food
+  brandedFoodState?: BrandedFoodState;
+  brandedFood?: any;
+};
+
 export async function parseIngredientString(
   client: SupabaseClient<Database>,
   ingredientString: string,
-  hasIngredient: boolean = true
-): Promise<{
-  amount: number | null;
-  unit: string;
-  ingredient: any;
-  preparationDescription: string | null;
-  parsed: ParsedPart[];
-  brandedFoodState?:
-    | 'loading'
-    | 'needs_basic_info'
-    | 'needs_nutrition'
-    | 'matching'
-    | 'complete'
-    | 'error';
-  brandedFood?: any;
-}> {
-  let amount = null;
+  hasIngredient: boolean = true,
+): Promise<ParseResult> {
+  let amount: number | null = null;
   let unit = '';
-  let ingredient = null;
-  let preparationDescription = null;
+  let preparationDescription: string | null = null;
+  let foodNameId: number | undefined;
+  let ingredientName: string | undefined;
+  let foodData: FullFoodRow | undefined;
+  let foodVariants: FoodVariant[] | undefined;
+  let brandedFoodState: BrandedFoodState | undefined;
+  let brandedFood: any;
 
   const tokens = ingredientString
     .split(' ')
     .filter((word) => word.trim() !== '')
     .map((word) => word.trim());
-  const parsed: ParsedPart[] = [];
+  const displayTextContextParts: string[] = [];
+  const displayTextIngredientParts: string[] = [];
+  const displayTextExtraParts: string[] = [];
 
-  for (let i = 0; i < tokens.length; i++) {
-    const word = tokens[i];
-
+  for (const [i, word] of tokens.entries()) {
     // Skip ignore words (case-insensitive)
     if (ignoreWords.includes(word.toLowerCase())) {
-      parsed.push({ text: word, styling: ignoredStyling });
+      displayTextContextParts.push(word);
       continue;
     }
 
@@ -207,15 +216,16 @@ export async function parseIngredientString(
     if (numberUnit) {
       amount = numberUnit.number;
       unit = numberUnit.unit;
-      parsed.push({ text: word, styling: amountStyling });
+      displayTextContextParts.push(word);
       continue;
     }
 
     // Try to parse as standalone number
+    // Use += so mixed numbers like "1 1/2" accumulate correctly (1 + 0.5 = 1.5)
     const numericValue = parseNumeric(word);
     if (numericValue != null) {
-      amount = numericValue;
-      parsed.push({ text: word, styling: amountStyling });
+      amount = (amount ?? 0) + numericValue;
+      displayTextContextParts.push(word);
       continue;
     }
 
@@ -223,7 +233,7 @@ export async function parseIngredientString(
     const lowerWord = word.toLowerCase();
     if (unitToDBMap[lowerWord as keyof typeof unitToDBMap]) {
       unit = unitToDBMap[lowerWord as keyof typeof unitToDBMap];
-      parsed.push({ text: word, styling: unitStyling });
+      displayTextContextParts.push(word);
       continue;
     }
 
@@ -231,21 +241,14 @@ export async function parseIngredientString(
     const productCodeMatch = word.match(/\[(\d+)\]/);
     if (productCodeMatch) {
       const barcode = productCodeMatch[1];
-      const brandedFood = await getBrandedFood(client, barcode);
+      const fetchedBrandedFood = await getBrandedFood(client, barcode);
 
       // Determine the state based on what's missing
-      let brandedFoodState:
-        | 'loading'
-        | 'needs_basic_info'
-        | 'needs_nutrition'
-        | 'matching'
-        | 'complete' = 'loading';
-
-      if (!brandedFood) {
-        // Case 1: No branded food found at all
+      if (!fetchedBrandedFood) {
         brandedFoodState = 'needs_basic_info';
+        displayTextIngredientParts.push(`Product ${barcode}`);
       } else {
-        const requirements = getBrandedFoodRequirements(brandedFood);
+        const requirements = getBrandedFoodRequirements(fetchedBrandedFood);
 
         if (!requirements.hasName) {
           brandedFoodState = 'needs_basic_info';
@@ -257,38 +260,48 @@ export async function parseIngredientString(
           brandedFoodState = 'complete';
         }
 
-        ingredient = {
-          food: brandedFood.food_name?.food,
-          ...brandedFood,
-        };
+        brandedFood = fetchedBrandedFood;
+        foodData = fetchedBrandedFood.food_name?.food;
+        foodNameId = fetchedBrandedFood.food_name?.id;
+        ingredientName = fetchedBrandedFood.product_name || undefined;
+
+        // Add product name to display text
+        const productDisplayName = fetchedBrandedFood.product_name
+          ? `${fetchedBrandedFood.brand ?? ''} ${
+              fetchedBrandedFood.product_name
+            }`.trim()
+          : `Product ${barcode}`;
+        displayTextIngredientParts.push(productDisplayName);
       }
 
-      parsed.push({
-        text: brandedFood?.product_name
-          ? (brandedFood?.brand ?? '') + ' ' + brandedFood?.product_name
-          : `Product ${barcode}`,
-        styling: ingredientStyling,
-        barcode: barcode,
-        type: 'product',
-      });
-
+      // Add remaining tokens to display text
       const rest = await parseIngredientString(
         client,
         tokens.slice(i + 1).join(' '),
-        false
+        false,
       );
-      parsed.push(...rest.parsed);
+      displayTextIngredientParts.push(rest.displayText);
 
       return {
         amount,
         unit,
-        ingredient,
         preparationDescription,
-        parsed,
+        displayText:
+          displayTextContextParts.join(' ') +
+          ' ' +
+          displayTextIngredientParts.join(' ').trim(),
+        displayTextContext: displayTextContextParts.join(' '),
+        displayTextIngredient: displayTextIngredientParts.join(' ').trim(),
+        displayTextExtra: displayTextExtraParts.join(' ').trim(),
+        foodNameId,
+        ingredientName,
+        foodData,
         brandedFoodState,
-        brandedFood: brandedFood || undefined,
+        brandedFood,
       };
     }
+
+
 
     const remainingWords = tokens.slice(i).join(' ');
 
@@ -318,7 +331,7 @@ export async function parseIngredientString(
           candidates.push(searchTerm);
         }
 
-        let bestResult = null;
+        let bestResult: any = null;
         let bestSimilarity = -1;
 
         let bestCandidateIndex = 0;
@@ -339,78 +352,98 @@ export async function parseIngredientString(
         }
 
         if (bestResult) {
+          // Add any excluded words to display text
           if (bestCandidateIndex > 0) {
-            const excludedWords = searchWords
-              .slice(0, bestCandidateIndex)
-              .join(' ');
-            const excludedParsed = await parseIngredientString(
-              client,
-              excludedWords,
-              false
-            );
-            parsed.push(...excludedParsed.parsed);
+            // Push each excluded word individually so countable_unit detection
+            // can match single words like "slice" even if "of" follows it.
+            displayTextContextParts.push(...searchWords.slice(0, bestCandidateIndex));
           }
-          ingredient = bestResult;
 
-          // Check if any previously ignored words match countable_units
-          if (unit === '' && ingredient.food.countable_units) {
-            const countableUnits = ingredient.food.countable_units as Record<
+          foodNameId = bestResult.id;
+          ingredientName = bestResult.name;
+          foodData = stripReport(bestResult.food);
+
+          const displayTextParts = displayTextContextParts.concat(
+            displayTextIngredientParts,
+          );
+          // Check if any previously added words match countable_units
+          if (unit === '' && bestResult.food.countable_units) {
+            const countableUnits = bestResult.food.countable_units as Record<
               string,
               number
             >;
-            // Get all previously parsed words with ignoredStyling
-            const previouslyIgnoredWords = parsed
-              .filter((p) => p.styling === ignoredStyling)
-              .map((p) => p.text);
-            for (const ignoredWord of previouslyIgnoredWords) {
-              const lowerIgnored = ignoredWord.toLowerCase();
+            // Check the last few words added to display text
+            for (let idx = displayTextParts.length - 1; idx >= 0; idx--) {
+              const prevWord = displayTextParts[idx];
+              const lowerPrevWord = prevWord.toLowerCase();
               let matchedUnit: string | null = null;
 
               // Check exact match
-              if (countableUnits[lowerIgnored]) {
-                matchedUnit = lowerIgnored;
+              if (countableUnits[lowerPrevWord]) {
+                matchedUnit = lowerPrevWord;
               }
               // Check singular version
-              else if (countableUnits[singularizeWord(lowerIgnored)]) {
-                matchedUnit = singularizeWord(lowerIgnored);
+              else if (countableUnits[singularizeWord(lowerPrevWord)]) {
+                matchedUnit = singularizeWord(lowerPrevWord);
               }
               // Check plural version
-              else if (countableUnits[pluralizeWord(lowerIgnored)]) {
-                matchedUnit = pluralizeWord(lowerIgnored);
+              else if (countableUnits[pluralizeWord(lowerPrevWord)]) {
+                matchedUnit = pluralizeWord(lowerPrevWord);
               }
 
               if (matchedUnit) {
                 unit = matchedUnit;
-                // Update styling for this word in parsed
-                const parsedEntry = parsed.find(
-                  (p) => p.text.toLowerCase() === lowerIgnored
-                );
-                if (parsedEntry) {
-                  parsedEntry.styling = unitStyling;
-                }
                 break;
               }
             }
           }
 
+          // Pluralize ingredient name if needed
+          let finalIngredientName = bestResult.name;
           if (
             unit == '' &&
             amount &&
             amount > 1 &&
-            !parsed.some((p) => p.text.toLowerCase() == 'of')
+            !displayTextParts.some((p) => p.toLowerCase() == 'of')
           ) {
-            ingredient.name = pluralizeWord(ingredient.name);
+            finalIngredientName = pluralizeWord(bestResult.name);
           }
 
-          parsed.push({ text: ingredient.name, styling: ingredientStyling });
+          ingredientName = finalIngredientName;
+          displayTextIngredientParts.push(finalIngredientName);
+
           if (extra) {
-            extra = extra.replace(/^,/, '');
+            extra = extra.replace(/^,/, '').trim();
             preparationDescription = extra;
-            parsed.push({
-              text: extra,
-              styling: preparationDescriptionStyling,
-            });
+            displayTextExtraParts.push(extra);
           }
+
+          // Fetch top 5 deduplicated variants for the winning candidate
+          const foodVariantsList: FoodVariant[] = [
+            { id: foodNameId!, name: finalIngredientName, food: foodData! },
+          ];
+          try {
+            const { data: variantsData } = await (client as any).rpc(
+              'search_foods_deduplicated',
+              { query: candidates[bestCandidateIndex], max: 5 },
+            );
+            if (variantsData?.length) {
+              const primaryFoodId = bestResult.food?.id;
+              for (const v of variantsData) {
+                if (v.food?.id !== primaryFoodId && foodVariantsList.length < 5) {
+                  foodVariantsList.push({
+                    id: v.id,
+                    name: v.name,
+                    food: stripReport(v.food),
+                  });
+                }
+              }
+            }
+          } catch (_) {
+            // Non-critical: variants default to just the primary match
+          }
+          foodVariants = foodVariantsList;
+
           break;
         }
       } catch (error) {
@@ -418,14 +451,27 @@ export async function parseIngredientString(
       }
     }
 
-    parsed.push({ text: word, styling: ignoredStyling });
+    displayTextContextParts.push(word);
   }
 
   return {
     amount,
     unit,
-    ingredient,
     preparationDescription,
-    parsed,
+    displayText:
+      displayTextContextParts.join(' ') +
+      ' ' +
+      displayTextIngredientParts.join(' ').trim() +
+      ' ' +
+      displayTextExtraParts.join(' ').trim(),
+    displayTextContext: displayTextContextParts.join(' '),
+    displayTextIngredient: displayTextIngredientParts.join(' ').trim(),
+    displayTextExtra: displayTextExtraParts.join(' ').trim(),
+    foodNameId,
+    ingredientName,
+    foodData,
+    foodVariants,
+    brandedFoodState,
+    brandedFood,
   };
 }

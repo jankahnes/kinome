@@ -84,7 +84,7 @@ const nutritionHighlightsCategories: {
   {
     name: 'Sodium',
     score: 'salt_score',
-    illustration: 'salt.webp',
+    illustration: 'salt2.webp',
     relevance: 4,
     thresholds: [
       {
@@ -181,7 +181,7 @@ const getRatingBackground = (rating: string) => {
 };
 
 export default function getNutritionHighlightCards(
-  computable: Recipe | FullFoodRow | null | undefined
+  computable: Recipe | FullFoodRow | null | undefined,
 ) {
   if (!computable) return [];
   const highlights = [];
@@ -196,7 +196,7 @@ export default function getNutritionHighlightCards(
     }
 
     const sortedThresholds = [...category.thresholds].sort(
-      (a, b) => b.value - a.value
+      (a, b) => b.value - a.value,
     );
     const metThreshold = sortedThresholds.find((t) => score >= t.value);
     if (!metThreshold) continue;
@@ -262,14 +262,14 @@ export default function getNutritionHighlightCards(
       const satietyKeywords = {
         Fullness: 'High Fullness Factor',
         Water: 'High Water Content',
-        Calories: 'Low Calories',
+        Calories: 'Low Calorie Density',
         'Glycemic Index': 'Low Glycemic Index',
       };
       const bestSatietyDescription =
         computable?.report?.humanReadable?.satiety[0].description;
       if (bestSatietyDescription) {
         const bestSatietyKey = Object.keys(satietyKeywords).find((key) =>
-          bestSatietyDescription.includes(key)
+          bestSatietyDescription.includes(key),
         );
         if (bestSatietyKey) {
           subtitle =

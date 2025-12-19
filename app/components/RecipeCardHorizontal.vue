@@ -42,7 +42,7 @@
       </div>
     </div>
     <div
-      class="z-0 flex-1 bg-primary-10 px-4 py-3 rounded-4xl flex flex-col gap-2 justify-center h-29 xs:h-35"
+      class="z-0 flex-1 main-card px-4 py-3 rounded-4xl flex flex-col gap-2 justify-center h-29 xs:h-35"
       :class="
         recipe?.picture || recipe?.social_picture
           ? '-ml-22 !pl-25 xs:-ml-28 xs:!pl-31'
@@ -59,7 +59,7 @@
       >
         <div
           v-if="recipe?.rating && recipe?.rating >= 4"
-          class="tag flex items-center gap-1 bg-slate-50"
+          class="tag flex items-center gap-1 bg-secondary"
         >
           <FormsRatingField
             :model-value="recipe?.rating"
@@ -72,7 +72,7 @@
         </div>
 
         <div
-          class="tag flex items-center justify-center text-nowrap bg-slate-50"
+          class="tag flex items-center justify-center text-nowrap bg-secondary"
           v-for="(tag, index) in top3Tags"
           :key="index"
         >

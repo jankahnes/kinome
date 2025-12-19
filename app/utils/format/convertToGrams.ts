@@ -1,5 +1,5 @@
 export default function convertToGrams(
-  amount: number,
+  amount: number | null | undefined,
   unit: string,
   density: number,
   unit_weight: number

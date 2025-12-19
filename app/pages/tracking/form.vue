@@ -1172,7 +1172,7 @@ const saveTracking = async () => {
     console.error('Failed to save tracking:', error);
   }
   auth.fetchProfile();
-  navigateTo('/tracking/today');
+  navigateTo('/tracking/daily');
 };
 </script>
 

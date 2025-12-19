@@ -2,63 +2,37 @@
   <div class="">
     <div class="py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl">
       <div class="flex justify-between items-end gap-6">
-        <div
-          class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10/70 shrink-1 min-w-0!"
-        >
-          <input
-            type="text"
-            placeholder="Search for a recipe"
-            class="flex-grow focus:outline-none py-2 min-w-0!"
-            v-model="searchQuery"
-            @blur="handleSearchBlur"
-            @keyup.enter="refresh(true)"
-          />
-          <IconSearch class="w-5" />
+        <div class="ai-ring rounded-2xl p-0.5">
+          <input type="text" :placeholder="'Describe what you\'re looking for…'"
+            class="flex-grow focus:outline-none py-2 min-w-0! rounded-[14px] px-4 bg-primary-10" v-model="searchQuery"
+            @blur="handleSearchBlur" @keyup.enter="refresh(true)" />
         </div>
-        <span class="text-gray-500 text-sm text-nowrap"
-          >{{ totalCount }} Results</span
-        >
+        <span class="text-gray-500 text-sm text-nowrap">{{ totalCount }} Results</span>
       </div>
 
       <div class="flex justify-between items-center flex-wrap gap-2 z-2">
         <div class="filters flex items-center gap-2">
-          <button
-            @click="onSelect('tags')"
-            :class="{
-              '!bg-primary !text-white': selectedFilter === 'tags',
-            }"
-            class="flex button bg-main p-2 font-bold gap-1 items-center"
-          >
+          <button @click="onSelect('tags')" :class="{
+            '!bg-primary !text-white': selectedFilter === 'tags',
+          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
             <IconTag class="w-5" />
             <span class="hidden lg:block">Tags</span>
           </button>
-          <button
-            @click="onSelect('health')"
-            :class="{
-              '!bg-primary !text-white': selectedFilter === 'health',
-            }"
-            class="flex button bg-main p-2 font-bold gap-1 items-center"
-          >
+          <button @click="onSelect('health')" :class="{
+            '!bg-primary !text-white': selectedFilter === 'health',
+          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
             <IconShield class="w-5" />
             <span class="hidden lg:block">Health Score</span>
           </button>
-          <button
-            @click="onSelect('kcal')"
-            :class="{
-              '!bg-primary !text-white': selectedFilter === 'kcal',
-            }"
-            class="flex button bg-main p-2 font-bold gap-1 items-center"
-          >
+          <button @click="onSelect('kcal')" :class="{
+            '!bg-primary !text-white': selectedFilter === 'kcal',
+          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
             <IconZap class="w-5" />
             <span class="hidden lg:block">Kcal</span>
           </button>
-          <button
-            @click="onSelect('cost')"
-            :class="{
-              '!bg-primary !text-white': selectedFilter === 'cost',
-            }"
-            class="flex button bg-main p-2 font-bold gap-1 items-center"
-          >
+          <button @click="onSelect('cost')" :class="{
+            '!bg-primary !text-white': selectedFilter === 'cost',
+          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
             <IconEuro class="w-5" />
             <span class="hidden lg:block">Cost</span>
           </button>
@@ -74,22 +48,14 @@
           <!-- Categories -->
           <div class="py-1">
             <BlocksCarousel>
-              <div
-                v-for="category in categories"
-                :key="category.tag"
-                @click="toggleTag(category)"
-                :class="{
-                  '!bg-primary !text-white': filteringTags.includes(
-                    category.tag
-                  ),
-                }"
-                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 button m-1"
-              >
+              <div v-for="category in categories" :key="category.tag" @click="toggleTag(category)" :class="{
+                '!bg-primary !text-white': filteringTags.includes(
+                  category.tag
+                ),
+              }"
+                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 animated-button bg-primary-10 m-1">
                 <span class="text-2xl">{{ category.icon }}</span>
-                <span
-                  class="text-sm sm:text-base sm:tracking-wider text-nowrap"
-                  >{{ category.name }}</span
-                >
+                <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{ category.name }}</span>
               </div>
             </BlocksCarousel>
           </div>
@@ -97,80 +63,38 @@
           <!-- Cuisines -->
           <div class="py-1">
             <BlocksCarousel>
-              <div
-                v-for="cuisine in cuisines"
-                :key="cuisine.tag"
-                @click="toggleTag(cuisine)"
-                :class="{
-                  '!bg-primary !text-white': filteringTags.includes(
-                    cuisine.tag
-                  ),
-                }"
-                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 button m-1"
-              >
+              <div v-for="cuisine in cuisines" :key="cuisine.tag" @click="toggleTag(cuisine)" :class="{
+                '!bg-primary !text-white': filteringTags.includes(
+                  cuisine.tag
+                ),
+              }"
+                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 animated-button bg-primary-10 m-1">
                 <span class="flex gap-0.5 rounded-4xl overflow-hidden">
-                  <img
-                    v-for="flag in cuisine.flags"
-                    :key="flag"
-                    :src="`/flags/${flag}.svg`"
-                    :alt="flag"
-                    class="h-5 w-auto"
-                  />
+                  <img v-for="flag in cuisine.flags" :key="flag" :src="`/flags/${flag}.svg`" :alt="flag"
+                    class="h-5 w-auto" />
                 </span>
-                <span
-                  class="text-sm sm:text-base sm:tracking-wider text-nowrap"
-                  >{{ cuisine.name }}</span
-                >
+                <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{ cuisine.name }}</span>
               </div>
             </BlocksCarousel>
           </div>
         </div>
-        <div
-          class="relative py-3 select-none ml-4 mr-6 lg:mx-3"
-          v-if="selectedFilter == 'health'"
-        >
-          <FormsRangeSlider
-            v-model="healthScoreRange"
-            :min="0"
-            :max="100"
-            class="max-w-lg"
-            :display-map="getGrade"
-            :update="updateGradeTag"
-          />
+        <div class="relative py-3 select-none ml-4 mr-6 lg:mx-3" v-if="selectedFilter == 'health'">
+          <FormsRangeSlider v-model="healthScoreRange" :min="0" :max="110" class="max-w-lg" :display-map="getGrade"
+            :update="updateGradeTag" />
         </div>
-        <div
-          class="relative py-3 select-none ml-4 mr-12 lg:mx-3"
-          v-if="selectedFilter == 'kcal'"
-        >
-          <FormsRangeSlider
-            v-model="kcalRange"
-            :min="0"
-            :max="2500"
-            class="max-w-lg"
-            :display-map="(value: number) => value"
-            :update="updateKcalTag"
-          />
+        <div class="relative py-3 select-none ml-4 mr-12 lg:mx-3" v-if="selectedFilter == 'kcal'">
+          <FormsRangeSlider v-model="kcalRange" :min="0" :max="2500" class="max-w-lg"
+            :display-map="(value: number) => value" :update="updateKcalTag" />
         </div>
-        <div
-          class="relative py-3 select-none ml-4 mr-18 lg:mx-3"
-          v-if="selectedFilter == 'cost'"
-        >
-          <FormsRangeSlider
-            v-model="costRange"
-            :min="0"
-            :max="200"
-            class="max-w-lg"
-            :display-map="getEuroFormat"
-            :update="updateCostTag"
-          />
+        <div class="relative py-3 select-none ml-4 mr-18 lg:mx-3" v-if="selectedFilter == 'cost'">
+          <FormsRangeSlider v-model="costRange" :min="0" :max="200" class="max-w-lg" :display-map="getEuroFormat"
+            :update="updateCostTag" />
         </div>
       </div>
       <div v-if="visibleTags.length" class="flex gap-2 flex-wrap mt-4">
-        <button
-          v-for="(tag, index) in visibleTags"
-          class="px-3 button flex items-center justify-center gap-2 group !shadow-none"
-          @click="removeTag(index)"
-        >
+        <button v-for="(tag, index) in visibleTags"
+          class="px-3 animated-button bg-primary-10 flex items-center justify-center gap-2 group !shadow-none"
+          @click="removeTag(index)">
           <IconX class="w-5" />
           <span>{{ tag }}</span>
         </button>
@@ -178,48 +102,22 @@
     </div>
     <div class="my-4 z-2">
       <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch">
-        <RecipeCard
-          :recipe="recipe"
+        <RecipeCard :recipe="recipe"
           class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 flex-1 min-h-50 text-[30px]"
-          v-for="recipe in results"
-          :key="recipe.id"
-        />
-        <div
-          ref="sentinelElement"
-          v-if="isLoading || hasMoreRecipes"
-          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
-        >
-          <Skeleton
-            class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
-          />
+          v-for="recipe in results" :key="recipe.id" />
+        <div ref="sentinelElement" v-if="isLoading || hasMoreRecipes"
+          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl">
+          <Skeleton class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl" />
         </div>
-        <Skeleton
-          v-if="isLoading || hasMoreRecipes"
-          v-for="i in 10"
-          :key="i"
-          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl"
-        />
+        <Skeleton v-if="isLoading || hasMoreRecipes" v-for="i in 10" :key="i"
+          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl" />
       </div>
       <div class="flex flex-col gap-4 md:hidden justify-items-stretch">
-        <RecipeCardHorizontal
-          :recipe="recipe"
-          class=""
-          v-for="recipe in results"
-          :key="recipe.id"
-        />
-        <div
-          ref="sentinelElementMobile"
-          class="w-full"
-          v-if="isLoading || hasMoreRecipes"
-        >
+        <RecipeCardHorizontal :recipe="recipe" class="" v-for="recipe in results" :key="recipe.id" />
+        <div ref="sentinelElementMobile" class="w-full" v-if="isLoading || hasMoreRecipes">
           <Skeleton class="w-full h-28 xs:h-34 rounded-xl" />
         </div>
-        <Skeleton
-          v-if="isLoading || hasMoreRecipes"
-          class="w-full h-28 xs:h-34 rounded-xl"
-          v-for="i in 5"
-          :key="i"
-        />
+        <Skeleton v-if="isLoading || hasMoreRecipes" class="w-full h-28 xs:h-34 rounded-xl" v-for="i in 5" :key="i" />
       </div>
     </div>
   </div>
@@ -234,6 +132,8 @@ const visibleTags = ref<string[]>([]);
 const filteringTags = ref<number[]>([]);
 const searchQuery = ref('');
 const lastSearchedQuery = ref('');
+const currentEmbedding = ref<number[] | null>(null);
+const isEmbedding = ref(false);
 const selectedFilter = ref('');
 const results = ref<RecipeOverview[]>([]);
 
@@ -328,14 +228,16 @@ async function loadMoreRecipes() {
       orderBy: selectedSorting.value.value,
       or: 'picture.not.eq.null,source_type.eq.MEDIA',
       filtering: filtering.value,
-      trigram_search: { column: 'title', query: searchQuery.value },
-      range: {
-        from: currentOffset.value,
-        to: currentOffset.value + RECIPES_PER_PAGE - 1,
-      },
+      vector_search: { embedding: currentEmbedding.value! },
+      ...(!currentEmbedding.value && {
+        range: {
+          from: currentOffset.value,
+          to: currentOffset.value + RECIPES_PER_PAGE - 1,
+        },
+      }),
     });
 
-    if (newRecipes.length < RECIPES_PER_PAGE) {
+    if (currentEmbedding.value || newRecipes.length < RECIPES_PER_PAGE) {
       hasMoreRecipes.value = false;
     }
 
@@ -350,10 +252,28 @@ async function loadMoreRecipes() {
 }
 
 async function refresh(shouldRecount = true) {
+  isLoading.value = true;
   currentOffset.value = 0;
   results.value = [];
   hasMoreRecipes.value = true;
   lastSearchedQuery.value = searchQuery.value;
+
+  if (searchQuery.value.trim()) {
+    isEmbedding.value = true;
+    try {
+      currentEmbedding.value = await $fetch<number[]>('/api/search/embed', {
+        method: 'POST',
+        body: { query: searchQuery.value },
+      });
+    } catch (e) {
+      console.error('Embedding error:', e);
+      currentEmbedding.value = null;
+    } finally {
+      isEmbedding.value = false;
+    }
+  } else {
+    currentEmbedding.value = null;
+  }
 
   if (shouldRecount) {
     getCount(supabase, {
@@ -364,6 +284,7 @@ async function refresh(shouldRecount = true) {
       totalCount.value = count;
     });
   }
+  isLoading.value = false;
   await loadMoreRecipes();
 }
 

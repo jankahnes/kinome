@@ -45,6 +45,10 @@ const iconMap: Record<string, any> = {
   weight: LucideIcons.Weight,
   banknote: LucideIcons.Banknote,
   factory: LucideIcons.Factory,
+  'trending-up': LucideIcons.TrendingUp,
+  'trending-down': LucideIcons.TrendingDown,
+  'check-check': LucideIcons.CheckCheck,
+  'shield-alert': LucideIcons.ShieldAlert,
 };
 
 const icon = computed(() => iconMap[props.name]);

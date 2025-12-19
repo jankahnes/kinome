@@ -22,17 +22,13 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  reverse: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(['update:modelValue']);
-
-const open = ref(props.modelValue);
-watch(
-  () => props.modelValue,
-  (v) => (open.value = v)
-);
-
-const body = ref(null);
+const open = computed(() => props.reverse ? !props.modelValue : props.modelValue);
 
 function enter(el) {
   el.style.height = '0px';

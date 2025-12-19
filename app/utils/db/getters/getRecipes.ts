@@ -16,7 +16,7 @@ function getTagCategory(tagId: number): string {
 
 async function getRecipeIdsByTags(
   tags: number[],
-  client: SupabaseClient<Database>
+  client: SupabaseClient<Database>,
 ): Promise<number[]> {
   // Group tags by category
   const tagsByCategory: Record<string, number[]> = {};
@@ -48,7 +48,7 @@ async function getRecipeIdsByTags(
     let matchingRecipeIds = recipeIdSets[0];
     for (let i = 1; i < recipeIdSets.length; i++) {
       matchingRecipeIds = new Set(
-        [...matchingRecipeIds].filter((id) => recipeIdSets[i].has(id))
+        [...matchingRecipeIds].filter((id) => recipeIdSets[i].has(id)),
       );
     }
     return Array.from(matchingRecipeIds);
@@ -59,7 +59,7 @@ async function getRecipeIdsByTags(
 
 export async function getRecipes(
   client: SupabaseClient<Database>,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<Recipe[]> {
   let query = client.from('recipes').select(`
         *,
@@ -100,7 +100,7 @@ export async function getRecipes(
   if (recipes.length === 0) return [];
 
   const userIds = recipes.flatMap((r: Recipe) =>
-    r.comments.map((c: { user_id: string }) => c.user_id)
+    r.comments.map((c: { user_id: string }) => c.user_id),
   );
   const recipeIds = recipes.map((r: Recipe) => r.id);
   const ratings = await getRatings(client, {
@@ -110,7 +110,7 @@ export async function getRecipes(
   for (const recipe of recipes) {
     for (const c of recipe.comments) {
       const match = ratings.find(
-        (r) => r.user_id === c.user_id && r.recipe_id === recipe.id
+        (r) => r.user_id === c.user_id && r.recipe_id === recipe.id,
       );
       c.rating = match?.rating ?? null;
     }
@@ -152,40 +152,6 @@ export async function getRecipes(
         mechanical_description: ingredient.mechanical_description,
       } as Ingredient;
     });
-
-    // Sort ingredients after their occurrence in the instructions
-    /**if (recipe.instructions && Array.isArray(recipe.instructions) && recipe.ingredients && recipe.ingredients.length > 0) {
-      const instructionText = recipe.instructions.join(' ');
-      const ingredientOrder = new Map<number, number>();
-      let order = 0;
-
-      // Extract ingredient IDs in order of appearance using regex [text](id)
-      const regex = /\[.*?\]\((\d+)\)/g;
-      let match;
-      while ((match = regex.exec(instructionText)) !== null) {
-        const ingredientId = parseInt(match[1], 10);
-        if (!ingredientOrder.has(ingredientId)) {
-          ingredientOrder.set(ingredientId, order++);
-        }
-      }
-
-      // If we found ingredient IDs in instructions, sort by occurrence
-      if (ingredientOrder.size > 0) {
-        // Sort ingredients by their first occurrence in instructions
-        // Ingredients not in instructions will be placed at the end
-        recipe.ingredients.sort((a: Ingredient, b: Ingredient) => {
-          const orderA = ingredientOrder.get(a.id) ?? Infinity;
-          const orderB = ingredientOrder.get(b.id) ?? Infinity;
-          return orderA - orderB;
-        });
-      } else {
-        // Fallback: sort by amount (descending - largest amounts first)
-        recipe.ingredients.sort((a: Ingredient, b: Ingredient) => {
-          return b.amount - a.amount;
-        });
-      }
-    }
-    */
     recipe.ingredients.forEach(fillForUnits);
   }
   return recipes as Recipe[];
@@ -193,21 +159,42 @@ export async function getRecipes(
 
 export async function getRecipe(
   client: SupabaseClient<Database>,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<Recipe> {
   return expectSingle(await getRecipes(client, opts));
 }
 
 export async function getRecipeOverviews(
   client: SupabaseClient<Database>,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<RecipeOverview[]> {
   let query = client.from('recipes').select(`
         id, hidx, kcal, price, title, created_at, visibility, picture, rating, protein, carbohydrates, fat, sugar, salt, fiber, user_id, collection, 
         tags:recipe_tags(tag_id), source, description, original_title, source_type, original_creator_channel_name
       `);
   let similarityMap: Map<number, number> | null = null;
-  if (
+  if (opts.vector_search?.embedding?.length) {
+    const { data: vectorResults, error: vectorError } = await client.rpc(
+      'search_recipes_ai',
+      {
+        query: opts.vector_search.embedding,
+        max: (opts.limit ?? 40) + 10,
+      },
+    );
+
+    if (vectorError) throw vectorError;
+
+    if (!vectorResults || vectorResults.length === 0) {
+      return [];
+    }
+
+    const recipeIds = vectorResults.map((result: any) => result.id);
+    similarityMap = new Map(
+      vectorResults.map((result: any) => [result.id, result.similarity]),
+    );
+
+    query = query.in('id', recipeIds);
+  } else if (
     opts.trigram_search &&
     opts.trigram_search.query &&
     opts.trigram_search.query.trim() !== ''
@@ -217,7 +204,7 @@ export async function getRecipeOverviews(
       {
         query: opts.trigram_search.query,
         max: (opts.limit ?? 40) + 10,
-      }
+      },
     );
 
     if (trigramError) throw trigramError;
@@ -228,7 +215,7 @@ export async function getRecipeOverviews(
 
     const recipeIds = trigramResults.map((result: any) => result.id);
     similarityMap = new Map(
-      trigramResults.map((result: any) => [result.id, result.similarity])
+      trigramResults.map((result: any) => [result.id, result.similarity]),
     );
 
     query = query.in('id', recipeIds);
@@ -278,7 +265,7 @@ export async function getRecipeOverviews(
 
 export async function getRecipeOverview(
   client: SupabaseClient,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<RecipeOverview> {
   return expectSingle(await getRecipeOverviews(client, opts));
 }

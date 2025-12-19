@@ -40,7 +40,7 @@
 
     <!-- was originally pt-[60%] -->
     <div
-      class="w-full relative pt-[60%] px-2 sm:px-6 pb-[5%] z-0 will-change-transform transition-transform duration-300 group-hover:translate-y-[1px] bg-primary-10 rounded-4xl min-h-40 max-h-100"
+      class="w-full relative pt-[60%] px-2 sm:px-6 pb-[5%] z-0 will-change-transform transition-transform duration-300 group-hover:translate-y-[1px] main-card rounded-4xl min-h-40 max-h-100"
       :class="{ '-mt-[60%] ': recipe.picture || recipe.source }"
     >
       <div
@@ -55,7 +55,7 @@
           class="flex gap-1.5 flex-wrap text-xs sm:text-[14px] h-7 sm:h-14 overflow-y-hidden items-center justify-center py-0.5"
         >
           <div
-            class="tag flex items-center gap-1 bg-slate-50"
+            class="tag flex items-center gap-1 bg-secondary"
             v-if="recipe?.rating && recipe?.rating >= 4"
           >
             <FormsRatingField
@@ -69,7 +69,7 @@
           </div>
 
           <div
-            class="tag flex items-center justify-center text-nowrap bg-slate-50"
+            class="tag flex items-center justify-center text-nowrap bg-secondary"
             v-for="(tag, index) in top3Tags"
             :key="index"
           >

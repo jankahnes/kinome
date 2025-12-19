@@ -955,7 +955,6 @@ export const alphaFunctions: Partial<
   tryptophan_mg: alpha_EAAs_except_Lysine,
   valine_mg: alpha_EAAs_except_Lysine,
   nova: noAlpha,
-  sidx: noAlpha,
   mnidx: noAlpha,
   fat_profile_score: noAlpha,
   protective_score: noAlpha,

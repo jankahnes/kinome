@@ -27,29 +27,12 @@
         </div>
         <div class="space-y-2 flex-1">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-            Instructions
+            Method
           </h2>
           <PagesRecipeInstructionContainerEditable
             v-model="instructionsEditableInformation.instructions"
           ></PagesRecipeInstructionContainerEditable>
         </div>
-      </div>
-      <div class="flex w-full flex-wrap gap-4">
-        <!--
-        <NutritionLabel
-          v-if="computedRecipe?.hidx !== undefined"
-          :nutritionData="computedRecipe"
-          class="bg-primary-20/70!"
-        />
-        -->
-        <!--
-        <HealthFacts
-          v-if="computedRecipe?.hidx !== undefined"
-          :recipe="computedRecipe"
-          :on-report="onClickReport"
-          class="bg-primary-20/70!"
-        />
-        -->
       </div>
       <div class="flex gap-2 w-full justify-start md:mt-6">
         <button
@@ -97,7 +80,7 @@ const ingredientListEditableInformation = ref<{
 const instructionsEditableInformation = ref<{
   instructions: string[];
 }>({
-  instructions: [],
+  instructions: ["", "", ""],
 });
 
 const baseRecipe = ref({
