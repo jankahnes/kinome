@@ -1,6 +1,6 @@
 <template>
   <div class="pb-16 m-4 sm:m-10 sm:ml-20">
-    <div class="flex gap-4 flex-wrap">
+    <div class="flex gap-2 flex-wrap">
       <NuxtLink
         v-for="view in views"
         :key="view.path"

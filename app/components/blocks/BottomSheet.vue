@@ -59,6 +59,8 @@ const MAX_HEIGHT_PERCENTAGE = 0.8;
 const FRICTION = 0.98; // Deceleration factor (higher = less friction, more momentum)
 const MIN_VELOCITY = 0.1;
 
+const historyStatePushed = ref(false); //avoid double-popping
+
 const calculateHeights = () => {
   maxHeightVh.value = window.innerHeight * MAX_HEIGHT_PERCENTAGE;
 
@@ -237,28 +239,49 @@ const resizeHandler = () => {
   calculateHeights();
 };
 
+const onPopState = () => {
+  if (isOpen.value && historyStatePushed.value) {
+    historyStatePushed.value = false;
+    isOpen.value = false;
+  }
+};
+
 watch(isOpen, async (open) => {
   if (!open) {
     stopMomentum();
     isDragging.value = false;
     dragOffsetY.value = 0;
     currentSheetHeight.value = 0;
+
+    if (historyStatePushed.value) {
+      historyStatePushed.value = false;
+      history.back();
+    }
   } else {
+    history.pushState({ bottomSheet: true }, '');
+    historyStatePushed.value = true;
+
     await nextTick();
-    await nextTick(); // Double nextTick to ensure slot content is rendered
+    await nextTick();
     calculateHeights();
   }
 });
 
 onMounted(() => {
   window.addEventListener('resize', resizeHandler);
+  window.addEventListener('popstate', onPopState);
 });
 
 onUnmounted(() => {
   stopMomentum();
   window.removeEventListener('resize', resizeHandler);
+  window.removeEventListener('popstate', onPopState);
   document.removeEventListener('mousemove', onDragMove as any);
   document.removeEventListener('mouseup', onDragEnd as any);
+
+  if (historyStatePushed.value) {
+    history.back();
+  }
 });
 </script>
 

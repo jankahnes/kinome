@@ -1,16 +1,284 @@
 <template>
   <Transition name="loaded-content">
-    <div class="max-w-screen-lg space-y-6 pt-10 pb-20" v-if="mounted">
-      <div
-        class="fixed bottom-16 left-1/2 translate-x-[-50%] sm:translate-x-0 sm:bottom-4 sm:left-4 z-50"
-      >
+    <div class="pt-10 pb-20" v-if="mounted">
+      <div class="flex gap-8 flex-wrap">
+        <!-- Tracking section-->
+        <div class="space-y-2 flex-1">
+          <h2 class="text-4xl font-bold tracking-tighter">Tracking</h2>
+          <div class="flex flex-col gap-4">
+            <!-- Meal adding buttons -->
+            <div class="flex flex-wrap gap-2 text-lg">
+              <button
+                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+                @click="showRecipeSearchModal = true"
+              >
+                <IconPlus class="w-4" />
+                Add Meal from Recipe
+              </button>
+              <button
+                v-for="mealPreset in mealPresets"
+                :key="mealPreset"
+                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+                @click="addMeal(mealPreset)"
+              >
+                {{ mealPreset }}
+              </button>
+              <button
+                v-if="!showCustomMealInput"
+                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+                @click="showCustomMealInput = true"
+              >
+                <IconPlus class="w-4" />
+                Add Other Meal
+              </button>
+              <div
+                v-else
+                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+              >
+                <input
+                  v-model="customMealName"
+                  placeholder="Enter meal name"
+                  class="focus:outline-none"
+                />
+                <button @click="addMeal(customMealName)">
+                  <IconCheck class="w-4" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Meals list -->
+            <div class="flex flex-col gap-4">
+              <div
+                v-for="(meal, index) in trackedMeals"
+                class="flex flex-col main-card main-card-padding"
+              >
+                <div
+                  class="flex items-center gap-2 animated-button justify-between"
+                  @click="meal.collapsed = !meal.collapsed"
+                >
+                  <div class="relative flex mx-1 ">
+                    <span
+                      class="text-xl font-bold invisible whitespace-pre px-4 py-0.5"
+                      aria-hidden="true"
+                      >{{
+                        trackedMeals[index].mealName || '✍️ Meal name'
+                      }}</span
+                    >
+                    <input
+                      v-model="trackedMeals[index].mealName"
+                      class="animated-button text-xl font-bold focus:outline-none absolute inset-0 px-4 py-0.5 text-center bg-main/30  cursor-text!"
+                      @click.stop
+                      placeholder="✍️ Meal name"
+                    />
+                  </div>
+                  <div class="flex items-center gap-2 text-gray-600">
+                    <NuxtLink
+                      :to="`/recipe/${meal.recipe_id}`"
+                      class="flex items-center justify-center rounded-md px-2 py-1 gap-1"
+                      v-if="meal.recipe_id !== undefined"
+                      @click.stop
+                    >
+                      <span class="text-xs hidden sm:block"
+                        >Jump to recipe</span
+                      >
+                      <IconExternalLink class="w-5 text-base!" />
+                    </NuxtLink>
+                    <IconChevronDown class="w-5" v-if="meal.collapsed" />
+                    <IconChevronUp class="w-5" v-else />
+                    <button class="rounded-md p-1" @click="removeMeal(index)">
+                      <IconTrash class="w-5" />
+                    </button>
+                  </div>
+                </div>
+                <BlocksCollapsible
+                  v-model="meal.collapsed"
+                  class="flex flex-col"
+                >
+                  <div
+                    v-for="(
+                      ingredient, ingredientIndex
+                    ) in meal.editableIngredients"
+                    :key="`${index}-${ingredientIndex}`"
+                    class="pt-2"
+                  >
+                    <TrackingInput
+                      :ref="(el) => setInputRef(index, ingredientIndex, el)"
+                      v-model="
+                        trackedMeals[index].editableIngredients[ingredientIndex]
+                      "
+                      @focus-next="focusNextInput(index, ingredientIndex)"
+                      @delete-ingredient="
+                        deleteIngredient(index, ingredientIndex)
+                      "
+                    />
+                  </div>
+                </BlocksCollapsible>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Nutrition summary -->
+        <div class="flex-1 flex flex-col">
+          <div
+            class="flex flex-col gap-2 bg-primary! main-card main-card-padding mt-4"
+          >
+            <div class="flex justify-between gap-10">
+              <h3 class="text-4xl font-bold tracking-tighter mx-2">
+                Companion
+              </h3>
+
+              <img
+                class="w-30 h-30 -mt-14 object-contain rounded-full border-2 bg-primary-10 border-primary-10 hidden sm:block"
+                src="/nutritionist.png"
+                alt="Companion"
+              />
+            </div>
+            <div class="flex flex-col mt-2">
+              <div
+                class="bg-green-100 w-4 h-4 z-0 rotate-45 -mb-2.5 self-end mr-13"
+              ></div>
+              <div
+                class="bg-green-100 rounded-4xl p-6 z-1 text-xl font-bold text-green-800"
+              >
+                Great start! Your protein intake is on track for the morning.
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <div
+                class="bg-primary-10 w-4 h-4 z-0 rotate-45 -mb-2.5 self-end mr-13"
+              ></div>
+              <div class="bg-primary-10 rounded-4xl pl-6 p-4 z-1">
+                Maybe focus on adding more fiber for lunch.
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <div
+                class="bg-primary-10 w-4 h-4 z-0 rotate-45 -mb-2.5 self-end mr-13"
+              ></div>
+              <div class="bg-primary-10 rounded-4xl pl-6 p-4 z-1">
+                You've hit your iron intake goal already!
+              </div>
+            </div>
+          </div>
+          <img
+            class="w-[80%] self-center opacity-50"
+            src="/arch.png"
+            alt="Summarizing grey lines"
+          />
+          <div class="relative">
+            <div
+              class="absolute top-1.5 left-1.5 w-full h-full main-card main-card-padding z-3 shadow-sm"
+            ></div>
+            <div
+              class="absolute top-3 left-3 w-full h-full main-card main-card-padding z-2 shadow-sm"
+            ></div>
+
+            <div
+              class="relative main-card main-card-padding flex flex-col items-center z-10 shadow-sm"
+            >
+              <h3
+                class="text-4xl font-bold tracking-tighter self-start mb-4 mx-2"
+              >
+                Nutrition Overview
+              </h3>
+              <SemiRing
+                :segments="[
+                  {
+                    value: (computedDailyNutrition?.kcal || 0) / 2100,
+                    color: 'stroke-carbs',
+                  },
+                ]"
+                ringBackground="stroke-carbs/20"
+                class="w-60 sm:w-92 mt-4"
+                :strokeWidth="10"
+              >
+                <div class="flex flex-col mb-8 items-center">
+                  <h4 class="text-5xl font-bold leading-none">
+                    {{ computedDailyNutrition?.kcal?.toFixed(0) || 0
+                    }}<span class="text-xl font-normal">/2100</span>
+                  </h4>
+                  <span class="text-xl leading-none">kcal</span>
+                </div>
+              </SemiRing>
+              <div class="flex flex-col w-full mt-6">
+                <p class="text-lg">Protein</p>
+                <div class="flex rounded-4xl bg-protein/10 relative h-8">
+                  <div
+                    class="absolute top-0 left-0 h-full rounded-4xl bg-protein flex items-center gap-2 px-2 transition-all duration-300 ease-in-out text-nowrap"
+                    :style="{
+                      width: `${
+                        ((computedDailyNutrition?.protein || 0) / 156) * 90 + 6.5
+                      }%`,
+                    }"
+                  >
+                    <IconBeef class="w-6 shrink-0" />
+                    <span class="text-xl font-bold"
+                      >{{ computedDailyNutrition?.protein?.toFixed(0) || 0 }}g /
+                      156g</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col w-full mt-3">
+                <p class="text-lg">Carbs</p>
+                <div class="flex rounded-4xl bg-carbs/10 relative h-8">
+                  <div
+                    class="absolute top-0 left-0 h-full rounded-4xl bg-carbs flex items-center gap-2 px-2 text-nowrap"
+                    :style="{
+                      width: `${
+                        ((computedDailyNutrition?.carbohydrates || 0) / 210) *
+                          90 +
+                        6.5
+                      }%`,
+                    }"
+                  >
+                    <IconWheat class="w-6 shrink-0" />
+                    <span class="text-xl font-bold"
+                      >{{
+                        computedDailyNutrition?.carbohydrates?.toFixed(0) || 0
+                      }}g / 210g</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col w-full mt-3">
+                <p class="text-lg">Fat</p>
+                <div class="flex rounded-4xl bg-fat/10 relative h-8">
+                  <div
+                    class="absolute top-0 left-0 h-full rounded-4xl bg-fat flex items-center gap-2 px-2 text-nowrap"
+                    :style="{
+                      width: `${
+                        ((computedDailyNutrition?.fat || 0) / 70) * 90 + 6.5
+                      }%`,
+                    }"
+                  >
+                    <IconDroplet class="w-6 shrink-0" />
+                    <span class="text-xl font-bold"
+                      >{{ computedDailyNutrition?.fat.toFixed(0) || 0 }}g /
+                      70g</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-10">
+                <div class="w-2 h-2 bg-gray-700 rounded-full"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save button -->
+      <div class="fixed bottom-4 right-10 z-50">
         <button
           @click="saveMeals"
           :disabled="isSaving || !hasUnsavedChanges"
-          class="button flex items-center gap-2 px-4 py-2 shadow-lg transition-all"
+          class="animated-button flex items-center gap-2 px-4 py-2 shadow-lg transition-all"
           :class="{
-            'bg-primary-50! text-gray-800': hasUnsavedChanges,
-            'bg-gray-200! text-gray-500': !hasUnsavedChanges,
+            'bg-primary-10': hasUnsavedChanges,
+            'bg-primary-10/20': !hasUnsavedChanges,
             'opacity-50 cursor-not-allowed': isSaving,
           }"
         >
@@ -28,118 +296,6 @@
             {{ formatTimeAgo(lastSavedAt) }}
           </span>
         </button>
-      </div>
-
-      <!-- Meal adding buttons -->
-      <div class="flex flex-wrap gap-4 select-none">
-        <button
-          class="button flex items-center gap-2 px-4 py-1 text-lg bg-primary-10!"
-          @click="showRecipeSearchModal = true"
-        >
-          <IconPlus class="w-4" />
-          Add Meal from Recipe
-        </button>
-        <button
-          v-for="mealPreset in mealPresets"
-          :key="mealPreset"
-          class="button flex items-center gap-2 px-4 py-1 text-lg"
-          @click="addMeal(mealPreset)"
-        >
-          {{ mealPreset }}
-        </button>
-        <button
-          v-if="!showCustomMealInput"
-          class="button flex items-center gap-2 px-4 py-1 text-lg"
-          @click="showCustomMealInput = true"
-        >
-          <IconPlus class="w-4" />
-          Add Other Meal
-        </button>
-        <div v-else class="flex items-center gap-2 button px-2 py-1 text-lg">
-          <input
-            v-model="customMealName"
-            placeholder="Enter meal name"
-            class="focus:outline-none"
-          />
-          <button @click="addMeal(customMealName)">
-            <IconCheck class="w-4" />
-          </button>
-        </div>
-      </div>
-
-      <!-- Meals list -->
-      <div class="flex flex-col gap-2">
-        <div
-          v-for="(meal, index) in trackedMeals"
-          class="flex flex-col gap-2 p-4 shadow-none! bg-primary-10/70 rounded-xl"
-          :class="{ 'bg-primary-10/70!': meal.recipe_id !== undefined }"
-        >
-          <div
-            class="flex items-center gap-2 button bg-transparent! outline-none! shadow-none! justify-between"
-            @click="meal.collapsed = !meal.collapsed"
-          >
-            <div class="relative inline-block">
-              <span
-                class="text-lg font-bold py-2 px-3 invisible whitespace-pre"
-                aria-hidden="true"
-                >{{ trackedMeals[index].mealName || '✍️ Meal name' }}</span
-              >
-              <input
-                :class="{
-                  'bg-primary-10/80!': meal.recipe_id !== undefined,
-                }"
-                v-model="trackedMeals[index].mealName"
-                class="text-lg font-bold focus:outline-none bg-primary-10 rounded-md py-2 px-3 absolute inset-0 w-full"
-                @click.stop
-                placeholder="✍️ Meal name"
-              />
-            </div>
-            <div class="flex items-center gap-2 text-gray-600">
-              <NuxtLink
-                :to="`/recipe/${meal.recipe_id}`"
-                class="flex items-center justify-center rounded-md px-2 py-1 gap-1"
-                v-if="meal.recipe_id !== undefined"
-                @click.stop
-              >
-                <span class="text-xs hidden sm:block">Jump to recipe</span>
-                <IconExternalLink class="w-5 text-base!" />
-              </NuxtLink>
-              <IconChevronDown class="w-5" v-if="meal.collapsed" />
-              <IconChevronUp class="w-5" v-else />
-              <button class="rounded-md p-1" @click="removeMeal(index)">
-                <IconTrash class="w-5" />
-              </button>
-            </div>
-          </div>
-          <div v-if="!meal.collapsed" class="min-h-12 flex flex-col gap-2">
-            <div
-              v-for="(ingredient, ingredientIndex) in meal.editableIngredients"
-              :key="`${index}-${ingredientIndex}`"
-            >
-              <TrackingInput
-                :ref="(el) => setInputRef(index, ingredientIndex, el)"
-                v-model="
-                  trackedMeals[index].editableIngredients[ingredientIndex]
-                "
-                @focus-next="focusNextInput(index, ingredientIndex)"
-                @delete-ingredient="deleteIngredient(index, ingredientIndex)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Nutrition summary -->
-      <div
-        v-if="computedDailyNutrition?.hidx !== undefined"
-        class="flex flex-wrap gap-4 mt-8"
-      >
-        <!--
-        <NutritionLabel :nutritionData="computedDailyNutrition" />
-        -->
-        <!--
-        <HealthFacts :recipe="computedDailyNutrition" />
-        -->
       </div>
 
       <!-- Modal for adding a meal from a recipe-->
@@ -168,7 +324,7 @@
                 class="w-full text-2xl"
                 :key="`${isMobile ? 'mobile' : 'desktop'}-${recipe.id}`"
                 :uniqueId="`${isMobile ? 'mobile' : 'desktop'}-${recipe.id}`"
-                @click.stop.prevent.capture="addMealFromRecipe(recipe.id)"
+                @click.stop.prevent.capture="handleAddMealFromRecipe(recipe.id)"
               />
             </div>
           </div>
@@ -179,108 +335,39 @@
 </template>
 
 <script setup lang="ts">
-import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
-
-type TrackedMeal = {
-  id?: number; // DB id, undefined for new meals
-  mealName: string;
-  recipe_id?: number;
-  editableIngredients: EditableTrackingItem[];
-  fullIngredients: FullIngredient[] | null;
-  collapsed: boolean;
-  summaryNutritionData: {
-    weight: number;
-    kcal: number;
-    protein: number;
-    fat: number;
-    carbohydrates: number;
-  };
-};
-
 const supabase = useSupabaseClient<Database>();
 const user = useSupabaseUser();
 const auth = useAuthStore();
 const mounted = ref(false);
-const show = ref(false);
-const showHero = ref(false);
 
 const computedDailyNutrition = ref<InsertableRecipe | null>(null);
-const trackedMeals = ref<TrackedMeal[]>([]);
 const showRecipeSearchModal = ref(false);
 const showCustomMealInput = ref(false);
-
 const customMealName = ref('');
-
-// Save/load state
-const selectedDate = ref(new Date());
-const isSaving = ref(false);
-const isLoading = ref(false);
-const lastSavedAt = ref<Date | null>(null);
-const hasUnsavedChanges = ref(false);
 
 const recipeSearchQuery = ref('');
 const recipeSearchResults = ref<RecipeOverview[]>([]);
 
-// Refs for TrackingInput components: [mealIndex][ingredientIndex] -> component instance
-const inputRefs = ref<Map<string, any>>(new Map());
-
-const setInputRef = (mealIndex: number, ingredientIndex: number, el: any) => {
-  if (el) {
-    inputRefs.value.set(`${mealIndex}-${ingredientIndex}`, el);
-  }
-};
-
-const focusNextInput = (
-  currentMealIndex: number,
-  currentIngredientIndex: number
-) => {
-  nextTick(() => {
-    // Try next ingredient in same meal
-    const nextIngredientIndex = currentIngredientIndex + 1;
-    if (
-      trackedMeals.value[currentMealIndex]?.editableIngredients[
-        nextIngredientIndex
-      ]
-    ) {
-      const ref = inputRefs.value.get(
-        `${currentMealIndex}-${nextIngredientIndex}`
-      );
-      ref?.focus();
-      return;
-    }
-
-    // Try first ingredient in next meal
-    const nextMealIndex = currentMealIndex + 1;
-    if (
-      trackedMeals.value[nextMealIndex] &&
-      !trackedMeals.value[nextMealIndex].collapsed &&
-      trackedMeals.value[nextMealIndex].editableIngredients.length > 0
-    ) {
-      const ref = inputRefs.value.get(`${nextMealIndex}-0`);
-      ref?.focus();
-      return;
-    }
-
-    // If no next input, ensure there's an empty one and focus it
-    if (trackedMeals.value[currentMealIndex]) {
-      const meal = trackedMeals.value[currentMealIndex];
-      const emptyInputs = meal.editableIngredients.filter(
-        (ing) => !ing.rawText.trim()
-      );
-      if (emptyInputs.length === 0) {
-        meal.editableIngredients.push({
-          rawText: '',
-          parsed: [],
-        });
-        nextTick(() => {
-          const newIndex = meal.editableIngredients.length - 1;
-          const ref = inputRefs.value.get(`${currentMealIndex}-${newIndex}`);
-          ref?.focus();
-        });
-      }
-    }
-  });
-};
+// Use the meal tracking composable
+const {
+  trackedMeals,
+  selectedDate,
+  isSaving,
+  isLoading,
+  lastSavedAt,
+  hasUnsavedChanges,
+  setInputRef,
+  focusNextInput,
+  addMeal,
+  addMealFromRecipe,
+  removeMeal,
+  deleteIngredient,
+  ensureOneEmptyInput,
+  loadMeals,
+  saveMeals,
+  formatTimeAgo,
+  setupAutoSave,
+} = useMealTracking();
 
 const mealPresets = [
   'Breakfast 🥐',
@@ -290,319 +377,24 @@ const mealPresets = [
   'Dessert 🍰',
 ];
 
-const addMeal = (mealName: string) => {
-  trackedMeals.value.push({
-    mealName,
-    editableIngredients: [],
-    fullIngredients: null,
-    collapsed: false,
-    summaryNutritionData: {
-      weight: 0,
-      kcal: 0,
-      protein: 0,
-      fat: 0,
-      carbohydrates: 0,
-    },
-  });
-};
-
-const addMealFromRecipe = async (recipeId: number) => {
+const handleAddMealFromRecipe = async (recipeId: number) => {
   showRecipeSearchModal.value = false;
-  const recipe = await getRecipe(supabase, { eq: { id: recipeId } });
-  const computableRecipe = await convertUploadableToComputable(
-    recipe,
-    supabase,
-    true,
-    1
-  );
-  const editableTrackingItems = computableRecipe.fullIngredients.map(
-    (ingredient) => {
-      const { amount, unit, parsed = [], rawText = '', ...rest } = ingredient;
-      return {
-        amount,
-        unit,
-        parsed,
-        rawText,
-        food: rest,
-      };
-    }
-  );
-  trackedMeals.value.push({
-    mealName: recipe.title,
-    recipe_id: recipeId,
-    editableIngredients:
-      editableTrackingItems as unknown as EditableTrackingItem[],
-    fullIngredients: [],
-    collapsed: true,
-    summaryNutritionData: {
-      weight: recipe.total_weight,
-      kcal: recipe.kcal || 0,
-      protein: recipe.protein || 0,
-      fat: recipe.fat || 0,
-      carbohydrates: recipe.carbohydrates || 0,
-    },
-  });
+  await addMealFromRecipe(recipeId);
+  await computeNutrition();
 };
-
-const deleteIngredient = (mealIndex: number, ingredientIndex: number) => {
-  trackedMeals.value[mealIndex].editableIngredients.splice(ingredientIndex, 1);
-};
-
-const removeMeal = (index: number) => {
-  trackedMeals.value.splice(index, 1);
-};
-
-const ensureOneEmptyInput = () => {
-  for (const meal of trackedMeals.value) {
-    //@ts-ignore
-    const emptyInputs = meal.editableIngredients.filter(
-      (ingredient) => ingredient.rawText.trim() === ''
-    );
-    if (emptyInputs.length === 0) {
-      meal.editableIngredients.push({
-        rawText: '',
-        parsed: [],
-      });
-    }
-  }
-};
-
-// Format date for DB queries (YYYY-MM-DD)
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
-// Format time ago for UI
-function formatTimeAgo(date: Date): string {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return 'today';
-}
-
-// Load meals from database
-async function loadMeals(date: Date) {
-  if (!user.value) return;
-
-  try {
-    isLoading.value = true;
-
-    const { data: mealsData, error } = await supabase
-      .from('tracked_meals')
-      .select(
-        `
-        id,
-        meal_name,
-        collapsed,
-        meal_order,
-        tracked_meal_foods (
-          id,
-          food_name:food_names(*, food:foods(*)),
-          branded_food:branded_foods(*, food_name:food_names(id, name, food:foods(*))),
-          amount,
-          unit,
-          raw_text,
-          food_order
-        )
-      `
-      )
-      .eq('user_id', user.value.id)
-      .eq('meal_date', formatDate(date))
-      .order('meal_order', { ascending: true });
-
-    if (error) throw error;
-
-    // Type assertion to avoid deep type instantiation
-    const meals = mealsData as any[];
-
-    if (meals && meals.length > 0) {
-      // Transform DB data to TrackedMeal format
-      const transformedMeals: TrackedMeal[] = [];
-
-      for (const meal of meals) {
-        const foods = meal.tracked_meal_foods || [];
-        const sortedFoods = foods.sort(
-          (a: any, b: any) => (a.food_order ?? 0) - (b.food_order ?? 0)
-        );
-        console.log(sortedFoods);
-        const editableIngredients: EditableTrackingItem[] = sortedFoods.map(
-          (food: any) => {
-            let unitName = food.unit.toLowerCase();
-            const processedBrandedFood = postprocessBrandedFood(
-              food.branded_food ?? {}
-            );
-            if (isCountable(food.unit) && food.amount != 1 && food.unit) {
-              unitName = pluralizeWord(unitName);
-            }
-            return {
-              id:
-                processedBrandedFood.food_name?.id ||
-                food.food_name?.id ||
-                undefined,
-              rawText: food.raw_text || '',
-              amount: food.amount || undefined,
-              unit: food.unit || undefined,
-              parsed: [
-                {
-                  text: food.amount.toString(),
-                  type: 'amount',
-                  styling: amountStyling,
-                },
-                {
-                  text: unitName,
-                  type: 'unit',
-                  styling: unitStyling,
-                },
-                {
-                  text: processedBrandedFood?.product_name
-                    ? (processedBrandedFood?.brand ?? '') +
-                      ' ' +
-                      processedBrandedFood?.product_name
-                    : food?.food_name?.name,
-                  type: 'ingredient',
-                  styling: ingredientStyling,
-                },
-              ],
-              food:
-                processedBrandedFood?.food_name?.food ||
-                food?.food_name?.food ||
-                undefined,
-              brandedFood: processedBrandedFood || undefined,
-            };
-          }
-        );
-
-        transformedMeals.push({
-          id: meal.id,
-          mealName: meal.meal_name,
-          collapsed: meal.collapsed ?? false,
-          editableIngredients,
-          fullIngredients: null,
-          summaryNutritionData: {
-            weight: 0,
-            kcal: 0,
-            protein: 0,
-            fat: 0,
-            carbohydrates: 0,
-          },
-        });
-      }
-
-      trackedMeals.value = transformedMeals;
-    } else {
-      // No meals for this date, start with empty "Other" meal
-      trackedMeals.value = [];
-      addMeal('Other');
-    }
-
-    hasUnsavedChanges.value = false;
-  } catch (error) {
-    console.error('Error loading meals:', error);
-    alert('Failed to load meals. Please refresh the page.');
-  } finally {
-    await computeNutrition();
-    isLoading.value = false;
-  }
-}
-
-// Save meals to database
-async function saveMeals() {
-  if (!user.value || !hasUnsavedChanges.value) return;
-
-  try {
-    isSaving.value = true;
-
-    // Delete all existing meals for this date
-    const { error: deleteError } = await supabase
-      .from('tracked_meals')
-      .delete()
-      .eq('user_id', user.value.id)
-      .eq('meal_date', formatDate(selectedDate.value));
-
-    if (deleteError) throw deleteError;
-
-    // Re-insert all meals
-    for (
-      let mealIndex = 0;
-      mealIndex < trackedMeals.value.length;
-      mealIndex++
-    ) {
-      const meal = trackedMeals.value[mealIndex];
-
-      // Skip meals with no valid ingredients
-      const validIngredients = meal.editableIngredients.filter(
-        (ing: any) => ing.rawText?.trim() && ing.food?.id
-      );
-
-      if (validIngredients.length === 0 && !meal.mealName.trim()) {
-        continue; // Skip completely empty meals
-      }
-
-      // Insert meal
-      const { data: insertedMeal, error: mealError } = await supabase
-        .from('tracked_meals')
-        .insert({
-          user_id: user.value.id,
-          meal_name: meal.mealName || 'Untitled Meal',
-          meal_date: formatDate(selectedDate.value),
-          collapsed: meal.collapsed,
-          meal_order: mealIndex,
-        })
-        .select()
-        .single();
-
-      if (mealError) throw mealError;
-
-      // Update local id
-      meal.id = insertedMeal.id;
-
-      // Insert foods for this meal
-      if (validIngredients.length > 0) {
-        const foodsToInsert = validIngredients.map(
-          (ing: any, foodIndex: number) => ({
-            tracked_meal_id: insertedMeal.id,
-            food_id: ing.id || null,
-            branded_food_barcode: ing.brandedFood?.barcode || null,
-            amount: ing.amount,
-            unit: ing.unit,
-            raw_text: ing.rawText,
-            food_order: foodIndex,
-          })
-        );
-
-        const { error: foodsError } = await supabase
-          .from('tracked_meal_foods')
-          .insert(foodsToInsert);
-
-        if (foodsError) throw foodsError;
-      }
-    }
-
-    hasUnsavedChanges.value = false;
-    lastSavedAt.value = new Date();
-  } catch (error) {
-    console.error('Error saving meals:', error);
-    alert('Failed to save meals. Please try again.');
-  } finally {
-    isSaving.value = false;
-  }
-}
 
 const computeNutrition = async () => {
-  //ts-ignore
+  //@ts-ignore
   const fullIngredients = trackedMeals.value
     .flatMap((meal) => meal.editableIngredients)
     .filter(
       (ingredient) =>
-        ingredient && ingredient.food?.id !== undefined && ingredient.amount
+        ingredient && ingredient.foodNameId !== undefined && ingredient.amount
     )
     .map((ingredient) => ({
       ...ingredient,
-      ...ingredient.food,
-      id: ingredient.food?.id,
+      ...ingredient.foodData,
+      id: ingredient.foodNameId,
     }));
   if (fullIngredients.length === 0) {
     computedDailyNutrition.value = null;
@@ -639,7 +431,7 @@ const searchRecipes = async () => {
 const computeNutritionDebounced = debounce(computeNutrition, 1000);
 const searchRecipesDebounced = debounce(searchRecipes, 1000);
 
-// Track unsaved changes
+// Track unsaved changes and compute nutrition
 watch(
   trackedMeals,
   () => {
@@ -655,10 +447,15 @@ watch(recipeSearchQuery, () => {
 });
 
 // Load meals on mount
-onMounted(() => {
-  show.value = true;
+onMounted(async () => {
   mounted.value = true;
-  loadMeals(selectedDate.value);
+  await loadMeals(selectedDate.value);
+  //temp
+  trackedMeals.value.forEach((meal) => {
+    meal.collapsed = !meal.collapsed;
+  });
+  await computeNutrition();
+  setupAutoSave();
 });
 </script>
 

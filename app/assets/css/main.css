@@ -26,7 +26,7 @@
   --breakpoint-2xs: 400px;
   --font-main: 'Libertinus Sans', sans-serif;
   --color-main: #f5eeee;
-  --color-primary: #ffbc2b;
+  --color-primary: #FFC340;
   --color-primary-gradient: #fdd835;
   --color-primary-5: color-mix(in srgb, var(--color-primary) 2%, white);
   --color-primary-10: color-mix(in srgb, var(--color-primary) 4%, white);
@@ -71,11 +71,11 @@
   --text-5xl: calc(3rem * var(--text-scale));
   --text-6xl: calc(3.75rem * var(--text-scale));
 
-  --color-halo-green: rgb(182, 255, 209);
+  --color-halo-green: rgb(32, 185, 89);
   --color-halo-emerald: rgb(208, 255, 196);
   --color-halo-blue: rgb(213, 212, 253);
 
-  --shadow-halo: drop-shadow(0 0 5px var(--tw-shadow-color))
+  --shadow-halo: drop-shadow(0 0 10px var(--tw-shadow-color))
     drop-shadow(0 0 2px var(--tw-shadow-color));
 }
 @layer base {

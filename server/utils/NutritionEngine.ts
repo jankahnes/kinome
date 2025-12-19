@@ -257,7 +257,6 @@ export default class NutritionEngine {
       return;
     }
 
-    console.log('🔍 Starting scoring');
     const scores = await this.getScoring();
     this.recipe.scores = scores;
     if (this.recipe.total_weight > 1200) {
@@ -272,7 +271,6 @@ export default class NutritionEngine {
     if (this.logToReport) {
       this.generateReport();
     }
-    console.log('🔍 Scoring done');
   }
 
   async computeFood(food: Food) {

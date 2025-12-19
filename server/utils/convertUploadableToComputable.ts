@@ -1,19 +1,10 @@
 import { getFoodNames } from '~/utils/db/getters/getFoods';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import {
-  unitStyling,
-  preparationDescriptionStyling,
-  unitToDBMap,
-  amountStyling,
-  ingredientStyling,
-} from '~/utils/format/parseIngredientString';
-import pluralizeWord from '~/utils/format/pluralizeWord';
-import isCountable from '~/utils/format/isCountable';
+import { unitToDBMap } from '~/utils/format/parseIngredientString';
 import type {
   ComputableRecipe,
   FullIngredient,
   UploadableRecipe,
-  ParsedPart,
   Recipe,
 } from '~/types/types';
 
@@ -25,50 +16,9 @@ function convertUnitToDB(unit: string) {
   }
 }
 
-function addParsed(ingredient: FullIngredient, serves: number) {
-  let unitName = ingredient.unit.toLowerCase();
-  if (
-    isCountable(ingredient.unit) &&
-    ingredient.amount != 1 &&
-    ingredient.unit
-  ) {
-    unitName = pluralizeWord(unitName);
-  }
-  const parsed = [
-    {
-      text: Number((ingredient.amount * serves).toFixed(1)).toString(),
-      styling: amountStyling,
-    },
-    {
-      text: ingredient.name,
-      styling: ingredientStyling,
-    },
-  ];
-  if (unitName != '') {
-    parsed.splice(1, 0, {
-      text: unitName,
-      styling: unitStyling,
-    });
-  }
-
-  ingredient.parsed = parsed satisfies ParsedPart[];
-  ingredient.rawText =
-    parsed[0].text + ' ' + unitName + ' ' + ingredient.name;
-
-  if (ingredient.preparation_description) {
-    parsed.push({
-      text: ingredient.preparation_description,
-      styling: preparationDescriptionStyling,
-    });
-    ingredient.rawText += ', ' + ingredient.preparation_description;
-  }
-}
-
 export default async function convertUploadableToComputable(
   recipe: UploadableRecipe | Recipe,
-  supabase: SupabaseClient,
-  parse: boolean = false,
-  parseServes: number|null = null
+  supabase: SupabaseClient
 ): Promise<ComputableRecipe> {
   if (!recipe || !supabase) {
     throw new Error('Recipe and supabase are required');
@@ -79,7 +29,9 @@ export default async function convertUploadableToComputable(
     }
   }
   const fullIngredients: FullIngredient[] = [];
-  const ingredientIds = recipe.ingredients.map((ingredient: { id: number }) => ingredient.id);
+  const ingredientIds = recipe.ingredients.map(
+    (ingredient: { id: number }) => ingredient.id
+  );
   const foodsFromDb = await getFoodNames(supabase, {
     in: { id: ingredientIds },
   });
@@ -97,9 +49,6 @@ export default async function convertUploadableToComputable(
       name: matchingFood.name,
       unit: convertUnitToDB(ingredient.unit),
     };
-    if (parse) {
-      addParsed(mergedIngredient, parseServes ?? recipe.batch_size ?? 1);
-    }
     fullIngredients.push(mergedIngredient);
   }
   return {

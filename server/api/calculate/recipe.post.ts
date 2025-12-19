@@ -17,14 +17,15 @@ type NutritionEngineArgs = {
 
 type Response = {
   recipeRow: InsertableRecipe | null;
-  foodLike?: any | null;
   recipeFoodRows: Omit<InsertableRecipeFood, 'recipe_id'>[] | null;
   recipeTagRows: Omit<InsertableRecipeTag, 'recipe_id'>[] | null;
 };
 
 export default defineEventHandler(async (event): Promise<Response> => {
   const body = await readBody(event);
-  const { nutritionEngineArgs } = body as { nutritionEngineArgs: NutritionEngineArgs };
+  const { nutritionEngineArgs } = body as {
+    nutritionEngineArgs: NutritionEngineArgs;
+  };
 
   const nutritionEngine = new NutritionEngine(
     nutritionEngineArgs.useGpt,
@@ -38,7 +39,6 @@ export default defineEventHandler(async (event): Promise<Response> => {
   if (nutritionEngineArgs.nutritionLabelOnly) {
     return {
       recipeRow: nutritionEngine.getRecipeRow(),
-      foodLike: nutritionEngine.getFoodLike(),
       recipeFoodRows: null,
       recipeTagRows: null,
     };
