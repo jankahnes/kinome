@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'pb-20 lg:pb-0 m-4 sm:m-8 sm:ml-20': !isLandingPage }">
-    <div class="flex gap-4 flex-wrap" v-if="hasTracking">
+    <div class="flex gap-2 flex-wrap" v-if="hasTracking">
       <NuxtLink
         v-for="view in views"
         :key="view.path"
@@ -29,16 +29,16 @@ const views = computed(() => [
     displayName: 'Today',
   },
   {
-    path: '/goals',
-    displayName: 'Goals',
+    path: '/trends',
+    displayName: 'Trends',
   },
   {
-    path: '/form',
-    displayName: 'Form',
+    path: '/saved',
+    displayName: 'Saved Meals',
   },
   {
-    path: '/review',
-    displayName: 'Review',
+    path: '/settings',
+    displayName: 'Settings',
   },
 ]);
 

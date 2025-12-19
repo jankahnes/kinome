@@ -247,143 +247,18 @@
             <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
               Health & Nutrition
             </h2>
-            <div class="flex flex-wrap gap-4">
-              <div class="main-card p-6 flex flex-col basis-120 flex-1">
-                <div class="flex gap-2 justify-between">
-                  <div class="flex flex-col flex-1 gap-1">
-                    <div class="flex justify-between">
-                      <span class="text-7xl font-bold leading-14">
-                        <span>{{ recipeStore.recipe?.kcal ?? 0 }}</span>
-                        <span class="text-xl text-gray-500">kcal</span>
-                      </span>
-                      <Ring
-                        class="block lg:hidden w-14 h-14"
-                        :segments="[
-                          {
-                            value: macroRingPercentages?.carbsPercent ?? 0,
-                            color: 'stroke-carbs',
-                          },
-                          {
-                            value: macroRingPercentages?.proteinPercent ?? 0,
-                            color: 'stroke-protein',
-                          },
-                          {
-                            value: macroRingPercentages?.fatPercent ?? 0,
-                            color: 'stroke-fat',
-                          },
-                        ]"
-                        :strokeWidth="16"
-                      />
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <div class="bg-carbs px-2 py-1 rounded-4xl">
-                        <span>{{
-                          recipeStore.recipe?.carbohydrates?.toFixed(0) ?? 0
-                        }}</span>
-                        <span>g Carbs</span>
-                      </div>
-                      <div class="bg-protein px-2 py-1 rounded-4xl">
-                        <span>{{
-                          recipeStore.recipe?.protein?.toFixed(0) ?? 0
-                        }}</span>
-                        <span>g Protein</span>
-                      </div>
-                      <div class="bg-fat px-2 py-1 rounded-4xl">
-                        <span>{{
-                          recipeStore.recipe?.fat?.toFixed(0) ?? 0
-                        }}</span>
-                        <span>g Fat</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span>
-                    <Ring
-                      class="hidden lg:block w-24 h-24"
-                      :segments="[
-                        {
-                          value: macroRingPercentages?.carbsPercent ?? 0,
-                          color: 'stroke-carbs',
-                        },
-                        {
-                          value: macroRingPercentages?.proteinPercent ?? 0,
-                          color: 'stroke-protein',
-                        },
-                        {
-                          value: macroRingPercentages?.fatPercent ?? 0,
-                          color: 'stroke-fat',
-                        },
-                      ]"
-                      :strokeWidth="16"
-                    />
-                  </span>
-                </div>
-                <div class="flex gap-2 flex-wrap mt-4 self-start">
-                  <button
-                    class="animated-button bg-slate-100 rounded-4xl px-4 py-1 flex items-center gap-2"
-                    @click="
-                      contextMode = 'nutrition';
-                      contextModalOpen = true;
-                    "
-                  >
-                    <IconTag class="w-5" />
-                    <span>View Full Nutrition</span>
-                  </button>
-                  <button
-                    class="animated-button bg-slate-100 rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
-                    @click="
-                      contextMode = 'health';
-                      contextModalOpen = true;
-                    "
-                  >
-                    <IconApple class="w-5" />
-                    <span>View Full Analysis</span>
-                  </button>
-                </div>
-              </div>
-              <div
-                class="bg-primary-10 flex flex-col gap-1 p-2 md:p-4 rounded-4xl items-center justify-center flex-1 basis-auto sm:basis-1/4"
-                v-if="nutritionHighlights.length > 0"
-              >
-                <div
-                  class="flex justify-center items-center text-4xl font-bold h-18 min-w-18 rounded-2xl"
-                  :class="
-                    gradeColors[getGrade(recipeStore.recipe?.hidx, 'ovr')]
-                  "
-                >
-                  {{ getGrade(recipeStore.recipe?.hidx, 'ovr') }}
-                </div>
-                <span class="text-lg font-bold tracking-tighter text-center"
-                  >Health Grade</span
-                >
-              </div>
-              <div
-                v-for="highlight in nutritionHighlights"
-                :key="highlight.title"
-                class="bg-primary-10 flex flex-col p-2 md:p-4 rounded-4xl items-center flex-1 basis-auto sm:basis-1/4"
-              >
-                <NuxtImg
-                  :src="`/nutrition-highlights/${highlight.illustration}`"
-                  :alt="highlight.title"
-                  class="w-14 h-14 object-contain"
-                />
-                <span
-                  class="text-lg font-bold tracking-tighter leading-none mt-1"
-                  >{{ highlight.title }}</span
-                >
-                <span
-                  class="text-sm text-gray-600 text-center px-2"
-                  v-if="highlight.subtitle"
-                >
-                  {{ highlight.subtitle }}
-                </span>
-                <div
-                  class="px-3 py-0.5 rounded-full text-sm font-semibold mt-2"
-                  :class="highlight.background"
-                >
-                  {{ highlight.rating }}
-                </div>
-              </div>
-            </div>
+            <NutritionHighlightGrid
+              :nutrition-data="recipeStore.recipe"
+              type="full"
+              @viewFullNutrition="
+                contextMode = 'nutrition';
+                contextModalOpen = true;
+              "
+              @viewFullAnalysis="
+                contextMode = 'health';
+                contextModalOpen = true;
+              "
+            />
           </div>
           <div class="space-y-2 order-5 xl:order-none" v-if="auth.isAdmin()">
             <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
@@ -919,32 +794,6 @@ function getTotalTime() {
   }
   return null;
 }
-
-// Macro percentages for ring display
-const macroRingPercentages = computed(() => {
-  if (!recipeStore.recipe || !recipeStore.recipe?.kcal) return null;
-  const recipe = recipeStore.recipe;
-  const usedKcal =
-    4 * (recipe.carbohydrates ?? 0) +
-    4 * (recipe.protein ?? 0) +
-    9 * (recipe.fat ?? 0);
-  const percentages = {
-    carbsPercent: ((recipe.carbohydrates ?? 0) * 4) / usedKcal,
-    proteinPercent: ((recipe.protein ?? 0) * 4) / usedKcal,
-    fatPercent: ((recipe.fat ?? 0) * 9) / usedKcal,
-  };
-  for (const [key, value] of Object.entries(percentages)) {
-    if (value > 0) {
-      percentages[key as keyof typeof percentages] = value;
-    }
-  }
-  return percentages;
-});
-
-const nutritionHighlights = computed(() => {
-  //@ts-ignore
-  return getNutritionHighlightCards(recipeStore.recipe);
-});
 
 const metaGenerics: { name: string; value: number }[] = [
   { name: 'Vegetarian', value: 103 },

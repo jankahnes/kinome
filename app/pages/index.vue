@@ -12,7 +12,7 @@
       </NuxtLink>
     </div>
     <div class="justify-between items-center gap-6 hidden md:flex">
-      <div class="flex gap-4 flex-1">
+      <div class="flex gap-2 flex-1">
         <div
           class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-2xl px-4 items-center gap-2 text-gray-600 bg-primary-10/40 shrink-1 flex-1 min-w-0! max-w-80"
         >

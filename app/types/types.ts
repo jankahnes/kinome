@@ -231,7 +231,6 @@ export type FullIngredient = FoodNameRow &
       | 'consumption_factor'
     >
   > & {
-    parsed?: ParsedPart[];
     rawText?: string;
     isEditing?: boolean;
     utility?: boolean;
@@ -240,7 +239,6 @@ export type FullIngredient = FoodNameRow &
 export type EditableIngredient = {
   category: string | null;
   rawText: string;
-  parsed: ParsedPart[];
   isEditing: boolean;
   // All FullIngredient properties are optional since new ingredients don't have them yet
   id?: number;
@@ -260,27 +258,36 @@ export type EditableIngredient = {
   utility?: boolean;
 };
 
+export type BrandedFoodState =
+  | 'loading'
+  | 'needs_basic_info'
+  | 'needs_nutrition'
+  | 'matching'
+  | 'complete'
+  | 'error';
+
 export type EditableTrackingItem = {
   rawText: string;
-  parsed: ParsedPart[];
+  displayText: string;
+
   amount?: number | null;
   unit?: string | null;
-  food?: {
-    best_similarity?: number;
-    id?: number;
-    food: FullFoodRow;
-    food_id: number;
-    is_primary: boolean;
-    name: string;
-  };
-  brandedFoodState?:
-    | 'loading'
-    | 'needs_basic_info'
-    | 'needs_nutrition'
-    | 'matching'
-    | 'complete'
-    | 'error';
-  brandedFood?: BrandedFood; // Store the full branded food data
+  preparationDescription?: string | null;
+
+  foodNameId?: number;
+  ingredientName?: string;
+  foodData?: FullFoodRow;
+
+  brandedFoodState?: BrandedFoodState;
+  brandedFood?: BrandedFood;
+};
+
+export type TrackedMeal = {
+  id?: number;
+  mealName: string;
+  recipe_id?: number;
+  editableIngredients: EditableTrackingItem[];
+  collapsed: boolean;
 };
 
 export type BaseRecipe = {
@@ -431,21 +438,6 @@ export type ProcessingRequirement = {
   full_nutri_processing?: boolean;
 };
 
-export type ParsedPart = {
-  text: string;
-  styling: string;
-  type?:
-    | 'amount'
-    | 'unit'
-    | 'food'
-    | 'product'
-    | 'prep'
-    | 'ignored'
-    | 'request';
-  barcode?: string;
-  productId?: string; // barcode or product ID from DB
-};
-
 export type ThermalIntensity = Database['public']['Enums']['thermal_intensity'];
 export type HeatMedium = Database['public']['Enums']['heat_medium'];
 export type MechanicalDisruption =
@@ -457,5 +449,3 @@ export type GptMetadataResponse = {
   salt_and_fat: any;
   hydration: any;
 };
-
-//

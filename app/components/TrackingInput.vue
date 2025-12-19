@@ -9,8 +9,8 @@
       />
     </Teleport>
 
-    <!-- Branded Food Completion Modal: Desktop -->
-    <BlocksModal v-model="showCompletionModal" responsive>
+    <!-- Branded Food Completion Modal -->
+    <BlocksResponsiveModal v-model="showCompletionModal" responsive>
       <BrandedFoodCompletionModal
         :barcode="currentBarcode"
         :branded-food="modelValue.brandedFood"
@@ -18,49 +18,12 @@
         @close="showCompletionModal = false"
         @saved="handleBrandedFoodSaved"
       />
-    </BlocksModal>
+    </BlocksResponsiveModal>
 
-    <!-- Branded Food Completion Modal: Mobile -->
-    <BlocksBottomSheet v-model="showCompletionModal" class="md:hidden">
-      <BrandedFoodCompletionModal
-        :barcode="currentBarcode"
-        :branded-food="modelValue.brandedFood"
-        :state="completionModalState"
-        @close="showCompletionModal = false"
-        @saved="handleBrandedFoodSaved"
-      />
-    </BlocksBottomSheet>
-
-    <!-- Text Selection Popup for Request -->
-    <Teleport to="body">
-      <Transition name="popup">
-        <div
-          v-if="showRequestPopup && selectedText"
-          :style="{
-            position: 'fixed',
-            top: `${popupPosition.y}px`,
-            left: `${popupPosition.x}px`,
-            transform: 'translate(-50%, -100%)',
-            zIndex: 9999,
-          }"
-          class="mb-2"
-        >
-          <button
-            @mousedown.prevent
-            @click="handleRequestFood(selectedText)"
-            class="bg-primary-50 text-primary px-2 rounded-xl shadow-lg hover:bg-primary-dark transition-all duration-150 flex items-center gap-2 font-medium text-xs whitespace-nowrap animate-scale-in"
-          >
-            <IconDatabase class="w-4" />
-            Request "{{ capitalize(selectedText.slice(0, 20))
-            }}{{ selectedText.length > 20 ? '...' : '' }}"
-          </button>
-        </div>
-      </Transition>
-    </Teleport>
-
+    <!-- Editing mode -->
     <div
       v-show="isEditing"
-      class="relative flex items-center gap-2 rounded-md p-2 border border-gray-300 focus:border-gray-300 transition-colors"
+      class="relative flex items-center gap-2 rounded-2xl px-4 py-2 border border-gray-200 focus-within:border-gray-300 transition-colors"
     >
       <input
         ref="inputRef"
@@ -68,19 +31,9 @@
         @blur="handleLeave()"
         @input="handleInput"
         @keydown.enter="handleEnter"
-        @select="handleTextSelection"
-        @mouseup="handleTextSelection"
-        class="flex-1 focus:outline-none"
+        class="flex-1 focus:outline-none text-lg"
         :placeholder="placeholder"
       />
-      <!--
-      <button
-        @mousedown.prevent
-        @click="handleBarcodeDetected('5056329505493')"
-      >
-        <span>test</span>
-      </button>
-      -->
       <button
         @mousedown.prevent
         @click="showScanner = true"
@@ -91,91 +44,50 @@
       </button>
     </div>
 
-    <!-- Parsed preview while editing -->
-    <div
-      v-if="isEditing && modelValue.parsed && modelValue.parsed.length > 0"
-      class="px-3 py-1 bg-gray-50 rounded-md text-sm space-x-1"
-    >
-      <span
-        v-for="(part, partIndex) in modelValue.parsed"
-        :key="partIndex"
-        :class="part.styling"
-      >
-        {{ part.text }}
-      </span>
-    </div>
-
-    <!-- Parsed preview (not editing) -->
+    <!-- Display mode (not editing) -->
     <div
       v-if="!isEditing"
-      class="rounded-md p-2 border border-transparent hover:border-blue-300 transition-colors flex gap-1 justify-between"
+      class="rounded-2xl px-4 py-2 border border-transparent hover:border-gray-200 transition-colors flex gap-1 justify-between cursor-text"
       :class="{
         'cursor-pointer': !isLocked,
-        'border-gray-300!': !modelValue.parsed.length,
+        'border-gray-300!': !modelValue.displayText,
       }"
       @click="isLocked ? null : handlePreviewClick()"
     >
-      <span v-if="!modelValue.parsed.length" class="text-gray-500">{{
+      <span v-if="!modelValue.displayText" class="text-gray-500">{{
         placeholder
       }}</span>
-      <div class="space-x-1">
+      <div class="space-x-2 text-lg flex items-center">
+        <img
+          v-if="modelValue.foodData?.visual_category"
+          :src="'/foods/' + modelValue.foodData.visual_category + '.webp'"
+          class="w-6 h-5 inline-block object-contain"
+        />
+        <!-- Branded food state indicators inline -->
         <span
-          v-for="(part, partIndex) in modelValue.parsed"
-          :key="partIndex"
-          :class="[
-            part.styling,
-            {
-              'cursor-pointer': part.type === 'product' && needsUserAction,
-            },
-          ]"
-          @click.stop="
-            part.type === 'product'
-              ? handleProductPartClick()
-              : handlePreviewClick(part.text)
+          v-if="
+            modelValue.brandedFoodState === 'needs_basic_info' ||
+            modelValue.brandedFoodState === 'needs_nutrition'
           "
+          class="animate-pulse cursor-pointer"
+          title="Click to complete product info"
+          @click.stop="handleProductPartClick"
+          >⚠️</span
         >
-          <!-- Visual indicator for product state -->
-          <span
-            v-if="
-              part.type === 'product' &&
-              modelValue.brandedFoodState &&
-              modelValue.brandedFoodState !== 'complete'
-            "
-            class="mr-1"
-          >
-            <span
-              v-if="
-                modelValue.brandedFoodState === 'needs_basic_info' ||
-                modelValue.brandedFoodState === 'needs_nutrition'
-              "
-              class="animate-pulse"
-              title="Click to complete product info"
-            >
-              ⚠️
-            </span>
-            <img
-              v-else-if="modelValue.brandedFoodState === 'matching'"
-              title="Matching to generic food..."
-              src="/loading.png"
-              class="w-4 h-4 inline-block"
-              alt="Loading icon"
-            />
-            <span
-              v-else-if="modelValue.brandedFoodState === 'error'"
-              class="text-red-500"
-              title="Error processing product"
-            >
-              ❌
-            </span>
-          </span>
-          <img
-            v-else-if="part.type === 'request'"
-            src="/loading.png"
-            class="w-4 h-4 inline-block"
-            alt="Loading icon"
-          />
-          {{ part.text }}
-        </span>
+        <img
+          v-else-if="modelValue.brandedFoodState === 'matching'"
+          title="Matching to generic food..."
+          src="/loading.png"
+          class="w-4 h-4 inline-block"
+          alt="Loading icon"
+        />
+        <span
+          v-else-if="modelValue.brandedFoodState === 'error'"
+          class="text-red-500"
+          title="Error processing product"
+          >❌</span
+        >
+        <span>{{ modelValue.displayText }}</span>
       </div>
       <button
         @click.stop="emit('deleteIngredient')"
@@ -213,7 +125,6 @@ const placeholders = [
   '1 cup of chopped onions',
   '2 tbsp of lemon juice',
   '1 handful of basil leaves',
-  '500ml of vegetable broth',
 ];
 
 const placeholder = computed(() => {
@@ -242,11 +153,6 @@ const completionModalState = ref<'needs_basic_info' | 'needs_nutrition'>(
   'needs_basic_info'
 );
 
-// Text selection for request popup
-const showRequestPopup = ref(false);
-const selectedText = ref('');
-const popupPosition = ref({ x: 0, y: 0 });
-
 const needsUserAction = computed(() => {
   return (
     props.modelValue.brandedFoodState === 'needs_basic_info' ||
@@ -257,16 +163,17 @@ const needsUserAction = computed(() => {
 async function parse(force: boolean = false) {
   if (!props.modelValue || isLocked.value) return;
   if (!props.modelValue.rawText.trim()) {
-    props.modelValue.parsed = [];
+    props.modelValue.displayText = '';
+    return;
   }
-  //if (props.modelValue.rawText.endsWith(' ') || force) {
+
   const result = await parseIngredientString(
     supabase,
     props.modelValue.rawText
   );
+
+  // Update modelValue with parsed result
   Object.assign(props.modelValue, result);
-  Object.assign(props.modelValue, result.ingredient);
-  //}
 }
 
 async function handleInput(event: InputEvent) {
@@ -275,7 +182,7 @@ async function handleInput(event: InputEvent) {
 }
 
 async function handleLeave() {
-  if (props.modelValue.parsed && props.modelValue.parsed.length > 0) {
+  if (props.modelValue.displayText) {
     isEditing.value = false;
   }
   parse(true);
@@ -297,7 +204,6 @@ async function handlePreviewClick(substring?: string) {
 }
 
 async function handleProductPartClick() {
-  console.log(props.modelValue.brandedFoodState);
   if (
     props.modelValue.brandedFoodState === 'needs_basic_info' ||
     props.modelValue.brandedFoodState === 'needs_nutrition'
@@ -426,120 +332,12 @@ async function startBackgroundMatching(barcode: string) {
   }
 }
 
-function handleTextSelection(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const selection = input.value.substring(
-    input.selectionStart || 0,
-    input.selectionEnd || 0
-  );
-
-  if (selection && selection.trim().length > 0) {
-    selectedText.value = selection.trim();
-
-    // Calculate popup position based on input position and selection
-    const inputRect = input.getBoundingClientRect();
-    const selectionStart = input.selectionStart || 0;
-
-    // Estimate horizontal position (rough approximation)
-    const charWidth = 8; // approximate character width
-    const selectionX = inputRect.left + selectionStart * charWidth;
-
-    popupPosition.value = {
-      x: Math.min(
-        Math.max(
-          selectionX + (selection.length * charWidth) / 2,
-          inputRect.left + 50
-        ),
-        inputRect.right - 50
-      ),
-      y: inputRect.top - 8,
-    };
-
-    showRequestPopup.value = true;
-  } else {
-    showRequestPopup.value = false;
-    selectedText.value = '';
-  }
-}
-
-async function handleRequestFood(query: string) {
-  showRequestPopup.value = false;
-  selectedText.value = '';
-
-  const position = props.modelValue.rawText.indexOf(query);
-  if (!query.trim() || position === -1) return;
-
-  isEditing.value = false;
-  isLocked.value = true;
-
-  const [before, after] = props.modelValue.rawText.split(query, 2);
-  props.modelValue.parsed = [
-    {
-      text: before,
-      styling: ignoredStyling,
-      type: 'ignored',
-    },
-    {
-      text: query,
-      styling: ingredientStyling,
-      type: 'request',
-    },
-    {
-      text: after,
-      styling: ignoredStyling,
-      type: 'ignored',
-    },
-  ];
-
-  const response = await $fetch('/api/db/request-food', {
-    method: 'POST',
-    body: {
-      query,
-      from_user: true,
-    },
-  });
-
-  if (response.status === 'ok') {
-    isLocked.value = false;
-    await parse(true);
-  } else {
-    alert('Error requesting food. Please try again.');
-    isLocked.value = false;
-  }
-}
-
-// Hide popup when clicking outside or pressing escape
-const handleDocumentClick = (event: MouseEvent) => {
-  if (showRequestPopup.value) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.animate-scale-in') && target !== inputRef.value) {
-      showRequestPopup.value = false;
-      selectedText.value = '';
-    }
-  }
-};
-
-const handleEscape = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && showRequestPopup.value) {
-    showRequestPopup.value = false;
-    selectedText.value = '';
-  }
-};
-
 const setIsEditing = () => {
-  isEditing.value = !props.modelValue.parsed.length;
+  isEditing.value = !props.modelValue.displayText;
 };
 
 onMounted(() => {
   setIsEditing();
-
-  document.addEventListener('click', handleDocumentClick);
-  document.addEventListener('keydown', handleEscape);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleDocumentClick);
-  document.removeEventListener('keydown', handleEscape);
 });
 
 defineExpose({
@@ -547,38 +345,3 @@ defineExpose({
   setIsEditing: () => setIsEditing(),
 });
 </script>
-
-<style scoped>
-.popup-enter-active {
-  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.popup-leave-active {
-  transition: all 0.1s ease-out;
-}
-
-.popup-enter-from {
-  opacity: 0;
-  transform: translate(-50%, -100%) scale(0.9);
-}
-
-.popup-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -100%) scale(0.95);
-}
-
-.animate-scale-in {
-  animation: scale-in 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes scale-in {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-</style>

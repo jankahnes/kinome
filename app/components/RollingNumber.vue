@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="inline-block">
     {{ displayedNumber }}
   </div>
 </template>
