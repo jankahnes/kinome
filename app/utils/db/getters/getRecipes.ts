@@ -71,7 +71,7 @@ export async function getRecipes(
             id,
             name,
             food:foods(
-              id, density, countable_units, price, aisle
+              id, density, countable_units, price, aisle, visual_category
             )
           ),
           category,
@@ -143,6 +143,7 @@ export async function getRecipes(
         density: ingredient.food_name.food.density,
         aisle: ingredient.food_name.food.aisle,
         price: ingredient.food_name.food.price,
+        visual_category: ingredient.food_name.food.visual_category,
         preparation_description: ingredient.preparation_description,
         consumption_factor: ingredient.consumption_factor,
         thermal_intensity: ingredient.thermal_intensity,

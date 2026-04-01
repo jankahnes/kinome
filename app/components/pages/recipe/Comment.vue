@@ -1,30 +1,16 @@
 <template>
   <div class="flex gap-4">
     <div class="flex flex-col items-center gap-2">
-      <Avatar
-        :user="comment.user"
-        class="w-12 h-12"
-        :class="isReply ? 'w-10! h-10!' : ''"
-      />
-      <div
-        class="w-px h-full bg-secondary"
-        v-if="comment.replies?.length"
-      ></div>
+      <Avatar :user="comment.user" class="w-12 h-12" :class="isReply ? 'w-10! h-10!' : ''" />
+      <div class="w-px h-full bg-secondary" v-if="comment.replies?.length"></div>
     </div>
     <div class="flex-1">
       <div class="flex items-center gap-4 justify-between">
         <span class="font-bold leading-none text-base">{{
           comment.user.username ?? 'Guest'
         }}</span>
-        <FormsRatingField
-          v-if="comment.rating"
-          class="-mt-1 text-primary"
-          :model-value="comment.rating"
-          :select="false"
-          :starWidth="22"
-          :starHeight="22"
-          :uniqueId="comment.id?.toString() ?? '' + id"
-        />
+        <FormsRatingField v-if="comment.rating" class="-mt-1 text-primary" :model-value="comment.rating" :select="false"
+          :starWidth="22" :starHeight="22" :uniqueId="comment.id?.toString() ?? '' + id" />
       </div>
       <span class="text-xs text-gray-500 leading-none">{{
         timeAgo(comment.created_at)
@@ -32,90 +18,51 @@
       <div class="mt-1 text-base" v-if="!isEditing">
         {{ comment.content }}
       </div>
-      <textarea
-        v-else
-        v-model="editText"
-        v-auto-resize
+      <textarea v-else v-model="editText" v-auto-resize
         class="w-full p-2 rounded-xl border border-[#DCCAB2] focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-16 mt-2"
-        rows="2"
-      ></textarea>
+        rows="2"></textarea>
 
       <div class="mt-2 flex flex-wrap gap-2 text-sm">
-        <button
-          v-if="!isReply && !isEditing && !replying"
-          class="animated-button bg-[#dccab25d] px-3 rounded-xl py-0.5"
-          @click="startReply"
-        >
-          Reply
-        </button>
-        <div
-          class="flex gap-2 flex-wrap flex-1 justify-end"
-          v-if="canModify && !isEditing && !replying"
-        >
-          <button
-            class="animated-button bg-[#dccab25d] px-3 rounded-xl py-0.5"
-            @click="startEdit"
-          >
-            Edit
-          </button>
-          <button
-            class="animated-button bg-red-200 px-3 rounded-xl py-0.5 text-red-800"
-            @click="deleteThis"
-          >
+
+        <div class="flex gap-2 flex-wrap" v-if="canModify && !isEditing && !replying">
+          <button class="animated-button bg-red-100 opacity-80 px-3 rounded-xl py-0.5" @click="deleteThis">
             Delete
+          </button>
+          <button class="animated-button bg-secondary px-3 rounded-xl py-0.5" @click="startEdit">
+            Edit
           </button>
         </div>
 
         <template v-if="isEditing">
-          <button
-            class="animated-button bg-[#DCCAB2] px-4 rounded-xl py-0.5"
-            @click="saveEdit"
-          >
-            Save
-          </button>
-          <button
-            class="animated-button bg-[#dccab27c] px-4 rounded-xl py-0.5"
-            @click="cancelEdit"
-          >
+          <button class="animated-button bg-secondary px-3 rounded-xl py-0.5 ml-auto" @click="cancelEdit">
             Cancel
           </button>
+          <button class="animated-button bg-secondary-700 px-3 rounded-xl py-0.5" @click="saveEdit">
+            Save
+          </button>
         </template>
+
+        <button v-if="!isReply && !isEditing && !replying"
+          class="animated-button bg-secondary px-3 rounded-xl py-0.5 ml-auto" @click="startReply">
+          Reply
+        </button>
       </div>
 
       <div v-if="replying && !isReply" class="mt-1 flex flex-col gap-2">
-        <textarea
-          v-model="replyText"
-          v-auto-resize
-          placeholder="Write a reply"
+        <textarea v-model="replyText" v-auto-resize placeholder="Write a reply"
           class="w-full p-2 rounded-xl border border-slate-200 focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-16"
-          rows="2"
-        ></textarea>
+          rows="2"></textarea>
         <div class="flex gap-2 justify-end">
-          <button
-            class="animated-button bg-[#dccab27c] px-4 rounded-xl py-0.5"
-            @click="cancelReply"
-          >
+          <button class="animated-button bg-secondary px-3 rounded-xl py-0.5" @click="cancelReply">
             Cancel
           </button>
-          <button
-            class="animated-button bg-[#DCCAB2] px-4 rounded-xl py-0.5"
-            @click="submitReply"
-          >
+          <button class="animated-button bg-secondary-700 px-3 rounded-xl py-0.5" @click="submitReply">
             Post reply
           </button>
         </div>
       </div>
-      <div
-        class="mt-6 flex flex-col gap-4"
-        v-if="comment.replies?.length && !isReply"
-      >
-        <Comment
-          :comment="reply"
-          :id="id"
-          :isReply="true"
-          v-for="reply in comment.replies"
-          :key="reply.id"
-        />
+      <div class="mt-6 flex flex-col gap-4" v-if="comment.replies?.length && !isReply">
+        <Comment :comment="reply" :id="id" :isReply="true" v-for="reply in comment.replies" :key="reply.id" />
       </div>
     </div>
   </div>

@@ -2,7 +2,7 @@
     <div class="main-card  main-card-padding flex min-w-0 flex-col gap-2">
         <div>
             <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Gut Health Drivers</h2>
-            <p class="text-sm text-gray-400">Health Markers, last 30 logged days</p>
+            <p class="text-sm text-gray-400">Health Markers, last 30 days</p>
         </div>
 
         <div v-if="gutHealth" class="flex flex-col gap-4 justify-between flex-1">

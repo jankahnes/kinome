@@ -17,6 +17,9 @@ export function getStringFromAmountInfo(
   }
 
   if (unit == 'LB' || unit == 'KG' || unit == 'L') {
+    if(unit == 'LB' && totalAmount > 1) {
+      return `${Math.round(totalAmount)} lbs`;
+    }
     return `${Number(totalAmount.toFixed(1))} ${unit.toLowerCase()}`;
   }
 

@@ -24,7 +24,8 @@
               <div class="text-sm text-slate-400 mt-0.5">per 100g</div>
             </div>
           </div>
-          <NuxtLink :to="`/foods/${modelValue.foodNameId}`" class="text-sm text-gray-300 hover:text-gray-400 transition-colors">
+          <NuxtLink :to="`/foods/${modelValue.foodNameId}`"
+            class="text-sm text-gray-300 hover:text-gray-400 transition-colors">
             <IconExternalLink class="w-6" />
           </NuxtLink>
         </div>
@@ -196,7 +197,8 @@ const placeholder = computed(() => {
 });
 
 const props = defineProps<{
-  modelValue: EditableTrackingItem;
+  modelValue: EditableIngredient;
+  showKcal?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -245,9 +247,9 @@ const measurementContext = computed(() => {
   );
   const kcal = (props.modelValue.foodData?.kcal ?? 0) / 100 * grams;
   if (props.modelValue.unit === 'G') {
-    return `${kcal.toFixed(0)} kcal`;
+    return props.showKcal ? `${kcal.toFixed(0)} kcal` : '';
   }
-  return `${grams.toFixed(0)}g · ${kcal.toFixed(0)} kcal`;
+  return props.showKcal ? `${grams.toFixed(0)}g · ${kcal.toFixed(0)} kcal` : `${grams.toFixed(0)}g`;
 });
 
 const holdFillStyle = computed(() =>

@@ -1,70 +1,29 @@
 <template>
-  <div class="sm:mx-14 mb-10">
-    <div v-if="!loading && !user" class="max-w-200 mt-5 mx-auto text-center">
-      <p class="text-gray-500">User not found</p>
+  <div class="pb-20 lg:pb-0 m-4 lg:m-8 lg:ml-20">
+    <div class="flex items-center gap-2 flex-wrap justify-between">
+      <div class="flex items-center gap-2 flex-wrap">
+        <NuxtLink v-for="view in views" :key="view.path" :to="view.path" class="animated-button bg-primary-10 px-3 py-2"
+          active-class="primary-gradient text-gray-800 px-3 py-2">
+          {{ view.displayName }}
+        </NuxtLink>
+      </div>
     </div>
-    <div class="flex gap-4 w-full flex-1 mt-22">
-      <FormsChoiceSlider
-        :choices="choices"
-        v-model="selectedView"
-        vertical
-        class="min-w-30 flex-[0.2] max-w-45 self-start sticky top-22 left-0"
-      />
-      <Transition name="loaded-content">
-        <section class="flex-1" v-if="!loading && user">
-          <template v-if="selectedView === 'recipes'">
-            <div
-              class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-center max-w-6xl"
-            >
-              <RecipeCard
-                v-if="user.recipes"
-                :recipe="recipe"
-                class="min-w-64 basis-64 max-w-90 flex-1 min-h-50 text-[30px]"
-                v-for="recipe in user.recipes"
-                :key="recipe.id"
-              />
-            </div>
-            <div class="flex flex-col gap-4 md:hidden justify-items-stretch">
-              <RecipeCardHorizontal
-                :recipe="recipe"
-                class=""
-                v-for="recipe in user.recipes"
-                :key="recipe.id"
-              />
-            </div>
-          </template>
-          <template v-if="selectedView === 'activity'">
-            <div class="flex flex-wrap gap-4 mr-12">
-              <FeedItem
-                v-for="activity in user.activity"
-                :key="activity.id"
-                :feed-item="activity"
-                class=""
-              />
-            </div>
-          </template>
-          <template v-if="selectedView === 'meals'"> </template>
-        </section>
-      </Transition>
-    </div>
+    <NuxtPage :transition="false" />
   </div>
 </template>
 
 <script setup lang="ts">
-const choices = computed(() => [
-  { value: 'recipes', displayName: '🛎️ Recipes' },
-  { value: 'activity', displayName: '🎯 Activity' },
-  { value: 'meals', displayName: '🍽️ Meals' },
-  { value: 'likes', displayName: '👍 Likes' },
-  { value: 'stats', displayName: '📊 Stats' },
-  { value: 'settings', displayName: '⚙️ Settings' },
+const userID = useRoute().params.id as string;
+
+const views = computed(() => [
+  { path: '/profile/' + userID + '/recipes', displayName: '🛎️ Recipes' },
+  { path: '/profile/' + userID + '/activity', displayName: '🎯 Activity' },
+  { path: '/profile/' + userID + '/settings', displayName: '⚙️ Settings' },
   ...(auth.user?.id === userID
-    ? [{ value: 'logout', displayName: '🚪 Log Out' }]
+    ? [{ path: '/logout', displayName: '🚪 Log Out' }]
     : []),
 ]);
 const selectedView = ref('recipes');
-const route = useRoute();
-const userID = route.params.id;
 const auth = useAuthStore();
 const supabase = useSupabaseClient<Database>();
 const user = ref<FullUser | null>(null);
@@ -83,15 +42,15 @@ watchEffect(async () => {
   if (auth.user?.id === userID) {
     user.value = auth.user;
   } else {
-    user.value = await getUser(supabase, { eq: { id: userID } });
-    useHead({
-      title: user.value?.username ?? 'User' + ' | Kinome',
-    });
+    user.value = await getUser(supabase, userID);
   }
   loading.value = false;
 });
 
 useHead({
+  title: computed(() =>
+    user.value?.username ? `${user.value.username} | Kinome` : 'User | Kinome',
+  ),
   meta: [
     {
       name: 'robots',

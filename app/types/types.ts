@@ -107,7 +107,17 @@ export type RecipeOverview = RecipeRow & {
   social_picture?: string | null;
 };
 
+export type CookStep = {
+  title?: string;
+  formatted_text: string;
+  type?: string;
+  step_time?: number;
+  timers?: number[];
+  tip?: string;
+}
+
 export type Recipe = RecipeRow & {
+  full_instructions: CookStep[] | null;
   ingredients?: Ingredient[];
   base_ingredients?: string[];
   comments: Comment[];
@@ -135,6 +145,7 @@ export type Ingredient = {
   mechanical_description: string | null;
   aisle: string | null;
   price: number | null;
+  visual_category?: string | null;
 };
 
 export type BrandedFood = BrandedFoodRow & {
@@ -238,28 +249,6 @@ export type FullIngredient = FoodNameRow &
     loggedDate?: Date;
   };
 
-export type EditableIngredient = {
-  category: string | null;
-  rawText: string;
-  isEditing: boolean;
-  // All FullIngredient properties are optional since new ingredients don't have them yet
-  id?: number;
-  name?: string;
-  amount?: number | null;
-  unit?: string | null;
-  density?: number;
-  preparation_description?: string | null;
-  countable_units?: Record<string, number>;
-  food?: FullFoodRow;
-  heat_medium?: RecipeFoodRow['heat_medium'];
-  mechanical_disruption?: RecipeFoodRow['mechanical_disruption'];
-  thermal_intensity?: RecipeFoodRow['thermal_intensity'];
-  thermal_description?: RecipeFoodRow['thermal_description'];
-  mechanical_description?: RecipeFoodRow['mechanical_description'];
-  consumption_factor?: RecipeFoodRow['consumption_factor'];
-  utility?: boolean;
-};
-
 export type BrandedFoodState =
   | 'loading'
   | 'needs_basic_info'
@@ -274,7 +263,7 @@ export type FoodVariant = {
   food: FullFoodRow;
 };
 
-export type EditableTrackingItem = {
+export type EditableIngredient = {
   rawText: string;
   displayText: string;
   displayTextContext?: string;
@@ -296,9 +285,9 @@ export type EditableTrackingItem = {
 
 export type TrackedMeal = {
   id?: number;
-  mealName: string;
+  name: string;
   recipe_id?: number;
-  editableIngredients: EditableTrackingItem[];
+  editableIngredients: EditableIngredient[];
   collapsed: boolean;
 };
 

@@ -9,11 +9,11 @@
         </NuxtLink>
       </div>
       <!-- Date navigator — only on /tracking/daily -->
-      <div v-if="isDaily" class="flex items-center border border-primary rounded-4xl bg-primary-10/40">
+      <div v-if="isDaily" class="flex items-center  rounded-4xl bg-primary-10/40">
         <button class="animated-button py-1 px-3" @click="navigateDate(-1)">
           <IconChevronLeft class="w-4 h-4" />
         </button>
-        <span class="text-sm font-semibold min-w-28 text-center border-x border-primary p-1">{{ dateLabel }}</span>
+        <span class="text-sm font-semibold min-w-28 text-center p-1 bg-primary-10/80 rounded-full">{{ dateLabel }}</span>
         <button class="animated-button py-1 px-3" @click="navigateDate(1)" :disabled="isToday"
           :class="{ 'opacity-30 cursor-not-allowed': isToday }">
           <IconChevronRight class="w-4 h-4" />

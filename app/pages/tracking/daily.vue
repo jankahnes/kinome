@@ -32,44 +32,13 @@
             </div>
 
             <!-- Meals list -->
-            <div class="flex flex-col gap-4">
-              <div v-for="(meal, index) in trackedMeals" class="flex flex-col main-card main-card-padding">
-                <div class="flex items-center gap-2 animated-button justify-between pr-1"
-                  @click="meal.collapsed = !meal.collapsed">
-                  <div class="relative flex mx-1 ">
-                    <span class="text-xl font-bold invisible whitespace-pre px-4 py-0.5" aria-hidden="true">{{
-                      trackedMeals[index].mealName || '✍️ Meal name'
-                    }}</span>
-                    <input v-model="trackedMeals[index].mealName"
-                      class="animated-button text-xl font-bold focus:outline-none absolute inset-0 px-4 py-0.5 text-center bg-main/30  cursor-text!"
-                      @click.stop placeholder="✍️ Meal name" />
-                  </div>
-                  <div class="flex items-center gap-2 text-gray-600">
-                    <NuxtLink :to="`/recipe/${meal.recipe_id}`"
-                      class="flex items-center justify-center rounded-md px-2 py-1 gap-1"
-                      v-if="meal.recipe_id !== undefined" @click.stop>
-                      <span class="text-xs hidden sm:block">Jump to recipe</span>
-                      <IconExternalLink class="w-5 text-base!" />
-                    </NuxtLink>
-                    <IconChevronDown class="w-5" v-if="meal.collapsed" />
-                    <IconChevronUp class="w-5" v-else />
-                    <button class="rounded-md p-1" @click="removeMeal(index)">
-                      <IconTrash class="w-5" />
-                    </button>
-                  </div>
-                </div>
-                <BlocksCollapsible v-model="meal.collapsed" class="flex flex-col" reverse>
-                  <div v-for="(
-ingredient, ingredientIndex
-                    ) in meal.editableIngredients" :key="`${index}-${ingredientIndex}`" class="pt-2">
-                    <TrackingInput :ref="(el) => setInputRef(index, ingredientIndex, el)" v-model="trackedMeals[index].editableIngredients[ingredientIndex]
-                      " @focus-next="focusNextInput(index, ingredientIndex)" @delete-ingredient="
-                        deleteIngredient(index, ingredientIndex)
-                        " />
-                  </div>
-                </BlocksCollapsible>
-              </div>
-            </div>
+            <EditableGroupList
+              v-model="trackedMeals"
+              :show-collapse="true"
+              :show-group-header="true"
+              group-name-placeholder="✍️ Meal name"
+              :show-kcal="true"
+            />
           </div>
         </div>
         <!-- Nutrition summary -->
@@ -105,97 +74,19 @@ ingredient, ingredientIndex
             </div>
           </div>
           <!-- Nutrition Overview -->
-          <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
-            <h3 class="text-4xl font-bold tracking-tighter self-start mb-2 mx-2">
-              Nutrition Overview
-            </h3>
-
-            <div class="flex flex-wrap 2xl:grid grid-cols-4 gap-2">
-              <div
-                class="flex flex-col justify-between p-4 bg-primary-10/50 md:bg-primary-20 rounded-3xl col-span-2 gap-6 flex-2">
-                <div class="">
-                  <div class="text-2xl font-bold leading-none">Kcal</div>
-                  <div class="text-[54px] leading-none font-bold -ml-1">{{ Math.round(computedDailyNutrition?.kcal ?? 0)
-                  }}<span class="text-xl text-nowrap">/{{ userTrackingGoals?.targets?.kcal }} kcal</span>
-                  </div>
-                </div>
-                <div class="flex w-full h-3 rounded-full overflow-hidden bg-slate-200">
-                  <div class="h-full rounded-full transition-all duration-300 bg-slate-400" :style="{
-                    width: Math.min(100, ((computedDailyNutrition?.kcal ?? 0) / userTrackingGoals?.targets?.kcal) * 100) + '%',
-                  }"></div>
-                </div>
-              </div>
-              <div v-for="item in overviewItems.slice(0, 4)" :key="item.title"
-                class="flex flex-col items-center justify-between p-4 main-card rounded-3xl gap-1 flex-1">
-                <div class="w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
-                  <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`"
-                    :alt="item.title" />
-                </div>
-                <div class="text-xl font-bold mt-1 leading-none">{{ item.title }}</div>
-                <div class="text-xl font-bold leading-none">
-                  {{ item.total }}{{ item.unit }}<span class="text-sm font-normal">/{{ item.goal }}{{ item.unit
-                  }}</span>
-                </div>
-                <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
-                  <template v-if="item.saturatedFatPct !== undefined">
-                    <div class="h-full rounded-full transition-all duration-300 bg-saturated-fat z-10"
-                      :style="{ width: item.saturatedFatPct + '%' }"></div>
-                    <div class="h-full rounded-full transition-all duration-300 -ml-2 z-0" :class="item.bgClass"
-                      :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }"></div>
-                  </template>
-                  <div v-else class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
-                    :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }"></div>
-                </div>
-              </div>
-              <!-- Carbs + Sugar paired card -->
-              <div class="col-span-2 flex gap-2 rounded-4xl bg-primary-10/60 p-1 flex-2">
-                <div v-for="item in overviewItems.slice(4)" :key="item.title"
-                  class="flex flex-col items-center justify-between p-3 main-card rounded-[1.25rem] gap-1 flex-1">
-                  <div class="w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
-                    <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`"
-                      :alt="item.title" />
-                  </div>
-                  <div class="text-xl font-bold mt-1 leading-none">{{ item.title }}</div>
-                  <div class="text-xl font-bold leading-none">
-                    {{ item.total }}{{ item.unit }}<span class="text-sm font-normal">/{{ item.goal }}{{ item.unit
-                    }}</span>
-                  </div>
-                  <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
-                    <div class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
-                      :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <NutritionOverviewCard
+            mode="tracking"
+            :nutrition="computedDailyNutrition"
+            :tracking-goals="userTrackingGoals?.targets"
+            @view-overall-report="showOverallReportPanel = true"
+          />
           <!-- Nutrition Quality -->
-          <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
-            <div class="flex justify-between items-center">
-              <h3 class="text-4xl font-bold tracking-tighter self-start mb-2 mx-2">
-                Nutrition Quality
-              </h3>
-              <button @click="showOverallReportPanel = true" class="p-2">
-                <IconChevronRight class="w-6 text-slate-400" />
-              </button>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <div v-for="item in qualityItems" :key="item.title"
-                class="relative flex flex-col items-center gap-2 p-4 main-card rounded-3xl"
-                :class="{ 'cursor-pointer': item.clickable }"
-                @click="item.clickable && handleQualityCardClick(item.title)">
-                <IconChevronRight v-if="item.clickable" class="absolute top-3 right-3 w-5 text-slate-400" />
-                <img class="w-10 h-10 object-contain mt-1" :src="`/nutrition-highlights/${item.img}`"
-                  :alt="item.title" />
-                <div class="font-bold text-sm leading-tight text-center">{{ item.title }}</div>
-                <div class="text-xs text-slate-500 text-center leading-tight min-h-4">
-                  {{ item.subtitle }}
-                </div>
-                <div class="px-2.5 py-0.5 rounded-full text-xs font-semibold mt-auto" :class="item.pillClass">
-                  {{ item.rating }}
-                </div>
-              </div>
-            </div>
-          </div>
+          <NutritionQualityCards
+            :cards="qualityItems"
+            :has-overall-report="true"
+            @view-overall-report="showOverallReportPanel = true"
+            @card-click="handleQualityCardClick"
+          />
         </div>
       </div>
       <!-- Save button -->
@@ -535,13 +426,8 @@ const {
   isLoading,
   lastSavedAt,
   hasUnsavedChanges,
-  setInputRef,
-  focusNextInput,
   addMeal,
   addMealFromRecipe,
-  removeMeal,
-  deleteIngredient,
-  ensureOneEmptyInput,
   loadMeals,
   saveMeals,
   formatTimeAgo,
@@ -584,7 +470,7 @@ const computeNutrition = async () => {
     title: 'Daily Tracking',
     fullIngredients,
     serves: 1,
-  } as ComputableRecipe;
+  } as unknown as ComputableRecipe;
   const nutrition = await $fetch('/api/calculate/recipe', {
     method: 'POST',
     body: {
@@ -609,79 +495,11 @@ const searchRecipes = async () => {
   recipeSearchResults.value = recipes;
 };
 
-const overviewItems = computed(() => {
-  const n = computedDailyNutrition.value;
-  return [
-    // Row 1 (after kcal): fiber, salt
-    {
-      title: 'Fiber',
-      img: 'fiber2.webp',
-      bgClass: 'bg-fiber',
-      bgLightClass: 'bg-fiber/30',
-      total: Math.round(n?.fiber ?? 0),
-      goal: userTrackingGoals.value?.targets?.fiber ?? 30,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-    {
-      title: 'Salt',
-      img: 'salt2.webp',
-      bgClass: 'bg-salt',
-      bgLightClass: 'bg-salt/30',
-      total: Math.round(n?.salt ?? 0),
-      goal: userTrackingGoals.value?.targets?.salt ?? 5,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-    // Row 2: protein, fat, then carbs+sugar pair (rendered outside v-for)
-    {
-      title: 'Protein',
-      img: 'protein2.webp',
-      bgClass: 'bg-protein',
-      bgLightClass: 'bg-protein/30',
-      total: Math.round(n?.protein ?? 0),
-      goal: userTrackingGoals.value?.targets?.protein ?? 100,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-    {
-      title: 'Fat',
-      img: 'fat.webp',
-      bgClass: 'bg-fat',
-      bgLightClass: 'bg-fat/30',
-      total: Math.round(n?.fat ?? 0),
-      goal: userTrackingGoals.value?.targets?.fat ?? 70,
-      unit: 'g',
-      saturatedFatPct: n
-        ? Math.min(100, ((n.saturated_fat ?? 0) / (n.fat ?? 1)) * 100)
-        : 0,
-    },
-    // [4] & [5] — rendered as a paired col-span-2 element below the v-for
-    {
-      title: 'Carbs',
-      img: 'fiber.webp',
-      bgClass: 'bg-carbs',
-      bgLightClass: 'bg-carbs/30',
-      total: Math.round((n as any)?.carbohydrates ?? 0),
-      goal: userTrackingGoals.value?.targets?.carbohydrates ?? 275,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-    {
-      title: 'Sugar',
-      img: 'sugar.webp',
-      bgClass: 'bg-sugar',
-      bgLightClass: 'bg-sugar/30',
-      total: Math.round(n?.sugar ?? 0),
-      goal: userTrackingGoals.value?.targets?.sugar ?? 40,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-  ];
-});
-
 const qualityItems = computed(() =>
-  getDailyQualityCards(computedDailyNutrition.value?.report)
+  getDailyQualityCards(computedDailyNutrition.value?.report, {
+    totalFat: computedDailyNutrition.value?.fat,
+    protectiveScore: computedDailyNutrition.value?.protective_score,
+  })
 );
 
 // --- Quality detail panels ---
@@ -772,7 +590,6 @@ const searchRecipesDebounced = debounce(searchRecipes, 1000);
 watch(
   trackedMeals,
   () => {
-    ensureOneEmptyInput();
     computeNutritionDebounced();
     hasUnsavedChanges.value = true;
   },
@@ -795,6 +612,13 @@ onMounted(async () => {
   mounted.value = true;
   selectedDate.value = parseDateFromQuery();
   await loadMeals(selectedDate.value);
+
+  // Auto-add recipe when arriving from cook mode
+  const addRecipeId = route.query.addRecipe;
+  if (addRecipeId) {
+    await handleAddMealFromRecipe(Number(addRecipeId));
+  }
+
   await computeNutrition();
   setupAutoSave();
 });

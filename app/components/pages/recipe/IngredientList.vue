@@ -4,58 +4,41 @@
       Ingredients
     </h2>
 
-    <div
-      class="main-card main-card-padding flex flex-col relative"
-      :class="{ '!bg-primary-20/80 overflow-hidden': formalizationLoading }"
-    >
+    <div class="main-card main-card-padding flex flex-col relative gap-2"
+      :class="{ '!bg-primary-20/80 overflow-hidden': formalizationLoading }">
       <div class="flex justify-between items-center w-full mb-4">
         <div v-if="ingredients && ingredients.length > 0">
           <div class="" v-if="batchSize && !servingMode">
             <p class="text-gray-600 ml-1 font-light">
               For {{ batchSize }} {{ batchSize === 1 ? 'serving' : 'servings' }}
             </p>
-            <p
-              @click="servingMode = !servingMode"
-              class="text-xs text-gray-400 ml-1 font-extralight cursor-pointer italic"
-            >
+            <p @click="servingMode = !servingMode"
+              class="text-xs text-gray-400 ml-1 font-extralight cursor-pointer italic">
               Adjust servings
             </p>
           </div>
           <div v-else>
             <p class="text-sm text-gray-600 ml-1 font-light">Servings:</p>
-            <FormsSlidingSelector
-              v-if="servingSize"
-              v-model="servingSize"
-              :choices="[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20]"
-              :expanded="false"
-              class="max-w-[180px]"
-            />
-            <p
-              v-if="batchSize"
-              @click="
-                servingMode = !servingMode;
-                servingSize = batchSize;
-              "
-              class="text-xs text-gray-400 ml-1 font-extralight cursor-pointer mb-4 italic"
-            >
+            <FormsSlidingSelector v-if="servingSize" v-model="servingSize"
+              :choices="[0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20]" :expanded="false"
+              class="max-w-[180px]" />
+            <p v-if="batchSize" @click="
+              servingMode = !servingMode;
+            servingSize = batchSize;
+            " class="text-xs text-gray-400 ml-1 font-extralight cursor-pointer mb-4 italic">
               Show ingredients for one batch
             </p>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button
-            class="animated-button flex items-center gap-2 px-3 py-1 bg-secondary text-xs"
-            @click="copyIngredients"
-          >
+          <button class="animated-button flex items-center gap-2 px-3 py-1 text-xs" @click="copyIngredients">
             <IconCopy class="w-4" />
             Copy
           </button>
           <transition name="fade-slide" mode="out-in">
-            <button
-              v-if="notOnDefaultUnits"
-              class="animated-button flex items-center gap-2 px-2 py-1 bg-secondary text-xs will-change-transform"
-              @click="resetUnits"
-            >
+            <button v-if="notOnDefaultUnits"
+              class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform"
+              @click="resetUnits">
               <IconRefreshCcw class="w-4" />
               <span>Reset Units</span>
             </button>
@@ -63,42 +46,27 @@
         </div>
       </div>
 
-      <div class="flex-1 py-2">
-        <div
-          class="max-w-100 space-y-4 select-none"
-          v-if="ingredients && ingredients.length > 0"
-        >
-          <template
-            v-for="(group, category) in groupedIngredients"
-            :key="category"
-          >
+      <div class="flex-1">
+        <div class="max-w-100 space-y-4 select-none" v-if="ingredients && ingredients.length > 0">
+          <template v-for="(group, category) in groupedIngredients" :key="category">
             <div v-if="category !== 'uncategorized' && group.length > 0">
-              <h3
-                class="text-lg font-semibold text-gray-800 mb-3 border-b-2 border-secondary"
-              >
+              <h3 class="text-lg font-semibold text-gray-800 border-b-2 border-secondary">
                 {{ category }}
               </h3>
             </div>
 
-            <ul class="space-y-5" role="list">
-              <li
-                v-for="ingredient in group"
-                :key="ingredient.name"
-                class="flex"
-              >
-                <input
-                  type="checkbox"
-                  :checked="checkedIngredients.has(ingredient.name)"
-                  @change="toggleIngredientChecked(ingredient.name)"
-                  class="w-4 h-4 rounded appearance-none bg-primary-20 outline outline-gray-300 mt-0.5"
-                />
-                <span class="ml-2 leading-none">
+            <ul class="flex flex-col gap-4 items-start" role="list">
+              <li v-for="ingredient in group" :key="ingredient.name"
+                class="flex items-center rounded-2xl px-2 py-1 transition-colors duration-200 gap-2"
+                :class="backgroundClass(ingredient)" @click="toggleIfNotLongPress(ingredient.name)">
+                <img class="h-5 min-w-7 object-contain object-center" :src="`/foods/${ingredient.visual_category}.webp`"
+                  v-if="ingredient.visual_category" />
+                <span class="leading-none">
                   <Transition name="fade-slide" mode="out-in">
-                    <span
-                      :key="`${servingSize}-${ingredient?.currentUnit}`"
+                    <span :key="`${servingSize}-${ingredient?.currentUnit}`"
                       class="tabular-nums whitespace-nowrap font-bold cursor-pointer"
-                      @click="onClickIngredient(ingredient)"
-                    >
+                      @pointerdown="startLongPress(() => onClickIngredient(ingredient))" @pointerup="cancelLongPress"
+                      @pointerleave="cancelLongPress" @pointercancel="cancelLongPress">
                       {{
                         getStringFromAmountInfo(
                           ingredient?.amountInfo?.[ingredient?.currentUnit],
@@ -107,95 +75,71 @@
                       }}
                     </span>
                   </Transition>
-                  <span
-                    class="font-light text-sm text-gray-600"
-                    v-if="
-                      isCountable(
-                        ingredient?.amountInfo?.[ingredient?.currentUnit][1]
-                      ) &&
-                      unitIsNoun(
-                        ingredient?.amountInfo?.[ingredient?.currentUnit][1]
-                      )
-                    "
-                  >
-                    of</span
-                  >
-                  <NuxtLink
-                    :to="
-                      getFoodUrl(ingredient.id, getIngredientName(ingredient))
-                    "
-                    class="cursor-pointer"
-                  >
+                  <span class="font-light text-sm text-gray-600" v-if="
+                    isCountable(
+                      ingredient?.amountInfo?.[ingredient?.currentUnit][1]
+                    ) &&
+                    unitIsNoun(
+                      ingredient?.amountInfo?.[ingredient?.currentUnit][1]
+                    )
+                  ">
+                    of</span>
+                  <span class="cursor-pointer"
+                    @pointerdown="startLongPress(() => navigateTo(getFoodUrl(ingredient.id, getIngredientName(ingredient))))"
+                    @pointerup="cancelLongPress" @pointerleave="cancelLongPress" @pointercancel="cancelLongPress">
                     <span class="font-medium">{{
                       ' ' + getIngredientName(ingredient)
                     }}</span>
-                    <span
-                      v-if="ingredient.preparation_description"
-                      class="font-light text-gray-600 text-sm mt-1"
-                      >, {{ ingredient.preparation_description }}
+                    <span v-if="ingredient.preparation_description" class="font-light text-gray-600 text-sm mt-1">, {{
+                      ingredient.preparation_description }}
                     </span>
-                  </NuxtLink>
+                  </span>
                 </span>
               </li>
             </ul>
           </template>
-          <div
-            class="flex gap-4 items-center flex-wrap pt-2"
-            v-if="
-              (addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1) ||
-              (addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75)
-            "
-          >
-            <div
-              class="flex gap-1 items-center rounded-xl"
-              v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1"
-            >
+          <div class="flex gap-4 items-center flex-wrap pt-2" v-if="
+            (addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1) ||
+            (addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75)
+          ">
+            <div class="flex gap-1 items-center rounded-xl"
+              v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1">
               <span class="text-sm">🧈</span>
-              <span class="text-xs font-medium"
-                >Plus estimated ~{{ getAdded(addedInfo?.addedFat) }}g of
-                fat</span
-              >
+              <span class="text-xs font-medium">Plus estimated ~{{ getAdded(addedInfo?.addedFat) }}g of
+                fat</span>
             </div>
-            <div
-              class="flex gap-1 items-center rounded-xl"
-              v-if="
-                addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
-              "
-            >
+            <div class="flex gap-1 items-center rounded-xl" v-if="
+              addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
+            ">
               <span class="text-sm">🧂</span>
               <span class="text-xs font-medium">
                 Plus estimated ~{{ getAdded(addedInfo?.addedSalt) }}g of
-                salt</span
-              >
+                salt</span>
             </div>
           </div>
-          <div class="w-full h-px bg-secondary"></div>
+          <div v-if="checkedIngredients.size > 0" class="w-full h-px bg-gray-200 my-6"></div>
+          <!--
           <div class="flex items-center gap-2">
-            <span class="ml-2"
-              >= ~<strong>{{ formatMoney(price) }}</strong> per Serving</span
-            >
-          </div>
+            <span class="ml-2">= ~<strong>{{ formatMoney(price) }}</strong> per Serving</span>
+          </div>-->
           <Transition name="fade-slide" mode="out-in">
-            <button
-              v-if="checkedIngredients.size > 0"
-              class="button flex items-center gap-2 px-4 py-1 font-medium !bg-primary !text-white will-change-transform mt-6"
-              @click="addToShoppingList"
-            >
+            <button v-if="checkedIngredients.size > 0"
+              class="animated-button flex items-center gap-2 px-4 py-1 font-medium !bg-primary !text-white will-change-transform"
+              @click="addToShoppingList">
               <IconShoppingCart class="w-5 h-5" />
               Add to Shopping List
             </button>
           </Transition>
+          <!--
+
           <div class="flex flex-wrap gap-2 mt-2">
-            <div
-              v-for="pill in metaPills"
-              :key="pill.text"
-              :class="pill.class"
-              class="flex items-center gap-2 rounded-4xl px-4 py-1 text-xs justify-center"
-            >
+            <div v-for="pill in metaPills" :key="pill.text" :class="pill.class"
+              class="flex items-center gap-2 rounded-4xl px-2 py-0.5 text-xs justify-center">
               <Icon :name="pill.icon" :size="14" />
               <span>{{ pill.text }}</span>
             </div>
           </div>
+          -->
         </div>
         <!-- No formal ingredients, display base ingredients-->
         <div v-else class="flex flex-col">
@@ -208,8 +152,8 @@
       </div>
       <div
         class="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent p-4 pointer-events-none"
-        v-if="formalizationLoading"
-      />
+        v-if="formalizationLoading" />
+      <div class="hidden bg-secondary-700/50 bg-secondary-700/70" />
     </div>
   </div>
 </template>
@@ -231,6 +175,7 @@ const props = defineProps({
   addedInfo: Object as PropType<AddedInfo>,
   price: Number,
   metaPills: Array<any>,
+  markedIngredients: Array<number>,
 });
 const root = ref(null);
 
@@ -243,6 +188,21 @@ const getAdded = (added: number) => {
     ((servingSize.value ?? 1) * added) / (props.batchSize ?? 1)
   );
 };
+
+const backgroundClass = (ingredient: any) => {
+  const isChecked = checkedIngredients.value.has(ingredient.name);
+  const isMarked = props.markedIngredients?.includes(ingredient.id);
+  if (isChecked && isMarked) {
+    return 'bg-secondary-700';
+  }
+  if (isChecked) {
+    return 'bg-secondary-700/70';
+  }
+  if (isMarked) {
+    return 'bg-secondary-700/50';
+  }
+  return 'bg-secondary/70 hover:bg-secondary';
+}
 
 const emit = defineEmits(['update:servingSize']);
 
@@ -291,6 +251,32 @@ function getIngredientName(ingredient: any) {
     return pluralizeWord(ingredient.name);
   }
   return ingredient.name;
+}
+
+const longPressActive = ref(false);
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+function startLongPress(callback: () => void, duration = 500) {
+  longPressActive.value = false;
+  longPressTimer = setTimeout(() => {
+    longPressActive.value = true;
+    callback();
+  }, duration);
+}
+
+function cancelLongPress() {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+}
+
+function toggleIfNotLongPress(ingredientName: string) {
+  if (longPressActive.value) {
+    longPressActive.value = false;
+    return;
+  }
+  toggleIngredientChecked(ingredientName);
 }
 
 function toggleIngredientChecked(ingredientName: string) {
@@ -363,8 +349,10 @@ async function addToShoppingList() {
   border: 0 !important;
   box-shadow: none !important;
   outline: none !important;
-  accent-color: var(--color-primary) !important; /* optional */
+  accent-color: var(--color-primary) !important;
+  /* optional */
 }
+
 .checkbox-no-border::-moz-focus-inner {
   border: 0 !important;
 }

@@ -1,4 +1,4 @@
-import type { TrackedMeal, EditableTrackingItem } from '~/types/types';
+import type { TrackedMeal, EditableIngredient } from '~/types/types';
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
 import convertToGrams from '~/utils/format/convertToGrams';
 
@@ -14,86 +14,20 @@ export function useMealTracking() {
   const lastSavedAt = ref<Date | null>(null);
   const hasUnsavedChanges = ref(false);
 
-  // Input ref management
-  const inputRefs = ref<Map<string, any>>(new Map());
-
-  function setInputRef(mealIndex: number, ingredientIndex: number, el: any) {
-    if (el) {
-      inputRefs.value.set(`${mealIndex}-${ingredientIndex}`, el);
-    }
-  }
-
-  function focusNextInput(
-    currentMealIndex: number,
-    currentIngredientIndex: number,
-  ) {
-    nextTick(() => {
-      // Try next ingredient in same meal
-      const nextIngredientIndex = currentIngredientIndex + 1;
-      if (
-        trackedMeals.value[currentMealIndex]?.editableIngredients[
-          nextIngredientIndex
-        ]
-      ) {
-        const ref = inputRefs.value.get(
-          `${currentMealIndex}-${nextIngredientIndex}`,
-        );
-        ref?.focus();
-        return;
-      }
-
-      // Try first ingredient in next meal
-      const nextMealIndex = currentMealIndex + 1;
-      if (
-        trackedMeals.value[nextMealIndex] &&
-        !trackedMeals.value[nextMealIndex].collapsed &&
-        trackedMeals.value[nextMealIndex].editableIngredients.length > 0
-      ) {
-        const ref = inputRefs.value.get(`${nextMealIndex}-0`);
-        ref?.focus();
-        return;
-      }
-
-      // If no next input, ensure there's an empty one and focus it
-      if (trackedMeals.value[currentMealIndex]) {
-        const meal = trackedMeals.value[currentMealIndex];
-        const emptyInputs = meal.editableIngredients.filter(
-          (ing) => !ing.rawText.trim(),
-        );
-        if (emptyInputs.length === 0) {
-          meal.editableIngredients.push({
-            rawText: '',
-            displayText: '',
-          });
-          nextTick(() => {
-            const newIndex = meal.editableIngredients.length - 1;
-            const ref = inputRefs.value.get(`${currentMealIndex}-${newIndex}`);
-            ref?.focus();
-          });
-        }
-      }
-    });
-  }
-
-  // Meal operations
-  function addMeal(mealName: string) {
-    trackedMeals.value.push({
-      mealName,
-      editableIngredients: [],
-      collapsed: false,
-    });
-  }
+  const {
+    ensureOneEmptyInput,
+    addGroup: addMeal,
+    removeGroup: removeMeal,
+  } = useIngredientGroupEditor(trackedMeals);
 
   async function addMealFromRecipe(recipeId: number) {
     const recipe = await getRecipe(supabase, { eq: { id: recipeId } });
     const computableRecipe = await convertUploadableToComputable(
       recipe,
       supabase,
-      true,
-      1,
     );
 
-    const editableTrackingItems: EditableTrackingItem[] =
+    const editableTrackingItems: EditableIngredient[] =
       computableRecipe.fullIngredients.map((ingredient) => {
         const displayTextContext = getStringFromAmountInfo(
           [ingredient.amount, ingredient.unit ?? 'G'],
@@ -117,36 +51,11 @@ export function useMealTracking() {
       });
 
     trackedMeals.value.push({
-      mealName: recipe.title,
+      name: recipe.title,
       recipe_id: recipeId,
       editableIngredients: editableTrackingItems,
       collapsed: true,
     });
-  }
-
-  function removeMeal(index: number) {
-    trackedMeals.value.splice(index, 1);
-  }
-
-  function deleteIngredient(mealIndex: number, ingredientIndex: number) {
-    trackedMeals.value[mealIndex].editableIngredients.splice(
-      ingredientIndex,
-      1,
-    );
-  }
-
-  function ensureOneEmptyInput() {
-    for (const meal of trackedMeals.value) {
-      const emptyInputs = meal.editableIngredients.filter(
-        (ingredient) => ingredient.rawText.trim() === '',
-      );
-      if (emptyInputs.length === 0) {
-        meal.editableIngredients.push({
-          rawText: '',
-          displayText: '',
-        });
-      }
-    }
   }
 
   // Helper: Format date for DB queries (YYYY-MM-DD)
@@ -172,7 +81,7 @@ export function useMealTracking() {
     return rest;
   }
 
-  function dbFoodToEditableItem(food: any): EditableTrackingItem {
+  function dbFoodToEditableItem(food: any): EditableIngredient {
     const processedBrandedFood = food.branded_food
       ? postprocessBrandedFood(food.branded_food)
       : null;
@@ -252,7 +161,7 @@ export function useMealTracking() {
           );
           return {
             id: meal.id,
-            mealName: meal.meal_name,
+            name: meal.meal_name,
             collapsed: meal.collapsed ?? false,
             editableIngredients: sortedFoods.map(dbFoodToEditableItem),
           };
@@ -339,7 +248,7 @@ export function useMealTracking() {
           (ing) => ing.rawText?.trim() && ing.foodNameId,
         );
 
-        if (validIngredients.length === 0 && !meal.mealName.trim()) {
+        if (validIngredients.length === 0 && !meal.name.trim()) {
           continue; // Skip completely empty meals
         }
 
@@ -348,10 +257,11 @@ export function useMealTracking() {
           .from('tracked_meals')
           .insert({
             user_id: user.value.id,
-            meal_name: meal.mealName || 'Untitled Meal',
+            meal_name: meal.name || 'Untitled Meal',
             meal_date: formatDate(selectedDate.value),
             collapsed: meal.collapsed,
             meal_order: mealIndex,
+            uses_recipe_id: meal.recipe_id ?? null,
             ...getMealNutrition(meal!),
           })
           .select()
@@ -413,17 +323,9 @@ export function useMealTracking() {
     lastSavedAt,
     hasUnsavedChanges,
 
-    // Input refs
-    inputRefs,
-    setInputRef,
-    focusNextInput,
-
     // Meal operations
     addMeal,
     addMealFromRecipe,
-    removeMeal,
-    deleteIngredient,
-    ensureOneEmptyInput,
 
     // Persistence
     loadMeals,

@@ -19,18 +19,18 @@
         v-if="isOpen"
         ref="panelRef"
         :class="style"
-        class="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 w-full z-99 overflow-hidden animated-button shadow-md"
+        class="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 w-full z-99 overflow-hidden shadow-sm rounded-3xl"
       >
         <ul class="">
           <li v-for="choice in choices" class="cursor-pointer">
             <button
-              class="flex w-full h-full items-center justify-between p-2"
+              class="w-full flex items-center justify-between p-2 animated-button hover:bg-secondary/60"
               @click="
                 emit('update:modelValue', choice);
                 isOpen = false;
               "
             >
-              <span class="">{{ choice.displayName }}</span>
+              <span class="text-left">{{ choice.displayName }}</span>
               <IconCheck
                 class="w-4"
                 v-if="modelValue.displayName == choice.displayName"

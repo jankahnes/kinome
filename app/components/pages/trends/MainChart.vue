@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <div class="relative">
+        <div class="relative -mx-3">
             <ClientOnly>
                 <apexchart type="line" height="300" :options="chartOptions" :series="chartSeries" />
                 <template #fallback>

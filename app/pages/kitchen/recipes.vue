@@ -2,10 +2,13 @@
   <div class="">
     <div class="py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl">
       <div class="flex justify-between items-end gap-6">
-        <div class="ai-ring rounded-2xl p-0.5">
-          <input type="text" :placeholder="'Describe what you\'re looking for…'"
-            class="flex-grow focus:outline-none py-2 min-w-0! rounded-[14px] px-4 bg-primary-10" v-model="searchQuery"
-            @blur="handleSearchBlur" @keyup.enter="refresh(true)" />
+        <div class="ai-ring rounded-2xl p-px flex items-center">
+          <div class="flex items-center rounded-[15px] px-2 bg-primary-10">
+            <IconSearch class="w-5 text-gray-400" />
+            <input type="text" :placeholder="'Describe what you\'re looking for…'" v-model="searchQuery"
+              @keyup.enter="refresh(true)" @blur="handleSearchBlur"
+              class="flex-grow focus:outline-none min-w-0! p-2" />
+          </div>
         </div>
         <span class="text-gray-500 text-sm text-nowrap">{{ totalCount }} Results</span>
       </div>

@@ -79,6 +79,9 @@ export default class NutritionEngine {
   report: any = {};
   cumulativeFields = Object.keys(alphaFunctions) as cumulativeKeys[];
 
+  tempNova: 1 | 2 | 3 | 4 | null = null;
+  tempSidx: number | null = null;
+
   UNUSUAL_KCAL_THRESHOLD = 2000;
   MOVER_DISPLAY_LIMIT = 3; // Max movers to display per category
   MOVER_THRESHOLD = 0.04; // Minimum 4% change to display
@@ -195,6 +198,7 @@ export default class NutritionEngine {
   }
 
   async computeRecipe(recipe: ComputableRecipe) {
+    this.tempSidx = recipe?.sidx;
     this.isFood = false;
     if (!recipe.serves) {
       console.error('WARNING: Recipe has no serves, setting to 1');
@@ -286,6 +290,8 @@ export default class NutritionEngine {
 
   async computeFood(food: Food) {
     this.isFood = true;
+    this.tempSidx = food.food.sidx;
+    this.tempNova = food.food.nova;
     const foodAsRecipe: any = {
       title: food.name,
       user_id: null,
@@ -783,11 +789,11 @@ export default class NutritionEngine {
     );
 
     const ed = this.getED();
-    const sidx = await this.getSIDX(water);
-    const satiety =
-      sidx == null
-        ? (this.recipe.sidx ?? Math.min(ed, 80))
-        : 0.5 * ed + 0.5 * sidx;
+    let sidx = await this.getSIDX(water);
+    if (sidx == null) {
+      sidx = this.tempSidx;
+    }
+    const satiety = sidx == null ? Math.min(ed, 80) : 0.5 * ed + 0.5 * sidx;
     const mnidx = this.getMNIDX();
     const fiber_score = this.getFiberScore();
     const protein_score = this.getProteinScoreOvr();
@@ -1173,12 +1179,15 @@ export default class NutritionEngine {
 
     if (this.logToReport) {
       let percentContributedFromNaturalSources = 0;
-      if (this.logToReport && this.report.contributors.sugar) {
+      if (this.report?.contributors?.sugar) {
         for (const contributor of this.report.contributors.sugar) {
           if ((contributor?.processingLevel ?? 10) <= 2) {
             percentContributedFromNaturalSources += contributor.value;
           }
         }
+      } else if (this.isFood) {
+        percentContributedFromNaturalSources =
+          (this.tempNova ?? 10) <= 2 ? 100 : 0;
       }
       const percentOfKcal =
         (this.recipe.sugar.per100 * 4) / (this.recipe.kcal.per100 + 1e-6);

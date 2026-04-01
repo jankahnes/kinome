@@ -17,7 +17,7 @@ export default defineEventHandler(async () => {
   while (hasMoreRecipes) {
     const { data: recipes, error } = await supabase
       .from('recipes')
-      .select('id, title, created_at, picture')
+      .select('id, title, picture')
       .eq('visibility', 'PUBLIC')
       .range(recipeOffset, recipeOffset + recipeBatchSize - 1);
 
@@ -40,7 +40,7 @@ export default defineEventHandler(async () => {
           .replace(/-+$/, '');
         const urlEntry: any = {
           loc: `/recipe/${recipe.id}-${slug}`,
-          lastmod: recipe.created_at,
+          lastmod: '2026-04-01',
           changefreq: 'weekly',
           priority: 0.8,
         };
@@ -71,7 +71,7 @@ export default defineEventHandler(async () => {
   while (hasMoreFoods) {
     const { data: foods, error } = await supabase
       .from('food_names')
-      .select('id, name, created_at')
+      .select('id, name')
       .eq('is_primary', true)
       .range(foodOffset, foodOffset + foodBatchSize - 1);
 
@@ -94,7 +94,7 @@ export default defineEventHandler(async () => {
           .replace(/-+$/, '');
         urls.push({
           loc: `/foods/${food.id}-${slug}`,
-          lastmod: food.created_at,
+          lastmod: '2026-04-01',
           changefreq: 'monthly',
           priority: 0.6,
         });

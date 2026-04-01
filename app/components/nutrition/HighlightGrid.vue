@@ -15,14 +15,14 @@
           class="animated-button bg-secondary rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
           @click="$emit('viewFullNutrition')"
         >
-          <IconTag class="w-5" />
+          <IconApple class="w-5" />
           <span>View Full Nutrition</span>
         </button>
         <button
           class="animated-button bg-secondary rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
           @click="$emit('viewFullAnalysis')"
         >
-          <IconApple class="w-5" />
+          <IconFileChartColumn class="w-5" />
           <span>View Full Analysis</span>
         </button>
       </div>

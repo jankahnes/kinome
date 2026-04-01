@@ -10,10 +10,10 @@
     <div class="justify-between items-center gap-6 hidden md:flex">
       <div class="flex gap-2 flex-1 items-center">
         <div class="ai-ring rounded-2xl p-px flex items-center">
-          <div class="flex items-center py-2 rounded-[15px] px-2 bg-primary-10">
+          <div class="flex items-center rounded-[15px] px-2 bg-primary-10">
             <IconSearch class="w-5 text-gray-400" />
             <input type="text" :placeholder="'Describe what you\'re looking for…'" v-model="searchQuery"
-              @keyup.enter="handleSearch" @blur="handleSearch" class="flex-grow focus:outline-none  min-w-0! px-2" />
+              @keyup.enter="handleSearch" @blur="handleSearch" class="flex-grow focus:outline-none min-w-0! p-2" />
           </div>
         </div>
         <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10 px-3 py-2 shrink-0">
@@ -57,7 +57,7 @@
         <span class="text-2xl">{{ category.icon }}</span>
         <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{
           category.name
-          }}</span>
+        }}</span>
       </div>
     </BlocksCarousel>
 
@@ -98,9 +98,9 @@
             ? 'desktop-0-0'
             : 'desktop-' + (index - 1) + '-' + recipe.id
             " class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110" :ref="(el) => {
-            if (el) desktopCards[index] = el;
-          }
-            " />
+              if (el) desktopCards[index] = el;
+            }
+              " />
       </div>
       <div class="flex mt-6 flex-wrap gap-8 items-stretch">
         <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
@@ -225,11 +225,6 @@ const categories = ref([
     name: 'Breakfast',
     icon: '🥐',
     tag: 201,
-  },
-  {
-    name: 'Lunch',
-    icon: '🍔',
-    tag: 205,
   },
   {
     name: 'Dinner',

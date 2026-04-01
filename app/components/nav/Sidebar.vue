@@ -23,14 +23,14 @@
                 auth.user?.username }}</span>
             </div>
           </NuxtLink>
-          <div class="flex gap-3 transition-all duration-300" v-else>
-            <Avatar :user="auth.user" class="rounded-full w-18" :placeholder="!auth.profileFetched"
+          <div class="flex gap-3 transition-all duration-300 pr-2" v-else>
+            <Avatar :user="auth.user" class="rounded-full w-14" :placeholder="!auth.profileFetched"
               :ring="focusedIndex === 0 && sidebarNavigationActive" @click="onClickLink(accountLink)" />
             <Transition name="fade" mode="out-in">
-              <Skeleton v-if="!auth.profileFetched" class="rounded-4xl w-2/3 h-8" />
+              <Skeleton v-if="!auth.profileFetched" class="rounded-3xl w-26 h-8 self-center" />
               <span class="text-xl font-bold text-wrap tracking-normal leading-none transition-all duration-300"
                 :class="{ 'text-3xl!': expanded }" v-else-if="auth.isUser()">{{ auth.user!.username }}</span>
-              <div class="flex flex-col rounded-xl overflow-hidden" v-else>
+              <div class="flex flex-col rounded-2xl overflow-hidden" v-else>
                 <NuxtLink to="/login" @click="onClickLink('/login')"
                   class="animated-button rounded-none! bg-primary-100/70 text-gray-800 font-bold tracking-tight flex items-center justify-center px-5 flex-1">
                   Login</NuxtLink>
@@ -74,7 +74,7 @@
               'ring-2 ring-primary-500 ring-offset-2':
                 focusedIndex === 4 && sidebarNavigationActive,
             }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/tracking')">
-            <IconChartLine class="w-6 h-6" />
+            <IconNotebookPen class="w-6 h-6" />
             <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Meal
               tracking</span>
           </NuxtLink>

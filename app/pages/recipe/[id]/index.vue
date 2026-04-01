@@ -1,218 +1,231 @@
 <template>
-  <Transition name="fade">
-    <div class="flex flex-col items-center lg:ml-1 mb-30" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
-      <NuxtImg class="w-full h-64 object-cover rounded-b-4xl object-top"
-        :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood-2.webp" alt="Light wooden background" />
-      <div
-        class="hidden xl:flex absolute top-60 -translate-y-full right-4 bg-white/30 z-10 rounded-4xl items-center justify-center py-1 px-4"
-        :class="{ 'top-22!': !recipeStore.recipe?.picture }">
-        <p class="text-lg flex items-center gap-2 font-bold" v-if="displayType === 'cuisine'">
-          <template v-if="getCuisineDescription(recipeStore.recipe?.collection ?? '')">
-            <span class="rounded-md overflow-hidden flex items-center justify-center" v-for="flag in getCuisineDescription(
-              recipeStore.recipe?.collection ?? ''
-            )?.flags" :key="flag">
-              <img :src="`/flags/${flag}.svg`" :alt="flag" class="h-5 inline-block" />
-            </span>
-          </template>
-          {{ capitalize(recipeStore.recipe?.collection?.split('-')[1] ?? '') }}
-        </p>
-        <p class="text-base flex items-center gap-2" v-if="displayType === 'website'">
-          <IconGlobe class="w-4 h-4" />
-          Imported from {{ capitalize(websiteName) }}
-        </p>
-        <a class="text-base flex items-center gap-2 cursor-pointer" v-if="displayType === 'creator'"
-          :href="recipeStore.recipe?.source ?? ''" target="_blank">
-          <IconVideo class="w-4 h-4" />
-          Created by {{ recipeStore.recipe?.original_creator_channel_name }}
-        </a>
-        <p class="text-lg flex items-center gap-2" v-if="displayType === 'user'">
-          <Avatar :user="recipeStore.recipe?.user!" class="w-8 h-8" />
-          <span class="text-lg font-semibold leading-none">{{
-            recipeStore.recipe?.user?.username
-          }}</span>
-        </p>
-      </div>
-      <NuxtImg v-if="recipeStore.recipe?.picture"
-        class="h-82 -mt-60 shadow-[#00000034] [filter:drop-shadow(10px_10px_30px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
-        :src="recipeStore.recipe?.picture" :alt="recipeStore.recipe?.title ?? 'Recipe picture'" />
-      <!-- Central overview -->
-      <div class="max-w-[800px] flex flex-col items-center text-center mx-2 lg:mx-8 mt-2"
-        :class="{ 'mt-8!': !recipeStore.recipe?.picture }">
-        <h1 class="text-5xl xl:text-6xl font-bold tracking-tighter text-balance">
-          {{ recipeStore.recipe?.title }}
-        </h1>
-        <p class="text-lg text-gray-600 mt-2 leading-normal hidden xl:block">
-          {{ recipeStore.recipe?.description }}
-        </p>
-        <p class="text-lg text-gray-600 mt-2 leading-normal block xl:hidden" v-if="mobileDescriptionExpanded"
-          @click="mobileDescriptionExpanded = false">
-          {{ recipeStore.recipe?.description }}
-        </p>
-        <p class="text-lg text-gray-600 mt-2 leading-normal block xl:hidden" v-else
-          @click="mobileDescriptionExpanded = true">
-          {{ mobileDescription }}...
-          <span class="text-gray-500 text-sm cursor-pointer font-bold">Show more
+  <div class="flex flex-col items-center lg:ml-1 mb-30" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
+    <NuxtImg class="w-full h-64 object-cover rounded-br-4xl object-top"
+      :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.png" alt="Light wooden background" />
+    <div
+      class="hidden xl:flex absolute top-60 -translate-y-full right-4 bg-white/30 z-10 rounded-4xl items-center justify-center py-1 px-3 overflow-hidden"
+      :class="{ 'top-22!': !recipeStore.recipe?.picture }">
+      <p class="text-lg flex items-center gap-2 font-bold" v-if="displayType === 'cuisine'">
+        <template v-if="getCuisineDescription(recipeStore.recipe?.collection ?? '')">
+          <span class="rounded-md overflow-hidden flex items-center justify-center" v-for="flag in getCuisineDescription(
+            recipeStore.recipe?.collection ?? ''
+          )?.flags" :key="flag">
+            <img :src="`/flags/${flag}.svg`" :alt="flag" class="h-5 inline-block" />
           </span>
-        </p>
-        <p class="flex gap-2 mt-2">
-          <button
-            class="animated-button bg-primary text-white flex-1 flex justify-center items-center gap-2 py-0.5 rounded-4xl! text-lg font-bold px-4">
-            <IconRocket class="w-6" :size="30" />
-            Start Cooking
-          </button>
-          <button class="animated-button flex justify-center items-center gap-2 p-1 rounded-4xl! text-slate-600"
-            v-if="true">
-            <IconNotebookPen class="w-5.5" />
-          </button>
-          <button
-            class="animated-button flex justify-center items-center gap-0.5 pt-0.5 px-3 rounded-4xl! bg-green-200 text-green-800"
-            v-else>
-            <IconNotebookPen class="w-5.5" />
-            <div class="flex flex-col items-start ml-2">
-              <span class="text-lg leading-none">Track</span>
-              <div class="flex items-center gap-1 leading-none text-xs -mt-1.5">
-                <span class="leading-none ml-px">Fits your Diet</span>
-                <IconCheck class="w-4 leading-none" />
-              </div>
-            </div>
-          </button>
-          <button class="animated-button flex justify-center items-center gap-2 p-1 rounded-4xl! text-slate-600">
-            <IconBookmark class="w-6" />
-          </button>
-        </p>
-        <div class="flex items-center gap-3 mt-4" v-if="recipeStore.recipe?.rating != null">
-          <div class="flex items-center gap-2">
-            <FormsRatingField :model-value="recipeStore.recipe?.rating" :star-width="26" :star-height="26"
-              :spacing="1.5" :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`"
-              class="text-primary" />
-            <span class="text-lg font-semibold leading-none mt-0.5">{{
-              recipeStore.recipe?.rating?.toFixed(1)
-            }}</span>
-          </div>
-          <template v-if="getTotalTime()">
-            <span class="text-lg text-gray-600">•</span>
-            <span class="text-base md:text-lg text-gray-600 leading-none">⏳{{ getTotalTime() }}</span>
-          </template>
-          <template v-if="recipeStore.recipe?.difficulty">
-            <span class="text-lg text-gray-600">•</span>
-            <span class="text-base md:text-lg text-gray-600 leading-none">👨‍🍳{{
-              capitalize(recipeStore.recipe?.difficulty) }}</span>
-          </template>
-        </div>
-
-        <div v-if="top7Tags.length > 0"
-          class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-sm mt-2 justify-center">
-          <div class="flex items-center justify-center text-nowrap bg-slate-200/60 px-3 py-1 rounded-4xl"
-            v-for="(tag, index) in top7Tags" :key="index">
-            {{ tag?.name }}
-          </div>
-        </div>
-      </div>
-      <div class="max-w-[1200px] flex-col xl:flex-row flex gap-10 md:mt-14 mx-2 lg:mx-8 xl:items-start">
-        <div class="contents xl:flex flex-col gap-8 flex-3">
-          <PagesRecipeInstructionContainer :instructions="recipeStore.recipe?.instructions"
-            :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize" class="hidden xl:block"
-            :hideHeader="false" :formalizationLoading="job?.step === 'formalizing_instructions'"
-            ref="instructionListRef">
-          </PagesRecipeInstructionContainer>
-          <div class="xl:hidden order-1">
-            <div class="w-0 h-0" ref="mobileTabTarget"></div>
-            <div
-              class="flex gap-4 justify-between sticky top-0 bg-main p-4 rounded-b-4xl z-10 select-none cursor-pointer">
-              <h2 class="text-3xl 2xs:text-4xl font-bold tracking-tighter flex-1" @click="
-                mobileTab = 'ingredients';
-              scrollIntoView(mobileTabTarget);
-              " :class="mobileTab === 'ingredients' ? '' : 'text-gray-300'">
-                Ingredients
-              </h2>
-              <h2 class="text-3xl 2xs:text-4xl font-bold tracking-tighter" @click="
-                mobileTab = 'method';
-              scrollIntoView(mobileTabTarget);
-              " :class="mobileTab === 'method' ? '' : 'text-gray-300'">
-                Method
-              </h2>
-            </div>
-            <PagesRecipeInstructionContainer v-if="mobileTab === 'method'"
-              :instructions="recipeStore.recipe?.instructions" :ingredients="recipeStore.recipe?.ingredients"
-              :servingSize="servingSize" :hideHeader="true"
-              :formalizationLoading="job?.step === 'formalizing_instructions'" />
-            <PagesRecipeIngredientList v-if="mobileTab === 'ingredients'" :addedInfo="{
-              addedFat: recipeStore.recipe?.added_fat ?? 0,
-              addedSalt: recipeStore.recipe?.added_salt ?? 0,
-              batchSize: recipeStore.recipe?.batch_size ?? 1,
-            }" :ingredients="recipeStore.recipe?.ingredients"
-              :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
-              :batchSize="recipeStore.recipe?.batch_size ?? undefined" :recipeId="recipeStore.recipe?.id"
-              v-model:servingSize="servingSize" :formalizationLoading="job?.step === 'formalizing_ingredients'"
-              :price="recipeStore.recipe?.price ?? 0" :hideHeader="true" :metaPills="metaPills" />
-          </div>
-          <div class="space-y-2 order-4 xl:order-none" v-if="recipeStore.recipe?.kcal">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-              Health & Nutrition
-            </h2>
-            <NutritionHighlightGrid :nutrition-data="recipeStore.recipe" type="full" @viewFullNutrition="
-              contextMode = 'nutrition';
-            contextModalOpen = true;
-            " @viewFullAnalysis="
-                contextMode = 'health';
-              contextModalOpen = true;
-              " />
-          </div>
-          <div class="space-y-2 order-5 xl:order-none" v-if="auth.isAdmin()">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-              Publish
-            </h2>
-            <PagesRecipePublishChecklist :recipe="recipeStore.recipe!" :refresh="async (r, f) => { }" />
-          </div>
-          <div class="space-y-2 order-5 xl:order-none">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-              {{
-                recipeStore.recipe?.comments?.length
-                  ? 'What others say'
-                  : 'Comments'
-              }}
-            </h2>
-            <PagesRecipeCommentSection :id="recipeStore.recipe?.id" />
-          </div>
-        </div>
-        <div class="contents xl:flex flex-col gap-8 flex-2" ref="rightRailRef" :style="stickyStyle" :class="{
-          'xl:sticky xl:top-4': shouldStick,
-        }">
-          <div>
-            <PagesRecipeIngredientList :addedInfo="{
-              addedFat: recipeStore.recipe?.added_fat ?? 0,
-              addedSalt: recipeStore.recipe?.added_salt ?? 0,
-              batchSize: recipeStore.recipe?.batch_size ?? 1,
-            }" :ingredients="recipeStore.recipe?.ingredients"
-              :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
-              :batchSize="recipeStore.recipe?.batch_size ?? undefined" :recipeId="recipeStore.recipe?.id"
-              v-model:servingSize="servingSize" class="hidden xl:block"
-              :formalizationLoading="job?.step === 'formalizing_ingredients'" :price="recipeStore.recipe?.price ?? 0"
-              ref="ingredientListRef" :metaPills="metaPills"></PagesRecipeIngredientList>
-          </div>
-          <div class="space-y-2 order-6 xl:order-none">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-              Similar Recipes
-            </h2>
-            <div class="flex flex-col gap-4">
-              <RecipeCardHorizontal v-for="recipe in similarRecipes" :key="recipe.id" :recipe="recipe" class="-ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <BlocksResponsiveInfo v-if="recipeStore.recipe?.kcal && recipeStore.recipe?.hidx" v-model="contextModalOpen"
-        :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`">
-        <div v-if="contextMode === 'nutrition'" class="m-4">
-          <h2 class="text-4xl font-bold tracking-tighter mb-8">
-            Full Nutrition
-          </h2>
-          <FoodNutritionFacts :computable="recipeStore.recipe" />
-          <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" />
-        </div>
-        <PagesReport v-if="contextMode === 'health'" :id="recipeStore.recipe?.id?.toString() ?? ''" :isFood="false" />
-      </BlocksResponsiveInfo>
+        </template>
+        {{ capitalize(recipeStore.recipe?.collection?.split('-')[1] ?? '') }}
+      </p>
+      <p class="text-base flex items-center gap-2" v-if="displayType === 'website'">
+        <IconGlobe class="w-4 h-4" />
+        Imported from {{ capitalize(websiteName) }}
+      </p>
+      <a class="text-base flex items-center gap-2 cursor-pointer" v-if="displayType === 'creator'"
+        :href="recipeStore.recipe?.source ?? ''" target="_blank">
+        <IconVideo class="w-4 h-4" />
+        Created by {{ recipeStore.recipe?.original_creator_channel_name }}
+      </a>
+      <p class="text-lg flex items-center gap-2" v-if="displayType === 'user'">
+        <Avatar :user="recipeStore.recipe?.user!" class="w-10 -my-1 -ml-3" />
+        <span class="text-lg font-semibold leading-none">{{
+          recipeStore.recipe?.user?.username
+        }}</span>
+      </p>
+      <NuxtLink :to="`/recipe/new?editCurrent=true`" class="hidden items-center gap-2 cursor-pointer">
+        <IconPencil class="w-4 h-4" />
+      </NuxtLink>
     </div>
-  </Transition>
+    <NuxtImg v-if="recipeStore.recipe?.picture"
+      class="h-82 -mt-60 shadow-[#00000034] [filter:drop-shadow(10px_10px_30px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
+      :src="recipeStore.recipe?.picture" :alt="recipeStore.recipe?.title ?? 'Recipe picture'" />
+    <!-- Central overview -->
+    <div class="max-w-[800px] flex flex-col items-center text-center mx-2 lg:mx-8 mt-2"
+      :class="{ 'mt-8!': !recipeStore.recipe?.picture }">
+      <h1 class="text-5xl xl:text-6xl font-bold tracking-tighter text-balance">
+        {{ recipeStore.recipe?.title }}
+      </h1>
+      <p class="text-lg text-gray-600 mt-2 leading-normal hidden xl:block">
+        {{ recipeStore.recipe?.description }}
+      </p>
+      <p class="text-lg text-gray-600 mt-2 leading-normal block xl:hidden" v-if="mobileDescriptionExpanded"
+        @click="mobileDescriptionExpanded = false">
+        {{ recipeStore.recipe?.description }}
+      </p>
+      <p class="text-lg text-gray-600 mt-2 leading-normal block xl:hidden" v-else
+        @click="mobileDescriptionExpanded = true">
+        {{ mobileDescription }}...
+        <span class="text-gray-500 text-sm cursor-pointer font-bold">Show more
+        </span>
+      </p>
+      <p class="flex gap-2 mt-2">
+        <button
+          class="animated-button bg-primary text-white flex-1 flex justify-center items-center gap-2 py-0.5 rounded-4xl! text-lg font-bold px-4"
+          @click="cookModeOpen = true">
+          <IconRocket class="w-6" :size="30" />
+          Start Cooking
+        </button>
+        <button v-if="!trackingAdded"
+          class="animated-button flex justify-center items-center gap-2 p-1 rounded-4xl! text-slate-600"
+          :class="{ 'opacity-60 cursor-not-allowed': trackingLoading }" :disabled="trackingLoading"
+          title="Track this meal" @click="trackFromRecipePage">
+          <IconLoaderCircle v-if="trackingLoading" class="w-5.5 animate-spin" />
+          <IconNotebookPen v-else class="w-5.5" />
+        </button>
+        <button v-else
+          class="animated-button flex justify-center items-center gap-0.5 pt-0.5 px-3 rounded-4xl! bg-green-100 text-green-800"
+          disabled>
+          <IconCheck class="w-5" />
+          <div class="flex flex-col items-start ml-2">
+            <span class="text-lg leading-none">Tracked</span>
+            <span class="leading-none text-[11px] -mt-0.5">Added to today</span>
+          </div>
+        </button>
+        <button class="animated-button flex justify-center items-center gap-2 p-1 rounded-4xl! text-slate-600">
+          <IconBookmark class="w-6" />
+        </button>
+      </p>
+      <div class="flex items-center gap-3 mt-4" v-if="recipeStore.recipe?.rating != null">
+        <div class="flex items-center gap-2">
+          <FormsRatingField :model-value="recipeStore.recipe?.rating" :star-width="26" :star-height="26" :spacing="1.5"
+            :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`" class="text-primary" />
+          <span class="text-lg font-semibold leading-none mt-0.5">{{
+            recipeStore.recipe?.rating?.toFixed(1)
+          }}</span>
+        </div>
+        <template v-if="getTotalTime()">
+          <span class="text-lg text-gray-600">•</span>
+          <span class="text-base md:text-lg text-gray-600 leading-none">⏳{{ getTotalTime() }}</span>
+        </template>
+        <template v-if="recipeStore.recipe?.difficulty">
+          <span class="text-lg text-gray-600">•</span>
+          <span class="text-base md:text-lg text-gray-600 leading-none">👨‍🍳{{
+            capitalize(recipeStore.recipe?.difficulty) }}</span>
+        </template>
+      </div>
+
+      <div v-if="top7Tags.length > 0" class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-sm mt-2 justify-center">
+        <div
+          class="flex items-center justify-center text-nowrap bg-slate-200/50 px-2 py-1 rounded-4xl gap-2 leading-none"
+          :class="specialTags.includes(tag?.id ?? 0) || tag?.id === 4 ? 'bg-slate-200/70!' : ''"
+          v-for="(tag, index) in top7Tags" :key="index">
+          <img :src="`/${tag?.name}.webp`" :alt="tag?.name" class="h-4" v-if="specialTags.includes(tag?.id ?? 0)" />
+          <IconDollarSign class="h-4 -mx-2" v-else-if="tag?.id === 4" />
+          {{ tag?.name }}
+        </div>
+      </div>
+    </div>
+    <div class="max-w-[1200px] flex-col xl:flex-row flex gap-10 md:mt-14 mx-2 lg:mx-8 xl:items-start">
+      <div class="contents xl:flex flex-col gap-8 flex-3">
+        <PagesRecipeCookSteps :fullInstructions="recipeStore.recipe?.full_instructions ?? recipeStore.recipe?.instructions?.map(i => ({
+          formatted_text: i,
+        })) ?? []"
+          :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize"
+          :formalizationLoading="job?.step === 'formalizing_instructions'" v-model:markedIngredients="markedIngredients"
+          class="hidden xl:block" ref="instructionListRef"/>
+        <div class="xl:hidden order-1">
+          <div class="w-0 h-0" ref="mobileTabTarget"></div>
+          <div
+            class="flex gap-4 justify-between sticky top-0 bg-main p-4 rounded-b-4xl z-10 select-none cursor-pointer">
+            <h2 class="text-3xl 2xs:text-4xl font-bold tracking-tighter flex-1" @click="
+              mobileTab = 'ingredients';
+            scrollIntoView(mobileTabTarget);
+            " :class="mobileTab === 'ingredients' ? '' : 'text-gray-300'">
+              Ingredients
+            </h2>
+            <h2 class="text-3xl 2xs:text-4xl font-bold tracking-tighter" @click="
+              mobileTab = 'method';
+            scrollIntoView(mobileTabTarget);
+            " :class="mobileTab === 'method' ? '' : 'text-gray-300'">
+              Method
+            </h2>
+          </div>
+          <PagesRecipeCookSteps v-if="mobileTab === 'method'" v-model:markedIngredients="markedIngredients"
+            :fullInstructions="recipeStore.recipe?.full_instructions ?? recipeStore.recipe?.instructions?.map(i => ({
+              formatted_text: i,
+            })) ?? []"
+            :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize"
+            :formalizationLoading="job?.step === 'formalizing_instructions'" :hideHeader="true" />
+          <PagesRecipeIngredientList v-if="mobileTab === 'ingredients'" :addedInfo="{
+            addedFat: recipeStore.recipe?.added_fat ?? 0,
+            addedSalt: recipeStore.recipe?.added_salt ?? 0,
+            batchSize: recipeStore.recipe?.batch_size ?? 1,
+          }" :ingredients="recipeStore.recipe?.ingredients"
+            :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
+            :batchSize="recipeStore.recipe?.batch_size ?? undefined" :recipeId="recipeStore.recipe?.id"
+            v-model:servingSize="servingSize" :formalizationLoading="job?.step === 'formalizing_ingredients'"
+            :price="recipeStore.recipe?.price ?? 0" :hideHeader="true" :metaPills="metaPills" />
+        </div>
+        <div class="space-y-2 order-4 xl:order-none" v-if="recipeStore.recipe?.kcal">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Health & Nutrition
+          </h2>
+          <NutritionHighlightGrid :nutrition-data="recipeStore.recipe" type="full" @viewFullNutrition="
+            contextMode = 'nutrition';
+          contextModalOpen = true;
+          " @viewFullAnalysis="
+            contextMode = 'health';
+          contextModalOpen = true;
+          " />
+        </div>
+        <div class="space-y-2 order-5 xl:order-none" v-if="auth.isAdmin()">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Publish
+          </h2>
+          <PagesRecipePublishChecklist :recipe="recipeStore.recipe!" :refresh="async (r, f) => { }" />
+        </div>
+        <div class="space-y-2 order-5 xl:order-none">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            {{
+              recipeStore.recipe?.comments?.length
+                ? 'What others say'
+                : 'Comments'
+            }}
+          </h2>
+          <PagesRecipeCommentSection :id="recipeStore.recipe?.id" />
+        </div>
+      </div>
+      <div class="contents xl:flex flex-col gap-8 flex-2" ref="rightRailRef" :style="stickyStyle" :class="{
+        'xl:sticky xl:top-4': shouldStick,
+      }">
+        <div>
+          <PagesRecipeIngredientList :addedInfo="{
+            addedFat: recipeStore.recipe?.added_fat ?? 0,
+            addedSalt: recipeStore.recipe?.added_salt ?? 0,
+            batchSize: recipeStore.recipe?.batch_size ?? 1,
+          }" :ingredients="recipeStore.recipe?.ingredients"
+            :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
+            :batchSize="recipeStore.recipe?.batch_size ?? undefined" :recipeId="recipeStore.recipe?.id"
+            v-model:servingSize="servingSize" class="hidden xl:block"
+            :formalizationLoading="job?.step === 'formalizing_ingredients'" :price="recipeStore.recipe?.price ?? 0"
+            ref="ingredientListRef" :metaPills="metaPills" :markedIngredients="markedIngredients">
+          </PagesRecipeIngredientList>
+        </div>
+        <div class="space-y-2 order-6 xl:order-none">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            Similar Recipes
+          </h2>
+          <div class="flex flex-col gap-4">
+            <RecipeCardHorizontal v-for="recipe in similarRecipes" :key="recipe.id" :recipe="recipe" class="-ml-2" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <PagesRecipeCookMode v-model="cookModeOpen" :steps="recipeStore.recipe?.full_instructions ?? recipeStore.recipe?.instructions?.map(i => ({
+      formatted_text: i,
+    })) ?? []" :ingredients="recipeStore.recipe?.ingredients" :title="recipeStore.recipe?.title"
+      :servingSize="servingSize" :recipeId="recipeStore.recipe?.id"
+      :totalTime="recipeStore.recipe?.total_time_mins ?? 0" :equipment="recipeStore.recipe?.equipment ?? []" />
+    <BlocksResponsiveInfo v-if="recipeStore.recipe?.kcal && recipeStore.recipe?.hidx" v-model="contextModalOpen"
+      :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`">
+      <div v-if="contextMode === 'nutrition'" class="m-4">
+        <h2 class="text-4xl font-bold tracking-tighter mb-8">
+          Full Nutrition
+        </h2>
+        <FoodNutritionFacts :computable="recipeStore.recipe" />
+        <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" />
+      </div>
+      <PagesReport v-if="contextMode === 'health'" :id="recipeStore.recipe?.id?.toString() ?? ''" :isFood="false" />
+    </BlocksResponsiveInfo>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -235,6 +248,35 @@ const mobileTabTarget = ref<HTMLElement | null>(null);
 
 const contextModalOpen = ref(false);
 const contextMode = ref<'nutrition' | 'health'>('nutrition');
+
+const markedIngredients = ref<number[]>([]);
+
+// Cook mode
+const cookModeOpen = ref(false);
+
+// Tracking from recipe page
+const { addMealFromRecipe, loadMeals, saveMeals, hasUnsavedChanges, selectedDate } =
+  useMealTracking();
+const trackingLoading = ref(false);
+const trackingAdded = ref(false);
+
+async function trackFromRecipePage() {
+  if (!id || trackingAdded.value) return;
+  trackingLoading.value = true;
+  try {
+    const today = new Date();
+    selectedDate.value = today;
+    await loadMeals(today);
+    await addMealFromRecipe(id);
+    hasUnsavedChanges.value = true;
+    await saveMeals();
+    trackingAdded.value = true;
+  } catch (e) {
+    console.error('Failed to track meal:', e);
+  } finally {
+    trackingLoading.value = false;
+  }
+}
 
 // Refs for sticky behavior
 const instructionListRef = ref<any>(null);
@@ -326,14 +368,26 @@ const id = Number(paramValue.split('-')[0]);
 
 const similarRecipes = ref<RecipeOverview[]>([]);
 
+const getBudgetDescription = (price: number): string => {
+  if (price >= 1) return `~$${Math.floor(price)}$ / serving`;
+  else return `~${formatMoney(Math.round(price * 10) / 10)} / serving`;
+}
+
 // Serving size state - managed at page level for both IngredientList and InstructionContainer
 const servingSize = ref(2); // Default to 2 servings
 
+const specialTags = [102, 103, 107, 112];
 const top7Tags = computed(() => {
   if (!recipeStore.recipe?.tags) return [];
-  const tags = recipeStore.recipe.tags.map((tag) => getTagByID(tag));
+  const tags = recipeStore.recipe.tags.map((tag) => getTagByID(tag)).filter((tag) => tag?.id !== 112);
   tags?.sort((a, b) => (b?.value ?? 0) - (a?.value ?? 0));
-  return tags?.slice(0, 7);
+  const budgetTag = tags.find((tag) => tag?.id === 4);
+  if (budgetTag) {
+    budgetTag.name = getBudgetDescription(recipeStore.recipe?.price ?? 0);
+  }
+  //extract special tags: vegan, vegetarian, gluten free, lactose free
+  if (tags.some((tag) => tag?.id === 102)) { return tags.filter((tag) => tag?.id !== 103).slice(0, 6); }
+  return tags.slice(0, 7);
 });
 
 const cuisines = ref([
@@ -472,7 +526,6 @@ watchEffect(async () => {
     if (recipeData.value.title && !paramValue.includes('-')) {
       navigateTo(getRecipeUrl(id, recipeData.value.title), { replace: true });
     }
-    console.log('recipeData.value.embedding', recipeStore.recipe?.embedding);
     similarRecipes.value = await getRecipeOverviews(supabase, {
       neq: { id },
       or: 'picture.not.eq.null,source_type.eq.MEDIA',
@@ -508,8 +561,90 @@ const description = computed(
     `${recipeStore.recipe?.title} recipe nutrition facts: ${recipeStore.recipe?.kcal} kcal/100g, Nutrition Quality: ${healthGrade.value}. Discover in-depth nutritional analyis.`
 );
 
+const jsonLd = computed(() => {
+  const recipe = recipeStore.recipe;
+  if (!recipe) return null;
+
+  const schema: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': 'Recipe',
+    name: recipe.title,
+    url: recipeUrl.value,
+    image: imageUrl.value,
+  };
+
+  if (recipe.description) schema.description = recipe.description;
+  if (recipe.created_at) schema.datePublished = recipe.created_at.split('T')[0];
+  if (recipe.total_time_mins) schema.totalTime = `PT${recipe.total_time_mins}M`;
+  if (recipe.batch_size) {
+    schema.recipeYield = `${recipe.batch_size} serving${recipe.batch_size !== 1 ? 's' : ''}`;
+  }
+
+  if (recipe.ingredients?.length) {
+    schema.recipeIngredient = recipe.ingredients.map(
+      (ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()
+    );
+  }
+
+  if (recipe.full_instructions?.length) {
+    schema.recipeInstructions = recipe.full_instructions.map((step: CookStep) => ({
+      '@type': 'HowToStep',
+      text: step.formatted_text,
+      ...(step.title ? { name: step.title } : {}),
+    }));
+  } else if (recipe.instructions?.length) {
+    schema.recipeInstructions = recipe.instructions.map((step: string) => ({
+      '@type': 'HowToStep',
+      text: step,
+    }));
+  }
+
+  if (recipe.kcal != null) {
+    const nutrition: Record<string, any> = {
+      '@type': 'NutritionInformation',
+      servingSize: '1 serving',
+      calories: `${Math.round(recipe.kcal)} kcal`,
+    };
+    if (recipe.protein != null) nutrition.proteinContent = `${recipe.protein.toFixed(1)} g`;
+    if (recipe.fat != null) nutrition.fatContent = `${recipe.fat.toFixed(1)} g`;
+    if (recipe.carbohydrates != null) nutrition.carbohydrateContent = `${recipe.carbohydrates.toFixed(1)} g`;
+    if (recipe.fiber != null) nutrition.fiberContent = `${recipe.fiber.toFixed(1)} g`;
+    if (recipe.sugar != null) nutrition.sugarContent = `${recipe.sugar.toFixed(1)} g`;
+    if (recipe.saturated_fat != null) nutrition.saturatedFatContent = `${recipe.saturated_fat.toFixed(1)} g`;
+    schema.nutrition = nutrition;
+  }
+
+  if (recipe.rating_count > 0) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: recipe.rating.toFixed(1),
+      ratingCount: recipe.rating_count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+
+  if (recipe.price != null) {
+    schema.estimatedCost = {
+      '@type': 'MonetaryAmount',
+      currency: 'EUR',
+      value: recipe.price.toFixed(2),
+    };
+  }
+
+  if (recipe.collection?.startsWith('traditional-')) {
+    const cuisineSlug = recipe.collection.slice('traditional-'.length);
+    schema.recipeCuisine = cuisineSlug.split('-').map((w: string) => capitalize(w)).join(' ');
+  }
+
+  return schema;
+});
+
 useHead(() => ({
   title: `${recipeStore.recipe?.title} Recipe - Method & Nutrition | Kinome`,
+  script: jsonLd.value
+    ? [{ type: 'application/ld+json', innerHTML: JSON.stringify(jsonLd.value) }]
+    : [],
   meta: [
     {
       name: 'description',
@@ -650,9 +785,33 @@ const deleteRecipe = async () => {
 };
 
 function getTotalTime() {
-  if (recipeStore.recipe?.total_time_mins) {
-    return `${recipeStore.recipe?.total_time_mins}min`;
+  const total = recipeStore.recipe?.total_time_mins;
+
+  if (total) {
+    let rounded;
+
+    if (total < 60) {
+      rounded = Math.floor(total / 5) * 5;
+    } else if (total < 120) {
+      rounded = Math.floor(total / 10) * 10;
+    } else {
+      rounded = Math.floor(total / 30) * 30;
+    }
+
+    rounded = Math.max(5, rounded);
+
+    const hours = Math.floor(rounded / 60);
+    const minutes = rounded % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    if (hours > 0) {
+      return `${hours}h`;
+    }
+    return `${minutes}min`;
   }
+
   if (recipeStore.recipe?.effort === 'LIGHT') {
     return '<20min';
   }
@@ -662,6 +821,7 @@ function getTotalTime() {
   if (recipeStore.recipe?.effort === 'HEAVY') {
     return '>60min';
   }
+
   return null;
 }
 
@@ -678,11 +838,23 @@ const metaPills = computed(() => {
   for (const generic of metaGenerics) {
     const hasGeneric = recipeStore.recipe.tags.includes(generic.value);
     pills.push({
-      text: hasGeneric ? generic.name : `Not ${generic.name}`,
-      class: hasGeneric ? 'bg-green-100' : 'bg-red-100',
+      text: hasGeneric ? generic.name : ((generic.name == "Gluten Free") ? "Contains Gluten" : `Not ${generic.name}`),
+      class: hasGeneric ? 'bg-green-100' : 'bg-red-50',
       icon: hasGeneric ? 'check' : 'x',
     });
   }
   return pills;
 });
 </script>
+
+<style>
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: transform 0.3s ease-out;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  transform: translateY(-100%);
+}
+</style>

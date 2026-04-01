@@ -1,33 +1,24 @@
 <template>
-  <div class="mb-20 m-4 lg:m-10 lg:ml-16" v-if="food">
+  <div class="my-8 mx-auto max-w-[1360px]" v-if="food">
     <p class="text-lg m-4">
-      <NuxtLink to="/" class="text-gray-500">Home</NuxtLink> >
-      <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> >
+      <NuxtLink to="/" class="text-gray-500">Home</NuxtLink> ›
+      <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> ›
       <span class="font-bold">{{ foodName }}</span>
     </p>
     <div class="flex flex-col 2xl:flex-row gap-6">
       <div class="contents xl:flex flex-col gap-6 lg:flex-1">
-        <div
-          class="main-card p-4 xl:pr-10 flex gap-4 xl:gap-8 flex-col xl:flex-row order-1 xl:order-none"
-        >
-          <div class="relative xl:basis-1/3">
-            <img
-              class="w-full h-full object-cover rounded-4xl"
-              src="/wood-2.webp"
-              :alt="foodName"
-            />
+
+        <div class="bg-primary-10/40 rounded-4xl main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-none xl:items-start">
+          <div class="relative xl:basis-1/5 h-40">
+            <img class="object-cover rounded-4xl h-full" src="/wood.png" :alt="foodName" />
 
             <div
-              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50 w-[45%] aspect-square flex items-center justify-center"
-            >
-              <img
-                :src="`/foods/${food?.visual_category ?? 'herb_fresh'}.webp`"
-                class="h-[60%] object-contain"
-                :alt="(food?.visual_category ?? 'herb_fresh') + ' illustration'"
-              />
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-10 h-[60%] aspect-square flex items-center justify-center">
+              <img :src="`/foods/${food?.visual_category ?? 'herb_fresh'}.webp`" class="h-[60%] object-contain"
+                :alt="(food?.visual_category ?? 'herb_fresh') + ' illustration'" />
             </div>
           </div>
-          <div class="flex-1 flex flex-col my-4 gap-4">
+          <div class="flex-1 flex flex-col gap-4">
             <div class="flex justify-between items-start">
               <div class="">
                 <h1 class="text-5xl font-bold">{{ foodName }}</h1>
@@ -35,14 +26,13 @@
                   {{ food?.aisle?.toUpperCase() || 'Food' }}
                 </p>
               </div>
-              <div
-                class="flex justify-center items-center w-15 h-15 rounded-2xl p-2"
+              <button class="flex justify-center items-center w-15 h-15 rounded-2xl p-2 shrink-0 hover:opacity-80 transition-opacity"
                 :class="gradeColors[getGrade(food?.hidx, 'ovr')]"
-              >
+                @click="openHealthReport">
                 <span class="text-3xl font-bold leading-none">{{
                   getGrade(food?.hidx, 'ovr')
                 }}</span>
-              </div>
+              </button>
             </div>
 
             <p v-if="food?.description" class="text-lg leading-snug">
@@ -51,10 +41,7 @@
                   ? food.description
                   : food.description.slice(0, 300) + '...'
               }}
-              <span
-                class="text-gray-500 text-sm cursor-pointer"
-                @click="mobileDescExpanded = !mobileDescExpanded"
-              >
+              <span class="text-gray-500 text-sm cursor-pointer" @click="mobileDescExpanded = !mobileDescExpanded">
                 {{ mobileDescExpanded ? 'Show less' : 'Show more' }}
               </span>
             </p>
@@ -64,134 +51,45 @@
             </div>
           </div>
         </div>
-        <div class="space-y-2 order-2 xl:order-none" v-if="food">
-          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-            Nutrition Highlights
-          </h2>
-          <NutritionHighlightGrid :nutrition-data="food" type="highlights" />
+        <div class="order-2 xl:order-none">
+          <NutritionOverviewCard mode="info" :nutrition="food" :portion-multiplier="portionMultiplier"
+            :dropdown-choices="dropdownChoices" v-model:selected-unit="selectedUnit"
+            @view-full-nutrition="contextMode = 'nutrition'; contextModalOpen = true" />
         </div>
-        <div class="space-y-2 order-3 xl:order-none">
-          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-            Nutrition Overview
-          </h2>
-          <div class="space-y-6 main-card p-6 order-2 2xl:order-none max-w-250">
-            <div class="flex gap-4 flex-col xl:flex-row">
-              <div class="flex flex-1 flex-col gap-6 justify-between">
-                <div class="relative self-start flex flex-col">
-                  <p class="text-lg">Portion Size</p>
-                  <FormsDropdown
-                    :choices="dropdownChoices"
-                    v-model="selectedUnit"
-                    class="min-w-60"
-                    :style="'bg-secondary'"
-                  />
-                </div>
-                <NutritionMacroCard
-                  :kcal="scaledFood?.kcal ?? 0"
-                  :carbohydrates="scaledFood?.carbohydrates ?? 0"
-                  :protein="scaledFood?.protein ?? 0"
-                  :fat="scaledFood?.fat ?? 0"
-                />
-                <div class="flex flex-col gap-2">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="animated-button bg-secondary rounded-4xl px-4 py-1 flex items-center gap-2"
-                    >
-                      <IconShoppingBag class="w-5" />
-                      <span>Shopping List</span>
-                    </button>
-                    <button
-                      class="animated-button bg-secondary rounded-4xl px-4 py-1 flex items-center gap-2"
-                    >
-                      <IconChartLine class="w-5" />
-                      <span>Track for today</span>
-                    </button>
-                  </div>
-                  <div class="flex gap-2 flex-wrap">
-                    <button
-                      class="animated-button bg-secondary rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
-                      @click="
-                        contextMode = 'nutrition';
-                        contextModalOpen = true;
-                      "
-                    >
-                      <IconTag class="w-5" />
-                      <span>View Full Nutrition</span>
-                    </button>
-                    <button
-                      class="animated-button bg-secondary rounded-4xl px-2 md:px-4 py-1 flex items-center gap-2"
-                      @click="
-                        contextMode = 'health';
-                        contextModalOpen = true;
-                      "
-                    >
-                      <IconApple class="w-5" />
-                      <span>View Full Analysis</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="w-px bg-secondary mx-6 hidden xl:block"></div>
-              <div class="flex flex-1 mt-4">
-                <FoodNutritionFacts
-                  :computable="food"
-                  :portionMultiplier="portionMultiplier"
-                  :referencingName="refencingName"
-                  class="flex-1"
-                />
-              </div>
+        <div class="order-3 xl:order-none" v-if="qualityCards.length">
+          <NutritionQualityCards :cards="qualityCards" mode="info" @view-overall-report="openHealthReport" />
+          <div class="flex gap-2 flex-wrap mt-2 px-1">
+            <div v-for="pill in dietaryPills" :key="pill.text"
+              class="flex items-center gap-1.5 rounded-4xl px-2 py-1 text-xs  text-slate-500">
+              <IconCheck v-if="pill.active" class="w-3" />
+              <IconX v-else class="w-3" />
+              <span>{{ pill.text }}</span>
             </div>
-            <div class="h-px bg-secondary w-full"></div>
-            <div
-              class="flex gap-6 justify-between items-center flex-wrap text-sm"
-            >
-              <div class="flex gap-2 flex-wrap">
-                <div
-                  v-for="pill in bottomMetaPillsGeneric"
-                  :key="pill.text"
-                  :class="pill.class"
-                  class="flex items-center gap-2 rounded-4xl px-2 py-1"
-                >
-                  <Icon :name="pill.icon" :size="20" />
-                  <span>{{ pill.text }}</span>
-                </div>
-              </div>
-              <div class="flex gap-2 flex-wrap">
-                <div
-                  v-for="pill in bottomMetaPillsSpecific"
-                  :key="pill.text"
-                  :class="pill.class"
-                  class="flex items-center gap-2 rounded-4xl px-2 py-1"
-                >
-                  <Icon :name="pill.icon" :size="20" />
-                  <span>{{ pill.text }}</span>
-                </div>
-              </div>
+            <div class="flex items-center gap-1.5 rounded-4xl px-2 py-1 text-xs  text-slate-500 ml-auto">
+              <IconDollarSign class="w-3" />
+              <span>~{{ formatMoney(food?.price ?? 0) }}/100g</span>
+            </div>
+            <div class="flex items-center gap-1.5 rounded-4xl px-2 py-1 text-xs  text-slate-500">
+              <IconWeight class="w-3" />
+              <span>{{ food?.density.toFixed(1) ?? 0 }}g/ml</span>
             </div>
           </div>
         </div>
       </div>
       <div class="contents xl:flex xl:flex-col gap-6 lg:basis-1/3">
         <!-- Healthy Swaps Card -->
-        <div
-          class="space-y-2 order-4 xl:order-none"
-          v-if="(food as any)?.suggested_swaps && (food as any).suggested_swaps.length > 0"
-        >
+        <div class="space-y-2 order-4 xl:order-none bg-primary-10/40 rounded-4xl p-4"
+          v-if="(food as any)?.suggested_swaps && (food as any).suggested_swaps.length > 0">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
             Healthy Swaps
           </h2>
-          <div class="main-card p-6 flex flex-col gap-2 order-4 2xl:order-none">
-            <div
-              class="flex gap-4 justify-between items-center cursor-pointer hover:bg-secondary rounded-2xl p-1"
-              v-for="swap in (food as any)?.suggested_swaps"
-              @click="navigateTo(getFoodUrl(swap.id, swap.name))"
-              :key="swap.id"
-            >
+          <div class="flex flex-col gap-2 order-4 2xl:order-none">
+            <div class="flex gap-4 justify-between items-center cursor-pointer bg-primary-10 rounded-3xl p-2"
+              v-for="swap in (food as any)?.suggested_swaps" @click="navigateTo(getFoodUrl(swap.id, swap.name))"
+              :key="swap.id">
               <div class="flex gap-3 items-center">
-                <div
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                  :class="gradeColors[getGrade(swap.hidx, 'ovr')]"
-                >
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                  :class="gradeColors[getGrade(swap.hidx, 'ovr')]">
                   <span class="text-2xl font-bold leading-none">{{
                     getGrade(swap.hidx, 'ovr')
                   }}</span>
@@ -200,9 +98,7 @@
                   <p class="text-lg font-bold leading-none line-clamp-3">
                     {{ swap.name }}
                   </p>
-                  <span
-                    class="text-sm text-gray-500 leading-none flex items-center gap-1"
-                  >
+                  <span class="text-sm text-gray-500 leading-none flex items-center gap-1">
                     <IconChevronsUp class="w-4" />
                     <span>{{ getSwapReason(swap) }}</span>
                   </span>
@@ -214,39 +110,24 @@
         </div>
 
         <!-- Found in Card -->
-        <div
-          class="space-y-2 order-5 xl:order-none"
-          v-if="containedInRecipes?.length"
-        >
+        <div class="space-y-2 order-5 xl:order-none bg-primary-10/40 rounded-4xl p-4" v-if="containedInRecipes?.length">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
             Found in
           </h2>
           <div class="flex flex-col order-5 2xl:order-none gap-2">
-            <RecipeCardHorizontal
-              v-for="recipe in containedInRecipes"
-              :key="recipe.id"
-              :recipe="recipe"
-              class="text-[22px] lg:text-[30px]"
-            />
+            <RecipeCardHorizontal v-for="recipe in containedInRecipes" :key="recipe.id" :recipe="recipe"
+              class="text-[22px] lg:text-[30px]" />
           </div>
         </div>
       </div>
     </div>
-    <BlocksResponsiveInfo
-      v-model="contextModalOpen"
-      :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`"
-    >
+    <BlocksResponsiveInfo v-model="contextModalOpen" sidePanelClass="w-120">
       <div v-if="contextMode === 'nutrition'" class="m-4">
         <h2 class="text-4xl font-bold tracking-tighter mb-8">Full Nutrition</h2>
         <FoodNutritionFacts :computable="food" />
         <FoodFullNutritionFacts :food="food" class="mt-10" />
       </div>
-      <PagesReport
-        v-if="contextMode === 'health' && id"
-        :id="id"
-        :isFood="true"
-        class=""
-      />
+      <PagesReport v-if="contextMode === 'health' && id" :id="id" :isFood="true" class="" />
     </BlocksResponsiveInfo>
   </div>
 </template>
@@ -255,6 +136,7 @@
 import { getGrade, gradeColors } from '~/utils/constants/grades';
 import capitalize from '~/utils/format/capitalize';
 import type { Food } from '~/types/types';
+import { getDailyQualityCards } from '~/utils/nutrition/getDailyQualityCards';
 
 const route = useRoute();
 const paramValue = route.params.id as string;
@@ -263,9 +145,13 @@ const supabase = useSupabaseClient<Database>();
 
 const selectedUnit = ref({ value: 100, displayName: '100g' });
 const mobileDescExpanded = ref(false);
-
 const contextModalOpen = ref(false);
 const contextMode = ref<'nutrition' | 'health'>('nutrition');
+
+const openHealthReport = () => {
+  contextMode.value = 'health';
+  contextModalOpen.value = true;
+};
 
 const dropdownChoices = computed(() => {
   const choices = [{ value: 100, displayName: '100g' }];
@@ -296,10 +182,7 @@ const { data: foodData } = await useAsyncData(
 );
 
 const foodName = computed(() => foodData.value?.name || '');
-const isPrimary = computed(() => foodData.value?.is_primary ?? false);
 const food = computed(() => foodData.value?.food);
-
-const servingPillsExpanded = ref(true);
 
 // Get the swap reason by comparing scores
 function getSwapReason(swap: NonNullable<Food['suggested_swaps']>[0]): string {
@@ -337,67 +220,55 @@ const portionMultiplier = computed(() => {
   return selectedUnit.value.value / 100;
 });
 
-const bottomMetaGenerics: (keyof FullFoodRow)[] = [
-  'vegan',
-  'vegetarian',
-  'gluten_free',
-  'lactose_free',
-];
+const novaLabels: Record<number, string> = {
+  1: 'Unprocessed',
+  2: 'Minimally processed',
+  3: 'Processed',
+  4: 'Ultra-processed',
+};
 
-const bottomMetaPillsGeneric = computed(() => {
+const novaPillClass: Record<number, string> = {
+  1: 'bg-green-100 text-green-700',
+  2: 'bg-green-100 text-green-700',
+  3: 'bg-orange-100 text-orange-700',
+  4: 'bg-red-100 text-red-700',
+};
+
+const qualityCards = computed(() => {
   if (!food.value) return [];
-  const pills = [];
-  for (const generic of bottomMetaGenerics) {
-    const formattedGeneric = capitalize(generic.replace('_', ' '));
-    pills.push({
-      text: food.value[generic] ? formattedGeneric : `Not ${formattedGeneric}`,
-      class: food.value[generic] ? 'bg-green-100' : 'bg-red-100',
-      icon: food.value[generic] ? 'check' : 'x',
-    });
+  const cards = getDailyQualityCards(food.value.report, {
+    totalFat: food.value.fat,
+    protectiveScore: food.value.protective_score,
+  }).map((c) => ({ ...c, clickable: false }));
+  const wholeIdx = cards.findIndex((c) => c.title === 'Whole Food %');
+  if (wholeIdx >= 0) {
+    const nova = food.value.nova as number | undefined;
+    cards[wholeIdx] = {
+      ...cards[wholeIdx]!,
+      title: 'Processing',
+      rating: nova ? (novaLabels[nova] ?? '–') : '–',
+      pillClass: nova ? (novaPillClass[nova] ?? 'bg-secondary') : 'bg-secondary',
+      subtitle: nova ? `NOVA ${nova}` : '',
+    };
   }
-  return pills;
+  return cards;
 });
 
-const bottomMetaPillsSpecific = computed(() => {
+const dietaryPillKeys = ['vegan', 'vegetarian', 'gluten_free', 'lactose_free'] as const;
+
+const dietaryPills = computed(() => {
   if (!food.value) return [];
-  const pills = [];
-  pills.push({
-    text: `NOVA ${food.value.nova}`,
-    class: 'bg-secondary',
-    icon: 'factory',
+  return dietaryPillKeys.map((key) => {
+    const label = capitalize(key.replace('_', ' '));
+    const active = (food.value as any)[key] as boolean | null;
+    return { text: active ? label : `Not ${label}`, active };
   });
-  pills.push({
-    text: `~${formatMoney(food.value.price)}/100g`,
-    class: 'bg-secondary',
-    icon: 'banknote',
-  });
-  pills.push({
-    text: `${food.value.density}g/ml`,
-    class: 'bg-secondary',
-    icon: 'weight',
-  });
-  return pills;
 });
 
 // Load recipes containing this food - non-blocking
 const { data: containedInRecipes } = useAsyncData(
   `recipes-containing-${id}`,
   () => getRecipesContaining(supabase, [Number(id)])
-);
-
-// Scaled food values for display in overview card
-const scaledFood = computed(() => {
-  if (!food.value) return null;
-  return {
-    kcal: food.value.kcal * portionMultiplier.value,
-    carbohydrates: food.value.carbohydrates * portionMultiplier.value,
-    protein: food.value.protein * portionMultiplier.value,
-    fat: food.value.fat * portionMultiplier.value,
-  };
-});
-
-const refencingName = computed(() =>
-  isPrimary.value ? null : food.value?.primary_name ?? ''
 );
 
 // Redirect from non-slugified URL to slugified URL

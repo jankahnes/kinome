@@ -84,6 +84,21 @@ export default defineNuxtConfig({
   },
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
-    exclude: [],
+    exclude: [
+      '/community/**',
+      '/__rq/**',
+      '/admin/**',
+      '/account/**',
+      '/demos/**',
+      '/login/**',
+      '/onboarding/**',
+      '/overview/**',
+      '/foods/scan/**',
+      '/kitchen/cookbook/**',
+      '/kitchen/recommendations/**',
+      '/profile/**',
+      '/tracking/saved/**',
+      '/tracking/settings/**',
+    ],
   },
 });

@@ -11,6 +11,7 @@ export type DailyQualityCard = {
   pillClass: string;
   subtitle: string;
   clickable: boolean;
+  orderValue: number;
 };
 
 const NULL_PILL = 'bg-secondary';
@@ -29,117 +30,67 @@ function resolve(
   return result;
 }
 
-// Shared tier sets reused across metrics
+// Shared tier sets
 const genericTiers: Threshold[] = [
   { minScore: -Infinity, rating: 'Low', pillClass: 'bg-red-100 text-red-700' },
-  {
-    minScore: 30,
-    rating: 'Moderate',
-    pillClass: 'bg-orange-100 text-orange-700',
-  },
+  { minScore: 30, rating: 'Moderate', pillClass: 'bg-orange-100 text-orange-700' },
   { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
-  {
-    minScore: 75,
-    rating: 'Very Good',
-    pillClass: 'bg-emerald-100 text-emerald-700',
-  },
+  { minScore: 75, rating: 'Very Good', pillClass: 'bg-emerald-100 text-emerald-700' },
   { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
 const qualityTiers: Threshold[] = [
-  {
-    minScore: -Infinity,
-    rating: 'Imbalanced',
-    pillClass: 'bg-red-100 text-red-700',
-  },
+  { minScore: -Infinity, rating: 'Imbalanced', pillClass: 'bg-red-100 text-red-700' },
   { minScore: 30, rating: 'Fair', pillClass: 'bg-orange-100 text-orange-700' },
   { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
-  {
-    minScore: 75,
-    rating: 'Very Good',
-    pillClass: 'bg-emerald-100 text-emerald-700',
-  },
+  { minScore: 75, rating: 'Very Good', pillClass: 'bg-emerald-100 text-emerald-700' },
   { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
 const gutHealthTiers: Threshold[] = [
-  {
-    minScore: -Infinity,
-    rating: 'Insufficient',
-    pillClass: 'bg-red-100 text-red-700',
-  },
+  { minScore: -Infinity, rating: 'Insufficient', pillClass: 'bg-red-100 text-red-700' },
   { minScore: 30, rating: 'Fair', pillClass: 'bg-orange-100 text-orange-700' },
   { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
-  {
-    minScore: 75,
-    rating: 'Very Good',
-    pillClass: 'bg-emerald-100 text-emerald-700',
-  },
+  { minScore: 75, rating: 'Very Good', pillClass: 'bg-emerald-100 text-emerald-700' },
   { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
 const wholeFoodTiers: Threshold[] = [
-  {
-    minScore: -Infinity,
-    rating: 'Mostly Processed Foods',
-    pillClass: 'bg-red-100 text-red-700',
-  },
+  { minScore: -Infinity, rating: 'Mostly Processed Foods', pillClass: 'bg-red-100 text-red-700' },
   { minScore: 20, rating: 'Mixed', pillClass: 'bg-orange-100 text-orange-700' },
-  {
-    minScore: 60,
-    rating: 'Mostly Whole',
-    pillClass: 'bg-green-100 text-green-700',
-  },
-  {
-    minScore: 75,
-    rating: 'Majority Whole',
-    pillClass: 'bg-emerald-100 text-emerald-700',
-  },
-  {
-    minScore: 92,
-    rating: 'Clean Diet',
-    pillClass: 'bg-blue-100 text-blue-700',
-  },
+  { minScore: 60, rating: 'Mostly Whole', pillClass: 'bg-green-100 text-green-700' },
+  { minScore: 75, rating: 'Majority Whole', pillClass: 'bg-emerald-100 text-emerald-700' },
+  { minScore: 92, rating: 'Clean Diet', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
 const electrolyteTiers: Threshold[] = [
-  {
-    minScore: -Infinity,
-    rating: 'High Na Load',
-    pillClass: 'bg-red-100 text-red-700',
-  },
-  {
-    minScore: 30,
-    rating: 'Imbalanced',
-    pillClass: 'bg-orange-100 text-orange-700',
-  },
+  { minScore: -Infinity, rating: 'High Na Load', pillClass: 'bg-red-100 text-red-700' },
+  { minScore: 30, rating: 'Imbalanced', pillClass: 'bg-orange-100 text-orange-700' },
   { minScore: 55, rating: 'Fair', pillClass: 'bg-yellow-100 text-yellow-700' },
-  {
-    minScore: 75,
-    rating: 'Balanced',
-    pillClass: 'bg-green-100 text-green-700',
-  },
+  { minScore: 75, rating: 'Balanced', pillClass: 'bg-green-100 text-green-700' },
   { minScore: 90, rating: 'Optimal', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
 const satietyTiers: Threshold[] = [
-  {
-    minScore: -Infinity,
-    rating: 'Very Low',
-    pillClass: 'bg-red-100 text-red-700',
-  },
+  { minScore: -Infinity, rating: 'Very Low', pillClass: 'bg-red-100 text-red-700' },
   { minScore: 30, rating: 'Low', pillClass: 'bg-orange-100 text-orange-700' },
   { minScore: 55, rating: 'Fair', pillClass: 'bg-green-100 text-green-700' },
-  {
-    minScore: 75,
-    rating: 'High',
-    pillClass: 'bg-emerald-100 text-emerald-700',
-  },
+  { minScore: 75, rating: 'High', pillClass: 'bg-emerald-100 text-emerald-700' },
   { minScore: 88, rating: 'Very High', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
+// More forgiving scale — only "very" high scores get the top ratings
+// Most foods have low antioxidant content, so this is specialty territory
+const antioxidantTiers: Threshold[] = [
+  { minScore: -Infinity, rating: 'None', pillClass: NULL_PILL },
+  { minScore: 10, rating: 'Some', pillClass: 'bg-green-100 text-green-700' },
+  { minScore: 30, rating: 'Good', pillClass: 'bg-emerald-100 text-emerald-700' },
+  { minScore: 55, rating: 'Rich', pillClass: 'bg-blue-100 text-blue-700' },
+  { minScore: 80, rating: 'Exceptional', pillClass: 'bg-purple-100 text-purple-700' },
+];
+
 function pillIsNegative(pillClass: string): boolean {
-  return pillClass.includes('red-'); // || pillClass.includes('orange-');
+  return pillClass.includes('red-');
 }
 
 function micronutrientSubtitle(
@@ -202,24 +153,14 @@ type GutSubKey =
   | 'processingSubScore'
   | 'sodiumSubScore';
 
-const gutSubLabels: Record<GutSubKey, { positive: string; negative: string }> =
-  {
-    fiberSubScore: { positive: 'Good Fiber', negative: 'Low Fiber' },
-    polyphenolSubScore: {
-      positive: 'Rich in Polyphenols',
-      negative: 'Low Polyphenols',
-    },
-    sugarSubScore: { positive: 'Low Sugar', negative: 'High Sugar' },
-    sfatSubScore: {
-      positive: 'Low Saturated Fat',
-      negative: 'High Saturated Fat',
-    },
-    processingSubScore: {
-      positive: 'Whole Foods',
-      negative: 'Processed Foods',
-    },
-    sodiumSubScore: { positive: 'Low Sodium', negative: 'High Sodium' },
-  };
+const gutSubLabels: Record<GutSubKey, { positive: string; negative: string }> = {
+  fiberSubScore: { positive: 'Good Fiber', negative: 'Low Fiber' },
+  polyphenolSubScore: { positive: 'Rich in Polyphenols', negative: 'Low Polyphenols' },
+  sugarSubScore: { positive: 'Low Sugar', negative: 'High Sugar' },
+  sfatSubScore: { positive: 'Low Saturated Fat', negative: 'High Saturated Fat' },
+  processingSubScore: { positive: 'Whole Foods', negative: 'Processed Foods' },
+  sodiumSubScore: { positive: 'Low Sodium', negative: 'High Sodium' },
+};
 
 const gutSubScoreKeys: GutSubKey[] = [
   'fiberSubScore',
@@ -261,19 +202,10 @@ function satietySubtitle(
 ): string {
   if (!humanReadable) return '';
   const satietyKeywords = {
-    Fullness: {
-      positive: 'High Fullness Factor',
-      negative: 'Low Fullness Factor',
-    },
+    Fullness: { positive: 'High Fullness Factor', negative: 'Low Fullness Factor' },
     Water: { positive: 'High Water Content', negative: 'Low Water Content' },
-    Calories: {
-      positive: 'Low Calorie Density',
-      negative: 'High Calorie Density',
-    },
-    'Glycemic Index': {
-      positive: 'Low Glycemic Index',
-      negative: 'High Glycemic Index',
-    },
+    Calories: { positive: 'Low Calorie Density', negative: 'High Calorie Density' },
+    'Glycemic Index': { positive: 'Low Glycemic Index', negative: 'High Glycemic Index' },
   };
   if (negative) {
     const worstSatietyDescription =
@@ -283,8 +215,7 @@ function satietySubtitle(
         worstSatietyDescription.includes(key),
       );
       if (worstSatietyKey) {
-        return satietyKeywords[worstSatietyKey as keyof typeof satietyKeywords]
-          .negative;
+        return satietyKeywords[worstSatietyKey as keyof typeof satietyKeywords].negative;
       }
     }
   }
@@ -294,39 +225,64 @@ function satietySubtitle(
       bestSatietyDescription.includes(key),
     );
     if (bestSatietyKey) {
-      return satietyKeywords[bestSatietyKey as keyof typeof satietyKeywords]
-        .positive;
+      return satietyKeywords[bestSatietyKey as keyof typeof satietyKeywords].positive;
     }
   }
   return '';
 }
 
-export function getDailyQualityCards(report: any): DailyQualityCard[] {
+function protectiveSubtitle(compounds: any, negative: boolean): string {
+  if (!compounds) return '';
+  if (negative) return '';
+  const candidates = [
+    { key: 'polyphenolsPer2000kcal', label: 'Polyphenols' },
+    { key: 'carotenoidsPer2000kcal', label: 'Carotenoids' },
+    { key: 'glucosinolatesPer2000kcal', label: 'Glucosinolates' },
+  ];
+  const significant = candidates
+    .filter((c) => (compounds[c.key] ?? 0) > 0)
+    .sort((a, b) => (compounds[b.key] ?? 0) - (compounds[a.key] ?? 0));
+  return significant[0] ? `Rich in ${significant[0].label}` : '';
+}
+
+export interface QualityCardContext {
+  /** Total fat grams (per 100g for food, total daily for tracking) */
+  totalFat?: number | null;
+  /** Protective compound score 0–100 */
+  protectiveScore?: number | null;
+}
+
+export function getDailyQualityCards(
+  report: any,
+  context?: QualityCardContext,
+): DailyQualityCard[] {
   const overall = report?.overall;
   const details = report?.details;
 
-  // --- Micronutrients ---
+  // --- Micronutrients (order 10, always shown) ---
   const mnResolved = resolve(overall?.mnidx, genericTiers);
   const microSubtitle = micronutrientSubtitle(
     details?.micronutrients ?? [],
     pillIsNegative(mnResolved.pillClass),
   );
 
-  // --- Fat Quality ---
-  const fatResolved = resolve(overall?.fat_profile_score, qualityTiers);
-  const fatSubtitle = fatQualitySubtitle(
-    details?.fatProfile,
-    pillIsNegative(fatResolved.pillClass),
-  );
+  // --- Fat Quality (order 6, condition: meaningful fat content) ---
+  const totalFat = context?.totalFat ?? details?.fatProfile?.totalFatPer100g ?? 0;
+  const fatConditionMet = totalFat > 5;
+  let fatResolved = resolve(overall?.fat_profile_score, qualityTiers);
+  let fatOrder = 9;
+  let fatSubtitle = fatQualitySubtitle(details?.fatProfile, pillIsNegative(fatResolved.pillClass));
+  if (!fatConditionMet) {
+    fatResolved = { rating: 'Minimal Fat', pillClass: NULL_PILL };
+    fatSubtitle = '';
+    fatOrder -= 20;
+  }
 
-  // --- Gut Health ---
+  // --- Gut Health (order 9, always shown) ---
   const gutResolved = resolve(overall?.gutHealth, gutHealthTiers);
-  const gutSubtitle = gutHealthSubtitle(
-    details?.gutHealth,
-    pillIsNegative(gutResolved.pillClass),
-  );
+  const gutSubtitle = gutHealthSubtitle(details?.gutHealth, pillIsNegative(gutResolved.pillClass));
 
-  // --- Whole Food % ---
+  // --- Whole Food % (order 7, always shown) ---
   const pctWhole: number | null = details?.processingLevel?.pctWhole ?? null;
   const wholeResolved = resolve(pctWhole, wholeFoodTiers);
   const wholeFoodSubtitle =
@@ -336,13 +292,12 @@ export function getDailyQualityCards(report: any): DailyQualityCard[] {
         : `${Math.round(pctWhole)}% whole`
       : '';
 
-  // --- Electrolytes ---
+  // --- Electrolytes (order 5, condition: Na:K ratio data available) ---
   const naKRatio: number | null = details?.salt?.naKRatio ?? null;
+  const electrolyteConditionMet = naKRatio != null;
   const electrolyteScore =
     naKRatio != null
-      ? Math.round(
-          Math.min(100, Math.max(0, 100 - (100 / 3) * (naKRatio - 0.5))),
-        )
+      ? Math.round(Math.min(100, Math.max(0, 100 - (100 / 3) * (naKRatio - 0.5))))
       : null;
   const electrolyteResolved = resolve(electrolyteScore, electrolyteTiers);
   const electrolyteSubtitle =
@@ -351,29 +306,32 @@ export function getDailyQualityCards(report: any): DailyQualityCard[] {
         ? `Na:K ${naKRatio.toFixed(1)} · skewed toward sodium`
         : `Na:K ratio ${naKRatio.toFixed(1)}`
       : '';
+  const electrolyteOrder = electrolyteConditionMet ? 6 : 6 - 20;
 
-  // --- Satiety ---
+  // --- Satiety (order 8, always shown) ---
   const satiety: number | null = overall?.satiety ?? null;
   const satietyResolved = resolve(satiety, satietyTiers);
-  const satietySub = satietySubtitle(
-    report?.humanReadable,
-    pillIsNegative(satietyResolved.pillClass),
-  );
+  const satietySub = satietySubtitle(report?.humanReadable, pillIsNegative(satietyResolved.pillClass));
 
-  return [
+  // --- Antioxidants / Protective (order 4, condition: meaningful protective score) ---
+  const protectiveScore =
+    context?.protectiveScore ?? overall?.protective_score ?? null;
+  const antioxidantResolved = resolve(protectiveScore, antioxidantTiers);
+  const antioxidantConditionMet = (protectiveScore ?? 0) >= 10;
+  const antioxidantSubtitle = protectiveSubtitle(
+    details?.protectiveCompounds,
+    pillIsNegative(antioxidantResolved.pillClass),
+  );
+  const antioxidantOrder = antioxidantConditionMet ? 4 : 4 - 20;
+
+  const allCards: DailyQualityCard[] = [
     {
       title: 'Micronutrients',
       img: 'micronutrients.webp',
       ...mnResolved,
       subtitle: microSubtitle,
       clickable: true,
-    },
-    {
-      title: 'Fat Quality',
-      img: 'fat.webp',
-      ...fatResolved,
-      subtitle: fatSubtitle,
-      clickable: true,
+      orderValue: 10,
     },
     {
       title: 'Gut Health',
@@ -381,20 +339,7 @@ export function getDailyQualityCards(report: any): DailyQualityCard[] {
       ...gutResolved,
       subtitle: gutSubtitle,
       clickable: true,
-    },
-    {
-      title: 'Whole Food %',
-      img: 'whole.webp',
-      ...wholeResolved,
-      subtitle: wholeFoodSubtitle,
-      clickable: false,
-    },
-    {
-      title: 'Electrolytes',
-      img: 'balance.webp',
-      ...electrolyteResolved,
-      subtitle: electrolyteSubtitle,
-      clickable: false,
+      orderValue: 8,
     },
     {
       title: 'Satiety',
@@ -402,6 +347,43 @@ export function getDailyQualityCards(report: any): DailyQualityCard[] {
       ...satietyResolved,
       subtitle: satietySub,
       clickable: false,
+      orderValue: 5,
+    },
+    {
+      title: 'Whole Food %',
+      img: 'whole.webp',
+      ...wholeResolved,
+      subtitle: wholeFoodSubtitle,
+      clickable: false,
+      orderValue: 7,
+    },
+    {
+      title: 'Fat Quality',
+      img: 'fat.webp',
+      ...fatResolved,
+      subtitle: fatSubtitle,
+      clickable: fatConditionMet,
+      orderValue: fatOrder,
+    },
+    {
+      title: 'Electrolytes',
+      img: 'balance.webp',
+      ...electrolyteResolved,
+      subtitle: electrolyteSubtitle,
+      clickable: false,
+      orderValue: electrolyteOrder,
+    },
+    {
+      title: 'Antioxidants',
+      img: 'protective.webp',
+      ...antioxidantResolved,
+      subtitle: antioxidantSubtitle,
+      clickable: false,
+      orderValue: antioxidantOrder,
     },
   ];
+
+  return allCards
+    .sort((a, b) => b.orderValue - a.orderValue)
+    .slice(0, 6);
 }

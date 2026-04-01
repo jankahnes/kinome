@@ -1,40 +1,34 @@
 <template>
-  <div class="space-y-2" ref="root">
+  <div class="space-y-2" ref="root" @click="closeTooltip">
     <h2 class="text-4xl font-bold tracking-tighter ml-2" v-if="!hideHeader">
       Method
     </h2>
-    <div
-      class="main-card main-card-padding flex flex-col relative overflow-hidden"
-      :class="{ '!bg-primary-20/80': formalizationLoading }"
-    >
-      <div class="flex-1" v-if="instructions && instructions.length > 0">
-        <div class="space-y-10">
-          <div
-            v-for="(instruction, index) in instructions"
-            :key="index"
-            class="flex gap-5 items-start"
-          >
+    <div class="main-card flex flex-col relative overflow-hidden"
+      :class="{ '!bg-primary-20/80': formalizationLoading }">
+      <div class="flex-1" v-if="fullInstructions && fullInstructions.length">
+        <div v-for="(step, index) in fullInstructions" :key="index"
+          class="flex gap-5 items px-4 md:px-6 first:pt-4 last:pb-3 md:first:pt-6 md:last:pb-5 hover:bg-secondary/50 group"
+          @mouseenter="onStepHover(step)" @mouseleave="onStepLeave()">
+          <div class="flex flex-col items-center">
+            <div class="h-4 w-px bg-gray-200/70 group-first:hidden" :class="{ '!h-5': !step.title }"></div>
             <div
-              class="min-w-9 h-9 p-1 rounded-xl flex items-center text-xl font-bold justify-center bg-primary-500 text-white flex-shrink-0 leading-none mt-1"
-            >
+              class="min-w-9 h-9 p-1 rounded-xl flex items-center text-xl font-bold justify-center bg-primary-500 text-white flex-shrink-0 leading-none group-first:mt-1">
               {{ index + 1 }}
             </div>
+            <div class="flex-1 w-px bg-gray-200/70 group-last:hidden"></div>
+          </div>
 
-            <div class="flex-1 min-w-0 relative">
-              <p
-                class="leading-relaxed"
-                v-html="renderInstructionWithLinks(instruction)"
-              ></p>
-            </div>
+          <div class="flex-1 flex flex-col gap-1  group-not-first:my-4 group-first:mb-4 group-last:mt-4 ">
+            <h3 class="text-lg font-bold">{{ step.title }}</h3>
+
+            <p class="" v-html="renderInstructionWithLinks(step.formatted_text)"></p>
           </div>
         </div>
       </div>
 
       <div v-else class="flex-1 flex items-center justify-center p-6 pb-32">
         <div class="text-center max-w-sm">
-          <div
-            class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"
-          >
+          <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <IconBookOpen class="w-6 h-6 text-gray-400" />
           </div>
           <h3 class="text-lg font-medium text-gray-700 mb-2">
@@ -49,49 +43,74 @@
       <!-- Dynamic Tooltip -->
       <transition name="fade" mode="out-in">
         <Teleport to="body" v-if="activeTooltip">
-          <div
-            class="fixed z-50 pointer-events-none transition-all duration-200"
-            :style="{
-              left: activeTooltip.x + 'px',
-              top: activeTooltip.y + 'px',
-              transform: 'translate(-50%, -100%)',
-            }"
-          >
+          <div class="fixed z-50 pointer-events-none transition-all duration-200" :style="{
+            left: activeTooltip.x + 'px',
+            top: activeTooltip.y + 'px',
+            transform: 'translate(-50%, -100%)',
+          }">
             <div
-              class="bg-secondary px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-center border border-gray-200"
-            >
+              class="bg-secondary px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-center border border-white">
               {{ activeTooltip.amount }}
               <div
-                class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-200"
-              ></div>
+                class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-200">
+              </div>
             </div>
           </div>
         </Teleport>
       </transition>
       <div
         class="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent p-4 pointer-events-none"
-        v-if="formalizationLoading"
-      />
+        v-if="formalizationLoading" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 interface Props {
-  instructions: string[] | null | undefined;
-  hideHeader: Boolean;
+  fullInstructions: CookStep[];
   ingredients?: any[];
   servingSize?: number;
   formalizationLoading: Boolean;
+  markedIngredients: number[];
+  hideHeader?: boolean;
 }
 
+const currentAnimation = ref<CookStep | null>(null);
+
 const props = defineProps<Props>();
+
+const playKey = ref(0);
+const animationSrc = ref('/cooking-animations/prep.webp');
 
 const root = ref(null);
 
 defineExpose({
   root,
 });
+
+const emit = defineEmits(['update:markedIngredients']);
+
+/** IDs from `[label](id)` links in formatted_text — same convention as CookMode. */
+function ingredientIdsInStep(step: CookStep): number[] {
+  const text = step.formatted_text ?? '';
+  const ids = [...text.matchAll(/\[[^\]]+\]\((\d+)\)/g)].map((m) =>
+    parseInt(m[1]!, 10)
+  );
+  console.log(ids);
+  return [...new Set(ids)];
+}
+
+function onStepHover(step: CookStep) {
+  playKey.value++;
+  animationSrc.value = `/cooking-animations/prep.webp?t=${Date.now()}`;
+  currentAnimation.value = step;
+  emit('update:markedIngredients', ingredientIdsInStep(step));
+}
+
+function onStepLeave() {
+  currentAnimation.value = null;
+  emit('update:markedIngredients', []);
+}
 
 // Tooltip state
 const activeTooltip = ref<{
@@ -124,7 +143,7 @@ function renderInstructionWithLinks(instruction: string): string {
       tabindex="0"
     >${ingredient}</span>`;
     }
-  );
+  ).replace(/\*([^*]+)\*/g, '<strong>$1</strong>');;
 }
 
 // Handle ingredient click
