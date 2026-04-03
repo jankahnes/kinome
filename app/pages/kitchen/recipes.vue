@@ -106,14 +106,14 @@
     <div class="my-4 z-2">
       <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch">
         <RecipeCard :recipe="recipe"
-          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 flex-1 min-h-50 text-[30px]"
+          class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]"
           v-for="recipe in results" :key="recipe.id" />
         <div ref="sentinelElement" v-if="isLoading || hasMoreRecipes"
-          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl">
-          <Skeleton class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl" />
+          class="min-w-65 basis-65 max-w-80 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl">
+          <Skeleton class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl" />
         </div>
         <Skeleton v-if="isLoading || hasMoreRecipes" v-for="i in 10" :key="i"
-          class="min-w-65 basis-65 max-w-100 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl" />
+          class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl" />
       </div>
       <div class="flex flex-col gap-4 md:hidden justify-items-stretch">
         <RecipeCardHorizontal :recipe="recipe" class="" v-for="recipe in results" :key="recipe.id" />

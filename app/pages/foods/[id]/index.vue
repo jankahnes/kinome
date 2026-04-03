@@ -8,7 +8,8 @@
     <div class="flex flex-col 2xl:flex-row gap-6">
       <div class="contents xl:flex flex-col gap-6 lg:flex-1">
 
-        <div class="bg-primary-10/40 rounded-4xl main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-none xl:items-start">
+        <div
+          class="bg-primary-10/40 rounded-4xl main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-none xl:items-start">
           <div class="relative xl:basis-1/5 h-40">
             <img class="object-cover rounded-4xl h-full" src="/wood.png" :alt="foodName" />
 
@@ -18,21 +19,26 @@
                 :alt="(food?.visual_category ?? 'herb_fresh') + ' illustration'" />
             </div>
           </div>
-          <div class="flex-1 flex flex-col gap-4">
-            <div class="flex justify-between items-start">
-              <div class="">
+          <div class="flex-1 flex flex-col gap-2">
+            <div class="flex justify-between">
+              <div class="flex flex-col">
                 <h1 class="text-5xl font-bold">{{ foodName }}</h1>
-                <p class="text-xs text-gray-400">
-                  {{ food?.aisle?.toUpperCase() || 'Food' }}
+                <p class="text-xs text-gray-400 uppercase">
+                  {{ food?.aisle || 'Food' }}
                 </p>
               </div>
-              <button class="flex justify-center items-center w-15 h-15 rounded-2xl p-2 shrink-0 hover:opacity-80 transition-opacity"
-                :class="gradeColors[getGrade(food?.hidx, 'ovr')]"
-                @click="openHealthReport">
-                <span class="text-3xl font-bold leading-none">{{
-                  getGrade(food?.hidx, 'ovr')
-                }}</span>
-              </button>
+              <div class="flex flex-col items-end">
+                <button
+                  class="flex justify-center items-center w-14 h-14 rounded-2xl p-2 shrink-0 hover:opacity-80 transition-opacity"
+                  :class="gradeColors[getGrade(food?.hidx, 'ovr')]" @click="openHealthReport">
+                  <span class="text-3xl font-bold leading-none">{{
+                    getGrade(food?.hidx, 'ovr')
+                  }}</span>
+                </button>
+                <p class="text-[11px] tracking-tight text-gray-400 uppercase">
+                  Health Grade
+                </p>
+              </div>
             </div>
 
             <p v-if="food?.description" class="text-lg leading-snug">
@@ -78,7 +84,7 @@
       </div>
       <div class="contents xl:flex xl:flex-col gap-6 lg:basis-1/3">
         <!-- Healthy Swaps Card -->
-        <div class="space-y-2 order-4 xl:order-none bg-primary-10/40 rounded-4xl p-4"
+        <div class="space-y-2 order-5 xl:order-none bg-primary-10/40 rounded-4xl p-4"
           v-if="(food as any)?.suggested_swaps && (food as any).suggested_swaps.length > 0">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
             Healthy Swaps
@@ -110,13 +116,27 @@
         </div>
 
         <!-- Found in Card -->
-        <div class="space-y-2 order-5 xl:order-none bg-primary-10/40 rounded-4xl p-4" v-if="containedInRecipes?.length">
+        <div class="space-y-2 order-6 xl:order-none bg-primary-10/40 rounded-4xl p-4" v-if="containedInRecipes?.length">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
             Found in
           </h2>
           <div class="flex flex-col order-5 2xl:order-none gap-2">
             <RecipeCardHorizontal v-for="recipe in containedInRecipes" :key="recipe.id" :recipe="recipe"
               class="text-[22px] lg:text-[30px]" />
+          </div>
+        </div>
+        <!-- FAQ Card -->
+        <div class="space-y-2 order-7 xl:order-none bg-primary-10/40 rounded-4xl p-4" v-if="faqItems.length">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-3">FAQ</h2>
+          <div class="space-y-2 ml-2">
+            <details v-for="item in faqItems" :key="item.question" class="group">
+              <summary
+                class="cursor-pointer font-semibold text-sm list-none flex justify-between items-center gap-2 py-1">
+                {{ item.question }}
+                <IconChevronDown class="w-4 shrink-0 transition-transform group-open:rotate-180" />
+              </summary>
+              <p class="text-sm text-gray-500 mt-1 pb-2 leading-snug">{{ item.answer }}</p>
+            </details>
           </div>
         </div>
       </div>
@@ -137,6 +157,7 @@ import { getGrade, gradeColors } from '~/utils/constants/grades';
 import capitalize from '~/utils/format/capitalize';
 import type { Food } from '~/types/types';
 import { getDailyQualityCards } from '~/utils/nutrition/getDailyQualityCards';
+import pluralize from 'pluralize';
 
 const route = useRoute();
 const paramValue = route.params.id as string;
@@ -283,17 +304,181 @@ const healthGrade = computed(() =>
   food.value?.hidx ? getGrade(food.value.hidx, 'ovr') : null
 );
 
-const description = computed(
-  () =>
-    `${foodName.value} nutrition facts: ${food.value?.kcal} kcal/100g, Nutrition Quality: ${healthGrade.value}. Discover in-depth nutritional analyis and healthy alternatives.`
-);
+const description = computed(() => {
+  const f = food.value;
+  if (!f) return `${foodName.value}: calories, protein, carbs and fat per 100g.`;
+
+  const grade = healthGrade.value;
+  const gradeText = grade && (grade.startsWith('A') || grade.startsWith('B') || grade.startsWith('C') || grade.startsWith('S')) ? ` Health Grade: ${grade}.` : '';
+
+  return `100g of ${foodName.value} contains ${f.kcal} kcal, ${f.protein}g protein, ${f.carbohydrates}g carbs and ${f.fat}g fat.${gradeText} See the full macro & micronutrient breakdown.`;
+});
 
 const foodUrl = computed(
   () => `https://kinome.app${getFoodUrl(Number(id), foodName.value)}`
 );
 
+function getFoodHealthHighlight(f: FullFoodRow): string {
+  const report = f.report as any;
+
+  const candidates = [
+    { key: 'mnidx', score: f.mnidx ?? 0 },
+    { key: 'protein_score', score: f.protein_score ?? 0 },
+    { key: 'fiber_score', score: f.fiber_score ?? 0 },
+    { key: 'fat_profile_score', score: f.fat_profile_score ?? 0 },
+    { key: 'protective_score', score: f.protective_score ?? 0 },
+    { key: 'satiety', score: f.satiety ?? 0 },
+  ].filter(c => c.score > 60)
+    .sort((a, b) => b.score - a.score);
+
+  const top = candidates[0];
+  if (!top) return '';
+
+  switch (top.key) {
+    case 'mnidx': {
+      const micros = (report?.details?.micronutrients ?? []) as { displayName: string; rdaPerServing: number }[];
+      const top2 = [...micros].sort((a, b) => b.rdaPerServing - a.rdaPerServing).slice(0, 2);
+      if (top2.length >= 2) return `It is an excellent source of ${top2[0]!.displayName} and ${top2[1]!.displayName}.`;
+      if (top2.length === 1) return `It is an excellent source of ${top2[0]!.displayName}.`;
+      return 'It is rich in essential micronutrients.';
+    }
+    case 'protein_score':
+      return `It is high in protein with ${f.protein}g per 100g.`;
+    case 'fiber_score':
+      return `It is a great source of dietary fiber (${f.fiber}g per 100g).`;
+    case 'fat_profile_score': {
+      const fp = report?.details?.fatProfile as Record<string, number> | undefined;
+      if (fp) {
+        const best = [
+          { key: 'o3Score', label: 'rich in omega-3 fatty acids' },
+          { key: 'mufaScore', label: 'rich in healthy unsaturated fats' },
+          { key: 'satFatScore', label: 'low in saturated fat' },
+        ].reduce((a, b) => (fp[b.key] ?? 0) > (fp[a.key] ?? 0) ? b : a);
+        return `It has an excellent fat profile — ${best.label}.`;
+      }
+      return 'It has an excellent fat quality profile.';
+    }
+    case 'protective_score': {
+      const cp = report?.details?.protectiveCompounds as Record<string, number> | undefined;
+      const best = [
+        { key: 'polyphenolsPer2000kcal', label: 'polyphenols' },
+        { key: 'carotenoidsPer2000kcal', label: 'carotenoids' },
+        { key: 'glucosinolatesPer2000kcal', label: 'glucosinolates' },
+      ].filter(c => (cp?.[c.key] ?? 0) > 0)
+        .sort((a, b) => (cp?.[b.key] ?? 0) - (cp?.[a.key] ?? 0))[0];
+      return best ? `It is rich in ${best.label}.` : 'It is rich in protective compounds.';
+    }
+    case 'satiety':
+      return 'It has a high satiety factor, helping you stay full for longer.';
+    default:
+      return '';
+  }
+}
+
+const schemaScripts = computed(() => {
+  const f = food.value;
+  if (!f) return [];
+
+  const scripts: { type: string; children: string }[] = [];
+
+  scripts.push({
+    type: 'application/ld+json',
+    children: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: foodName.value,
+      description: description.value,
+      url: foodUrl.value,
+      nutrition: {
+        '@type': 'NutritionInformation',
+        servingSize: '100g',
+        calories: `${f.kcal} kcal`,
+        proteinContent: `${f.protein}g`,
+        carbohydrateContent: `${f.carbohydrates}g`,
+        fatContent: `${f.fat}g`,
+        saturatedFatContent: `${f.saturated_fat}g`,
+        fiberContent: `${f.fiber}g`,
+        sugarContent: `${f.sugar}g`,
+        ...(f.trans_fats_mg != null && { transFatContent: `${(f.trans_fats_mg / 1000).toFixed(2)}g` }),
+        ...(f.salt != null && { sodiumContent: `${Math.round((f.salt / 2.5) * 1000)}mg` }),
+      },
+    }),
+  });
+
+  if (faqItems.value.length > 0) {
+    scripts.push({
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqItems.value.map(item => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: { '@type': 'Answer', text: item.answer },
+        })),
+      }),
+    });
+  }
+
+  return scripts;
+});
+
+const faqItems = computed<{ question: string; answer: string }[]>(() => {
+  const f = food.value;
+  if (!f) return [];
+
+  const name = foodName.value;
+  const isOrAre = pluralize.isPlural(name) ? 'are' : 'is';
+  const IsOrAre = isOrAre === 'are' ? 'Are' : 'Is';
+  const items: { question: string; answer: string }[] = [];
+  const grade = healthGrade.value;
+
+  if (grade) {
+    const highlight = getFoodHealthHighlight(f);
+    let answer: string;
+    if (grade.startsWith('S')) {
+      answer = `Yes, ${name} ${isOrAre} exceptionally healthy, earning an S Health Grade — among the highest possible. ${highlight}`;
+    } else if (grade.startsWith('A')) {
+      answer = `Yes, ${name} ${isOrAre} very healthy with a Health Grade of ${grade}. ${highlight}`;
+    } else if (grade.startsWith('B')) {
+      answer = `Yes, ${name} ${isOrAre} considered healthy with a Health Grade of ${grade}. ${highlight}`;
+    } else if (grade.startsWith('C')) {
+      answer = `${name} ${isOrAre} rated moderate (Health Grade ${grade}) per 100g and can be part of a balanced diet.`;
+    } else {
+      answer = `${name} ${isOrAre} rated ${grade} on overall nutritional quality. Best consumed in moderation alongside nutrient-dense foods.`;
+    }
+    items.push({ question: `${IsOrAre} ${name} healthy?`, answer: answer.trim() });
+  }
+
+  items.push({
+    question: `What are the macros in ${name}?`,
+    answer: `100g of ${name} contains ${f.kcal} kcal, ${f.protein}g protein, ${f.carbohydrates}g carbohydrates and ${f.fat}g fat (of which ${f.saturated_fat}g saturated), and ${f.fiber}g fiber.`,
+  });
+
+  const nova = f.nova as number | undefined;
+  if (nova) {
+    items.push({
+      question: `What NOVA processing level is ${name}?`,
+      answer: `${name} ${isOrAre} NOVA ${nova} - ${novaLabels[nova]}.`.trim(),
+    });
+  }
+
+  if (f.vegan) {
+    items.push({ question: `Is ${name} vegan?`, answer: `Yes, ${name} is vegan.` });
+  } else if (f.vegetarian) {
+    items.push({ question: `Is ${name} vegetarian?`, answer: `Yes, ${name} is vegetarian but not vegan.` });
+  }
+
+  if (f.gluten_free) {
+    items.push({ question: `Is ${name} gluten free?`, answer: `Yes, ${name} is gluten free.` });
+  }
+
+  return items;
+});
+
 useHead(() => ({
   title: `${foodName.value} - Complete Nutrition Facts & Analysis`,
+  script: schemaScripts.value,
   meta: [
     {
       name: 'description',

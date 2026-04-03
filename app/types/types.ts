@@ -81,6 +81,7 @@ export type Activity = ActivityRow & {
     title: string;
     id: number;
     picture: string;
+    source_type: string;
   } | null;
   rating?: {
     rating: number;
@@ -114,7 +115,7 @@ export type CookStep = {
   step_time?: number;
   timers?: number[];
   tip?: string;
-}
+};
 
 export type Recipe = RecipeRow & {
   full_instructions: CookStep[] | null;
@@ -291,6 +292,19 @@ export type TrackedMeal = {
   collapsed: boolean;
 };
 
+export type VideoMetadata = {
+  url?: string | null;
+  title?: string | null;
+  channel?: string | null;
+  channel_handle?: string | null;
+  channel_id?: string | null;
+  view_count?: number | null;
+  like_count?: number | null;
+  tags?: string[] | null;
+  upload_date?: string | null;
+  duration?: number | null;
+};
+
 export type BaseRecipe = {
   title: string;
   user_id: string | null;
@@ -305,8 +319,7 @@ export type BaseRecipe = {
   based_on?: number | null;
   ingredients?: any | null;
   base_ingredients: string[];
-  original_creator_channel_name?: string | null;
-  original_creator_channel_id?: string | null;
+  video_metadata?: VideoMetadata | null;
 };
 
 export type UploadableRecipe = Omit<BaseRecipe, 'base_ingredients'> & {

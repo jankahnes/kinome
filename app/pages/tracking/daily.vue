@@ -32,13 +32,8 @@
             </div>
 
             <!-- Meals list -->
-            <EditableGroupList
-              v-model="trackedMeals"
-              :show-collapse="true"
-              :show-group-header="true"
-              group-name-placeholder="✍️ Meal name"
-              :show-kcal="true"
-            />
+            <EditableGroupList v-model="trackedMeals" :show-collapse="true" :show-group-header="true"
+              group-name-placeholder="✍️ Meal name" :show-kcal="true" />
           </div>
         </div>
         <!-- Nutrition summary -->
@@ -74,19 +69,11 @@
             </div>
           </div>
           <!-- Nutrition Overview -->
-          <NutritionOverviewCard
-            mode="tracking"
-            :nutrition="computedDailyNutrition"
-            :tracking-goals="userTrackingGoals?.targets"
-            @view-overall-report="showOverallReportPanel = true"
-          />
+          <NutritionOverviewCard mode="tracking" :nutrition="computedDailyNutrition"
+            :tracking-goals="userTrackingGoals?.targets" @view-overall-report="showOverallReportPanel = true" />
           <!-- Nutrition Quality -->
-          <NutritionQualityCards
-            :cards="qualityItems"
-            :has-overall-report="true"
-            @view-overall-report="showOverallReportPanel = true"
-            @card-click="handleQualityCardClick"
-          />
+          <NutritionQualityCards mode="info" :cards="qualityItems" :has-overall-report="true"
+            @view-overall-report="showOverallReportPanel = true" @card-click="handleQualityCardClick" />
         </div>
       </div>
       <!-- Save button -->

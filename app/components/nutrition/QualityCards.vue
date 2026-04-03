@@ -5,7 +5,7 @@
       <button @click="emit('viewOverallReport')" class="flex items-center gap-0.5 animated-button text-sm p-2"
         :class="mode === 'info' ? 'bg-primary-10' : 'text-slate-400'">
         <span v-if="mode === 'info'" class="hidden sm:inline">View Full</span>
-        <IconChevronRight class="w-6" />
+        <IconChevronRight class="w-5" />
       </button>
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">

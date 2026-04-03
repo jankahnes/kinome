@@ -96,7 +96,6 @@ function ingredientIdsInStep(step: CookStep): number[] {
   const ids = [...text.matchAll(/\[[^\]]+\]\((\d+)\)/g)].map((m) =>
     parseInt(m[1]!, 10)
   );
-  console.log(ids);
   return [...new Set(ids)];
 }
 

@@ -1,206 +1,598 @@
 <template>
   <Transition name="loaded-content">
-    <div v-if="auth.profileFetched && auth.isUser()">
-      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mt-12">
-        {{ greeting }}
-      </h1>
-      <div class="flex flex-wrap gap-4 gap-y-8 mt-12" v-if="auth.isUser()">
-        <!-- Today's Nutrition -->
-        <div class="shrink-0 flex flex-col gap-6">
-          <h2 class="text-2xl font-bold tracking-tight mx-2">
-            Today's Nutrition
-          </h2>
-          <div class="main-card p-4 md:p-6 flex flex-col justify-between gap-6 flex-1">
-            <div class="flex gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <Ring
-                  class="w-22 h-22 md:w-26 md:h-26"
-                  :segments="[{ value: 0.6, color: 'stroke-primary' }]"
-                  :strokeWidth="10"
-                >
-                  <span class="text-xl font-bold text-gray-500">1450</span>
-                </Ring>
-                <p class="font-bold text-lg leading-none mt-2">Calories</p>
-                <p class="font-light text-sm text-gray-500 leading-none">
-                  1450/2000
-                </p>
+    <div v-if="auth.profileFetched">
+
+      <!-- ─── GUEST VIEW ────────────────────────────────────────────── -->
+      <div v-if="!auth.isUser()">
+        <HerocardsHome />
+        <div class="mt-10">
+          <div class="flex items-baseline gap-3 mb-5">
+            <h2 class="text-2xl font-bold tracking-tight">For You</h2>
+            <span class="text-sm text-gray-400">
+              <NuxtLink to="/login" class="underline">Sign in</NuxtLink> to personalise
+            </span>
+          </div>
+          <ForYouGrid :results="allResults" :is-loading="isLoading" />
+        </div>
+      </div>
+
+      <!-- ─── LOGGED IN VIEW ───────────────────────────────────────── -->
+      <div v-else class="space-y-6 lg:space-y-10 mt-4 lg:mt-10">
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">{{ greeting }}</h1>
+
+        <!-- NUTRITION AUTOPILOT ─────────────────────────────────────── -->
+        <section v-if="hasTracking">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold tracking-tight">Nutrition Autopilot</h2>
+          </div>
+
+          <div class="flex gap-4 flex-wrap sm:items-end mt-5">
+            <!-- Progress card -->
+            <div
+              class="rounded-4xl bg-primary-10/50 main-card-padding flex-shrink-0 flex-1 basis-80 md:max-w-100 flex flex-col gap-5 md:mb-3.5">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Today's progress</span>
+
+              <!-- Calories -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between text-sm">
+                  <span class="font-semibold">Calories</span>
+                  <span class="transition-all duration-400"
+                    :class="previewConsumed.kcal > kcalGoal * 1.2 ? 'text-amber-500 font-medium' : 'text-gray-500'">
+                    {{ Math.round(previewConsumed.kcal) }} / {{ kcalGoal }} kcal
+                  </span>
+                </div>
+                <div class="h-2.5 rounded-full bg-primary-10 overflow-hidden relative">
+                  <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+                    :class="previewConsumed.kcal > kcalGoal * 1.2 ? 'bg-amber-400' : 'bg-primary'"
+                    :style="{ width: Math.min(100, (todayConsumed.kcal / kcalGoal) * 100) + '%' }" />
+                  <div v-if="hoveredRecipe && todayConsumed.kcal <= kcalGoal"
+                    class="absolute inset-y-0 rounded-full bg-primary/30 transition-all duration-400"
+                    :style="previewBarStyle(todayConsumed.kcal, hoveredRecipe.kcal ?? 0, kcalGoal)" />
+                </div>
               </div>
-              <div class="flex flex-col items-center gap-1">
-                <Ring
-                  class="w-22 h-22 md:w-26 md:h-26"
-                  :segments="[{ value: 0.4, color: 'stroke-primary' }]"
-                  :strokeWidth="10"
-                >
-                  <span class="text-xl font-bold text-gray-500">50g</span>
-                </Ring>
-                <p class="font-bold text-lg leading-none mt-2">Protein</p>
-                <p class="font-light text-sm text-gray-500 leading-none">
-                  50/120
-                </p>
+
+              <!-- Protein -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between text-sm">
+                  <span class="font-semibold">Protein</span>
+                  <span class="text-gray-500">
+                    {{ Math.round(previewConsumed.protein) }}g / {{ proteinGoal }}g
+                  </span>
+                </div>
+                <div class="h-2.5 rounded-full bg-protein/20 overflow-hidden relative">
+                  <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-protein"
+                    :style="{ width: Math.min(100, (todayConsumed.protein / proteinGoal) * 100) + '%' }" />
+                  <div v-if="hoveredRecipe"
+                    class="absolute inset-y-0 rounded-full bg-protein/40 transition-all duration-300"
+                    :style="previewBarStyle(todayConsumed.protein, hoveredRecipe.protein ?? 0, proteinGoal)" />
+                </div>
               </div>
-              <div class="flex flex-col items-center gap-1">
-                <Ring
-                  class="w-22 h-22 md:w-26 md:h-26"
-                  :segments="[{ value: 0.7, color: 'stroke-primary' }]"
-                  :strokeWidth="10"
-                >
-                  <span class="text-xl font-bold text-gray-500">20g</span>
-                </Ring>
-                <p class="font-bold text-lg leading-none mt-2">Fiber</p>
-                <p class="font-light text-sm text-gray-500 leading-none">
-                  20/30
-                </p>
+
+              <!-- Carbs -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between text-sm">
+                  <span class="font-semibold">Carbs</span>
+                  <span class="transition-all duration-400"
+                    :class="previewConsumed.carbohydrates > carbsGoal * 1.2 ? 'text-amber-500 font-medium' : 'text-gray-500'">
+                    {{ Math.round(previewConsumed.carbohydrates) }}g / {{ carbsGoal }}g
+                  </span>
+                </div>
+                <div class="h-2.5 rounded-full bg-carbs/20 overflow-hidden relative">
+                  <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+                    :class="previewConsumed.carbohydrates > carbsGoal * 1.2 ? 'bg-amber-300' : 'bg-carbs'"
+                    :style="{ width: Math.min(100, (todayConsumed.carbohydrates / carbsGoal) * 100) + '%' }" />
+                  <div v-if="hoveredRecipe"
+                    class="absolute inset-y-0 rounded-full bg-carbs/40 transition-all duration-400"
+                    :style="previewBarStyle(todayConsumed.carbohydrates, hoveredRecipe.carbohydrates ?? 0, carbsGoal)" />
+                </div>
               </div>
+
+              <!-- Fat -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between text-sm">
+                  <span class="font-semibold">Fat</span>
+                  <span class="transition-all duration-400"
+                    :class="previewConsumed.fat > fatGoal * 1.2 ? 'text-amber-500 font-medium' : 'text-gray-500'">
+                    {{ Math.round(previewConsumed.fat) }}g / {{ fatGoal }}g
+                  </span>
+                </div>
+                <div class="h-2.5 rounded-full bg-fat/20 overflow-hidden relative">
+                  <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+                    :class="previewConsumed.fat > fatGoal * 1.2 ? 'bg-amber-300' : 'bg-fat'"
+                    :style="{ width: Math.min(100, (todayConsumed.fat / fatGoal) * 100) + '%' }" />
+                  <div v-if="hoveredRecipe && todayConsumed.fat <= fatGoal"
+                    class="absolute inset-y-0 rounded-full bg-fat/40 transition-all duration-400"
+                    :style="previewBarStyle(todayConsumed.fat, hoveredRecipe.fat ?? 0, fatGoal)" />
+                </div>
+              </div>
+
+              <!-- Fiber -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between text-sm">
+                  <span class="font-semibold">Fiber</span>
+                  <span class="text-gray-500">
+                    {{ Math.round(previewConsumed.fiber) }}g / {{ fiberGoal }}g
+                  </span>
+                </div>
+                <div class="h-2.5 rounded-full bg-fiber/20 overflow-hidden relative">
+                  <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-fiber"
+                    :style="{ width: Math.min(100, (todayConsumed.fiber / fiberGoal) * 100) + '%' }" />
+                  <div v-if="hoveredRecipe"
+                    class="absolute inset-y-0 rounded-full bg-fiber/40 transition-all duration-300"
+                    :style="previewBarStyle(todayConsumed.fiber, hoveredRecipe.fiber ?? 0, fiberGoal)" />
+                </div>
+              </div>
+
+
+
+              <NuxtLink to="/tracking/daily"
+                class="animated-button bg-primary-10 text-sm text-center py-2 px-3 mt-auto flex items-center self-center gap-2">
+                See details
+                <IconChevronRight class="w-4" />
+              </NuxtLink>
             </div>
-            <div class="flex items-center gap-4">
-              <NuxtLink
-                to="/tracking"
-                class="animated-button outline-primary outline-2 p-3 text-lg leading-none"
-                >View details</NuxtLink
-              >
-              <button
-                @click="() => {}"
-                class="animated-button outline-primary outline-2 bg-primary p-3 text-lg leading-none flex-1"
-              >
-                Quick add meal
-              </button>
+
+            <!-- Macro-fit recipe suggestions -->
+            <template v-if="isFamiliarLoading">
+              <Skeleton v-for="i in 4" :key="i" class="basis-44 max-w-80 flex-1 h-86 rounded-xl" />
+            </template>
+            <template v-else-if="macroFitRecipes.length">
+              <RecipeCard v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
+                :reason-text="getMacroBadgeText(recipe)" class="basis-50 text-[28px] max-w-80 hidden sm:flex flex-1"
+                @mouseenter="hoveredRecipe = recipe" @mouseleave="hoveredRecipe = null" />
+              <RecipeCardHorizontal v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
+                :reason-text="getMacroBadgeText(recipe)"
+                class="text-[24px] basis-80 sm:hidden flex-1" />
+            </template>
+            <p v-else class="text-sm text-gray-400 self-center">
+              Save some recipes to get personalised meal suggestions.
+            </p>
+          </div>
+        </section>
+
+        <!-- FOR YOU ────────────────────────────────────────────────── -->
+        <section>
+          <div class="">
+            <h2 class="text-2xl font-bold tracking-tight">For You</h2>
+            <NuxtLink to="/kitchen/recommendations" class="text-sm -mt-1 flex items-center text-gray-500">See all<IconChevronRight class="w-4" /></NuxtLink>
+          </div>
+          <ForYouGrid :results="forYouResults" :is-loading="isLoading" />
+        </section>
+
+        <!-- QUICK WINS + FRIDGE ─────────────────────────────────────── -->
+        <section class="flex gap-8 flex-wrap lg:flex-nowrap">
+
+          <!-- Quick Wins carousel -->
+          <div v-if="quickWins.length" class="flex-1 min-w-0 space-y-4 basis-80">
+            <div class="flex items-baseline gap-3">
+              <h2 class="text-2xl font-bold tracking-tight">Quick Wins</h2>
+              <span class="text-sm text-gray-400">Under 30 minutes</span>
+            </div>
+            <BlocksCarousel flex-class="gap-3">
+              <RecipeCard
+                v-for="recipe in quickWins"
+                :key="recipe.id"
+                :recipe="recipe"
+                :reason-text="getQuickTimeLabel(recipe)"
+                class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]"
+              />
+            </BlocksCarousel>
+          </div>
+          
+          <!-- Fridge Widget -->
+          <div :class="quickWins.length ? 'basis-80 flex-1 max-w-104' : 'w-full'" class="flex flex-col gap-4 mb-4">
+            <h2 class="text-2xl font-bold tracking-tight">What's in your fridge?</h2>
+            <div class="rounded-4xl bg-primary-10/50 main-card-padding space-y-4 flex-1">
+
+              <!-- Input state -->
+              <template v-if="fridgeResults === null">
+                <p class="text-sm text-gray-500 leading-snug">Enter ingredients — we'll find recipes that use them all.</p>
+                <div v-if="fridgeIngredients.length" class="flex flex-wrap gap-2">
+                  <div v-for="(ing, i) in fridgeIngredients" :key="i"
+                    class="flex items-center gap-1.5 px-2.5 py-1 bg-primary-10 rounded-xl text-sm">
+                    <span>{{ ing }}</span>
+                    <button @click="removeFridgeIngredient(i)"
+                      class="text-gray-400 hover:text-gray-600 leading-none text-base">×</button>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <input v-model="fridgeInput" placeholder="e.g. chicken…"
+                    @keydown.enter.prevent="addFridgeIngredient"
+                    class="flex-1 bg-primary-10 rounded-2xl px-3 py-2 text-sm focus:outline-none" />
+                  <button @click="addFridgeIngredient" class="animated-button bg-primary-10 px-3 py-2 rounded-2xl">
+                    <IconPlus class="w-4" />
+                  </button>
+                </div>
+                <button @click="searchFridge" :disabled="fridgeIngredients.length === 0 || fridgeLoading"
+                  class="animated-button bg-primary text-white w-full py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-40 transition-opacity mt-auto">
+                  <span v-if="fridgeLoading">Searching…</span>
+                  <span v-else>Find Recipes</span>
+                </button>
+              </template>
+
+              <!-- Results state -->
+              <template v-else>
+                <div class="flex items-center justify-between">
+                  <p class="text-sm text-gray-500">
+                    {{ fridgeResults.length ? `${fridgeResults.length} recipe${fridgeResults.length === 1 ? '' : 's'} found` : 'No recipes found' }}
+                  </p>
+                  <button @click="clearFridge" class="text-xs text-primary font-semibold">Try again</button>
+                </div>
+                <div v-if="fridgeResults.length" class="flex flex-col gap-2">
+                  <RecipeCardHorizontal v-for="recipe in fridgeResults" :key="recipe.id" :recipe="recipe"
+                    class="text-[20px]" />
+                </div>
+                <p v-else class="text-sm text-gray-400">Try fewer or different ingredients.</p>
+              </template>
+
             </div>
           </div>
-        </div>
-        <!-- Shopping List -->
-        <div class="shrink-0 flex flex-col gap-6">
-          <h2 class="text-2xl font-bold tracking-tight mx-2">Shopping List</h2>
-          <div class="main-card p-6 flex flex-col justify-between gap-6 flex-1">
-            <div class="flex flex-col gap-4">
-              <div class="flex items-center gap-3">
-                <input type="checkbox" class="w-5 h-5" />
-                <p class="text-lg leading-none">100g of Chicken</p>
-              </div>
-              <div class="flex items-center gap-3">
-                <input type="checkbox" class="w-5 h-5" />
-                <p class="text-lg leading-none">500g of Rice</p>
-              </div>
-              <div class="flex items-center gap-3">
-                <input type="checkbox" class="w-5 h-5" />
-                <p class="text-lg leading-none">200g of Salmon</p>
-              </div>
-              <div class="flex items-center gap-3">
-                <input type="checkbox" class="w-5 h-5" />
-                <p class="text-lg leading-none">100g of Carrots</p>
-              </div>
-            </div>
-            <NuxtLink
-              to="/shopping-list"
-              class="p-3 text-lg leading-none text-center self-center text-primary font-bold"
-              >View all (12 items) ›</NuxtLink
-            >
-          </div>
-        </div>
-        <!-- Your Cookbook -->
-        <div
-          class="space-y-6 pb-0 basis-80 w-80 md:basis-120 md:w-120 flex-1 md:max-w-300"
-        >
-          <h2 class="text-2xl font-bold tracking-tight">From your Cookbook</h2>
-          <BlocksCarousel class="" :flexClass="'gap-2'">
-            <NuxtLink
-              :to="'/recipe/new'"
-              class="animated-button flex flex-col gap-2 justify-center items-center p-4 outline-2 outline-primary rounded-4xl! w-44 h-56 self-end ml-2 mb-2"
-            >
-              <div
-                class="rounded-full primary-gradient p-2 leading-none text-white w-10 aspect-square flex items-center justify-center"
-              >
-                <IconPlus class="w-6" strokeWidth="3" />
-              </div>
-              <p class="text-lg leading-none">Add a recipe</p>
-            </NuxtLink>
+        </section>
+
+        <!-- RECENTLY SEEN ───────────────────────────────────────────── -->
+        <section v-if="recentlySeen.length">
+          <h2 class="text-2xl font-bold tracking-tight mb-4">You Looked at These</h2>
+          <BlocksCarousel flex-class="gap-3">
             <RecipeCard
-              v-for="recipe in yourKitchenRecipes"
+              v-for="recipe in recentlySeen"
               :key="recipe.id"
               :recipe="recipe"
-              class="w-50 ml-2 mb-2 text-[24px] sm:text-[30px]"
+              class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]"
             />
           </BlocksCarousel>
-        </div>
+        </section>
+
+        <!-- EQUIPMENT ───────────────────────────────────────────────── -->
+        <section v-if="userEquipmentIds.length">
+          <h2 class="text-2xl font-bold tracking-tight mb-8">For Your Kitchen</h2>
+          <div class="space-y-10">
+            <template v-for="eqId in userEquipmentIds" :key="eqId">
+              <div v-if="equipmentRecipes[eqId]?.length">
+                <h3 class="text-lg font-semibold tracking-tight mb-4">{{ getEquipmentLabel(eqId) }}</h3>
+                <BlocksCarousel flex-class="gap-3">
+                  <RecipeCard
+                    v-for="recipe in equipmentRecipes[eqId]"
+                    :key="recipe.id"
+                    :recipe="recipe"
+                    :reason-text="'For your ' + getEquipmentName(eqId)"
+                    class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]"
+                  />
+                </BlocksCarousel>
+              </div>
+            </template>
+          </div>
+        </section>
+
       </div>
-      <div v-else class="basis-100 w-full bg-primary-300 rounded-4xl p-6"></div>
-      <!-- Recommendations -->
-      <div class="mt-6">
-        <h2 class="text-2xl font-bold tracking-tight mx-2">For You</h2>
-        <p
-          class="text-sm text-gray-500 leading-none mx-2"
-          v-if="!auth.isUser()"
-        >
-          <NuxtLink to="/login" class="underline">Sign in</NuxtLink> to get
-          tailored recommendations
-        </p>
-        <div class="flex flex-wrap gap-6 mt-6">
-          <RecipeCardHorizontal
-            v-for="recipe in recommendedRecipes"
-            :key="recipe.id"
-            :recipe="recipe"
-            class="basis-95 max-w-150 flex-1 text-[24px] sm:text-[30px]"
-          />
-        </div>
-      </div>
-    </div>
-    <div v-else-if="auth.profileFetched && !auth.isUser()">
-      <HerocardsHome />
-      <div class="pt-10">
-        <h2 class="text-2xl font-bold tracking-tight mx-2">For You</h2>
-        <p
-          class="text-sm text-gray-500 leading-none mx-2"
-          v-if="!auth.isUser()"
-        >
-          <NuxtLink to="/login" class="underline">Sign in</NuxtLink> to get
-          tailored recommendations
-        </p>
-        <div class="flex flex-wrap gap-6 mt-6">
-          <RecipeCardHorizontal
-            v-for="recipe in recommendedRecipes"
-            :key="recipe.id"
-            :recipe="recipe"
-            class="basis-95 max-w-150 flex-1 text-[24px] sm:text-[30px]"
-          />
-        </div>
-      </div>
+
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-const auth = useAuthStore();
-const supabase = useSupabaseClient<Database>();
-const recommendedRecipes = ref<RecipeOverview[] | null>(null);
-
-const yourKitchenRecipes = computed(() => {
-  const all = new Set([
-    ...(auth.user?.recipes ?? []),
-    ...(auth.user?.bookmarks ?? []),
-  ]);
-  const unique = Array.from(all).sort((a, b) => b.relevancy - a.relevancy);
-  return unique.slice(0, 9);
-});
-
-const fetchRecipes = async () => {
-  if (!auth.user?.id) return;
-  recommendedRecipes.value = await getRecipeOverviews(supabase, {
-    orderBy: { column: 'relevancy', ascending: false },
-    range: { from: 15, to: 23 },
-    eq: { visibility: 'PUBLIC' },
-    not: { picture: null },
-  });
+type RecommendationRow = RecipeOverview & {
+  nearest_recipe: { id: number; title: string; set: 'own' | 'bookmarks' | 'ratings' } | null;
+  matched_tags: number[];
+  dominant_signal: 'taste' | 'tags' | 'trending';
 };
 
-watchEffect(() => {
-  fetchRecipes();
+const supabase = useSupabaseClient<Database>();
+const auth = useAuthStore();
+
+// ─── Greeting ────────────────────────────────────────────────────────────────
+const greeting = computed(() =>
+  auth.user?.username ? `Welcome back, ${auth.user.username}!` : 'Welcome back!'
+);
+
+// ─── Tracking config ─────────────────────────────────────────────────────────
+// @ts-ignore
+const hasTracking = computed(() => !!(auth.user?.user_data as any)?.tracking);
+const trackingTargets = computed(() => (auth.user?.user_data as any)?.tracking?.targets);
+const kcalGoal = computed(() => trackingTargets.value?.kcal ?? 2000);
+const proteinGoal = computed(() => trackingTargets.value?.protein ?? 100);
+const fiberGoal = computed(() => trackingTargets.value?.fiber ?? 30);
+const fatGoal = computed(() => trackingTargets.value?.fat ?? 70);
+const carbsGoal = computed(() => trackingTargets.value?.carbohydrates ?? 275);
+
+// ─── Today's nutrition ───────────────────────────────────────────────────────
+const todayConsumed = ref({ kcal: 0, protein: 0, fiber: 0, fat: 0, carbohydrates: 0 });
+const isTodayLoading = ref(false);
+
+async function fetchTodayNutrition() {
+  if (!auth.user?.id) return;
+  const today = new Date().toISOString().split('T')[0] ?? '';
+  isTodayLoading.value = true;
+  try {
+    const { data } = await supabase
+      .from('tracked_meals')
+      .select('kcal, protein, fat, carbohydrates, fiber')
+      .eq('user_id', auth.user.id)
+      .eq('meal_date', today);
+
+    if (data?.length) {
+      todayConsumed.value = {
+        kcal: data.reduce((s, m) => s + (m.kcal ?? 0), 0),
+        protein: data.reduce((s, m) => s + (m.protein ?? 0), 0),
+        fiber: data.reduce((s, m) => s + (m.fiber ?? 0), 0),
+        fat: data.reduce((s, m) => s + (m.fat ?? 0), 0),
+        carbohydrates: data.reduce((s, m) => s + (m.carbohydrates ?? 0), 0),
+      };
+    }
+  } finally {
+    isTodayLoading.value = false;
+  }
+}
+
+// ─── Hover preview ───────────────────────────────────────────────────────────
+const hoveredRecipe = ref<RecipeOverview | null>(null);
+
+const previewConsumed = computed(() => ({
+  kcal: todayConsumed.value.kcal + (hoveredRecipe.value?.kcal ?? 0),
+  protein: todayConsumed.value.protein + (hoveredRecipe.value?.protein ?? 0),
+  fiber: todayConsumed.value.fiber + (hoveredRecipe.value?.fiber ?? 0),
+  fat: todayConsumed.value.fat + (hoveredRecipe.value?.fat ?? 0),
+  carbohydrates: todayConsumed.value.carbohydrates + (hoveredRecipe.value?.carbohydrates ?? 0),
+}));
+
+function previewBarStyle(consumed: number, recipeVal: number, goal: number) {
+  const consumedPct = Math.min(100, (consumed / goal) * 100);
+  const addPct = Math.min(100 - consumedPct, (recipeVal / goal) * 100);
+  return { left: consumedPct + '%', width: Math.max(0, addPct) + '%' };
+}
+
+// ─── Macro-fit scoring ───────────────────────────────────────────────────────
+const EXPONENT = 1.3;
+
+type MacroType = 'positive' | 'negative' | 'bidirectional';
+
+function rawMacroDist(consumed: number, recipeVal: number, target: number, type: MacroType): number {
+  const actual = consumed + recipeVal;
+  if (type === 'positive') return Math.max(0, target - actual);
+  if (type === 'negative') return Math.max(0, actual - target);
+  return Math.abs(target - actual);
+}
+
+function macroFitScore(recipe: RecipeOverview): number {
+  const c = todayConsumed.value;
+  const entries: Array<{ consumed: number; recipeVal: number; target: number; weight: number; type: MacroType }> = [
+    { consumed: c.protein, recipeVal: recipe.protein ?? 0, target: proteinGoal.value, weight: 2.5, type: 'positive' },
+    { consumed: c.kcal, recipeVal: recipe.kcal ?? 0, target: kcalGoal.value, weight: 2, type: 'bidirectional' },
+    { consumed: c.fiber, recipeVal: recipe.fiber ?? 0, target: fiberGoal.value, weight: 1, type: 'positive' },
+    { consumed: c.fat, recipeVal: recipe.fat ?? 0, target: fatGoal.value, weight: 0.7, type: 'bidirectional' },
+    { consumed: c.carbohydrates, recipeVal: recipe.carbohydrates ?? 0, target: carbsGoal.value, weight: 0.5, type: 'bidirectional' },
+  ];
+  let total = 0;
+  for (const e of entries) {
+    if (e.target <= 0) continue;
+    const normalized = rawMacroDist(e.consumed, e.recipeVal, e.target, e.type) / e.target;
+    total += e.weight * Math.pow(normalized, EXPONENT);
+  }
+  return total;
+}
+
+// ─── Familiar recipes (for nutrition section) ────────────────────────────────
+const familiarRecipes = ref<RecipeOverview[]>([]);
+const isFamiliarLoading = ref(false);
+
+const macroFitRecipes = computed(() => {
+  if (!familiarRecipes.value.length) return [];
+  return [...familiarRecipes.value]
+    .sort((a, b) => macroFitScore(a) - macroFitScore(b))
+    .slice(0, 4);
 });
 
-const greeting = computed(() => {
-  if (auth.user?.username) {
-    return `Welcome back, ${auth.user?.username}!`;
+const macroFitIds = computed(() => new Set(macroFitRecipes.value.map((r) => r.id)));
+
+function getMacroBadgeText(recipe: RecipeOverview): string {
+  const c = todayConsumed.value;
+  const candidates = [
+    { label: `+${Math.round(recipe.protein ?? 0)}g Protein`, shortfall: Math.max(0, proteinGoal.value - c.protein) / Math.max(1, proteinGoal.value), value: recipe.protein ?? 0 },
+    { label: `+${Math.round(recipe.fiber ?? 0)}g Fiber`, shortfall: Math.max(0, fiberGoal.value - c.fiber) / Math.max(1, fiberGoal.value), value: recipe.fiber ?? 0 },
+    { label: `≈ ${Math.round(recipe.kcal ?? 0)} kcal`, shortfall: Math.abs(kcalGoal.value - c.kcal) / Math.max(1, kcalGoal.value), value: recipe.kcal ?? 0 },
+  ].filter((c) => c.value > 0).sort((a, b) => b.shortfall - a.shortfall);
+  return candidates[0]?.label ?? 'Good match';
+}
+
+async function fetchFamiliarRecipes() {
+  if (!auth.user?.id) return;
+  isFamiliarLoading.value = true;
+  try {
+    const { data, error } = await (supabase as any).rpc('get_recommendations', {
+      p_user_id: auth.user.id,
+      max: 40,
+      explore: false,
+    });
+    if (!error) {
+      familiarRecipes.value = (data ?? []).map((row: any) => ({ ...row, tags: row.tags ?? [] }));
+    }
+  } finally {
+    isFamiliarLoading.value = false;
   }
-  return 'Welcome back!';
+}
+
+// ─── Recommendations (shared: For You + Quick Wins) ──────────────────────────
+const allResults = ref<RecommendationRow[]>([]);
+const isLoading = ref(true);
+
+function isQuickRecipe(r: RecipeOverview): boolean {
+  if (r.total_time_mins && r.total_time_mins >= 30) return false;
+  if (r.total_time_mins && r.total_time_mins <= 30) return true;
+  return (r.tags ?? []).some((t) => t == 2);
+}
+
+function getQuickTimeLabel(recipe: RecipeOverview): string {
+  const mins = recipe.total_time_mins;
+  if (!mins) return 'Ready in <25min';
+  const rounded = Math.max(5, mins < 60 ? Math.floor(mins / 5) * 5 : Math.floor(mins / 10) * 10);
+  const h = Math.floor(rounded / 60);
+  const m = rounded % 60;
+  if (h > 0 && m > 0) return `${h}h ${m}min`;
+  if (h > 0) return `${h}h`;
+  return `Ready in ${m}min`;
+}
+
+const quickWins = computed(() =>
+  allResults.value
+    .filter((r) => !macroFitIds.value.has(r.id) && isQuickRecipe(r))
+    .slice(0, 5)
+);
+
+const quickWinIds = computed(() => new Set(quickWins.value.map((r) => r.id)));
+
+const forYouResults = computed(() =>
+  allResults.value.filter((r) => !macroFitIds.value.has(r.id) && !quickWinIds.value.has(r.id)).slice(0, 13)
+);
+
+const allUsedIds = computed(() => new Set([
+  ...macroFitIds.value,
+  ...quickWinIds.value,
+  ...forYouResults.value.map((r) => r.id),
+]));
+
+async function fetchRecommendations() {
+  isLoading.value = true;
+  try {
+    const { data, error } = await (supabase as any).rpc('get_recommendations', {
+      p_user_id: auth.user?.id,
+      max: 24,
+      explore: true,
+    });
+    if (!error) {
+      allResults.value = (data ?? []).map((row: any) => ({
+        ...row,
+        tags: row.tags ?? [],
+      })) as RecommendationRow[];
+    }
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// ─── Recently Seen ────────────────────────────────────────────────────────────
+const recentlySeenRecipes = ref<RecipeOverview[]>([]);
+
+const recentlySeen = computed(() =>
+  recentlySeenRecipes.value.filter((r) => !allUsedIds.value.has(r.id))
+);
+
+async function fetchRecentlySeen() {
+  const ids: number[] = ((auth.user as any)?.recently_seen ?? []).slice(0, 14);
+  if (ids.length === 0) return;
+  const recipes = await getRecipeOverviews(supabase, { in: { id: ids }, limit: 14 });
+  recentlySeenRecipes.value = ids
+    .map((id) => recipes.find((r) => r.id === id))
+    .filter(Boolean) as RecipeOverview[];
+}
+
+// ─── Equipment ────────────────────────────────────────────────────────────────
+const equipmentRecipes = ref<Record<number, RecipeOverview[]>>({});
+
+const userEquipmentIds = computed<number[]>(() =>
+  ((auth.user as any)?.liked_tags ?? []).filter((id: number) => id >= 400)
+);
+
+const EQUIPMENT_LABELS: Record<number, string> = {
+  400: '🌪️ Air Fryer',
+  401: '⚡ Instant Pot',
+  402: '🍲 Slow Cooker',
+  403: '🤖 Thermomix',
+  404: '🍰 Stand Mixer',
+  405: '🍦 Ice Cream Machine',
+  406: '🌡️ Sous Vide',
+  407: '🧇 Waffle Iron',
+  408: '☀️ Dehydrator',
+  409: '🔵 Cast Iron',
+  410: '🫕 Dutch Oven',
+  411: '🥢 Wok',
+  412: '🍞 Bread Machine',
+  413: '🔥 Smoker',
+  414: '🍚 Rice Cooker',
+};
+
+function getEquipmentLabel(id: number): string {
+  return EQUIPMENT_LABELS[id] ?? 'Special Equipment';
+}
+
+function getEquipmentName(id: number): string {
+  return (EQUIPMENT_LABELS[id] ?? '').replace(/^\S+\s/, '');
+}
+
+async function fetchEquipmentRecipes() {
+  const eqIds = userEquipmentIds.value;
+  if (eqIds.length === 0) return;
+  await Promise.all(
+    eqIds.map(async (eqId) => {
+      const recipes = await getRecipeOverviews(supabase, {
+        filtering: { tags: [eqId], hidx: null, kcal: null, price: null },
+        orderBy: { column: 'relevancy', ascending: false },
+        or: 'picture.not.eq.null,source_type.eq.MEDIA',
+        limit: 8,
+      });
+      equipmentRecipes.value[eqId] = recipes;
+    })
+  );
+}
+
+// ─── Fridge Widget ────────────────────────────────────────────────────────────
+const fridgeInput = ref('');
+const fridgeIngredients = ref<string[]>([]);
+const fridgeResults = ref<RecipeOverview[] | null>(null);
+const fridgeLoading = ref(false);
+
+function addFridgeIngredient() {
+  const val = fridgeInput.value.trim().replace(/,+$/, '');
+  if (val && !fridgeIngredients.value.includes(val)) {
+    fridgeIngredients.value.push(val);
+  }
+  fridgeInput.value = '';
+}
+
+function removeFridgeIngredient(index: number) {
+  fridgeIngredients.value.splice(index, 1);
+}
+
+function clearFridge() {
+  fridgeResults.value = null;
+}
+
+async function searchFridge() {
+  if (fridgeIngredients.value.length === 0 || fridgeLoading.value) return;
+  fridgeLoading.value = true;
+  try {
+    const foodNameIds: number[] = [];
+    for (const ingredient of fridgeIngredients.value) {
+      const { data } = await (supabase as any).rpc('search_foods', { query: ingredient, max: 1 });
+      if (data?.[0]?.best_similarity > 0.7) {
+        const { data: fnData } = await supabase
+          .from('food_names')
+          .select('id')
+          .eq('food_id', data[0].food_id)
+          .limit(1)
+          .single();
+        if (fnData?.id) foodNameIds.push(fnData.id);
+      }
+    }
+    fridgeResults.value = foodNameIds.length
+      ? await getRecipesContaining(supabase, foodNameIds)
+      : [];
+  } catch {
+    fridgeResults.value = [];
+  } finally {
+    fridgeLoading.value = false;
+  }
+}
+
+// ─── Watchers ────────────────────────────────────────────────────────────────
+watchEffect(() => {
+  if (!auth.profileFetched) return;
+  fetchRecommendations();
+  fetchRecentlySeen();
+  if (auth.isUser()) {
+    fetchEquipmentRecipes();
+    if (hasTracking.value) {
+      fetchTodayNutrition();
+      fetchFamiliarRecipes();
+    }
+  }
 });
 </script>
-
-<style scoped></style>

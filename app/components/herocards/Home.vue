@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex main-card py-10 shadow-lg mt-8 md:mt-12 justify-between items-center relative overflow-hidden"
+    class="flex main-card py-10 mt-8 md:mt-12 justify-between items-center relative overflow-hidden"
   >
     <div
       class="flex flex-col gap-2 flex-1 2xl:mr-84 min-w-0 mx-4 sm:mx-10 text-center sm:text-left"

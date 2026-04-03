@@ -4,6 +4,148 @@ import pluralizeWord from '~/utils/format/pluralizeWord';
 import singularizeWord from '~/utils/format/singularizeWord';
 import type { Database } from '~/types/supabase';
 
+// ── Wiki-fields enrichment ────────────────────────────────────────────────────
+
+const MICRONUTRIENT_REFS: Record<string, number> = {
+  calcium_mg: 1000,
+  choline_mg: 550,
+  copper_mg: 0.9,
+  folate_ug_dfe: 400,
+  iodine_ug: 150,
+  iron_mg: 18,
+  magnesium_mg: 400,
+  manganese_mg: 2.3,
+  mufas_total_mg: 25000,
+  niacin_b3_mg: 16,
+  omega3_total_mg: 800,
+  potassium_mg: 4700,
+  riboflavin_b2_mg: 1.3,
+  selenium_ug: 55,
+  thiamine_b1_mg: 1.2,
+  vitamin_a_ug_rae: 900,
+  vitamin_b12_ug: 2.4,
+  vitamin_b6_mg: 1.7,
+  vitamin_c_mg: 90,
+  vitamin_d_ug: 20,
+  vitamin_e_mg_alpha_te: 15,
+  vitamin_k_ug: 120,
+  zinc_mg: 11,
+};
+
+function getTopThreeMicros(food: Record<string, any>): Record<string, number> {
+  const relevances: [string, number, number][] = [];
+  for (const [nutrient, refValue] of Object.entries(MICRONUTRIENT_REFS)) {
+    if (food[nutrient] != null && food[nutrient] > 0) {
+      relevances.push([nutrient, food[nutrient] / refValue, food[nutrient]]);
+    }
+  }
+  relevances.sort((a, b) => b[1] - a[1]);
+  return Object.fromEntries(relevances.slice(0, 3).map(([k, , v]) => [k, v]));
+}
+
+async function enrichFoodWithWikiFields(
+  client: any,
+  foodId: number,
+  foodObject: Record<string, any>,
+  foodNames: string[],
+  nutritionResponse: any
+) {
+  const assets = useStorage('assets:server');
+  const wikiPrompt = (await assets.getItem('food-create/wiki-fields.txt')) as string;
+
+  const nutritionLabel = {
+    kcal: foodObject.kcal,
+    carbohydrates: foodObject.carbohydrates,
+    sugar: foodObject.sugar,
+    fiber: foodObject.fiber,
+    protein: foodObject.protein,
+    fat: foodObject.fat,
+    saturated_fat: foodObject.saturated_fat,
+    salt: foodObject.salt,
+    nova: foodObject.nova,
+    ...getTopThreeMicros(foodObject),
+  };
+
+  const proteinQualityScore = Math.round(
+    nutritionResponse?.fullReport?.protein?.proteinQualityScore ??
+    nutritionResponse?.nutritionComputed?.report?.protein?.proteinQualityScore ??
+    0
+  );
+  const healthReport = {
+    overall_score: foodObject.hidx,
+    fiber_score: foodObject.fiber_score,
+    protein_score: foodObject.protein_score,
+    satiety_score: foodObject.satiety,
+    micronutrient_score: foodObject.mnidx,
+    fat_profile_score: foodObject.fat_profile_score,
+    protein_quality_score: proteinQualityScore,
+    polyphenol_score: foodObject.polyphenols,
+    carotenoid_score: foodObject.carotenoids,
+    glucosinolates_score: foodObject.glucosinolates,
+  };
+
+  const message = wikiPrompt
+    .replace('{primary_name}', foodObject.primary_name)
+    .replace('{nutrition_label}', JSON.stringify(nutritionLabel))
+    .replace('{referencing_foods}', JSON.stringify(foodNames))
+    .replace('{health_report}', JSON.stringify(healthReport));
+
+  const response = await $fetch('/api/gpt/response', {
+    method: 'POST',
+    body: { message, type: 'default' },
+  }) as string;
+
+  if (!response) return;
+  const result = JSON.parse(extractJson(response) ?? '{}');
+  if (!result?.visual_category) return;
+
+  await client
+    .from('foods')
+    .update({ visual_category: result.visual_category, description: result.description } as any)
+    .eq('id', foodId);
+
+  if (result.suggested_healthier_swaps?.length) {
+    const swaps: { food_id: number; swap_id: number }[] = [];
+    const baseHidx = foodObject.hidx ?? 0;
+
+    for (const swapName of result.suggested_healthier_swaps as string[]) {
+      try {
+        const swapResponse = (await $fetch('/api/db/request-food', {
+          method: 'POST',
+          body: { query: swapName, from_user: false },
+        })) as { status: string; data: { id: number | null } };
+
+        const swapNameId = swapResponse.data?.id;
+        if (!swapNameId) continue;
+
+        const { data: swapFoodName } = await client
+          .from('food_names')
+          .select('food_id')
+          .eq('id', swapNameId)
+          .single();
+        if (!swapFoodName) continue;
+
+        const { data: swapFood } = await client
+          .from('foods')
+          .select('hidx')
+          .eq('id', swapFoodName.food_id)
+          .single();
+        if (!swapFood || swapFood.hidx == null) continue;
+
+        if (swapFood.hidx > baseHidx + 5) {
+          swaps.push({ food_id: foodId, swap_id: swapNameId });
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    if (swaps.length) {
+      await client.from('foods_healthier_swap_suggestions').insert(swaps as any);
+    }
+  }
+}
+
 /**
  * Input: {
  * query: String
@@ -474,6 +616,16 @@ export default defineEventHandler(async (event) => {
       });
     }
     logCheckpoint('Request status updated');
+
+    enrichFoodWithWikiFields(
+      client,
+      foodData[0].id,
+      foodObject,
+      [primaryName, ...aliasesToInsert],
+      nutritionResponse
+    ).catch((err) =>
+      console.error(`wiki-fields enrichment failed for food ${foodData[0].id}:`, err)
+    );
 
     console.log(`🎉 Total execution time: ${Date.now() - startTime}ms`);
 

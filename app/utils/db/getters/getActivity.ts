@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function getActivity(
   client: SupabaseClient,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<Activity[]> {
   let query = client.from('activity').select(
     `
@@ -12,7 +12,8 @@ export async function getActivity(
         content,
         recipe: recipe_id (
           title,
-          id
+          id,
+          source_type
         )
       ),
       recipe: recipe_id (
@@ -29,7 +30,7 @@ export async function getActivity(
         )
       ),
       food: food_name_id ( name )
-    `
+    `,
   );
   query = buildQuery(query, opts);
   const { data, error } = await query;

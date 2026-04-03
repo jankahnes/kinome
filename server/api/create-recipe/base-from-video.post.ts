@@ -30,8 +30,18 @@ export default defineEventHandler(async (event) => {
     );
   }
   Object.assign(responseBase, args);
-  responseBase.original_creator_channel_name = responseBase.channel ?? null;
-  responseBase.original_creator_channel_id = responseBase.channel_id ?? null;
+  responseBase.video_metadata = {
+    url: responseBase.url ?? null,
+    title: responseBase.original_title ?? null,
+    channel: responseBase.channel ?? null,
+    channel_handle: responseBase.channel_handle ?? null,
+    channel_id: responseBase.channel_id ?? null,
+    view_count: responseBase.view_count ?? null,
+    like_count: responseBase.like_count ?? null,
+    tags: responseBase.tags ?? null,
+    upload_date: responseBase.upload_date ?? null,
+    duration: responseBase.duration ?? null,
+  };
   responseBase.base_ingredients = responseBase.ingredients_string
     .split('\n')
     .map((ingredient: string) => ingredient.trim())

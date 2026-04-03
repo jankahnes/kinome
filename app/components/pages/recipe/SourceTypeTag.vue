@@ -8,7 +8,7 @@
   >
     <span
       v-if="collection && collection.startsWith('traditional')"
-      class="flex items-center gap-2"
+      class="flex items-center gap-1"
     >
       <IconLibrary class="w-5" />
       From our Traditional
@@ -17,11 +17,11 @@
       }}
       Collection
     </span>
-    <span v-else-if="sourceType === 'WEBSITE'" class="flex items-center gap-2">
+    <span v-else-if="sourceType === 'WEBSITE'" class="flex items-center gap-1">
       <IconGlobe class="w-5" />
       Imported from {{ capitalize(getWebsiteName(source)) }}
     </span>
-    <span v-else-if="sourceType === 'MEDIA'" class="flex items-center gap-2">
+    <span v-else-if="sourceType === 'MEDIA'" class="flex items-center gap-1">
       <img
         :src="'/' + getWebsiteName(source) + '.webp'"
         :class="small ? iconStylesSmall?.[getWebsiteName(source) as keyof typeof iconStylesSmall] : iconStyles?.[getWebsiteName(source) as keyof typeof iconStyles]"

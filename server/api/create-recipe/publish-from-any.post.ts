@@ -9,6 +9,7 @@ type AnyInput = {
 export default defineEventHandler(async (event) => {
   const input = await readBody(event);
   const { source_type, source, collection }: AnyInput = input;
+
   let baseRecipe: BaseRecipe;
   switch (source_type) {
     case 'TITLE':
@@ -24,13 +25,17 @@ export default defineEventHandler(async (event) => {
       });
       break;
   }
+
   const { id } = await $fetch('/api/create-recipe/upload-base-recipe', {
     method: 'POST',
     body: { baseRecipe },
   });
+
+  // Phase B fires automatically for WEBSITE source_type
   await $fetch('/api/create-recipe/postprocess-base-recipe', {
     method: 'POST',
-    body: { recipeId: id, publish: true },
+    body: { recipeId: id },
   });
+
   return { status: 'ok', id };
 });

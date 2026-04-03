@@ -1,23 +1,16 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { Database } from '~/types/supabase';
-import {
-  BaseRecipe,
-  ProcessingRequirement,
-  RecipeRow,
-  UploadableRecipe,
-} from '~/types/types';
+import { RecipeRow, UploadableRecipe } from '~/types/types';
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
+
+const FULL_PROCESSING_SOURCES = ['MEDIA', 'WEBSITE'];
 
 export default defineEventHandler(async (event) => {
   const input = await readBody(event);
-  const {
-    recipeId,
-    jobId,
-    publish,
-  }: { recipeId: number; jobId: number; publish: boolean } = input;
+  const { recipeId, jobId }: { recipeId: number; jobId?: number } = input;
   const supabase = serverSupabaseServiceRole<Database>(event);
   const headers = getRequestHeaders(event);
-  // fetch base recipe
+
   const { data: baseRecipe }: { data: RecipeRow | null } = await supabase
     .from('recipes')
     .select('*')
@@ -27,19 +20,18 @@ export default defineEventHandler(async (event) => {
   if (!baseRecipe || !baseRecipe.base_ingredients_serves) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Recipe not found or missing required field : serves',
+      statusMessage: 'Recipe not found or missing required field: serves',
     });
   }
 
-  console.log('🔍 Formalizing ingredients string');
-  //set polling step to formalizing_ingredients
-  await supabase
-    .from('jobs')
-    .update({
-      step: 'formalizing_ingredients',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', jobId);
+  // ── Phase A: Step 1 — Formalize ingredients ──────────────────────────────
+  console.log('🔍 [Phase A] Formalizing ingredients');
+  if (jobId) {
+    await supabase
+      .from('jobs')
+      .update({ step: 'formalizing_ingredients', updated_at: new Date().toISOString() })
+      .eq('id', jobId);
+  }
 
   const { ingredients, notes } = await $fetch(
     '/api/create-recipe/formalize-ingredients',
@@ -48,7 +40,7 @@ export default defineEventHandler(async (event) => {
       body: {
         base_ingredients: baseRecipe.base_ingredients?.join('\n'),
         recipe_context_string: baseRecipe.title,
-        jobId: jobId,
+        jobId,
       },
     }
   );
@@ -65,12 +57,13 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  console.log('🔍 Converting uploadable recipe to computable recipe');
+  // ── Phase A: Step 2 — Basic nutrition (UNLISTED) ─────────────────────────
+  console.log('🔍 [Phase A] Calculating basic nutrition');
   const uploadableRecipe: UploadableRecipe = {
     ...baseRecipe,
     serves: baseRecipe.base_ingredients_serves,
-    ingredients: ingredients,
-    notes: notes,
+    ingredients,
+    notes,
   };
 
   const computableRecipe = await convertUploadableToComputable(
@@ -78,78 +71,7 @@ export default defineEventHandler(async (event) => {
     supabase
   );
 
-  console.log('🔍 Updating recipe with nutrition');
-  const response = await $fetch('/api/create-recipe/upload-processed-recipe', {
-    method: 'POST',
-    headers: {
-      cookie: headers.cookie || '',
-      authorization: headers.authorization || '',
-    },
-    body: {
-      ...computableRecipe,
-      full: false,
-    },
-  });
-
-  if (response.status !== 'ok') {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to create recipe',
-    });
-  }
-
-  await supabase
-    .from('jobs')
-    .update({
-      step: 'formalizing_instructions',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', jobId);
-
-  console.log('🔍 Formalizing instructions');
-  const descAndInstructions = (await $fetch(
-    '/api/create-recipe/formalize-instructions',
-    {
-      method: 'POST',
-      body: {
-        ...uploadableRecipe,
-      },
-    }
-  )) as { description: string; instructions?: string[] };
-
-  Object.assign(computableRecipe, descAndInstructions);
-
-  const { error } = await supabase
-    .from('recipes')
-    .update(descAndInstructions)
-    .eq('id', recipeId);
-
-  if (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage:
-        'Failed to update recipe with description and instructions',
-    });
-  }
-
-  if (!publish) {
-    await supabase.from('jobs').delete().eq('id', jobId);
-    return {
-      status: 'ok',
-    };
-  }
-  console.log('🔍 Publish ON, preparing required fields.');
-  await supabase
-    .from('jobs')
-    .update({
-      step: 'pre_publish',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', jobId);
-
-  const promises = [];
-  console.log('🔍 Calculating full nutrition');
-  const fullNutritionPromise = $fetch(
+  const nutritionResponse = await $fetch(
     '/api/create-recipe/upload-processed-recipe',
     {
       method: 'POST',
@@ -157,86 +79,88 @@ export default defineEventHandler(async (event) => {
         cookie: headers.cookie || '',
         authorization: headers.authorization || '',
       },
-      body: {
-        ...computableRecipe,
-        full: true,
-      },
+      body: { ...computableRecipe, full: false },
     }
   );
-  promises.push(fullNutritionPromise);
 
-  if (!baseRecipe.picture) {
-    console.log('🔍 No existing picture, generating AI placeholder picture');
-    const picturePromise = $fetch('/api/create-recipe/get-processed-image', {
-      method: 'POST',
-      headers: {
-        cookie: headers.cookie || '',
-        authorization: headers.authorization || '',
-      },
-      body: baseRecipe,
-    })
-      .then((response) => {
-        if (!response.image_base64) {
-          throw createError({
-            statusCode: 500,
-            statusMessage: 'Failed to generate picture',
-          });
-        }
-
-        console.log('🔍 Uploading AI placeholder picture');
-        return $fetch('/api/db/upload-image', {
-          method: 'POST',
-          headers: {
-            cookie: headers.cookie || '',
-            authorization: headers.authorization || '',
-          },
-          body: {
-            image: response.image_base64,
-            bucket: 'recipe',
-            id: recipeId,
-          },
-        });
-      })
-      .then((uploadResponse) => {
-        if (!uploadResponse.publicUrl) {
-          throw createError({
-            statusCode: 500,
-            statusMessage: 'Failed to upload picture',
-          });
-        }
-
-        console.log('🔍 Picture uploaded, updating recipe');
-        return supabase
-          .from('recipes')
-          .update({ picture: uploadResponse.publicUrl })
-          .eq('id', recipeId)
-          .then(({ error }) => {
-            if (error) {
-              throw createError({
-                statusCode: 500,
-                statusMessage: 'Failed to update recipe picture',
-              });
-            }
-            return uploadResponse;
-          });
-      })
-      .catch((error) => {
-        throw createError({
-          statusCode: 500,
-          statusMessage: error.statusMessage || 'Failed to process picture',
-        });
-      });
-
-    promises.push(picturePromise);
+  if ((nutritionResponse as any).status !== 'ok') {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to upload recipe nutrition',
+    });
   }
 
-  await Promise.all(promises);
+  // ── Phase A: Step 3 — Formalize instructions + extract equipment ──────────
+  console.log('🔍 [Phase A] Formalizing instructions');
+  if (jobId) {
+    await supabase
+      .from('jobs')
+      .update({ step: 'formalizing_instructions', updated_at: new Date().toISOString() })
+      .eq('id', jobId);
+  }
 
-  console.log('🔍 All required fields prepared, deleting job');
+  const { description, instructions, equipment_tag_ids } = (await $fetch(
+    '/api/create-recipe/formalize-instructions',
+    {
+      method: 'POST',
+      body: { ...uploadableRecipe },
+    }
+  )) as { description: string; instructions: string[]; equipment_tag_ids: number[] };
 
-  await supabase.from('jobs').delete().eq('id', jobId);
+  // Carry Phase A outputs into uploadableRecipe so Phase B has fresh data for embedding
+  uploadableRecipe.description = description;
+  (uploadableRecipe as any).instructions = instructions;
 
-  return {
-    status: 'ok',
-  };
+  const { error: updateError } = await supabase
+    .from('recipes')
+    .update({ description, instructions })
+    .eq('id', recipeId);
+
+  if (updateError) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to update recipe description and instructions',
+    });
+  }
+
+  // ── Phase A: Step 4 — Insert equipment tags ───────────────────────────────
+  if (equipment_tag_ids.length > 0) {
+    console.log(`🔍 [Phase A] Inserting equipment tags: ${equipment_tag_ids}`);
+    const { error: tagError } = await supabase.from('recipe_tags').insert(
+      equipment_tag_ids.map((tag_id) => ({ recipe_id: recipeId, tag_id })) as any
+    );
+    if (tagError) {
+      console.error('🔍 [Phase A] Failed to insert equipment tags:', tagError);
+    }
+  }
+
+  // ── Phase A complete ──────────────────────────────────────────────────────
+  console.log('✅ [Phase A] Complete');
+  if (jobId) {
+    await supabase.from('jobs').delete().eq('id', jobId);
+  }
+
+  // ── Fire Phase B for full-processing sources (no await) ───────────────────
+  const isFullProcessing = FULL_PROCESSING_SOURCES.includes(
+    baseRecipe.source_type ?? ''
+  );
+
+  if (isFullProcessing) {
+    console.log(`🔍 Firing Phase B for recipe ${recipeId} (${baseRecipe.source_type})`);
+    $fetch('/api/create-recipe/postprocess-enrich-recipe', {
+      method: 'POST',
+      body: {
+        recipeId,
+        uploadableRecipe,
+        instructions,
+        equipment_tag_ids,
+        authCookie: headers.cookie || '',
+        authHeader: headers.authorization || '',
+      },
+    }).catch((err) => {
+      console.error(`🔍 [Phase B] Failed for recipe ${recipeId}:`, err);
+    });
+  }
+
+  return { status: 'ok' };
 });

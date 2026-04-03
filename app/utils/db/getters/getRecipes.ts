@@ -8,6 +8,7 @@ import fillForUnits from '~/utils/format/fillForUnits';
 import type { Database } from '~/types/supabase';
 
 function getTagCategory(tagId: number): string {
+  if (tagId >= 400) return 'EQUIPMENT';
   if (tagId >= 300) return 'CUISINE';
   if (tagId >= 200) return 'TYPE';
   if (tagId >= 100) return 'DIET';
@@ -87,7 +88,7 @@ export async function getRecipes(
           user:profiles(id, username, picture)
         ),
         user:profiles!recipes_user_id_fkey(id, username, picture)
-      `);
+      `).neq('visibility', 'HIDDEN');
 
   query = buildQuery(query, opts);
 
@@ -171,8 +172,8 @@ export async function getRecipeOverviews(
 ): Promise<RecipeOverview[]> {
   let query = client.from('recipes').select(`
         id, hidx, kcal, price, title, created_at, visibility, picture, rating, protein, carbohydrates, fat, sugar, salt, fiber, user_id, collection, 
-        tags:recipe_tags(tag_id), source, description, original_title, source_type, original_creator_channel_name
-      `);
+        tags:recipe_tags(tag_id), source, description, video_metadata, source_type, total_time_mins
+      `).neq('visibility', 'HIDDEN');
   let similarityMap: Map<number, number> | null = null;
   if (opts.vector_search?.embedding?.length) {
     const { data: vectorResults, error: vectorError } = await client.rpc(

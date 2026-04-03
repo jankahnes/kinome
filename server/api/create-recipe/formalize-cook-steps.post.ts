@@ -13,11 +13,8 @@ interface CookStepRequestBody {
 }
 
 const BASE_INSTRUCTIONS_BLOCK = `
-The original recipe source includes the following instructions. Use them as a reference
-for technique and step order, but rewrite entirely in your own words.
-Do not copy phrasing or sentence structure.
+Phase A instructions — use these as a guide for step order and technique, but write the rich formatted steps in your own detailed style:
 
-Source instructions:
 {instructions}
 `;
 
@@ -36,8 +33,7 @@ export default defineEventHandler(async (event) => {
     })
     .join(';\n');
 
-  const hasInstructions =
-    body.instructions && body.instructions.length > 0;
+  const hasInstructions = body.instructions && body.instructions.length > 0;
 
   const baseInstructionsBlock = hasInstructions
     ? BASE_INSTRUCTIONS_BLOCK.replace(
@@ -72,5 +68,9 @@ export default defineEventHandler(async (event) => {
     throw new Error('No JSON found in cook steps response');
   }
 
-  return JSON.parse(jsonString);
+  const result = JSON.parse(jsonString);
+  return {
+    steps: result.steps,
+    estimated_total_time: result.estimated_total_time as number,
+  };
 });

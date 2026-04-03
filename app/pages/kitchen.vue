@@ -1,13 +1,8 @@
 <template>
   <div class="pb-16 m-4 sm:m-10 sm:ml-20">
     <div class="flex gap-2 flex-wrap">
-      <NuxtLink
-        v-for="view in views"
-        :key="view.path"
-        :to="`/kitchen${view.path}`"
-        class="animated-button bg-primary-10 px-3 py-2"
-        active-class="primary-gradient text-gray-800 px-3 py-2"
-      >
+      <NuxtLink v-for="view in views" :key="view.path" :to="`/kitchen${view.path}`"
+        class="animated-button bg-primary-10 px-3 py-2" active-class="primary-gradient text-gray-800 px-3 py-2">
         {{ view.displayName }}
       </NuxtLink>
     </div>
@@ -26,15 +21,11 @@ const views = computed(() => [
   },
   ...(auth.isUser()
     ? [
-        {
-          path: '/recommendations',
-          displayName: 'Recommendations',
-        },
-        {
-          path: '/cookbook',
-          displayName: 'Your Cookbook',
-        },
-      ]
+      {
+        path: '/recommendations',
+        displayName: 'Recommendations',
+      },
+    ]
     : []),
   {
     path: '/recipes',

@@ -34,6 +34,7 @@ export const TAGS = [
   { id: 116, name: 'mediterranean diet', value: 6, category: 'DIET' }, //ai
   { id: 117, name: 'dash diet', value: 6, category: 'DIET' }, //ai
   { id: 118, name: 'macro-friendly', value: 6, category: 'DIET' },
+  { id: 119, name: 'carnivore', value: 0, category: 'DIET' }, //ai
 
   { id: 200, name: 'main/dinner', value: 0, category: 'TYPE' }, //ai
   { id: 201, name: 'breakfast', value: 0, category: 'TYPE' }, //ai
@@ -92,4 +93,20 @@ export const TAGS = [
   { id: 324, name: 'brazilian', value: 3, category: 'CUISINE' }, //ai
   { id: 325, name: 'russian', value: 3, category: 'CUISINE' }, //ai
   { id: 326, name: 'mexican', value: 3, category: 'CUISINE' }, //ai
+
+  { id: 400, name: 'air fryer', value: 0, category: 'EQUIPMENT' },
+  { id: 401, name: 'instant pot', value: 0, category: 'EQUIPMENT' },
+  { id: 402, name: 'slow cooker', value: 0, category: 'EQUIPMENT' },
+  { id: 403, name: 'thermomix', value: 0, category: 'EQUIPMENT' },
+  { id: 404, name: 'stand mixer', value: 0, category: 'EQUIPMENT' },
+  { id: 405, name: 'ice cream machine', value: 0, category: 'EQUIPMENT' },
+  { id: 406, name: 'sous vide', value: 0, category: 'EQUIPMENT' },
+  { id: 407, name: 'waffle iron', value: 0, category: 'EQUIPMENT' },
+  { id: 408, name: 'dehydrator', value: 0, category: 'EQUIPMENT' },
+  { id: 409, name: 'cast iron', value: 0, category: 'EQUIPMENT' },
+  { id: 410, name: 'dutch oven', value: 0, category: 'EQUIPMENT' },
+  { id: 411, name: 'wok', value: 0, category: 'EQUIPMENT' },
+  { id: 412, name: 'bread machine', value: 0, category: 'EQUIPMENT' },
+  { id: 413, name: 'smoker', value: 0, category: 'EQUIPMENT' },
+  { id: 414, name: 'rice cooker', value: 0, category: 'EQUIPMENT' },
 ] as Tag[];

@@ -1,4 +1,5 @@
 export function timeAgo(isoString: string): string {
+  console.log(isoString);
   const date = new Date(isoString);
   const now = new Date();
   const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // in seconds

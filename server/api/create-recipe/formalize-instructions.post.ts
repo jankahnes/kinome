@@ -1,72 +1,59 @@
 import extractJson from '~/utils/format/extractJson';
 import { UploadableRecipe } from '~/types/types';
-import { getPublishingRequirements } from '~/utils/getPublishingRequirements';
+
+const BASE_INSTRUCTIONS_BLOCK = `The recipe source includes these instructions. Use them as a guide for technique and step order, but write the instructions entirely in your own words. Do not copy phrases or sentence structure.
+
+Source instructions:
+{instructions}
+`;
 
 export default defineEventHandler(async (event) => {
   const assets = useStorage('assets:server');
-  const base_recipe_information: UploadableRecipe = (await readBody(
-    event
-  )) as UploadableRecipe;
-  const publishingRequirements = getPublishingRequirements(base_recipe_information);
+  const recipe: UploadableRecipe = await readBody(event);
 
-  const ingredientsString = base_recipe_information.ingredients
-    .map(
-      (ingredient: {
-        name_original?: string;
-        id: number;
-        name?: string;
-        primary_name?: string;
-        preparation_description?: string;
-      }) =>
-        `${
-          ingredient.name_original || ingredient.name || ingredient.primary_name
-        } (${ingredient.preparation_description || ''}), ID ${ingredient.id}`
-    )
+  const ingredientsString = recipe.ingredients
+    .map((ingredient: any) => {
+      const name = ingredient.name_original || ingredient.name || ingredient.primary_name;
+      const prep = ingredient.preparation_description ? ` (${ingredient.preparation_description})` : '';
+      return `${name}${prep}`;
+    })
     .join(';\n');
-  let response = null;
-  if (
-    !publishingRequirements.hasInstructions
-  ) {
-    const descAndInstructionsPrompt = (await assets.getItem(
-      'recipe-create/desc-and-instructions-from-ingredients.txt'
-    )) as string;
-    response = await $fetch('/api/gpt/response', {
-      method: 'POST',
-      body: {
-        message: descAndInstructionsPrompt
-          .replace('{ingredient_list}', ingredientsString)
-          .replace('{title_info}', base_recipe_information.title),
-        type: 'default',
-      },
-    });
-  } else {
-    const descAndInstructionsWithBasePrompt = (await assets.getItem(
-      'recipe-create/desc-and-instructions-from-ingredients-with-base.txt'
-    )) as string;
-    response = await $fetch('/api/gpt/response', {
-      method: 'POST',
-      body: {
-        message: descAndInstructionsWithBasePrompt
-          .replace('{ingredient_list}', ingredientsString)
-          .replace('{title_info}', base_recipe_information.title)
-          .replace(
-            '{instructions}',
-            base_recipe_information.instructions!.join('\n')
-          ),
-        type: 'defaultInsensitive',
-      },
-    });
+
+  const baseInstructionsBlock =
+    recipe.instructions?.length
+      ? BASE_INSTRUCTIONS_BLOCK.replace('{instructions}', recipe.instructions.join('\n'))
+      : '';
+
+  const prompt = (await assets.getItem(
+    'recipe-create/desc-and-instructions-from-ingredients.txt'
+  )) as string;
+
+  const message = prompt
+    .replace('{title_info}', recipe.title ?? '')
+    .replace('{ingredient_list}', ingredientsString)
+    .replace('{base_instructions}', baseInstructionsBlock);
+
+  const response = await $fetch('/api/gpt/response', {
+    method: 'POST',
+    body: {
+      message,
+      type: 'default',
+    },
+  });
+
+  if (!response) {
+    throw new Error('No response from GPT for formalize-instructions');
   }
-  if (response) {
-    const descAndInstructionJson = extractJson(response);
-    if (!descAndInstructionJson) {
-      throw new Error('No JSON found in desc and instructions response');
-    }
-    const descAndInstructionsResult = JSON.parse(descAndInstructionJson);
-    if (!base_recipe_information.description) {
-      return { ...descAndInstructionsResult };
-    } else {
-      return { instructions: descAndInstructionsResult.instructions };
-    }
+
+  const jsonString = extractJson(response as string);
+  if (!jsonString) {
+    throw new Error('No JSON found in formalize-instructions response');
   }
+
+  const result = JSON.parse(jsonString);
+  return {
+    description: result.description as string,
+    instructions: result.instructions as string[],
+    equipment_tag_ids: (result.equipment_tag_ids ?? []) as number[],
+  };
 });

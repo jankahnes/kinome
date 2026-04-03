@@ -3,12 +3,12 @@
     <NuxtImg class="w-full h-64 object-cover rounded-br-4xl object-top"
       :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.png" alt="Light wooden background" />
     <div
-      class="hidden xl:flex absolute top-60 -translate-y-full right-4 bg-white/30 z-10 rounded-4xl items-center justify-center py-1 px-3 overflow-hidden"
+      class="hidden absolute top-60 -translate-y-full right-4 bg-white/30 z-10 rounded-4xl items-center justify-center py-1 px-3 overflow-hidden"
       :class="{ 'top-22!': !recipeStore.recipe?.picture }">
       <p class="text-lg flex items-center gap-2 font-bold" v-if="displayType === 'cuisine'">
         <template v-if="getCuisineDescription(recipeStore.recipe?.collection ?? '')">
           <span class="rounded-md overflow-hidden flex items-center justify-center" v-for="flag in getCuisineDescription(
-            recipeStore.recipe?.collection ?? ''
+            recipeStore.recipe?.collection ?? '',
           )?.flags" :key="flag">
             <img :src="`/flags/${flag}.svg`" :alt="flag" class="h-5 inline-block" />
           </span>
@@ -20,9 +20,9 @@
         Imported from {{ capitalize(websiteName) }}
       </p>
       <a class="text-base flex items-center gap-2 cursor-pointer" v-if="displayType === 'creator'"
-        :href="recipeStore.recipe?.source ?? ''" target="_blank">
+        :href="effectiveSource ?? ''" target="_blank">
         <IconVideo class="w-4 h-4" />
-        Created by {{ recipeStore.recipe?.original_creator_channel_name }}
+        Created by {{ (recipeStore.recipe?.video_metadata as any)?.channel }}
       </a>
       <p class="text-lg flex items-center gap-2" v-if="displayType === 'user'">
         <Avatar :user="recipeStore.recipe?.user!" class="w-10 -my-1 -ml-3" />
@@ -58,20 +58,24 @@
       </p>
       <p class="flex gap-2 mt-2">
         <button
-          class="animated-button bg-primary text-white flex-1 flex justify-center items-center gap-2 py-0.5 rounded-4xl! text-lg font-bold px-4"
+          class="animated-button bg-primary text-white flex-1 flex justify-center items-center gap-2 py-0.5 text-lg font-bold px-4"
           @click="cookModeOpen = true">
           <IconRocket class="w-6" :size="30" />
           Start Cooking
         </button>
-        <button v-if="!trackingAdded"
-          class="animated-button flex justify-center items-center gap-2 p-1 rounded-4xl! text-slate-600"
+        <button class="animated-button bg-primary-10 flex justify-center items-center gap-1 px-2" v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'"
+          @click="scrollToWatchSection()">
+          <IconChevronDown class="h-5" />
+          <span class="leading-none font-bold">Watch Video</span>
+        </button>
+        <button v-if="!trackingAdded" class="animated-button flex justify-center items-center gap-2 p-1 text-slate-600"
           :class="{ 'opacity-60 cursor-not-allowed': trackingLoading }" :disabled="trackingLoading"
           title="Track this meal" @click="trackFromRecipePage">
           <IconLoaderCircle v-if="trackingLoading" class="w-5.5 animate-spin" />
           <IconNotebookPen v-else class="w-5.5" />
         </button>
         <button v-else
-          class="animated-button flex justify-center items-center gap-0.5 pt-0.5 px-3 rounded-4xl! bg-green-100 text-green-800"
+          class="animated-button flex justify-center items-center gap-0.5 pt-0.5 px-3 bg-green-100 text-green-800"
           disabled>
           <IconCheck class="w-5" />
           <div class="flex flex-col items-start ml-2">
@@ -79,8 +83,15 @@
             <span class="leading-none text-[11px] -mt-0.5">Added to today</span>
           </div>
         </button>
-        <button class="animated-button flex justify-center items-center gap-2 p-1 rounded-4xl! text-slate-600">
-          <IconBookmark class="w-6" />
+        <button
+          class="animated-button flex justify-center items-center gap-2 p-1 text-slate-600 transition-all duration-200"
+          :class="{
+            '': isBookmarked,
+            'opacity-60 cursor-not-allowed': bookmarkLoading,
+          }" :disabled="bookmarkLoading" :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this recipe'"
+          @click="toggleBookmark">
+          <IconLoaderCircle v-if="bookmarkLoading" class="w-5.5 animate-spin" />
+          <IconBookmark v-else class="w-6" :class="{ 'fill-current': isBookmarked }" />
         </button>
       </p>
       <div class="flex items-center gap-3 mt-4" v-if="recipeStore.recipe?.rating != null">
@@ -105,8 +116,10 @@
       <div v-if="top7Tags.length > 0" class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-sm mt-2 justify-center">
         <div
           class="flex items-center justify-center text-nowrap bg-slate-200/50 px-2 py-1 rounded-4xl gap-2 leading-none"
-          :class="specialTags.includes(tag?.id ?? 0) || tag?.id === 4 ? 'bg-slate-200/70!' : ''"
-          v-for="(tag, index) in top7Tags" :key="index">
+          :class="specialTags.includes(tag?.id ?? 0) || tag?.id === 4
+            ? 'bg-slate-200/70!'
+            : ''
+            " v-for="(tag, index) in top7Tags" :key="index">
           <img :src="`/${tag?.name}.webp`" :alt="tag?.name" class="h-4" v-if="specialTags.includes(tag?.id ?? 0)" />
           <IconDollarSign class="h-4 -mx-2" v-else-if="tag?.id === 4" />
           {{ tag?.name }}
@@ -115,12 +128,14 @@
     </div>
     <div class="max-w-[1200px] flex-col xl:flex-row flex gap-10 md:mt-14 mx-2 lg:mx-8 xl:items-start">
       <div class="contents xl:flex flex-col gap-8 flex-3">
-        <PagesRecipeCookSteps :fullInstructions="recipeStore.recipe?.full_instructions ?? recipeStore.recipe?.instructions?.map(i => ({
-          formatted_text: i,
-        })) ?? []"
-          :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize"
+        <PagesRecipeCookSteps :fullInstructions="recipeStore.recipe?.full_instructions ??
+          recipeStore.recipe?.instructions?.map((i) => ({
+            formatted_text: i,
+          })) ??
+          []
+          " :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize"
           :formalizationLoading="job?.step === 'formalizing_instructions'" v-model:markedIngredients="markedIngredients"
-          class="hidden xl:block" ref="instructionListRef"/>
+          class="hidden xl:block" ref="instructionListRef" />
         <div class="xl:hidden order-1">
           <div class="w-0 h-0" ref="mobileTabTarget"></div>
           <div
@@ -139,10 +154,12 @@
             </h2>
           </div>
           <PagesRecipeCookSteps v-if="mobileTab === 'method'" v-model:markedIngredients="markedIngredients"
-            :fullInstructions="recipeStore.recipe?.full_instructions ?? recipeStore.recipe?.instructions?.map(i => ({
-              formatted_text: i,
-            })) ?? []"
-            :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize"
+            :fullInstructions="recipeStore.recipe?.full_instructions ??
+              recipeStore.recipe?.instructions?.map((i) => ({
+                formatted_text: i,
+              })) ??
+              []
+              " :ingredients="recipeStore.recipe?.ingredients" :servingSize="servingSize"
             :formalizationLoading="job?.step === 'formalizing_instructions'" :hideHeader="true" />
           <PagesRecipeIngredientList v-if="mobileTab === 'ingredients'" :addedInfo="{
             addedFat: recipeStore.recipe?.added_fat ?? 0,
@@ -154,7 +171,7 @@
             v-model:servingSize="servingSize" :formalizationLoading="job?.step === 'formalizing_ingredients'"
             :price="recipeStore.recipe?.price ?? 0" :hideHeader="true" :metaPills="metaPills" />
         </div>
-        <div class="space-y-2 order-4 xl:order-none" v-if="recipeStore.recipe?.kcal">
+        <div class="space-y-2 order-3 xl:order-none" v-if="recipeStore.recipe?.kcal">
           <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
             Health & Nutrition
           </h2>
@@ -166,10 +183,8 @@
           contextModalOpen = true;
           " />
         </div>
-        <div class="space-y-2 order-5 xl:order-none" v-if="auth.isAdmin()">
-          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-            Publish
-          </h2>
+        <div class="space-y-2 order-4 xl:order-none" v-if="auth.isAdmin()">
+          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">Publish</h2>
           <PagesRecipePublishChecklist :recipe="recipeStore.recipe!" :refresh="async (r, f) => { }" />
         </div>
         <div class="space-y-2 order-5 xl:order-none">
@@ -183,43 +198,114 @@
           <PagesRecipeCommentSection :id="recipeStore.recipe?.id" />
         </div>
       </div>
-      <div class="contents xl:flex flex-col gap-8 flex-2" ref="rightRailRef" :style="stickyStyle" :class="{
-        'xl:sticky xl:top-4': shouldStick,
-      }">
-        <div>
-          <PagesRecipeIngredientList :addedInfo="{
-            addedFat: recipeStore.recipe?.added_fat ?? 0,
-            addedSalt: recipeStore.recipe?.added_salt ?? 0,
-            batchSize: recipeStore.recipe?.batch_size ?? 1,
-          }" :ingredients="recipeStore.recipe?.ingredients"
-            :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
-            :batchSize="recipeStore.recipe?.batch_size ?? undefined" :recipeId="recipeStore.recipe?.id"
-            v-model:servingSize="servingSize" class="hidden xl:block"
-            :formalizationLoading="job?.step === 'formalizing_ingredients'" :price="recipeStore.recipe?.price ?? 0"
-            ref="ingredientListRef" :metaPills="metaPills" :markedIngredients="markedIngredients">
-          </PagesRecipeIngredientList>
-        </div>
-        <div class="space-y-2 order-6 xl:order-none">
-          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
-            Similar Recipes
-          </h2>
-          <div class="flex flex-col gap-4">
-            <RecipeCardHorizontal v-for="recipe in similarRecipes" :key="recipe.id" :recipe="recipe" class="-ml-2" />
+      <div class="contents xl:block flex-2" :style="rightColumnStyle">
+        <div class="contents xl:flex flex-col gap-8" ref="rightRailRef" :style="stickyStyle" :class="{
+          'xl:sticky xl:top-4': shouldStick,
+        }">
+          <div>
+            <PagesRecipeIngredientList :addedInfo="{
+              addedFat: recipeStore.recipe?.added_fat ?? 0,
+              addedSalt: recipeStore.recipe?.added_salt ?? 0,
+              batchSize: recipeStore.recipe?.batch_size ?? 1,
+            }" :ingredients="recipeStore.recipe?.ingredients"
+              :baseIngredients="recipeStore.recipe?.base_ingredients ?? []"
+              :batchSize="recipeStore.recipe?.batch_size ?? undefined" :recipeId="recipeStore.recipe?.id"
+              v-model:servingSize="servingSize" class="hidden xl:block"
+              :formalizationLoading="job?.step === 'formalizing_ingredients'" :price="recipeStore.recipe?.price ?? 0"
+              ref="ingredientListRef" :metaPills="metaPills" :markedIngredients="markedIngredients">
+            </PagesRecipeIngredientList>
+          </div>
+          <div class="space-y-2 order-2 xl:order-none rounded-4xl" :class="{ 'watch-flash': watchSectionFlashing }"
+            v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'">
+            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2" ref="watchSectionTarget">Watch</h2>
+            <div class="flex main-card main-card-padding sm:gap-6">
+              <div class="flex flex-col flex-1 justify-between ">
+                <div>
+                  <a class="text-sm uppercase text-slate-400 tracking-tight" :href="effectiveSource ?? ''"
+                    target="_blank">
+                    Original video
+                  </a>
+                  <p class="text-xs text-slate-400 tracking-tight -mt-1">Uploaded {{ uploadDate }}</p>
+                </div>
+                <div class="flex flex-col gap-2 items-center p-4 -mx-6 bg-secondary">
+                  <img class="w-20 h-20 object-cover rounded-full opacity-80 shadow-[0_0_10px_#00000020]"
+                    src="/neutral-avatar1.webp" alt="Guest avatar" />
+                  <div class="flex items-center gap-2 bg-primary-10 px-3 rounded-3xl ">
+                    <img :src="`/${getWebsiteName(effectiveSource)}.webp`" :alt="getWebsiteName(effectiveSource)"
+                      class="h-5" />
+                    <h3 class="text-lg sm:text-xl font-bold tracking-tight truncate max-w-48">
+                      {{ (recipeStore.recipe?.video_metadata as any)?.channel }}
+                    </h3>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2 pt-2 sm:pt-6">
+                  <div class="flex flex-wrap gap-2 max-h-5 overflow-hidden">
+                    <span class="text-sm text-blue-500" v-for="hashtag in (
+                      recipeStore.recipe?.video_metadata as any
+                    )?.tags ?? []" :key="hashtag">
+                      #{{ hashtag }}
+                    </span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="text-sm uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
+                      (recipeStore.recipe?.video_metadata as any)?.view_count
+                    ">
+                      <IconEye class="w-4 h-4" />
+                      {{
+                        getSocialProof(
+                          (recipeStore.recipe?.video_metadata as any)?.view_count,
+                        )
+                      }}
+                    </span>
+                    <span class="text-sm uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
+                      (recipeStore.recipe?.video_metadata as any)?.like_count
+                    ">
+                      <IconHeart class="w-4 h-4" />
+                      {{
+                        getSocialProof(
+                          (recipeStore.recipe?.video_metadata as any)?.like_count,
+                        )
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <iframe :src="embedSrc" title="Video" frameborder="0"
+                class="rounded-3xl self-center w-[150px] h-[270px] sm:w-[202px] sm:h-[360px]" allow="
+                accelerometer;
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                gyroscope;
+                picture-in-picture;
+                web-share;
+              " allowfullscreen v-if="embedSrc">
+              </iframe>
+            </div>
+          </div>
+          <div class="space-y-2 order-6 xl:order-none">
+            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+              You might also like
+            </h2>
+            <div class="flex flex-col gap-4">
+              <RecipeCardHorizontal v-for="recipe in similarRecipes" :key="recipe.id" :recipe="recipe" class="-ml-2" />
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <PagesRecipeCookMode v-model="cookModeOpen" :steps="recipeStore.recipe?.full_instructions ?? recipeStore.recipe?.instructions?.map(i => ({
-      formatted_text: i,
-    })) ?? []" :ingredients="recipeStore.recipe?.ingredients" :title="recipeStore.recipe?.title"
-      :servingSize="servingSize" :recipeId="recipeStore.recipe?.id"
-      :totalTime="recipeStore.recipe?.total_time_mins ?? 0" :equipment="recipeStore.recipe?.equipment ?? []" />
+    <PagesRecipeCookMode v-model="cookModeOpen" :steps="recipeStore.recipe?.full_instructions ??
+      recipeStore.recipe?.instructions?.map((i) => ({
+        formatted_text: i,
+      })) ??
+      []
+      " :ingredients="recipeStore.recipe?.ingredients" :title="recipeStore.recipe?.title" :servingSize="servingSize"
+      :recipeId="recipeStore.recipe?.id" :totalTime="recipeStore.recipe?.total_time_mins ?? 0"
+      :equipment="recipeStore.recipe?.equipment ?? []" />
     <BlocksResponsiveInfo v-if="recipeStore.recipe?.kcal && recipeStore.recipe?.hidx" v-model="contextModalOpen"
       :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`">
       <div v-if="contextMode === 'nutrition'" class="m-4">
-        <h2 class="text-4xl font-bold tracking-tighter mb-8">
-          Full Nutrition
-        </h2>
+        <h2 class="text-4xl font-bold tracking-tighter mb-8">Full Nutrition</h2>
         <FoodNutritionFacts :computable="recipeStore.recipe" />
         <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" />
       </div>
@@ -245,18 +331,87 @@ const mobileDescription = computed(() => {
 });
 
 const mobileTabTarget = ref<HTMLElement | null>(null);
+const watchSectionTarget = ref<HTMLElement | null>(null);
 
 const contextModalOpen = ref(false);
 const contextMode = ref<'nutrition' | 'health'>('nutrition');
 
 const markedIngredients = ref<number[]>([]);
 
+
 // Cook mode
 const cookModeOpen = ref(false);
 
+const effectiveSource = computed(() => {
+  return (recipeStore.recipe?.video_metadata as any)?.url ?? recipeStore.recipe?.source;
+});
+
+const uploadDate = computed(() => {
+  const raw = (recipeStore.recipe?.video_metadata as any)?.upload_date as
+    | string
+    | undefined;
+  if (!raw) return '';
+  const iso =
+    /^\d{8}$/.test(raw)
+      ? `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`
+      : raw;
+  return timeAgo(iso);
+});
+
+const embedSrc = computed(() => {
+  const src = effectiveSource.value;
+  if (!src) return null;
+
+  // Handle YouTube links
+  if (src.includes('youtube.com') || src.includes('youtu.be')) {
+    let videoId = '';
+    try {
+      if (src.includes('youtube.com')) {
+        // e.g. https://www.youtube.com/watch?v=JbC14Zn7plU
+        const url = new URL(src);
+        videoId = url.searchParams.get('v') || '';
+      } else if (src.includes('youtu.be')) {
+        // e.g. https://youtu.be/JbC14Zn7plU
+        // or https://youtu.be/JbC14Zn7plU?t=123
+        const url = new URL(src);
+        videoId = url.pathname.split('/')[1] || '';
+      }
+    } catch (e) {
+      // fallback: try extracting after last slash
+      videoId = src.split('/').pop() || '';
+    }
+    return videoId
+      ? `https://www.youtube.com/embed/${videoId}`
+      : null;
+  } else if (src?.includes('tiktok')) {
+    return `https://www.tiktok.com/player/v1/${src.split('/').pop()}`;
+  }
+  return null;
+});
+
+const getWebsiteName = (source: string | null | undefined) => {
+  if (!source) return '';
+  const url = new URL(source);
+  const parts = url.hostname.split('.');
+  const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+  return domain;
+};
+
+const getSocialProof = (number: number | null | undefined) => {
+  if (!number) return '0';
+  if (number >= 1000000) return `${Math.floor(number / 1000000)}M`;
+  else if (number >= 1000) return `${Math.floor(number / 1000)}K`;
+  else return number.toString();
+};
+
 // Tracking from recipe page
-const { addMealFromRecipe, loadMeals, saveMeals, hasUnsavedChanges, selectedDate } =
-  useMealTracking();
+const {
+  addMealFromRecipe,
+  loadMeals,
+  saveMeals,
+  hasUnsavedChanges,
+  selectedDate,
+} = useMealTracking();
 const trackingLoading = ref(false);
 const trackingAdded = ref(false);
 
@@ -286,6 +441,7 @@ const rightRailRef = ref<HTMLElement | null>(null);
 // Heights and sticky state
 const instructionHeight = ref(0);
 const ingredientHeight = ref(0);
+const rightRailHeight = ref(0);
 const containerTop = ref(0);
 const maxScrollPosition = ref(0);
 const scrollY = ref(0);
@@ -320,15 +476,21 @@ const stickyStyle = computed(() => {
   return {};
 });
 
+const rightColumnStyle = computed(() => {
+  if (!shouldStick.value) return {};
+  const needed = rightRailHeight.value + instructionHeight.value - ingredientHeight.value;
+  return { 'min-height': `${needed}px` };
+});
+
 const measureHeights = () => {
   if (isMobile.value || !import.meta.client) return;
 
   nextTick(() => {
     const instructionComponent = instructionListRef.value;
     const ingredientComponent = ingredientListRef.value;
-    const containerEl = rightRailRef.value;
+    const railEl = rightRailRef.value;
 
-    if (!instructionComponent || !ingredientComponent || !containerEl) return;
+    if (!instructionComponent || !ingredientComponent) return;
 
     const instructionRoot = instructionComponent.root;
     const ingredientRoot = ingredientComponent.root;
@@ -338,7 +500,7 @@ const measureHeights = () => {
     const ingredientEl =
       ingredientRoot?.value || ingredientRoot || ingredientComponent.$el;
 
-    if (instructionEl && ingredientEl && containerEl) {
+    if (instructionEl && ingredientEl) {
       const instructionHeightNew =
         instructionEl.offsetHeight ||
         instructionEl.getBoundingClientRect().height;
@@ -349,9 +511,15 @@ const measureHeights = () => {
       if (instructionHeightNew > 0 && ingredientHeightNew > 0) {
         instructionHeight.value = instructionHeightNew;
         ingredientHeight.value = ingredientHeightNew;
+        if (railEl) {
+          rightRailHeight.value =
+            railEl.offsetHeight || railEl.getBoundingClientRect().height;
+        }
 
-        const containerRect = containerEl.getBoundingClientRect();
-        containerTop.value = containerRect.top + window.scrollY;
+        // Use instruction element for containerTop — the right rail may be
+        // in sticky position, which skews getBoundingClientRect
+        const instructionRect = instructionEl.getBoundingClientRect();
+        containerTop.value = instructionRect.top + window.scrollY;
 
         maxScrollPosition.value =
           containerTop.value +
@@ -371,7 +539,7 @@ const similarRecipes = ref<RecipeOverview[]>([]);
 const getBudgetDescription = (price: number): string => {
   if (price >= 1) return `~$${Math.floor(price)}$ / serving`;
   else return `~${formatMoney(Math.round(price * 10) / 10)} / serving`;
-}
+};
 
 // Serving size state - managed at page level for both IngredientList and InstructionContainer
 const servingSize = ref(2); // Default to 2 servings
@@ -379,14 +547,18 @@ const servingSize = ref(2); // Default to 2 servings
 const specialTags = [102, 103, 107, 112];
 const top7Tags = computed(() => {
   if (!recipeStore.recipe?.tags) return [];
-  const tags = recipeStore.recipe.tags.map((tag) => getTagByID(tag)).filter((tag) => tag?.id !== 112);
+  const tags = recipeStore.recipe.tags
+    .map((tag) => getTagByID(tag))
+    .filter((tag) => tag?.id !== 112);
   tags?.sort((a, b) => (b?.value ?? 0) - (a?.value ?? 0));
   const budgetTag = tags.find((tag) => tag?.id === 4);
   if (budgetTag) {
     budgetTag.name = getBudgetDescription(recipeStore.recipe?.price ?? 0);
   }
   //extract special tags: vegan, vegetarian, gluten free, lactose free
-  if (tags.some((tag) => tag?.id === 102)) { return tags.filter((tag) => tag?.id !== 103).slice(0, 6); }
+  if (tags.some((tag) => tag?.id === 102)) {
+    return tags.filter((tag) => tag?.id !== 103).slice(0, 6);
+  }
   return tags.slice(0, 7);
 });
 
@@ -434,8 +606,9 @@ const displayType = computed(() => {
 });
 
 const websiteName = computed(() => {
-  if (!recipeStore.recipe?.source) return '';
-  const url = new URL(recipeStore.recipe.source);
+  const src = effectiveSource.value;
+  if (!src) return '';
+  const url = new URL(src);
   const parts = url.hostname.split('.');
   const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
   return domain;
@@ -456,7 +629,7 @@ const getCuisineDescription = (collection: string) => {
   if (displayType.value !== 'cuisine') return null;
   const cuisineName = collection.split('-')[1];
   const cuisine = cuisines.value.find(
-    (cuisine) => cuisine.name === cuisineName
+    (cuisine) => cuisine.name === cuisineName,
   );
   return cuisine ?? null;
 };
@@ -465,7 +638,7 @@ const getCuisineDescription = (collection: string) => {
 const jobId = ref(Number(route.query.poll as string) || null);
 const { job, isPolling, error, start, stop, restart, fetchJob } = useJobPolling(
   jobId,
-  supabase
+  supabase,
 );
 
 const loadingStore = useLoadingStore();
@@ -496,7 +669,7 @@ watch(
   () => job.value?.step,
   (newStep, oldStep) => {
     onJobStepChange(newStep, oldStep);
-  }
+  },
 );
 
 const {
@@ -508,8 +681,13 @@ const {
   () => getRecipe(supabase, { eq: { id } }),
   {
     lazy: import.meta.client,
-  }
+  },
 );
+
+const isBookmarked = ref(false);
+const bookmarkLoading = ref(false);
+
+
 
 // Re-fetch recipe data without showing loading state (for job polling updates)
 const loadRecipeWithoutLoading = async () => {
@@ -541,24 +719,24 @@ const recipeUrl = computed(
   () =>
     `https://kinome.app${getRecipeUrl(
       recipeStore.recipe?.id ?? 0,
-      recipeStore.recipe?.title ?? ''
-    )}`
+      recipeStore.recipe?.title ?? '',
+    )}`,
 );
 
 const imageUrl = computed(
   () =>
     recipeStore.recipe?.picture ||
     recipeStore.recipe?.social_picture ||
-    'https://kinome.app/feast.png'
+    'https://kinome.app/feast.png',
 );
 
 const healthGrade = computed(() =>
-  recipeStore.recipe?.hidx ? getGrade(recipeStore.recipe?.hidx, 'ovr') : null
+  recipeStore.recipe?.hidx ? getGrade(recipeStore.recipe?.hidx, 'ovr') : null,
 );
 
 const description = computed(
   () =>
-    `${recipeStore.recipe?.title} recipe nutrition facts: ${recipeStore.recipe?.kcal} kcal/100g, Nutrition Quality: ${healthGrade.value}. Discover in-depth nutritional analyis.`
+    `${recipeStore.recipe?.title} recipe nutrition facts: ${recipeStore.recipe?.kcal} kcal/100g, Nutrition Quality: ${healthGrade.value}. Discover in-depth nutritional analyis.`,
 );
 
 const jsonLd = computed(() => {
@@ -581,17 +759,19 @@ const jsonLd = computed(() => {
   }
 
   if (recipe.ingredients?.length) {
-    schema.recipeIngredient = recipe.ingredients.map(
-      (ing) => `${ing.amount} ${ing.unit} ${ing.name}`.trim()
+    schema.recipeIngredient = recipe.ingredients.map((ing) =>
+      `${ing.amount} ${ing.unit} ${ing.name}`.trim(),
     );
   }
 
   if (recipe.full_instructions?.length) {
-    schema.recipeInstructions = recipe.full_instructions.map((step: CookStep) => ({
-      '@type': 'HowToStep',
-      text: step.formatted_text,
-      ...(step.title ? { name: step.title } : {}),
-    }));
+    schema.recipeInstructions = recipe.full_instructions.map(
+      (step: CookStep) => ({
+        '@type': 'HowToStep',
+        text: step.formatted_text,
+        ...(step.title ? { name: step.title } : {}),
+      }),
+    );
   } else if (recipe.instructions?.length) {
     schema.recipeInstructions = recipe.instructions.map((step: string) => ({
       '@type': 'HowToStep',
@@ -605,12 +785,17 @@ const jsonLd = computed(() => {
       servingSize: '1 serving',
       calories: `${Math.round(recipe.kcal)} kcal`,
     };
-    if (recipe.protein != null) nutrition.proteinContent = `${recipe.protein.toFixed(1)} g`;
+    if (recipe.protein != null)
+      nutrition.proteinContent = `${recipe.protein.toFixed(1)} g`;
     if (recipe.fat != null) nutrition.fatContent = `${recipe.fat.toFixed(1)} g`;
-    if (recipe.carbohydrates != null) nutrition.carbohydrateContent = `${recipe.carbohydrates.toFixed(1)} g`;
-    if (recipe.fiber != null) nutrition.fiberContent = `${recipe.fiber.toFixed(1)} g`;
-    if (recipe.sugar != null) nutrition.sugarContent = `${recipe.sugar.toFixed(1)} g`;
-    if (recipe.saturated_fat != null) nutrition.saturatedFatContent = `${recipe.saturated_fat.toFixed(1)} g`;
+    if (recipe.carbohydrates != null)
+      nutrition.carbohydrateContent = `${recipe.carbohydrates.toFixed(1)} g`;
+    if (recipe.fiber != null)
+      nutrition.fiberContent = `${recipe.fiber.toFixed(1)} g`;
+    if (recipe.sugar != null)
+      nutrition.sugarContent = `${recipe.sugar.toFixed(1)} g`;
+    if (recipe.saturated_fat != null)
+      nutrition.saturatedFatContent = `${recipe.saturated_fat.toFixed(1)} g`;
     schema.nutrition = nutrition;
   }
 
@@ -634,7 +819,10 @@ const jsonLd = computed(() => {
 
   if (recipe.collection?.startsWith('traditional-')) {
     const cuisineSlug = recipe.collection.slice('traditional-'.length);
-    schema.recipeCuisine = cuisineSlug.split('-').map((w: string) => capitalize(w)).join(' ');
+    schema.recipeCuisine = cuisineSlug
+      .split('-')
+      .map((w: string) => capitalize(w))
+      .join(' ');
   }
 
   return schema;
@@ -716,19 +904,152 @@ const scrollIntoView = async (target: any, offset: number = 0) => {
   });
 };
 
+const watchSectionFlashing = ref(false);
+
+const scrollToWatchSection = () => {
+  if (!watchSectionTarget.value) return;
+
+  if (!isMobile.value) {
+    // On xl+: the Watch section is in the sticky right rail below the ingredient list.
+    // The sticky behaviour makes getBoundingClientRect().top on the watch section stay
+    // constant as the page scrolls, so a plain scrollIntoView undershoots. We correct
+    // by adding the "overhang" — how much further the cook-steps column extends past
+    // the bottom of the ingredient list (b2 - b1). If the ingredient list is already
+    // longer (b1 >= b2) the stickiness isn't causing a problem, so we fall through to
+    // the normal path.
+    const ingredientComponent = ingredientListRef.value;
+    const instructionComponent = instructionListRef.value;
+
+    const ingredientRoot = ingredientComponent?.root;
+    const instructionRoot = instructionComponent?.root;
+    const ingredientEl: HTMLElement | null =
+      ingredientRoot?.value || ingredientRoot || ingredientComponent?.$el || null;
+    const instructionEl: HTMLElement | null =
+      instructionRoot?.value || instructionRoot || instructionComponent?.$el || null;
+
+    if (ingredientEl && instructionEl) {
+      const b1 = ingredientEl.getBoundingClientRect().bottom;
+      const b2 = instructionEl.getBoundingClientRect().bottom;
+
+      if (b2 > b1) {
+        let domElement: HTMLElement = (watchSectionTarget.value as any).$el ?? watchSectionTarget.value;
+        const targetRect = domElement.getBoundingClientRect();
+        const targetTop = targetRect.top + window.pageYOffset + (b2 - b1);
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+
+        setTimeout(() => {
+          watchSectionFlashing.value = true;
+          setTimeout(() => { watchSectionFlashing.value = false; }, 900);
+        }, 700);
+        return;
+      }
+    }
+  }
+
+  scrollIntoView(watchSectionTarget.value);
+
+  setTimeout(() => {
+    watchSectionFlashing.value = true;
+    setTimeout(() => { watchSectionFlashing.value = false; }, 900);
+  }, 700);
+};
+
 const handleScroll = () => {
   scrollY.value = window.scrollY;
 };
 
 let resizeObserver: ResizeObserver | null = null;
 
+const initStickyBehavior = () => {
+  if (!import.meta.client || typeof ResizeObserver === 'undefined') return;
+
+  resizeObserver?.disconnect();
+  resizeObserver = new ResizeObserver(() => {
+    measureHeights();
+  });
+
+  const instructionComponent = instructionListRef.value;
+  const ingredientComponent = ingredientListRef.value;
+  const railEl = rightRailRef.value;
+
+  if (instructionComponent?.root) {
+    const instructionEl =
+      instructionComponent.root?.value || instructionComponent.root;
+    if (instructionEl) resizeObserver.observe(instructionEl);
+  }
+
+  if (ingredientComponent?.root) {
+    const ingredientEl =
+      ingredientComponent.root?.value || ingredientComponent.root;
+    if (ingredientEl) resizeObserver.observe(ingredientEl);
+  }
+
+  if (railEl) resizeObserver.observe(railEl);
+
+  measureHeights();
+};
+
+// Re-attach observers when components mount after lazy data load (client-side nav)
+watch(
+  () => instructionListRef.value,
+  (val) => {
+    if (val) nextTick(() => initStickyBehavior());
+  },
+  { flush: 'post' },
+);
+
+const fetchBookmarkStatus = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data, error } = await supabase
+    .from('bookmarks')
+    .select('recipe_id')
+    .eq('user_id', user.id)
+    .eq('recipe_id', id)
+    .maybeSingle();
+  isBookmarked.value = data != null;
+};
+
+async function toggleBookmark() {
+  if (!id || bookmarkLoading.value) return;
+  bookmarkLoading.value = true;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    if (isBookmarked.value) {
+      const { error } = await supabase
+        .from('bookmarks')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('recipe_id', id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from('bookmarks').insert({
+        user_id: user.id,
+        recipe_id: id,
+      });
+      if (error) throw error;
+    }
+    await fetchBookmarkStatus();
+  } catch (e) {
+    console.error('Bookmark toggle failed:', e);
+  } finally {
+    bookmarkLoading.value = false;
+  }
+}
+
 onMounted(async () => {
+  fetchBookmarkStatus();
   if (
     !recipeStore.recipe?.picture &&
     recipeStore.recipe?.source_type === 'MEDIA'
   ) {
     recipeStore.recipe.social_picture = await recipeStore.getSocialPicture(
-      recipeStore.recipe.source ?? ''
+      effectiveSource.value ?? '',
     );
   }
   start();
@@ -736,34 +1057,16 @@ onMounted(async () => {
   track(id, 'click');
   trackTimeSpent(id);
 
+  if (auth.user?.id) {
+    trackRecipeView(supabase, auth.user.id, id).catch(() => { });
+  }
+
   // Set up sticky behavior
   scrollY.value = window.scrollY;
   window.addEventListener('scroll', handleScroll, { passive: true });
   window.addEventListener('resize', measureHeights, { passive: true });
 
-  // Set up ResizeObserver for dynamic height changes
-  if (typeof ResizeObserver !== 'undefined') {
-    resizeObserver = new ResizeObserver(() => {
-      measureHeights();
-    });
-
-    nextTick(() => {
-      const instructionComponent = instructionListRef.value;
-      const ingredientComponent = ingredientListRef.value;
-
-      if (instructionComponent?.root) {
-        const instructionEl =
-          instructionComponent.root?.value || instructionComponent.root;
-        if (instructionEl) resizeObserver?.observe(instructionEl);
-      }
-
-      if (ingredientComponent?.root) {
-        const ingredientEl =
-          ingredientComponent.root?.value || ingredientComponent.root;
-        if (ingredientEl) resizeObserver?.observe(ingredientEl);
-      }
-    });
-  }
+  nextTick(() => initStickyBehavior());
 });
 
 onUnmounted(() => {
@@ -838,7 +1141,11 @@ const metaPills = computed(() => {
   for (const generic of metaGenerics) {
     const hasGeneric = recipeStore.recipe.tags.includes(generic.value);
     pills.push({
-      text: hasGeneric ? generic.name : ((generic.name == "Gluten Free") ? "Contains Gluten" : `Not ${generic.name}`),
+      text: hasGeneric
+        ? generic.name
+        : generic.name == 'Gluten Free'
+          ? 'Contains Gluten'
+          : `Not ${generic.name}`,
       class: hasGeneric ? 'bg-green-100' : 'bg-red-50',
       icon: hasGeneric ? 'check' : 'x',
     });
@@ -856,5 +1163,23 @@ const metaPills = computed(() => {
 .slide-down-enter-from,
 .slide-down-leave-to {
   transform: translateY(-100%);
+}
+
+@keyframes watchFlash {
+  0% {
+    filter: brightness(1);
+  }
+
+  20% {
+    filter: brightness(1.1);
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.watch-flash {
+  animation: watchFlash 0.8s ease-out;
 }
 </style>

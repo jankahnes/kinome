@@ -17,7 +17,7 @@
           :class="mode === 'info' ? 'bg-primary-10' : 'text-slate-400'"
         >
           <span v-if="mode === 'info'" class="hidden sm:inline">View Full</span>
-          <IconChevronRight class="w-6" />
+          <IconChevronRight class="w-5" />
         </button>
       </div>
     </div>

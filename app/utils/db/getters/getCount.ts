@@ -2,18 +2,21 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function getCount(
   client: SupabaseClient<Database>,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<number> {
-  let query = client.from('recipes').select('*', {
-    count: 'exact',
-    head: true,
-  });
+  let query = client
+    .from('recipes')
+    .select('*', {
+      count: 'exact',
+      head: true,
+    })
+    .neq('visibility', 'HIDDEN');
 
   if (opts.filtering?.tags && opts.filtering.tags.length > 0) {
     // Handle tag filtering separately to get recipe IDs first
     const recipeIds = await getRecipeIdsByTagsForCount(
       opts.filtering.tags,
-      client
+      client,
     );
     if (recipeIds.length > 0) {
       query = query.in('id', recipeIds);
@@ -35,6 +38,7 @@ export async function getCount(
 }
 
 function getTagCategory(tagId: number): string {
+  if (tagId >= 400) return 'EQUIPMENT';
   if (tagId >= 300) return 'CUISINE';
   if (tagId >= 200) return 'TYPE';
   if (tagId >= 100) return 'DIET';
@@ -43,7 +47,7 @@ function getTagCategory(tagId: number): string {
 
 async function getRecipeIdsByTagsForCount(
   tags: number[],
-  client: SupabaseClient<Database>
+  client: SupabaseClient<Database>,
 ): Promise<number[]> {
   // Group tags by category
   const tagsByCategory: Record<string, number[]> = {};
@@ -75,7 +79,7 @@ async function getRecipeIdsByTagsForCount(
     let matchingRecipeIds = recipeIdSets[0];
     for (let i = 1; i < recipeIdSets.length; i++) {
       matchingRecipeIds = new Set(
-        [...matchingRecipeIds].filter((id) => recipeIdSets[i].has(id))
+        [...matchingRecipeIds].filter((id) => recipeIdSets[i].has(id)),
       );
     }
     return Array.from(matchingRecipeIds);

@@ -31,7 +31,6 @@ const auth = useAuthStore();
 const supabase = useSupabaseClient<Database>();
 const job = ref<{ id: number } | null>(null);
 const route = useRoute();
-const publish = ref(false);
 
 const views: {
   value: string;
@@ -58,7 +57,6 @@ const views: {
 
 const isLoading = ref(false);
 const loadingMessage = ref('');
-
 const submitFromNaturalLanguage = async (recipe: BaseRecipe) => {
   isLoading.value = true;
   job.value = await createJob(
@@ -100,7 +98,6 @@ const submitFromPreparsed = async (recipe: ComputableRecipe) => {
       body: {
         recipeId: response.id,
         jobId: job.value?.id,
-        publish: publish.value,
       },
     });
     navigateTo(
@@ -224,7 +221,6 @@ const submitBaseRecipe = async (baseRecipe: BaseRecipe) => {
     body: {
       recipeId: id,
       jobId: job.value?.id,
-      publish: publish.value,
     },
   });
   navigateTo(

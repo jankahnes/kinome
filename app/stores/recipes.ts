@@ -18,7 +18,6 @@ export const useRecipeStore = defineStore('recipe', () => {
     source: string,
     noFetch: boolean = false
   ): Promise<string | null> {
-    console.log('getSocialPicture', source, noFetch);
     if (!source || source === '') return null;
     if (cachedSocialPictures.value[source]) {
       return cachedSocialPictures.value[source];
