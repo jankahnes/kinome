@@ -1,5 +1,4 @@
 export function timeAgo(isoString: string): string {
-  console.log(isoString);
   const date = new Date(isoString);
   const now = new Date();
   const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // in seconds
@@ -17,5 +16,9 @@ export function timeAgo(isoString: string): string {
   if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
 
   const months = Math.floor(days / 30);
-  return `${months} month${months === 1 ? '' : 's'} ago`;
+
+  if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+
+  const years = Math.floor(months / 12);
+  return `${years} year${years === 1 ? '' : 's'} ago`;
 }

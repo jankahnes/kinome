@@ -1,49 +1,42 @@
 <template>
   <NuxtLink v-if="recipe?.id" :to="getRecipeUrl(recipe?.id, recipe?.title)"
-    class="transition-all duration-300 group ml-4 md:ml-0 flex">
-    <div class="flex flex-row md:items-center w-full">
-      <!-- circular -->
-      <div class="relative z-10 text-lg sm:text-xl">
-        <NuxtImg v-if="recipe?.picture"
-          class="h-34 md:h-74 mt-6 md:mt-0 aspect-square object-cover bg-transparent shadow-[#00000044] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-4px] group-hover:scale-[1.01]"
-          :src="recipe?.picture || ''" fetchpriority="high" :alt="recipe?.title" />
-      </div>
+    class="transition-all duration-300 group flex items-center main-card"
+    :class="{ 'bg-primary-10/50!': isSignature }">
+    <!-- circular -->
+    <NuxtImg v-if="recipe?.picture"
+      class="-ml-10 z-10 h-[94%] max-h-70 aspect-square object-contain shadow-[#00000035] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.008]"
+      :src="recipe?.picture || ''" fetchpriority="high" :alt="recipe?.title" />
 
-      <div class="z-0 h-full flex-1">
-        <div
-          class="main-card -ml-38 pl-44 md:-ml-64 md:pl-74 pr-4 md:pr-10 py-4 md:py-8 rounded-4xl h-full flex flex-col gap-2 md:gap-3">
-          <h2
-            class="font-bold text-3xl md:text-5xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-none "
-            :class="{ 'underline decoration-primary underline-offset-4': true }">
-            {{ recipe?.title }}
-            <span
-              class="hidden sm:inline-flex bg-primary text-base font-bold px-3.5 py-1 rounded-full items-center justify-center tracking-tight gap-1 text-white">
-              <IconFlame class="w-5 h-5" strokeWidth="3" />
-              <span>TRENDING</span>
-            </span>
-          </h2>
-          <p class="text-xs md:text-base text-gray-600 line-clamp-4 ml-1">
-            {{ recipe?.description }}
-          </p>
+    <div class="flex-1 flex flex-col gap-2 md:gap-3 pl-6 pr-10 py-7">
+      <h2
+        class="font-bold text-3xl md:text-5xl tracking-tighter line-clamp-2 items-center gap-4 flex justify-between leading-none "
+        :class="{ 'underline decoration-primary underline-offset-4': true, 'text-4xl!': isSignature }">
+        {{ recipe?.title }}
+        <span v-if="!isSignature"
+          class="hidden sm:inline-flex bg-primary text-base font-bold px-3.5 py-1 rounded-full items-center justify-center tracking-tight gap-1 text-white">
+          <IconFlame class="w-5 h-5" strokeWidth="3" />
+          <span>TRENDING</span>
+        </span>
+      </h2>
+      <p class="text-xs md:text-base text-gray-600 line-clamp-4 ml-0.5 max-w-3xl">
+        {{ recipe?.description }}
+      </p>
 
-          <div class="flex flex-col flex-1 gap-2 justify-end items-start">
-            <p class="flex items-center gap-2">
-              <FormsRatingField :model-value="recipe?.rating" :star-width="24" :star-height="24" :spacing="2"
-                :select="false" :uniqueId="`card-highlight-${recipe?.id}-${uniqueId}`"
-                class="text-primary hidden md:inline-block" />
-              <FormsRatingField :model-value="recipe?.rating" :star-width="18" :star-height="18" :select="false"
-                :uniqueId="`card-highlight-mobile-${recipe?.id}-${uniqueId}`"
-                class="text-primary inline-block md:hidden" />
-              <span class="text-lg font-semibold leading-none mt-0.5">{{
-                recipe?.rating.toFixed(1)
-                }}</span>
-            </p>
-            <div class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-xs md:text-sm">
-              <div class="tag flex items-center justify-center text-nowrap bg-secondary"
-                v-for="(tag, index) in top3Tags" :key="index">
-                {{ tag?.name }}
-              </div>
-            </div>
+      <div class="flex flex-col flex-1 gap-2 justify-end items-start mt-auto">
+        <p class="flex items-center gap-2">
+          <FormsRatingField :model-value="recipe?.rating" :star-width="24" :star-height="24" :spacing="2"
+            :select="false" :uniqueId="`card-highlight-${recipe?.id}-${uniqueId}`"
+            class="text-primary hidden md:inline-block" />
+          <FormsRatingField :model-value="recipe?.rating" :star-width="18" :star-height="18" :select="false"
+            :uniqueId="`card-highlight-mobile-${recipe?.id}-${uniqueId}`" class="text-primary inline-block md:hidden" />
+          <span class="text-lg font-semibold leading-none mt-0.5">{{
+            recipe?.rating.toFixed(1)
+          }}</span>
+        </p>
+        <div class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-xs md:text-sm">
+          <div class="tag flex items-center justify-center text-nowrap bg-secondary" v-for="(tag, index) in top3Tags"
+            :key="index">
+            {{ tag?.name }}
           </div>
         </div>
       </div>
@@ -55,10 +48,12 @@
 const props = defineProps<{
   recipe: RecipeOverview;
   uniqueId?: string;
+  isSignature?: boolean;
 }>();
 const top3Tags = ref(getTop3Tags(props.recipe));
 
 function getTop3Tags(recipe: RecipeOverview) {
+  if (!recipe.tags) return [];
   const tags = recipe.tags.map((tag) => getTagByID(tag));
   tags.sort((a, b) => (b?.value ?? 0) - (a?.value ?? 0));
   const cropped = tags.slice(0, 3);

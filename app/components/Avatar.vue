@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="link" active-class="[&>*]:shadow-none!">
+  <NuxtLink :to="link" active-class="[&>*]:shadow-none!" class="inline-block">
     <Transition name="fade" mode="out-in">
       <Skeleton
         v-if="placeholder"
@@ -15,10 +15,10 @@
       />
       <div
         v-else-if="user?.username"
-        class="rounded-full bg-primary-10 flex items-center justify-center aspect-square p-2 h-full transition-all duration-300"
+        class="@container rounded-full bg-primary-10 flex items-center justify-center aspect-square w-full p-2 h-full transition-all duration-300"
         :class="ring ? 'ring-2 ring-primary-500 ring-offset-2' : ''"
       >
-        <span class="font-semibold text-primary text-[100%]">
+        <span class="font-semibold leading-none text-primary text-[42cqi]">
           {{ user.username.slice(0, 2).toUpperCase() }}
         </span>
       </div>

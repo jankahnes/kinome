@@ -28,7 +28,7 @@
         <Avatar :user="recipeStore.recipe?.user!" class="w-10 -my-1 -ml-3" />
         <span class="text-lg font-semibold leading-none">{{
           recipeStore.recipe?.user?.username
-        }}</span>
+          }}</span>
       </p>
       <NuxtLink :to="`/recipe/new?editCurrent=true`" class="hidden items-center gap-2 cursor-pointer">
         <IconPencil class="w-4 h-4" />
@@ -63,8 +63,8 @@
           <IconRocket class="w-6" :size="30" />
           Start Cooking
         </button>
-        <button class="animated-button bg-primary-10 flex justify-center items-center gap-1 px-2" v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'"
-          @click="scrollToWatchSection()">
+        <button class="animated-button bg-primary-10 flex justify-center items-center gap-1 px-2"
+          v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'" @click="scrollToWatchSection()">
           <IconChevronDown class="h-5" />
           <span class="leading-none font-bold">Watch Video</span>
         </button>
@@ -100,7 +100,7 @@
             :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`" class="text-primary" />
           <span class="text-lg font-semibold leading-none mt-0.5">{{
             recipeStore.recipe?.rating?.toFixed(1)
-          }}</span>
+            }}</span>
         </div>
         <template v-if="getTotalTime()">
           <span class="text-lg text-gray-600">•</span>
@@ -753,9 +753,32 @@ const jsonLd = computed(() => {
 
   if (recipe.description) schema.description = recipe.description;
   if (recipe.created_at) schema.datePublished = recipe.created_at.split('T')[0];
+  const channel = (recipe.video_metadata as any)?.channel as string | undefined;
+  if (channel) {
+    schema.author = {
+      '@type': 'Organization',
+      name: channel,
+    };
+  }
+  const cookTimeMins =
+    recipe.total_time_mins ??
+    (recipe.effort === 'LIGHT'
+      ? 20
+      : recipe.effort === 'MODERATE'
+        ? 35
+        : recipe.effort === 'HEAVY'
+          ? 60
+          : null);
+  if (cookTimeMins != null) schema.cookTime = `PT${cookTimeMins}M`;
   if (recipe.total_time_mins) schema.totalTime = `PT${recipe.total_time_mins}M`;
   if (recipe.batch_size) {
     schema.recipeYield = `${recipe.batch_size} serving${recipe.batch_size !== 1 ? 's' : ''}`;
+  }
+  const categoryTag = recipe.tags
+    ?.map((tagId) => getTagByID(tagId))
+    .find((tag) => tag && tag.id >= 200 && tag.id <= 209);
+  if (categoryTag?.name) {
+    schema.recipeCategory = capitalize(categoryTag.name.replace('main/', ''));
   }
 
   if (recipe.ingredients?.length) {
@@ -1119,7 +1142,7 @@ function getTotalTime() {
     return '<20min';
   }
   if (recipeStore.recipe?.effort === 'MODERATE') {
-    return '40min';
+    return '35min';
   }
   if (recipeStore.recipe?.effort === 'HEAVY') {
     return '>60min';

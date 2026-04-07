@@ -55,7 +55,7 @@
         highlight.title
       }}</span>
       <span
-        class="text-sm text-gray-600 text-center px-2"
+        class="text-sm text-gray-600 text-center"
         v-if="highlight.subtitle && subtitles"
       >
         {{ highlight.subtitle }}

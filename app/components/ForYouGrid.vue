@@ -16,7 +16,7 @@
     <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch">
 
       <RecipeCardHighlight v-if="orderedResults.highlight" :recipe="orderedResults.highlight"
-        class="flex-3 basis-217 mb-3.5 mt-18 md:-ml-10!" />
+        class="flex-3 basis-217 mb-3.5 mt-18" />
 
       <RecipeCard v-for="recipe in orderedResults.results" :recipe="recipe" :reason-text="getReasonText(recipe)"
         class="text-[30px] min-w-65 basis-65 max-w-80 3xl:max-w-110 3xl:basis-85 flex-1 flex flex-col items-center" />

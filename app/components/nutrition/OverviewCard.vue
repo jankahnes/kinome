@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
-    <div class="flex justify-between items-center mb-3 mx-2 gap-4 gap-y-2 flex-wrap">
+    <div class="flex justify-between items-center mb-3 mx-2 gap-4 gap-y-0 flex-wrap">
       <h3 class="text-4xl font-bold tracking-tighter shrink-0">Nutrition Overview</h3>
-      <div class="flex items-center gap-2 ">
+      <div class="flex items-center gap-2 justify-between sm:justify-end flex-1 ">
         <div v-if="mode === 'info' && dropdownChoices?.length" class="relative min-w-36">
           <FormsDropdown
             :choices="dropdownChoices"
@@ -82,7 +82,7 @@
       </div>
 
       <!-- Carbs + Sugar paired card -->
-      <div class="col-span-2 flex gap-2 rounded-3xl bg-primary-10/50 p-1 flex-2">
+      <div class="col-span-2 flex gap-2 rounded-3xl bg-primary-10/50 p-1 flex-2 basis-60">
         <div
           v-for="item in overviewItems.slice(4)"
           :key="item.title"

@@ -15,7 +15,7 @@
         </div>
 
         <div class="mx-5 bg-secondary/70 self-center rounded-3xl  mr-6">
-          <NuxtLink :to="`/profile/${auth.user?.id}`" class="flex gap-3 items-center animated-button overflow-hidden group pr-3" v-if="auth.isUser()">
+          <NuxtLink :to="`/profile/${auth.user?.id}`" class="flex gap-3 items-center animated-button overflow-hidden group pr-3 -ml-1" v-if="auth.isUser()">
             <Avatar :user="auth.user" class="w-14" :placeholder="!auth.profileFetched"
               :ring="focusedIndex === 0 && sidebarNavigationActive" @click="onClickLink(accountLink)" />
             <div class="flex flex-col flex-1">

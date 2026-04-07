@@ -69,7 +69,7 @@
           class="w-50 min-h-60 text-[20px] sm:w-70 sm:min-h-95 sm:text-[30px] flex-shrink-0 mb-2 mr-4" />
       </BlocksCarousel>
       <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
-        :uniqueId="'mobile-0-0'" class="md:-ml-10! text-[20px] md:text-[30px]" />
+        :uniqueId="'mobile-0-0'" />
       <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)" :key="recipe.id + 'mobile'"
         :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
         class="text-[20px] basis-95 flex-1" />
@@ -104,7 +104,7 @@
       </div>
       <div class="flex mt-6 flex-wrap gap-8 items-stretch">
         <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
-          :uniqueId="'desktop-0-0'" class="-ml-10! flex-1 basis-244 3xl:max-w-6xl" />
+          :uniqueId="'desktop-0-0'" class="flex-1 basis-244 3xl:max-w-6xl" />
         <div class="flex flex-wrap gap-4 shrink-0 basis-80 flex-1 items-center">
           <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
             :key="recipe.id + 'desktop'" :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"

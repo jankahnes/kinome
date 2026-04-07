@@ -1,17 +1,10 @@
 <template>
   <div class="pb-20 lg:pb-0 m-4 lg:m-8 lg:ml-20">
-    <div class="flex items-center gap-2 flex-wrap justify-between">
-      <div class="flex items-center gap-2 flex-wrap">
-        <NuxtLink
-          v-for="view in views"
-          :key="view.path"
-          :to="view.path"
-          class="animated-button bg-primary-10 px-3 py-2"
-          exact-active-class="primary-gradient text-gray-800 px-3 py-2"
-        >
-          {{ view.displayName }}
-        </NuxtLink>
-      </div>
+    <div class="flex items-center gap-2 flex-wrap" v-if="!isOverviewPage">
+      <NuxtLink v-for="view in views" :key="view.path" :to="view.path" class="animated-button bg-primary-10 px-3 py-2"
+        exact-active-class="primary-gradient text-gray-800 px-3 py-2">
+        {{ view.displayName }}
+      </NuxtLink>
     </div>
     <NuxtPage :transition="false" />
   </div>
@@ -25,6 +18,10 @@ const user = ref<FullUser | null>(null);
 const loading = ref(true);
 
 const isOwn = computed(() => auth.user?.id === userID);
+
+const route = useRoute();
+
+const isOverviewPage = computed(() => route.path === '/profile/' + userID);
 
 provide('profileUser', user);
 provide('profileIsOwn', isOwn);

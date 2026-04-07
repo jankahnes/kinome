@@ -99,6 +99,7 @@ export default defineNuxtConfig({
       '/profile/**',
       '/tracking/saved/**',
       '/tracking/settings/**',
+      '/logout/**',
     ],
   },
 });
