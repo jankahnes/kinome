@@ -1,7 +1,7 @@
 <template>
   <NuxtLink v-if="recipe?.id" :to="getRecipeUrl(recipe?.id, recipe?.title)"
     class="transition-all duration-300 group flex items-center main-card"
-    :class="{ 'bg-primary-10/50!': isSignature }">
+    :class="{ 'bg-primary-10/70!': isSignature }">
     <!-- circular -->
     <NuxtImg v-if="recipe?.picture"
       class="-ml-10 z-10 h-[94%] max-h-70 aspect-square object-contain shadow-[#00000035] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.008]"

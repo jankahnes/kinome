@@ -24,7 +24,7 @@
           <img
             src="/blob.webp"
             alt="Blob"
-            class="h-50 z-0 rotate-160 opacity-50"
+            class="h-50 z-0 rotate-160"
           />
           <img
             src="/universal_cookbook.webp"
@@ -46,7 +46,7 @@
           <img
             src="/blob.webp"
             alt="Blob"
-            class="h-50 rotate-340 opacity-50 z-0"
+            class="h-50 rotate-340 z-0"
           />
           <img
             src="/tailored_discovery.webp"
@@ -66,7 +66,7 @@
           ref="card3"
           @click="scrollTo(card3)"
         >
-          <img src="/blob.webp" alt="Blob" class="h-50 opacity-50 z-0" />
+          <img src="/blob.webp" alt="Blob" class="h-50 z-0" />
           <img
             src="/smart_tracking.webp"
             alt="Smart Tracking"

@@ -9,7 +9,7 @@
         <div class="absolute inset-0 bg-black/50" @click="isOpen = false"></div>
 
         <div
-          class="relative bg-white rounded-3xl max-w-lg max-h-[90vh] overflow-y-auto mb-20 modal-content font-main"
+          class="relative bg-white rounded-3xl max-h-[90vh] overflow-y-auto mb-20 modal-content font-main mx-4"
         >
           <slot />
         </div>
@@ -21,7 +21,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   modelValue: boolean;
-  responsive: boolean;
+  responsive?: boolean;
 }>();
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;

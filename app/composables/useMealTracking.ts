@@ -294,6 +294,13 @@ export function useMealTracking() {
 
       hasUnsavedChanges.value = false;
       lastSavedAt.value = new Date();
+
+      await $fetch('/api/db/tracking-gamification', {
+        method: 'POST',
+        body: {
+          date: formatDate(selectedDate.value),
+        },
+      });
     } catch (error) {
       console.error('Error saving meals:', error);
       alert('Failed to save meals. Please try again.');

@@ -20,6 +20,16 @@ export const useAuthStore = defineStore('auth', () => {
       }
     }
     profileFetched.value = true;
+    try {
+      await $fetch('/api/db/visit', {
+        method: 'POST',
+        body: {
+          date: new Date().toISOString().slice(0, 10),
+        },
+      });
+    } catch (error) {
+      console.error('Failed to record daily visit:', error);
+    }
   }
 
   async function fetchUser() {

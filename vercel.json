@@ -1,1 +1,8 @@
-{}
+{
+  "crons": [
+    {
+      "path": "/api/cron/recompute-archetype-percentiles",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

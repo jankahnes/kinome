@@ -14,6 +14,9 @@ function parseBase64Image(base64String: string): { buffer: Buffer; mimeType: str
   
   if (dataUrlMatch) {
     const [, mimeType, base64Data] = dataUrlMatch;
+    if (!mimeType || !base64Data) {
+      throw new Error('Invalid data URL');
+    }
     return {
       buffer: Buffer.from(base64Data, 'base64'),
       mimeType: mimeType
@@ -29,6 +32,7 @@ export default defineEventHandler(async (event) => {
   // Get authenticated user (works even when using service role for operations)
   // Allow programmatic calls without auth context
   let userId: string | null = null;
+  const config = useRuntimeConfig();
   try {
     const user = await serverSupabaseUser(event);
     userId = user?.id || null;
@@ -102,6 +106,17 @@ export default defineEventHandler(async (event) => {
   // Use service role for storage operations (with manual auth checks)
   const client = serverSupabaseServiceRole<Database>(event);
 
+  if (bucket === 'signature') {
+    if (!userId) {
+      throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+    }
+
+    const isAdmin = userId === config.adminUuid;
+    if (!isAdmin && id !== userId) {
+      throw createError({ statusCode: 403, statusMessage: 'Not authorized to update this signature image' });
+    }
+  }
+
   if (shouldUpsert) {
     // Check ownership before allowing upsert (only for recipe bucket)
     if (bucket === 'recipe') {
@@ -119,7 +134,6 @@ export default defineEventHandler(async (event) => {
       if (fetchError || !existingRecipe) {
         throw createError({ statusCode: 404, statusMessage: 'Recipe not found' });
       }
-      const config = useRuntimeConfig();
       const adminUuid = config.adminUuid;
       if(userId && userId == adminUuid) {
         console.log("Overriding user check for admin");
@@ -131,7 +145,7 @@ export default defineEventHandler(async (event) => {
     
     const { data: updateData, error: updateError } = await client.storage.from(bucket).update(fileName, processedBuffer, {
       contentType: fileName.endsWith('.webp') ? 'image/webp' : originalMimetype || 'image/jpeg',
-      cacheControl: '3600',
+      cacheControl: bucket === 'signature' ? '0' : '3600',
     });
     if (updateError) {
       console.error('Update error:', updateError);
@@ -144,7 +158,7 @@ export default defineEventHandler(async (event) => {
 
   const { error } = await client.storage.from(bucket).upload(fileName, processedBuffer, {
     contentType: fileName.endsWith('.webp') ? 'image/webp' : originalMimetype || 'image/jpeg',
-    cacheControl: '3600',
+    cacheControl: bucket === 'signature' ? '0' : '3600',
   });
 
   if (error) {

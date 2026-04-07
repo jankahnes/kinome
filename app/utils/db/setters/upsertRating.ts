@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export default async function upsertRating(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   rating: number,
   userId: string,
   recipeId: number
@@ -13,17 +13,11 @@ export default async function upsertRating(
     throw new Error('Rating has to be between 0 and 5.');
   }
 
-  // Use upsert with conflict target to ensure (user_id, recipe_id) is used as the unique key
-  const { error } = await supabase.from('ratings').upsert(
-    {
-      user_id: userId,
-      recipe_id: recipeId,
-      rating: rating,
+  await $fetch('/api/db/rating', {
+    method: 'POST',
+    body: {
+      recipeId,
+      rating,
     },
-    { onConflict: 'user_id,recipe_id' }
-  );
-
-  if (error) {
-    throw new Error('Failed to update rating: ' + error.message);
-  }
+  });
 }

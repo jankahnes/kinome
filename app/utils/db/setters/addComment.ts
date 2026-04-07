@@ -2,26 +2,21 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { InsertableComment } from '~/types/types';
 
 export default async function (
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   comment: InsertableComment
 ): Promise<number> {
   if (!comment.user_id) {
     throw new Error("Can't create a comment without being logged in.");
   }
 
-  const { data, error } = await supabase
-    .from('comments')
-    .insert({
-      user_id: comment.user_id,
-      replying_to: comment.replying_to ?? null,
-      content: comment.content,
+  const data = await $fetch<{ id: number }>('/api/db/comment', {
+    method: 'POST',
+    body: {
       recipe_id: comment.recipe_id,
-    })
-    .select('id');
+      content: comment.content,
+      replying_to: comment.replying_to ?? null,
+    },
+  });
 
-  if (error) {
-    throw new Error('Failed to insert comment: ' + error.message);
-  }
-
-  return data?.[0]?.id;
+  return data.id;
 }

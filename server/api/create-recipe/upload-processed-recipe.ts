@@ -4,6 +4,10 @@ import {
 } from '#supabase/server';
 import type { ComputableRecipe, InsertableRecipe } from '~/types/types';
 import type { Database } from '~/types/supabase';
+import {
+  evaluateAlchemistForRecipe,
+  handleRecipeCreated,
+} from '~~/server/utils/gamification/service';
 
 // Helper function to check if recipe exists in database
 async function recipeExists(client: any, recipeId: number): Promise<boolean> {
@@ -340,5 +344,12 @@ export default defineEventHandler(async (event) => {
       shouldUpdate ? 'updated' : 'uploaded'
     } successfully: ${recipeId}, ${body.title}`
   );
+
+  if (userId && !shouldUpdate) {
+    await handleRecipeCreated(client as any, userId, recipeId);
+  } else if (userId) {
+    await evaluateAlchemistForRecipe(client as any, recipeId);
+  }
+
   return { status: 'ok', id: recipeId };
 });

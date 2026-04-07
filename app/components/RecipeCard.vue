@@ -44,7 +44,8 @@
       </div>
     </div>
     <div
-      class="px-3 py-1.5 rounded-xl bg-primary-10/70 text-xs text-gray-500 font-medium -mt-4 shadow-[0_0_8px_rgba(0,0,0,0.1)] z-10 text-center truncate max-w-[80%]" v-if="reasonText">
+      class="px-3 py-1.5 rounded-xl bg-primary-10/70 text-xs text-gray-500 font-medium -mt-4 shadow-[0_0_8px_rgba(0,0,0,0.1)] z-10 text-center truncate max-w-[80%]"
+      v-if="reasonText">
       {{ reasonText }}
     </div>
   </NuxtLink>

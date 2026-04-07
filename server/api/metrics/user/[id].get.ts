@@ -23,6 +23,7 @@ import {
   parseVector,
   cosineSimilarity,
 } from '~~/server/utils/metrics/embedding';
+import { buildProfileGamificationSummary } from '~~/server/utils/gamification/service';
 
 const MIN_T_SIZE = 10;
 const GLOBAL_CACHE_ID = 1;
@@ -44,6 +45,7 @@ export default defineEventHandler(async (event) => {
       .eq('id', GLOBAL_CACHE_ID)
       .maybeSingle(),
   ]);
+  const gamification = await buildProfileGamificationSummary(client, userId);
 
   // 2. Cold-start guard: |T| must be big enough to be meaningful
   const allIds = new Set<number>([
@@ -67,6 +69,7 @@ export default defineEventHandler(async (event) => {
         rated: edges.ratingCount,
         highlyRated: edges.highlyRatedIds.size,
       },
+      gamification,
     };
   }
 
@@ -127,7 +130,8 @@ export default defineEventHandler(async (event) => {
       .from('profiles')
       .select('id, username, picture, cached_taste_vector')
       .neq('id', userId)
-      .not('cached_taste_vector', 'is', null);
+      .not('cached_taste_vector', 'is', null)
+      .not('username', 'is', null);
     if (nErr) throw nErr;
 
     const scored: { row: any; sim: number }[] = [];
@@ -174,6 +178,7 @@ export default defineEventHandler(async (event) => {
       rated: edges.ratingCount,
       highlyRated: edges.highlyRatedIds.size,
     },
+    gamification,
     radar,
     neighbors,
   };

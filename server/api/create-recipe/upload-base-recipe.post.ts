@@ -8,6 +8,7 @@ import { recipeKeys } from '~/types/keys';
 import stripKeys from '~/utils/format/stripKeys';
 import type { InsertableRecipe } from '~/types/types';
 import cleanUrl from '~/utils/cleanUrl';
+import { handleRecipeCreated } from '~~/server/utils/gamification/service';
 
 async function uploadImage(
   recipeId: number,
@@ -110,5 +111,8 @@ export default defineEventHandler(async (event) => {
   }
 
   console.log(`✅ Recipe uploaded successfully: ${data?.id}, ${data?.title}`);
+  if (userId && data?.id) {
+    await handleRecipeCreated(client as any, userId, data.id);
+  }
   return { status: 'ok', id: data?.id };
 });
