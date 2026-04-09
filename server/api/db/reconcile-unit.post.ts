@@ -112,6 +112,7 @@ export default defineEventHandler(
           .replace('{unit}', processedUnit)
           .replace('{available_units}', availableUnitsText),
         type: 'quick',
+        schemaKey: 'recipeUnitReconciliation',
       },
     });
 

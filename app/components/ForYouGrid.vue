@@ -11,12 +11,12 @@
   </div>
 
   <!-- Results -->
-  <div v-else-if="results.length" class="mt-4 md:-mt-12">
+  <div v-else-if="results.length" class="mt-4">
     <!-- Desktop grid -->
-    <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch">
+    <div class="hidden md:flex gap-6 flex-wrap justify-stretch -mt-16">
 
       <RecipeCardHighlight v-if="orderedResults.highlight" :recipe="orderedResults.highlight"
-        class="flex-3 basis-217 mb-3.5 mt-18" />
+        class="flex-3 basis-217 mb-4 mt-16" />
 
       <RecipeCard v-for="recipe in orderedResults.results" :recipe="recipe" :reason-text="getReasonText(recipe)"
         class="text-[30px] min-w-65 basis-65 max-w-80 3xl:max-w-110 3xl:basis-85 flex-1 flex flex-col items-center" />

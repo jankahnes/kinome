@@ -118,7 +118,7 @@
 }
 
 .main-card {
-  @apply bg-primary-10/70 md:bg-primary-10 rounded-4xl;
+  @apply bg-primary-10 rounded-4xl;
 }
 
 .main-card-padding {

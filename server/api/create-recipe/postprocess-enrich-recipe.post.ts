@@ -139,8 +139,14 @@ export default defineEventHandler(async (event) => {
 
   // Step 2: Full nutrition recalculation → sets visibility PUBLIC
   console.log(`🔍 [Phase B] Running full nutrition calculation`);
+  const enrichedUploadableRecipe = uploadableRecipe as UploadableRecipe & {
+    full_instructions?: any[];
+    total_time_mins?: number | null;
+  };
+  enrichedUploadableRecipe.full_instructions = enriched.steps;
+  enrichedUploadableRecipe.total_time_mins = enriched.estimated_total_time;
   const computableRecipe = await convertUploadableToComputable(
-    uploadableRecipe,
+    enrichedUploadableRecipe,
     supabase,
   );
 

@@ -17,17 +17,17 @@ export interface GlobalState {
 let state: GlobalState =
   process.env.NODE_ENV === 'production'
     ? {
-        quick: { model: 'gpt-5-nano', reasoning: 'low' },
-        vision: { model: 'gpt-5-mini', reasoning: 'low' },
-        default: { model: 'gpt-5-mini', reasoning: 'low' },
-        defaultInsensitive: { model: 'gpt-5-mini', reasoning: 'minimal' },
+        quick: { model: 'gpt-5.4-nano', reasoning: 'low' },
+        vision: { model: 'gpt-5.4-mini', reasoning: 'low' },
+        default: { model: 'gpt-5.4-mini', reasoning: 'low' },
+        defaultInsensitive: { model: 'gpt-5.4-mini', reasoning: 'minimal' },
         accurate: { model: 'gpt-5.4', reasoning: 'low' },
       }
     : {
-        quick: { model: 'gpt-5-nano', reasoning: 'low' }, //was low  for curated recipes
-        vision: { model: 'gpt-5-mini', reasoning: 'low' }, //was medium  for curated recipes
-        default: { model: 'gpt-5-mini', reasoning: 'low' }, //was medium  for curated recipes
-        defaultInsensitive: { model: 'gpt-5-mini', reasoning: 'minimal' },
+        quick: { model: 'gpt-5.4-nano', reasoning: 'low' }, //was low  for curated recipes
+        vision: { model: 'gpt-5.4-mini', reasoning: 'low' }, //was medium  for curated recipes
+        default: { model: 'gpt-5.4-mini', reasoning: 'low' }, //was medium  for curated recipes
+        defaultInsensitive: { model: 'gpt-5.4-mini', reasoning: 'minimal' },
         accurate: { model: 'gpt-5.4', reasoning: 'low' },
       };
 

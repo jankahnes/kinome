@@ -1,82 +1,53 @@
-<template>
+﻿<template>
   <Transition name="loaded-content">
     <div class="pt-10 pb-20 sm:pb-4 relative" v-if="mounted">
       <div class="flex gap-8 flex-wrap">
-        <!-- Tracking section-->
         <div class="space-y-2 flex-1 2xl:min-w-100 bg-primary-10/40 rounded-4xl p-4">
           <h2 class="text-4xl font-bold tracking-tighter">Tracking</h2>
           <div class="flex flex-col gap-4">
-            <!-- Meal adding buttons -->
-            <div class="flex flex-wrap gap-2 text-lg">
+            <div class="flex flex-wrap gap-2 sm:text-lg">
+
+              <button v-for="mealPreset in savedTemplates" :key="mealPreset.id"
+                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+                @click="addMealFromTemplate(mealPreset.id)">
+                <IconBookMarked class="w-5" />
+                Add {{ mealPreset.name }}
+              </button>
               <button class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
                 @click="showRecipeSearchModal = true">
-                <IconPlus class="w-4" />
+                <IconSalad class="w-5" />
                 Add Meal from Recipe
               </button>
               <button v-for="mealPreset in mealPresets" :key="mealPreset"
                 class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10" @click="addMeal(mealPreset)">
-                {{ mealPreset }}
+                Add {{ mealPreset }}
               </button>
-              <button v-if="!showCustomMealInput"
-                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
-                @click="showCustomMealInput = true">
-                <IconPlus class="w-4" />
-                Add Other Meal
-              </button>
-              <div v-else class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10">
-                <input v-model="customMealName" placeholder="Enter meal name" class="focus:outline-none" />
-                <button @click="addMeal(customMealName)">
-                  <IconCheck class="w-4" />
-                </button>
-              </div>
+
             </div>
 
-            <!-- Meals list -->
             <EditableGroupList v-model="trackedMeals" :show-collapse="true" :show-group-header="true"
-              group-name-placeholder="✍️ Meal name" :show-kcal="true" />
+              group-name-placeholder="Meal name" :show-kcal="true">
+              <template #header-actions="{ group }">
+                <button v-if="group.editableIngredients?.some((ingredient) => ingredient.rawText?.trim())" type="button"
+                  class="animated-button rounded-xl p-1.5"
+                  :title="savedMealActionState[groupKey(group)] === 'saved' ? 'Meal saved' : 'Save meal'"
+                  @click.stop="saveMealAsTemplate(group)">
+                  <IconCheck v-if="savedMealActionState[groupKey(group)] === 'saved'" class="w-5 text-emerald-600" />
+                  <IconBookmark v-else class="w-5" />
+                </button>
+              </template>
+            </EditableGroupList>
           </div>
         </div>
-        <!-- Nutrition summary -->
-        <div class="flex-1 flex flex-col gap-6 2xl:min-w-140">
-          <!-- Companion -->
-          <div class="flex-col gap-2 bg-primary! main-card main-card-padding mt-4 hidden">
-            <div class="flex justify-between gap-10">
-              <h3 class="text-4xl font-bold tracking-tighter mx-2">
-                Companion
-              </h3>
 
-              <img
-                class="w-30 h-30 -mt-14 object-contain rounded-full border-2 bg-primary-10 border-primary-10 hidden sm:block"
-                src="/nutritionist.png" alt="Companion" />
-            </div>
-            <div class="flex flex-col mt-2">
-              <div class="bg-green-100 w-4 h-4 z-0 rotate-45 -mb-2.5 self-end mr-13"></div>
-              <div class="bg-green-100 rounded-4xl p-6 z-1 text-xl font-bold text-green-800">
-                Great start! Your protein intake is on track for the morning.
-              </div>
-            </div>
-            <div class="flex flex-col">
-              <div class="bg-primary-10 w-4 h-4 z-0 rotate-45 -mb-2.5 self-end mr-13"></div>
-              <div class="bg-primary-10 rounded-4xl pl-6 p-4 z-1">
-                Maybe focus on adding more fiber for lunch.
-              </div>
-            </div>
-            <div class="flex flex-col">
-              <div class="bg-primary-10 w-4 h-4 z-0 rotate-45 -mb-2.5 self-end mr-13"></div>
-              <div class="bg-primary-10 rounded-4xl pl-6 p-4 z-1">
-                You've hit your iron intake goal already!
-              </div>
-            </div>
-          </div>
-          <!-- Nutrition Overview -->
+        <div class="flex-1 flex flex-col gap-6 2xl:min-w-140">
           <NutritionOverviewCard mode="tracking" :nutrition="computedDailyNutrition"
             :tracking-goals="userTrackingGoals?.targets" @view-overall-report="showOverallReportPanel = true" />
-          <!-- Nutrition Quality -->
-          <NutritionQualityCards mode="info" :cards="qualityItems" :has-overall-report="true"
+          <NutritionQualityCards mode="full" :cards="qualityItems" :has-overall-report="true"
             @view-overall-report="showOverallReportPanel = true" @card-click="handleQualityCardClick" />
         </div>
       </div>
-      <!-- Save button -->
+
       <div class="fixed bottom-16 lg:bottom-4 right-2 lg:right-10 z-50">
         <button @click="saveMeals" :disabled="isSaving || !hasUnsavedChanges"
           class="animated-button flex items-center gap-2 px-4 py-2 shadow-lg transition-all" :class="{
@@ -97,13 +68,10 @@
         </button>
       </div>
 
-      <!--Overall Report panel-->
-
       <BlocksResponsiveInfo v-model="showOverallReportPanel" sidePanelClass="w-96">
-        <PagesReport :computedRecipe="computedDailyNutrition" />
+        <PagesReport id="tracking-day" :is-food="false" :computedRecipe="computedDailyNutrition as any" />
       </BlocksResponsiveInfo>
 
-      <!-- Micronutrient detail panel -->
       <BlocksResponsiveInfo v-model="showMicroPanel" sidePanelClass="w-96">
         <div class="p-5 flex flex-col gap-5">
           <div>
@@ -111,7 +79,6 @@
             <h2 class="text-2xl font-bold">Micronutrients</h2>
           </div>
           <template v-if="micronutrientGroups.hasAny">
-            <!-- Vitamins -->
             <div v-if="micronutrientGroups.vitamins.length">
               <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Vitamins</div>
               <div class="flex flex-col gap-3">
@@ -134,7 +101,6 @@
                 </div>
               </div>
             </div>
-            <!-- Minerals -->
             <div v-if="micronutrientGroups.minerals.length">
               <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Minerals</div>
               <div class="flex flex-col gap-3">
@@ -162,7 +128,6 @@
         </div>
       </BlocksResponsiveInfo>
 
-      <!-- Fat quality detail panel -->
       <BlocksResponsiveInfo v-model="showFatPanel" sidePanelClass="w-96">
         <div class="p-5 flex flex-col gap-5">
           <div>
@@ -170,7 +135,6 @@
             <h2 class="text-2xl font-bold">Fat Profile</h2>
           </div>
           <div v-if="fatProfile" class="flex flex-col items-center gap-4">
-            <!-- Donut chart -->
             <div class="w-44 h-44">
               <Ring :segments="fatDonutSegments.map(s => ({ value: s.value, color: s.color }))" :stroke-width="13">
                 <div class="text-center leading-tight">
@@ -179,7 +143,6 @@
                 </div>
               </Ring>
             </div>
-            <!-- Legend -->
             <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm w-full">
               <div v-for="seg in fatDonutSegments.filter(s => s.pct > 0)" :key="seg.label"
                 class="flex items-center gap-2">
@@ -189,7 +152,6 @@
               </div>
             </div>
           </div>
-          <!-- Text insights -->
           <div class="flex flex-col gap-2">
             <div v-for="item in fatProfileReadable" :key="item.description"
               class="flex items-start gap-3 p-3 rounded-xl" :class="item.bgColor">
@@ -205,7 +167,6 @@
         </div>
       </BlocksResponsiveInfo>
 
-      <!-- Gut health detail panel -->
       <BlocksResponsiveInfo v-model="showGutPanel" sidePanelClass="w-96">
         <div class="p-5 flex flex-col gap-5">
           <div>
@@ -213,7 +174,6 @@
             <h2 class="text-2xl font-bold">Gut Health</h2>
           </div>
           <div v-if="gutHealth">
-            <!-- Overall bar -->
             <div class="mb-1 flex justify-between text-sm">
               <span class="font-semibold text-slate-600">Overall Score</span>
               <span class="font-bold">{{ gutHealth.overallScore }}/100</span>
@@ -223,7 +183,6 @@
                 :style="{ width: Math.max(0, gutHealth.overallScore) + '%' }" />
             </div>
 
-            <!-- Gut-friendly factors -->
             <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Gut-friendly factors</div>
             <div class="flex flex-col gap-2 mb-5">
               <div class="flex justify-between items-center p-3 rounded-xl"
@@ -261,7 +220,6 @@
               </div>
             </div>
 
-            <!-- Impact factors -->
             <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Impact factors</div>
             <div class="flex flex-col gap-2 mb-5">
               <div class="flex justify-between items-center p-3 rounded-xl"
@@ -313,51 +271,11 @@
                   {{ gutHealth.sodiumSubScore }}</span>
               </div>
             </div>
-
-            <!-- Daily details (recipe/diet level) -->
-            <template v-if="gutHealth.addedSugarG > 0 || gutHealth.upfKcalPct > 0 || gutHealth.animalProteinG > 0">
-              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Daily details</div>
-              <div class="flex flex-col gap-2">
-                <div v-if="gutHealth.addedSugarG > 0" class="flex justify-between items-center p-3 rounded-xl"
-                  :class="gutHealth.addedSugarG > 25 ? 'bg-red-50' : 'bg-secondary'">
-                  <div>
-                    <div class="font-semibold text-sm"
-                      :class="gutHealth.addedSugarG > 25 ? 'text-red-800' : 'text-slate-600'">
-                      Added sugar</div>
-                    <div class="text-xs text-slate-500">Goal &lt; 25g per day</div>
-                  </div>
-                  <span class="text-xl font-bold"
-                    :class="gutHealth.addedSugarG > 25 ? 'text-red-700' : 'text-slate-500'">
-                    {{ gutHealth.addedSugarG }}g</span>
-                </div>
-                <div v-if="gutHealth.upfKcalPct > 0" class="flex justify-between items-center p-3 rounded-xl"
-                  :class="gutHealth.upfKcalPct > 20 ? 'bg-red-50' : 'bg-secondary'">
-                  <div>
-                    <div class="font-semibold text-sm"
-                      :class="gutHealth.upfKcalPct > 20 ? 'text-red-800' : 'text-slate-600'">
-                      Ultra-processed foods</div>
-                    <div class="text-xs text-slate-500">% of calories · goal &lt; 20%</div>
-                  </div>
-                  <span class="text-xl font-bold"
-                    :class="gutHealth.upfKcalPct > 20 ? 'text-red-700' : 'text-slate-500'">
-                    {{ gutHealth.upfKcalPct }}%</span>
-                </div>
-                <div v-if="gutHealth.animalProteinG > 0"
-                  class="flex justify-between items-center p-3 rounded-xl bg-secondary">
-                  <div>
-                    <div class="font-semibold text-sm text-slate-600">Animal protein</div>
-                    <div class="text-xs text-slate-500">Ideally paired with fiber</div>
-                  </div>
-                  <span class="text-xl font-bold text-slate-500">{{ gutHealth.animalProteinG }}g</span>
-                </div>
-              </div>
-            </template>
           </div>
           <p v-else class="text-sm text-slate-400">Log some food to see gut health data.</p>
         </div>
       </BlocksResponsiveInfo>
 
-      <!-- Modal for adding a meal from a recipe-->
       <BlocksResponsiveModal v-model="showRecipeSearchModal">
         <template #default="{ isMobile }">
           <div class="flex flex-col gap-6 p-6 max-h-[50%] sm:min-w-120 mb-10 md:mb-0" @click.stop>
@@ -381,15 +299,17 @@
 </template>
 
 <script setup lang="ts">
+import type { TrackedMeal } from '~/types/types';
+import { parseLogicalDate } from '~/utils/format/logicalDate';
+
 const route = useRoute();
 const supabase = useSupabaseClient<Database>();
 const auth = useAuthStore();
+const loadingStore = useLoadingStore();
 
 function parseDateFromQuery(): Date {
   const q = route.query.date;
-  if (typeof q === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(q)) {
-    return new Date(q + 'T12:00:00');
-  }
+  if (typeof q === 'string') return parseLogicalDate(q) ?? new Date();
   return new Date();
 }
 const userTrackingGoals = computed(() => auth.user?.user_data?.tracking);
@@ -397,15 +317,10 @@ const mounted = ref(false);
 
 const computedDailyNutrition = ref<InsertableRecipe | null>(null);
 const showRecipeSearchModal = ref(false);
-const showCustomMealInput = ref(false);
-const customMealName = ref('');
 
 const recipeSearchQuery = ref('');
 const recipeSearchResults = ref<RecipeOverview[]>([]);
 
-const chosenCard = ref<'overview' | 'quality' | 'details'>('quality');
-
-// Use the meal tracking composable
 const {
   trackedMeals,
   selectedDate,
@@ -415,18 +330,24 @@ const {
   hasUnsavedChanges,
   addMeal,
   addMealFromRecipe,
+  addMealFromTemplate,
   loadMeals,
   saveMeals,
   formatTimeAgo,
+  getMealNutrition,
   setupAutoSave,
 } = useMealTracking();
 
+const savedTemplates = ref<TrackedMeal[]>([]);
+const savedMealActionState = ref<Record<string, 'idle' | 'saved'>>({});
+const savedMealActionTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 const mealPresets = [
-  'Breakfast 🥐',
-  'Lunch 🍔',
-  'Dinner 🍝',
-  'Snack 🍟',
-  'Dessert 🍰',
+  'Breakfast',
+  'Lunch',
+  'Dinner',
+  'Snack',
+  'Dessert',
 ];
 
 const handleAddMealFromRecipe = async (recipeId: number) => {
@@ -435,29 +356,70 @@ const handleAddMealFromRecipe = async (recipeId: number) => {
   await computeNutrition();
 };
 
+async function loadSavedTemplates() {
+  try {
+    savedTemplates.value = await $fetch<TrackedMeal[]>('/api/tracking/templates');
+  } catch (error) {
+    console.error('Failed to load saved meal templates:', error);
+  }
+}
+
+async function saveMealAsTemplate(meal: TrackedMeal) {
+  const key = groupKey(meal);
+  try {
+    await $fetch('/api/tracking/templates/save-from-meal', {
+      method: 'POST',
+      body: meal.id
+        ? { mealId: meal.id }
+        : {
+          meal: {
+            ...meal,
+            summary: getMealNutrition(meal),
+          },
+        },
+    });
+    await loadSavedTemplates();
+    savedMealActionState.value[key] = 'saved';
+    if (savedMealActionTimers.has(key)) {
+      clearTimeout(savedMealActionTimers.get(key)!);
+    }
+    savedMealActionTimers.set(key, setTimeout(() => {
+      savedMealActionState.value[key] = 'idle';
+      savedMealActionTimers.delete(key);
+    }, 1800));
+    loadingStore.displayTransientToast('Saved meal template');
+  } catch (error) {
+    console.error('Failed to save meal template:', error);
+    loadingStore.displayTransientToast('Failed to save meal template');
+  }
+}
+
+function groupKey(meal: TrackedMeal) {
+  return meal.id != null ? `persisted-${meal.id}` : `${meal.name}-${trackedMeals.value.indexOf(meal)}`;
+}
+
 const computeNutrition = async () => {
-  //@ts-ignore
   const fullIngredients = trackedMeals.value
     .flatMap((meal) => meal.editableIngredients)
-    .filter(
-      (ingredient) =>
-        ingredient && ingredient.foodNameId !== undefined && ingredient.amount
-    )
+    .filter((ingredient) => ingredient && ingredient.foodNameId !== undefined && ingredient.amount)
     .map((ingredient) => ({
       ...ingredient,
       ...ingredient.foodData,
       id: ingredient.foodNameId,
-      name: ingredient.ingredientName
+      name: ingredient.ingredientName,
     }));
+
   if (fullIngredients.length === 0) {
     computedDailyNutrition.value = null;
     return;
   }
+
   const sendingRecipe = {
     title: 'Daily Tracking',
     fullIngredients,
     serves: 1,
   } as unknown as ComputableRecipe;
+
   const nutrition = await $fetch('/api/calculate/recipe', {
     method: 'POST',
     body: {
@@ -486,10 +448,9 @@ const qualityItems = computed(() =>
   getDailyQualityCards(computedDailyNutrition.value?.report, {
     totalFat: computedDailyNutrition.value?.fat,
     protectiveScore: computedDailyNutrition.value?.protective_score,
-  })
+  }),
 );
 
-// --- Quality detail panels ---
 const showOverallReportPanel = ref(false);
 const showMicroPanel = ref(false);
 const showFatPanel = ref(false);
@@ -536,9 +497,8 @@ const micronutrientGroups = computed(() => {
 
 const fatProfile = computed(() => computedDailyNutrition.value?.report?.details?.fatProfile);
 const fatProfileReadable = computed<{ description: string; subtitle: string; color: string; bgColor: string }[]>(
-  () => computedDailyNutrition.value?.report?.humanReadable?.fatProfile ?? []
+  () => computedDailyNutrition.value?.report?.humanReadable?.fatProfile ?? [],
 );
-
 const gutHealth = computed(() => computedDailyNutrition.value?.report?.details?.gutHealth);
 
 const fatDonutSegments = computed(() => {
@@ -573,34 +533,31 @@ function getOnTrackBadge(rda: number): { label: string; cls: string } | null {
 const computeNutritionDebounced = debounce(computeNutrition, 1000);
 const searchRecipesDebounced = debounce(searchRecipes, 1000);
 
-// Track unsaved changes and compute nutrition
 watch(
   trackedMeals,
   () => {
     computeNutritionDebounced();
     hasUnsavedChanges.value = true;
   },
-  { deep: true }
+  { deep: true },
 );
 
 watch(recipeSearchQuery, () => {
   searchRecipesDebounced();
 });
 
-// Reload when the ?date query param changes (arrow navigation from parent)
 watch(() => route.query.date, async () => {
   selectedDate.value = parseDateFromQuery();
   await loadMeals(selectedDate.value);
   await computeNutrition();
 });
 
-// Load meals on mount
 onMounted(async () => {
   mounted.value = true;
   selectedDate.value = parseDateFromQuery();
+  await loadSavedTemplates();
   await loadMeals(selectedDate.value);
 
-  // Auto-add recipe when arriving from cook mode
   const addRecipeId = route.query.addRecipe;
   if (addRecipeId) {
     await handleAddMealFromRecipe(Number(addRecipeId));
@@ -608,6 +565,11 @@ onMounted(async () => {
 
   await computeNutrition();
   setupAutoSave();
+});
+
+onBeforeUnmount(() => {
+  savedMealActionTimers.forEach((timer) => clearTimeout(timer));
+  savedMealActionTimers.clear();
 });
 </script>
 

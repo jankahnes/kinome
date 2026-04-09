@@ -262,6 +262,7 @@ async function trackedDatesByUser(client: AnyClient, userId: string) {
     .from('tracked_meals')
     .select('meal_date')
     .eq('user_id', userId)
+    .not('is_template', 'is', true)
     .not('meal_date', 'is', null);
 
   if (error) throw error;

@@ -1,7 +1,6 @@
 <template>
   <div
-    class="main-card main-card-padding flex flex-col gap-4 !pb-3 items-start disabled:opacity-20 disabled:cursor-not-allowed"
-  >
+    class="main-card main-card-padding flex flex-col gap-4 !pb-3 items-start disabled:opacity-20 disabled:cursor-not-allowed">
     <div v-if="recipe.visibility === 'PUBLIC'" class="space-y-2 opacity-60">
       <div class="flex gap-2 items-center">
         <IconCheck class="w-6" />
@@ -10,10 +9,7 @@
       <div class="flex gap-2 items-center">
         <IconChartLine class="w-6" />
         <span class="text-lg">Relevancy</span>
-        <div
-          class="progress-ring ml-2"
-          :style="{ '--progress': recipe.relevancy + '%' }"
-        >
+        <div class="progress-ring ml-2" :style="{ '--progress': recipe.relevancy + '%' }">
           <div class="inner text-xs font-light">
             {{ recipe.relevancy }}
           </div>
@@ -28,78 +24,53 @@
           in search results and recommendations.
         </p>
       </div>
-      <div
-        class="flex gap-2 items-center flex-wrap gap-y-1 mt-4"
-        :class="{
-          'opacity-50': publishingRequirements.hasInstructions,
-        }"
-      >
+      <div class="flex gap-2 items-center flex-wrap gap-y-1 mt-4" :class="{
+        'opacity-50': publishingRequirements.hasInstructions,
+      }">
         <IconCheck class="w-6" v-if="publishingRequirements.hasInstructions" />
         <IconArrowRight class="w-6" v-else />
-        <span class="text-[18px] flex-1 text-nowrap"
-          >Add cooking instructions</span
-        >
+        <span class="text-[18px] flex-1 text-nowrap">Add cooking instructions</span>
         <div class="flex gap-2 items-center flex-wrap">
-          <button
-            class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="!publishingRequirements.hasInstructions"
-            @click="generateInstructions"
-            :disabled="generateInstructionsLoading || generatePictureLoading"
-          >
-            <IconLoader
-              class="w-4 animate-spin"
-              v-if="generateInstructionsLoading"
-            />
+          <button class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
+            v-if="!publishingRequirements.hasInstructions" @click="generateInstructions"
+            :disabled="generateInstructionsLoading || generatePictureLoading">
+            <IconLoader class="w-4 animate-spin" v-if="generateInstructionsLoading" />
             <IconSparkles class="w-4" v-else />
             <span>{{
               generateInstructionsLoading ? 'Generating...' : 'Generate'
             }}</span>
           </button>
-          <button
-            class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
-            v-if="!publishingRequirements.hasInstructions"
-            @click="scrollToEditableInstructions"
-            :disabled="generateInstructionsLoading || generatePictureLoading"
-          >
+          <button class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
+            v-if="!publishingRequirements.hasInstructions" @click="scrollToEditableInstructions"
+            :disabled="generateInstructionsLoading || generatePictureLoading">
             <IconPencil class="w-4" />
             <span>Add</span>
           </button>
         </div>
       </div>
-      <div
-        class="flex gap-2 items-center flex-wrap gap-y-1"
-        :class="{ 'opacity-50': publishingRequirements.hasPicture }"
-      >
+      <div class="flex gap-2 items-center flex-wrap gap-y-1"
+        :class="{ 'opacity-50': publishingRequirements.hasPicture }">
         <IconCheck class="w-6" v-if="publishingRequirements.hasPicture" />
         <IconArrowRight class="w-6" v-else />
         <span class="text-[18px] flex-1 text-nowrap mr-4">Add picture</span>
         <div class="flex gap-2 items-center flex-wrap">
-          <button
-            class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="!publishingRequirements.hasPicture"
-            @click="generatePicture"
-            :disabled="generatePictureLoading || generateInstructionsLoading"
-          >
+          <button class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
+            v-if="!publishingRequirements.hasPicture" @click="generatePicture"
+            :disabled="generatePictureLoading || generateInstructionsLoading">
             <IconSparkles class="w-4" v-if="!generatePictureLoading" />
             <IconLoader class="w-4 animate-spin" v-else />
             <span>Generate</span>
           </button>
-          <button
-            class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="!publishingRequirements.hasPicture"
-            @click="triggerFileUpload"
-            :disabled="generatePictureLoading || generateInstructionsLoading"
-          >
+          <button class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
+            v-if="!publishingRequirements.hasPicture" @click="triggerFileUpload"
+            :disabled="generatePictureLoading || generateInstructionsLoading">
             <IconUpload class="w-4" />
             <span>Upload</span>
           </button>
 
-          <button
-            class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
-            v-if="!publishingRequirements.hasPicture"
-            @click="triggerPhotoEnv"
-            :disabled="generatePictureLoading || generateInstructionsLoading"
-          >
+          <button class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
+            v-if="!publishingRequirements.hasPicture" @click="triggerPhotoEnv"
+            :disabled="generatePictureLoading || generateInstructionsLoading">
             <IconCamera class="w-4" />
             <span>Take picture</span>
           </button>
@@ -127,34 +98,58 @@
             }}</span>
           </button>
           -->
-        <button
-          v-if="
-            publishingRequirements.hasInstructions &&
-            publishingRequirements.hasPicture &&
-            publishingRequirements.instructionsMatchedToIngredients
-          "
-          class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
-          @click="publishRecipe"
-          :disabled="
-            publishLoading ||
+        <button v-if="
+          publishingRequirements.hasInstructions &&
+          publishingRequirements.hasPicture &&
+          publishingRequirements.instructionsMatchedToIngredients
+        " class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary" @click="publishRecipe"
+          :disabled="publishLoading ||
             generateInstructionsLoading ||
             generatePictureLoading
-          "
-        >
+            ">
           <IconLoader class="w-4 animate-spin" v-if="publishLoading" />
           <IconChevronsUp class="w-4" v-else />
           <span>{{ publishLoading ? 'Publishing...' : 'Publish' }}</span>
         </button>
       </div>
     </div>
-    <button
-      v-if="auth.user?.username === 'administrator'"
-      class="button px-2 py-[3px] inline-flex gap-2 items-center !text-gray-800 !bg-primary-10/70 self-start"
-      @click="deboost"
-    >
-      <IconChevronsDown class="w-5" />
-      <span>Deboost</span>
-    </button>
+    <div v-if="auth.isAdmin()" class="flex flex-wrap gap-2 items-center self-start w-full mt-1">
+      <button
+        class="button px-2 py-[3px] inline-flex gap-2 items-center text-primary outline-1 outline-primary"
+        type="button"
+        @click="regeneratePicture"
+        :disabled="generatePictureLoading || generateInstructionsLoading || deleteLoading || deleteImageLoading">
+        <IconLoader class="w-4 animate-spin" v-if="generatePictureLoading" />
+        <IconRefreshCcw class="w-4" v-else />
+        <span>{{ generatePictureLoading ? 'Regenerating...' : 'Regenerate picture' }}</span>
+      </button>
+      <button
+        v-if="recipe.picture"
+        class="button px-2 py-[3px] inline-flex gap-2 items-center outline-1 outline-red-500/70 text-red-700 hover:bg-red-50"
+        type="button"
+        @click="deleteRecipeImage"
+        :disabled="deleteImageLoading || generatePictureLoading || generateInstructionsLoading || deleteLoading">
+        <IconLoader class="w-4 animate-spin" v-if="deleteImageLoading" />
+        <IconImageOff class="w-4" v-else />
+        <span>{{ deleteImageLoading ? 'Removing...' : 'Delete image' }}</span>
+      </button>
+      <button
+        class="button px-2 py-[3px] inline-flex gap-2 items-center !text-white !bg-red-600 hover:!bg-red-700"
+        type="button"
+        @click="deleteRecipeAdmin"
+        :disabled="deleteLoading || generatePictureLoading || generateInstructionsLoading || deleteImageLoading">
+        <IconLoader class="w-4 animate-spin" v-if="deleteLoading" />
+        <IconTrash class="w-4" v-else />
+        <span>{{ deleteLoading ? 'Deleting...' : 'Delete recipe' }}</span>
+      </button>
+      <button
+        class="button px-2 py-[3px] inline-flex gap-2 items-center !text-gray-800 !bg-primary-10/70"
+        type="button"
+        @click="deboost">
+        <IconChevronsDown class="w-5" />
+        <span>Deboost</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -165,10 +160,14 @@ const props = defineProps<{
 }>();
 
 const supabase = useSupabaseClient<Database>();
+const router = useRouter();
+const recipeStore = useRecipeStore();
 const generatePictureLoading = ref(false);
 const generateInstructionsLoading = ref(false);
 const publishLoading = ref(false);
 const replaceImageLoading = ref(false);
+const deleteLoading = ref(false);
+const deleteImageLoading = ref(false);
 const auth = useAuthStore();
 const fileInput = ref<HTMLInputElement | null>(null);
 const loadingStore = useLoadingStore();
@@ -189,6 +188,8 @@ const generatePicture = async () => {
   const payload = {
     title: props.recipe.title,
     instructions: props.recipe.instructions,
+    source_type: props.recipe.source_type,
+    source: props.recipe.source,
   };
   const response = await $fetch('/api/create-recipe/get-processed-image', {
     method: 'POST',
@@ -219,6 +220,49 @@ const generatePicture = async () => {
     .eq('id', props.recipe.id);
   generatePictureLoading.value = false;
   loadingStore.displayTransientToast('Picture generated successfully! ✨');
+};
+
+const regeneratePicture = async () => {
+  generatePictureLoading.value = true;
+  loadingStore.displayToast('Regenerating picture ✨');
+
+  const payload = {
+    title: props.recipe.title,
+    instructions: props.recipe.instructions,
+    source_type: props.recipe.source_type,
+    source: props.recipe.source,
+  };
+  const response = await $fetch('/api/create-recipe/get-processed-image', {
+    method: 'POST',
+    body: payload,
+  });
+  if (!response.image_base64) {
+    generatePictureLoading.value = false;
+    loadingStore.displayTransientToast('Failed to regenerate picture ❌');
+    throw new Error('Failed to regenerate picture');
+  }
+  const imageData = await $fetch('/api/db/upload-image', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: {
+      image: response.image_base64,
+      bucket: 'recipe',
+      id: props.recipe.id,
+      shouldUpsert: Boolean(props.recipe.picture),
+    },
+  });
+  props.recipe.picture = imageData.publicUrl;
+  await supabase
+    .from('recipes')
+    .update({
+      picture: imageData.publicUrl,
+    })
+    .eq('id', props.recipe.id);
+  generatePictureLoading.value = false;
+  await props.refresh(props.recipe.id, true);
+  loadingStore.displayTransientToast('Picture regenerated successfully! ✨');
 };
 
 const generateInstructions = async () => {
@@ -254,9 +298,9 @@ const publishRecipe = async () => {
     );
     throw new Error(
       'Publishing requirements not met: ' +
-        Object.values(publishingRequirements.value)
-          .filter((requirement) => requirement === false)
-          .join(', ')
+      Object.values(publishingRequirements.value)
+        .filter((requirement) => requirement === false)
+        .join(', ')
     );
   }
   await supabase
@@ -333,6 +377,57 @@ const deboost = async () => {
     })
     .eq('id', props.recipe.id);
 };
+
+const deleteRecipeImage = async () => {
+  if (!props.recipe.picture) return;
+  if (
+    !confirm(
+      'Remove the image file from storage and clear the picture on this recipe?'
+    )
+  ) {
+    return;
+  }
+  deleteImageLoading.value = true;
+  try {
+    await $fetch('/api/db/delete-recipe-image', {
+      method: 'POST',
+      body: {
+        recipeId: props.recipe.id,
+      },
+    });
+    props.recipe.picture = null;
+    await props.refresh(props.recipe.id, true);
+    loadingStore.displayTransientToast('Image removed ✨');
+  } catch (error) {
+    console.error('Failed to delete recipe image:', error);
+    loadingStore.displayTransientToast('Failed to remove image ❌');
+  } finally {
+    deleteImageLoading.value = false;
+  }
+};
+
+const deleteRecipeAdmin = async () => {
+  if (!confirm('Delete this recipe permanently? This cannot be undone.')) {
+    return;
+  }
+  deleteLoading.value = true;
+  try {
+    await $fetch('/api/db/delete-recipe', {
+      method: 'POST',
+      body: {
+        recipeId: props.recipe.id,
+      },
+    });
+    recipeStore.deleteRecipe(props.recipe.id);
+    recipeStore.setRecipe({} as Recipe);
+    await router.push('/');
+  } catch (error) {
+    console.error('Failed to delete recipe:', error);
+    loadingStore.displayTransientToast('Failed to delete recipe ❌');
+  } finally {
+    deleteLoading.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -341,10 +436,8 @@ const deboost = async () => {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: conic-gradient(
-    var(--color-primary) var(--progress),
-    #ffffff var(--progress)
-  );
+  background: conic-gradient(var(--color-primary) var(--progress),
+      #ffffff var(--progress));
   display: flex;
   align-items: center;
   justify-content: center;

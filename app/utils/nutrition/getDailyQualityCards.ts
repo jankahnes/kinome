@@ -139,6 +139,22 @@ const satietyTiers: Threshold[] = [
   { minScore: 88, rating: 'Very High', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
+const fiberTiers: Threshold[] = [
+  { minScore: -Infinity, rating: 'Low', pillClass: 'bg-red-100 text-red-700' },
+  { minScore: 30, rating: 'Some', pillClass: 'bg-orange-100 text-orange-700' },
+  { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
+  { minScore: 68, rating: 'High', pillClass: 'bg-emerald-100 text-emerald-700' },
+  { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
+];
+
+const proteinTiers: Threshold[] = [
+  { minScore: -Infinity, rating: 'Low', pillClass: 'bg-red-100 text-red-700' },
+  { minScore: 30, rating: 'Moderate', pillClass: 'bg-orange-100 text-orange-700' },
+  { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
+  { minScore: 68, rating: 'High', pillClass: 'bg-emerald-100 text-emerald-700' },
+  { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
+];
+
 // More forgiving scale — only "very" high scores get the top ratings
 // Most foods have low antioxidant content, so this is specialty territory
 const antioxidantTiers: Threshold[] = [
@@ -426,6 +442,20 @@ export function getDailyQualityCards(
   );
   const antioxidantOrder = antioxidantConditionMet ? 4 : 4 - 20;
 
+  // --- Fiber (order 3, condition: notably high or low) ---
+  const fiberScore: number | null = overall?.fiber_score ?? null;
+  const fiberResolved = resolve(fiberScore, fiberTiers);
+  const fiberConditionMet = fiberScore != null && (fiberScore >= 68 || fiberScore <= 25);
+  const fiberOrder = fiberConditionMet ? 6 : 6 - 20;
+  const fiberSubtitle = fiberConditionMet ? `${report.details?.fiber?.fiberTotal?.toFixed(0)}g per serving` : '';
+
+  // --- Protein (order 2, condition: notably high) ---
+  const proteinScore: number | null = overall?.protein_score ?? null;
+  const proteinResolved = resolve(proteinScore, proteinTiers);
+  const proteinConditionMet = proteinScore != null && proteinScore >= 68;
+  const proteinOrder = proteinConditionMet ? 7 : 7 - 20;
+  const proteinSubtitle = proteinConditionMet ? `${report.details?.protein?.proteinPerServing?.toFixed(0)}g per serving` : '';
+
   const allCards: DailyQualityCard[] = [
     {
       title: 'Micronutrients',
@@ -457,7 +487,7 @@ export function getDailyQualityCards(
       ...wholeResolved,
       subtitle: wholeFoodSubtitle,
       clickable: false,
-      orderValue: 7,
+      orderValue: 5,
     },
     {
       title: 'Fat Quality',
@@ -482,6 +512,22 @@ export function getDailyQualityCards(
       subtitle: antioxidantSubtitle,
       clickable: false,
       orderValue: antioxidantOrder,
+    },
+    {
+      title: 'Fiber',
+      img: 'fiber.webp',
+      ...fiberResolved,
+      subtitle: fiberSubtitle,
+      clickable: false,
+      orderValue: fiberOrder,
+    },
+    {
+      title: 'Protein',
+      img: 'protein.webp',
+      ...proteinResolved,
+      subtitle: proteinSubtitle,
+      clickable: false,
+      orderValue: proteinOrder,
     },
   ];
 

@@ -145,6 +145,7 @@ async function fetchMacroMeals() {
             .from('tracked_meals')
             .select('meal_date, kcal, protein, fat, carbohydrates, fiber, sugar, salt')
             .eq('user_id', user.value.id)
+            .not('is_template', 'is', true)
             .gte('meal_date', formatTrendsDate(dr.start))
             .lte('meal_date', formatTrendsDate(dr.end))
             .order('meal_date', { ascending: true });
@@ -278,6 +279,7 @@ async function fetchPeriodNutrition() {
                 )
             `)
             .eq('user_id', user.value.id)
+            .not('is_template', 'is', true)
             .gte('meal_date', formatTrendsDate(analysisDateRange.value.start))
             .lte('meal_date', formatTrendsDate(analysisDateRange.value.end))
             .order('meal_date', { ascending: true });

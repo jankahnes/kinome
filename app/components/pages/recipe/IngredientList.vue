@@ -94,6 +94,8 @@
                       ingredient.preparation_description }}
                     </span>
                   </span>
+                  <span v-if="false" class="font-light text-gray-600 text-sm mt-1">, {{ ingredient?.consumption_factor * 100
+                    }}% eaten</span>
                 </span>
               </li>
             </ul>
@@ -102,18 +104,17 @@
             (addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1) ||
             (addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75)
           ">
-            <div class="flex gap-1 items-center rounded-xl"
-              v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1">
+            <div class="flex items-center rounded-xl" v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1">
               <span class="text-sm">🧈</span>
-              <span class="text-xs font-medium">Plus estimated ~{{ getAdded(addedInfo?.addedFat) }}g of
+              <span class="text-xs font-medium">Plus ~{{ getAdded(addedInfo?.addedFat) }}g of
                 fat</span>
             </div>
-            <div class="flex gap-1 items-center rounded-xl" v-if="
+            <div class="flex items-center rounded-xl" v-if="
               addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
             ">
               <span class="text-sm">🧂</span>
               <span class="text-xs font-medium">
-                Plus estimated ~{{ getAdded(addedInfo?.addedSalt) }}g of
+                Plus ~{{ getAdded(addedInfo?.addedSalt) }}g of
                 salt</span>
             </div>
           </div>

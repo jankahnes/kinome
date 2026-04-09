@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
     body: {
       message,
       type: 'default',
+      schemaKey: 'recipeDescriptionInstructions',
     },
   });
 

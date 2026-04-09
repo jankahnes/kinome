@@ -7,7 +7,7 @@ import type { BaseRecipe, UploadableRecipe } from '~/types/types';
 import { recipeKeys } from '~/types/keys';
 import stripKeys from '~/utils/format/stripKeys';
 import type { InsertableRecipe } from '~/types/types';
-import cleanUrl from '~/utils/cleanUrl';
+import canonicalUrl from '~/utils/canonicalUrl';
 import { handleRecipeCreated } from '~~/server/utils/gamification/service';
 
 async function uploadImage(
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
           user_id: userId,
           base_ingredients_serves: baseRecipe.serves,
           visibility: 'UNLISTED',
-          source: cleanUrl(baseRecipe.source),
+          source: canonicalUrl(baseRecipe.source),
         },
         recipeKeys
       ) as InsertableRecipe

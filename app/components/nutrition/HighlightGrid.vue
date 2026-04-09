@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-wrap gap-4">
+  <div class="flex flex-wrap gap-3">
     <div
       class="flex-1 basis-full main-card main-card-padding"
       v-if="type === 'full'"

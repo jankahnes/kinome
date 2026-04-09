@@ -1,8 +1,7 @@
 <template>
   <!-- Header -->
   <div
-    class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-3xl sm:rounded-t-3xl"
-  >
+    class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-3xl sm:rounded-t-3xl">
     <h2 class="text-xl font-semibold">Complete Product Info</h2>
     <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
       <IconX />
@@ -24,32 +23,22 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">
           Product Name <span class="text-red-500">*</span>
         </label>
-        <input
-          v-model="formData.product_name"
-          type="text"
+        <input v-model="formData.product_name" type="text"
           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-          placeholder="e.g., Organic Whole Wheat Pasta"
-          required
-        />
+          placeholder="e.g., Organic Whole Wheat Pasta" required />
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">
           Brand
         </label>
-        <input
-          v-model="formData.brand"
-          type="text"
+        <input v-model="formData.brand" type="text"
           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-          placeholder="e.g., Barilla (optional)"
-        />
+          placeholder="e.g., Barilla (optional)" />
       </div>
 
-      <button
-        @click="saveBasicInfo"
-        :disabled="!formData.product_name"
-        class="w-full bg-primary text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark transition-colors"
-      >
+      <button @click="saveBasicInfo" :disabled="!formData.product_name"
+        class="w-full bg-primary text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark transition-colors">
         Continue to Nutrition →
       </button>
     </div>
@@ -65,11 +54,8 @@
 
       <!-- Camera capture option -->
       <div class="space-y-2">
-        <button
-          @click="captureNutritionLabel"
-          :disabled="isProcessingImage"
-          class="w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button @click="captureNutritionLabel" :disabled="isProcessingImage"
+          class="w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           <IconLoaderCircle v-if="isProcessingImage" class="animate-spin" />
           <IconCamera v-else />
           {{ isProcessingImage ? 'Processing...' : 'Scan Nutrition Label' }}
@@ -77,14 +63,8 @@
         <p class="text-xs text-gray-500 text-center">
           Or enter values manually below
         </p>
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          class="hidden"
-          @change="handleImageCapture"
-        />
+        <input ref="fileInput" type="file" accept="image/*" capture="environment" class="hidden"
+          @change="handleImageCapture" />
       </div>
 
       <!-- Manual entry fields -->
@@ -93,115 +73,78 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Calories (kcal)
           </label>
-          <input
-            v-model.number="formData.kcal"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.kcal" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Fat (g)
           </label>
-          <input
-            v-model.number="formData.fat"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.fat" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Saturated Fat (g)
           </label>
-          <input
-            v-model.number="formData.saturated_fat"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.saturated_fat" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Carbs (g)
           </label>
-          <input
-            v-model.number="formData.carbohydrates"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.carbohydrates" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Sugar (g)
           </label>
-          <input
-            v-model.number="formData.sugar"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.sugar" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Fiber (g)
           </label>
-          <input
-            v-model.number="formData.fiber"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.fiber" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Protein (g)
           </label>
-          <input
-            v-model.number="formData.protein"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.protein" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Salt (g)
           </label>
-          <input
-            v-model.number="formData.salt"
-            type="number"
-            step="0.1"
+          <input v-model.number="formData.salt" type="number" step="0.1"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="0"
-            required
-          />
+            placeholder="0" required />
         </div>
       </div>
 
-      <button
-        @click="saveNutrition"
-        :disabled="!isNutritionComplete"
-        class="w-full bg-primary text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark transition-colors"
-      >
+      <button @click="saveNutrition" :disabled="!isNutritionComplete"
+        class="w-full bg-primary text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark transition-colors">
         Save & Match Food →
       </button>
+    </div>
+    <div class="hidden from-sky-100 to-blue-50
+from-emerald-100 to-teal-50
+from-red-100 to-orange-50
+from-rose-100 to-pink-50
+from-amber-100 to-yellow-50">
     </div>
   </div>
 </template>

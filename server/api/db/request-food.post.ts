@@ -43,6 +43,29 @@ function getTopThreeMicros(food: Record<string, any>): Record<string, number> {
   return Object.fromEntries(relevances.slice(0, 3).map(([k, , v]) => [k, v]));
 }
 
+function normalizeOptionalName(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function normalizeCountableUnits(
+  countableUnits: { unit_name: string; weight_grams: number }[] | null | undefined
+) {
+  const entries = (countableUnits ?? [])
+    .map(({ unit_name, weight_grams }) => {
+      const normalizedUnit = unit_name === '' ? '' : unit_name.trim();
+      return [normalizedUnit, weight_grams] as const;
+    })
+    .filter(
+      ([unit_name, weight_grams]) =>
+        (unit_name === '' || unit_name.length > 0) &&
+        Number.isFinite(weight_grams) &&
+        weight_grams > 0
+    );
+
+  return Object.fromEntries(entries) as Record<string, number>;
+}
+
 async function enrichFoodWithWikiFields(
   client: any,
   foodId: number,
@@ -92,7 +115,7 @@ async function enrichFoodWithWikiFields(
 
   const response = await $fetch('/api/gpt/response', {
     method: 'POST',
-    body: { message, type: 'default' },
+    body: { message, type: 'default', schemaKey: 'foodWikiFields' },
   }) as string;
 
   if (!response) return;
@@ -184,6 +207,13 @@ export default defineEventHandler(async (event) => {
 
   const input = await readBody(event);
   let { query, from_user } = input;
+  query = normalizeOptionalName(query);
+  if (!query) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Food query is empty',
+    });
+  }
   let request_id = null;
 
   try {
@@ -277,6 +307,7 @@ export default defineEventHandler(async (event) => {
       body: {
         message: searchPrompt.replace('{query}', query),
         type: 'quick',
+        schemaKey: 'foodMatchSearchRelated',
       },
     });
     if (!response)
@@ -332,6 +363,7 @@ export default defineEventHandler(async (event) => {
           .replace('{query}', query)
           .replace('{results}', relevantFoodsNames),
         type: 'default',
+        schemaKey: 'foodMatchJudgeResults',
       },
     });
     logCheckpoint('Judge GPT call completed');
@@ -344,6 +376,12 @@ export default defineEventHandler(async (event) => {
       primary_name: string | null;
       other_names: string[] | null;
     };
+    const queryName = normalizeOptionalName(judgeResults.query_name) ?? query;
+    const primaryName = normalizeOptionalName(judgeResults.primary_name) ?? queryName;
+    const otherNames = (judgeResults.other_names || []).flatMap((name) => {
+      const normalized = normalizeOptionalName(name);
+      return normalized ? [normalized] : [];
+    });
 
     if (judgeResults.judgement === 'reject') {
       logCheckpoint('Reject judgement');
@@ -364,11 +402,15 @@ export default defineEventHandler(async (event) => {
     };
 
     if (judgeResults.judgement === 'add_as_alias') {
+      if (judgeResults.matching_id == null) {
+        throw new Error('Judge response missing matching_id for alias');
+      }
+
       // Build list of all aliases to insert
       const aliasesToInsert = buildAliasList([
-        judgeResults.query_name,
-        judgeResults.primary_name,
-        ...(judgeResults.other_names || []),
+        queryName,
+        primaryName,
+        ...otherNames,
       ]);
 
       if (aliasesToInsert.length === 0) {
@@ -400,7 +442,7 @@ export default defineEventHandler(async (event) => {
 
       // Find the ID that corresponds to the query_name specifically
       const queryNameEntry = foodNameData?.find(
-        (entry) => entry.name === judgeResults.query_name
+        (entry) => entry.name === queryName
       );
       const returnedId = queryNameEntry?.id ?? foodNameData?.[0]?.id;
 
@@ -418,7 +460,7 @@ export default defineEventHandler(async (event) => {
           status: 'ALIAS_INSERTED',
           status_info: `Accepted as alias (${aliasesToInsert.length} name(s))`,
           food_name_id: returnedId,
-          food_name: judgeResults.query_name,
+          food_name: queryName,
         });
       }
 
@@ -435,7 +477,6 @@ export default defineEventHandler(async (event) => {
     }
 
     //Else, we need to insert the food as a new food
-    const primaryName = judgeResults.primary_name ?? judgeResults.query_name;
     const contextPrompt = (await assets.getItem(
       'food-create/context.txt'
     )) as string;
@@ -461,6 +502,7 @@ export default defineEventHandler(async (event) => {
           systemPrompt: generalAminoPrompt,
           message: `Food: ${primaryName}`,
           type: 'accurate',
+          schemaKey: 'foodGeneralAmino',
         },
       }),
       $fetch('/api/gpt/response', {
@@ -469,6 +511,7 @@ export default defineEventHandler(async (event) => {
           systemPrompt: contextPrompt,
           message: `Food: ${primaryName}`,
           type: 'accurate',
+          schemaKey: 'foodContext',
         },
       }),
       $fetch('/api/gpt/response', {
@@ -477,6 +520,7 @@ export default defineEventHandler(async (event) => {
           systemPrompt: micronutrientsPrompt,
           message: `Food: ${primaryName}`,
           type: 'accurate',
+          schemaKey: 'foodMicronutrients',
         },
       }),
       $fetch('/api/gpt/response', {
@@ -485,6 +529,7 @@ export default defineEventHandler(async (event) => {
           systemPrompt: unitsPrompt,
           message: `Food: ${primaryName}`,
           type: 'accurate',
+          schemaKey: 'foodUnitsAndAisle',
         },
       }),
     ]);
@@ -497,7 +542,14 @@ export default defineEventHandler(async (event) => {
     const micronutrients = JSON.parse(
       extractJson(micronutrientsResponse) ?? '{}'
     );
-    const units = JSON.parse(extractJson(unitsResponse) ?? '{}');
+    const unitsRaw = JSON.parse(extractJson(unitsResponse) ?? '{}') as {
+      countable_units?: { unit_name: string; weight_grams: number }[];
+      aisle?: string;
+    };
+    const units = {
+      ...unitsRaw,
+      countable_units: normalizeCountableUnits(unitsRaw.countable_units),
+    };
 
     const foodObject = {
       name: primaryName,
@@ -564,9 +616,9 @@ export default defineEventHandler(async (event) => {
 
     // Build list of all aliases (excluding the primary name)
     const allAliasNames = [
-      judgeResults.query_name,
-      judgeResults.primary_name,
-      ...(judgeResults.other_names || []),
+      queryName,
+      primaryName,
+      ...otherNames,
     ];
     const aliasesToInsert = buildAliasList(allAliasNames).filter(
       (name) => name !== primaryName
@@ -592,7 +644,7 @@ export default defineEventHandler(async (event) => {
 
       // Update newFoodNameId to point to the query_name alias if it exists
       const queryNameAlias = aliasData?.find(
-        (alias) => alias.name === judgeResults.query_name
+        (alias) => alias.name === queryName
       );
       if (queryNameAlias) {
         newFoodNameId = queryNameAlias.id;

@@ -188,6 +188,21 @@ async function updateExistingRecipe(
     );
   }
 
+  // Preserve variation fields written by detect-variation (which runs between
+  // Phase A and Phase B). recipeRow is built from an in-memory snapshot taken
+  // before detect-variation ran, so these would otherwise be overwritten.
+  const { data: currentVariation } = await client
+    .from('recipes')
+    .select('based_on, variation_name, variation_summary, variation_display_name')
+    .eq('id', recipeId)
+    .single();
+  if (currentVariation?.based_on != null) {
+    (recipeRow as any).based_on = currentVariation.based_on;
+    (recipeRow as any).variation_name = currentVariation.variation_name;
+    (recipeRow as any).variation_summary = currentVariation.variation_summary;
+    (recipeRow as any).variation_display_name = currentVariation.variation_display_name;
+  }
+
   const { error: updateError } = await client
     .from('recipes')
     .update({
@@ -298,6 +313,16 @@ export default defineEventHandler(async (event) => {
     recipeFoodRows: any[];
     recipeTagRows: any[];
   };
+
+  const preservedRecipeFields = {
+    full_instructions: (body as any).full_instructions,
+    total_time_mins: (body as any).total_time_mins,
+  };
+  for (const [key, value] of Object.entries(preservedRecipeFields)) {
+    if (value != null) {
+      (response.recipeRow as any)[key] = value;
+    }
+  }
 
   if (body.full) {
     response.recipeRow.visibility = 'PUBLIC';

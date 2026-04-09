@@ -42,7 +42,10 @@ export function useTruncateRow(
       );
 
       const maxHeight = Math.max(
-        ...firstRowElements.map((el) => el.offsetHeight)
+        ...firstRowElements.map((el) => {
+          const marginTop = parseFloat(getComputedStyle(el).marginTop) || 0;
+          return marginTop + el.offsetHeight;
+        })
       );
       height.value = maxHeight + padding;
     } else {

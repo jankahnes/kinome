@@ -89,7 +89,7 @@ export async function getRecipesContaining(
   // Step 4: Get the full recipe overviews for the matching recipe IDs
   const recipes = await getRecipeOverviews(client, {
     in: { id: Array.from(matchingRecipeIds) },
-    limit: 5,
+    limit: 4,
     orderBy: { column: 'relevancy', ascending: false },
     or: 'picture.not.eq.null,source_type.eq.MEDIA',
   });

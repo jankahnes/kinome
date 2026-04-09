@@ -77,6 +77,7 @@ export default defineEventHandler(async (event) => {
       body: {
         message: prompt,
         type: 'default',
+        schemaKey: 'brandedFoodGenericMatch',
       },
     });
 

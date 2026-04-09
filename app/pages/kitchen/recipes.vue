@@ -10,33 +10,33 @@
               class="flex-grow focus:outline-none min-w-0! p-2" />
           </div>
         </div>
-        <span class="text-gray-500 text-sm text-nowrap">{{ totalCount }} Results</span>
+        <span class="text-gray-500 text-sm text-nowrap hidden sm:block">{{ totalCount }} Results</span>
       </div>
 
       <div class="flex justify-between items-center flex-wrap gap-2 z-2">
         <div class="filters flex items-center gap-2">
           <button @click="onSelect('tags')" :class="{
-            '!bg-primary !text-white': selectedFilter === 'tags',
-          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
-            <IconTag class="w-5" />
+            '!bg-primary/80 !text-white': selectedFilter === 'tags',
+          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            <IconTag class="w-4" />
             <span class="hidden lg:block">Tags</span>
           </button>
           <button @click="onSelect('health')" :class="{
-            '!bg-primary !text-white': selectedFilter === 'health',
-          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
-            <IconShield class="w-5" />
+            '!bg-primary/80 !text-white': selectedFilter === 'health',
+          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            <IconShield class="w-4" />
             <span class="hidden lg:block">Health Score</span>
           </button>
           <button @click="onSelect('kcal')" :class="{
-            '!bg-primary !text-white': selectedFilter === 'kcal',
-          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
-            <IconZap class="w-5" />
+            '!bg-primary/80 !text-white': selectedFilter === 'kcal',
+          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            <IconZap class="w-4" />
             <span class="hidden lg:block">Kcal</span>
           </button>
           <button @click="onSelect('cost')" :class="{
-            '!bg-primary !text-white': selectedFilter === 'cost',
-          }" class="flex animated-button bg-primary-10 p-2 font-bold gap-1 items-center">
-            <IconEuro class="w-5" />
+            '!bg-primary/80 !text-white': selectedFilter === 'cost',
+          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            <IconEuro class="w-4" />
             <span class="hidden lg:block">Cost</span>
           </button>
         </div>

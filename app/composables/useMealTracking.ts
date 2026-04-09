@@ -1,6 +1,7 @@
 import type { TrackedMeal, EditableIngredient } from '~/types/types';
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
-import convertToGrams from '~/utils/format/convertToGrams';
+import { formatLogicalDate } from '~/utils/format/logicalDate';
+import { getMealNutrition } from '~/utils/tracking/getMealNutrition';
 
 export function useMealTracking() {
   const supabase = useSupabaseClient<Database>();
@@ -58,9 +59,27 @@ export function useMealTracking() {
     });
   }
 
+  async function addMealFromTemplate(templateId: number) {
+    const template = await $fetch<TrackedMeal>('/api/tracking/templates/add-to-day', {
+      method: 'POST',
+      body: {
+        templateId,
+        date: formatDate(selectedDate.value),
+        materialize: false,
+      },
+    });
+
+    trackedMeals.value.push({
+      ...template,
+      id: undefined,
+      collapsed: true,
+      is_template: false,
+    });
+  }
+
   // Helper: Format date for DB queries (YYYY-MM-DD)
   function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
+    return formatLogicalDate(date);
   }
 
   // Helper: Format time ago for UI
@@ -127,13 +146,16 @@ export function useMealTracking() {
     try {
       isLoading.value = true;
 
-      const { data: mealsData, error } = await supabase
+      let { data: mealsData, error } = await supabase
         .from('tracked_meals')
         .select(
           `
           id,
           meal_name,
           collapsed,
+          uses_recipe_id,
+          uses_meal_id,
+          is_template,
           meal_order,
           tracked_meal_foods (
             id,
@@ -148,11 +170,53 @@ export function useMealTracking() {
         )
         .eq('user_id', user.value.id)
         .eq('meal_date', formatDate(date))
+        .not('is_template', 'is', true)
         .order('meal_order', { ascending: true });
 
       if (error) throw error;
 
-      const meals = mealsData as any[];
+      let meals = mealsData as any[];
+
+      if (formatDate(date) === formatDate(new Date())) {
+        const materialized = await $fetch<{ inserted: number }>('/api/tracking/materialize-schedules', {
+          method: 'POST',
+          body: {
+            date: formatDate(date),
+          },
+        });
+
+        if ((materialized.inserted ?? 0) > 0) {
+          const retry = await supabase
+            .from('tracked_meals')
+            .select(
+              `
+              id,
+              meal_name,
+              collapsed,
+              uses_recipe_id,
+              uses_meal_id,
+              is_template,
+              meal_order,
+              tracked_meal_foods (
+                id,
+                food_name:food_names(id, name, food:foods(*)),
+                branded_food:branded_foods(*, food_name:food_names(id, name, food:foods(*))),
+                amount,
+                unit,
+                raw_text,
+                food_order
+              )
+            `,
+            )
+            .eq('user_id', user.value.id)
+            .eq('meal_date', formatDate(date))
+            .not('is_template', 'is', true)
+            .order('meal_order', { ascending: true });
+
+          if (retry.error) throw retry.error;
+          meals = (retry.data ?? []) as any[];
+        }
+      }
 
       if (meals && meals.length > 0) {
         const transformedMeals: TrackedMeal[] = meals.map((meal) => {
@@ -162,6 +226,9 @@ export function useMealTracking() {
           return {
             id: meal.id,
             name: meal.meal_name,
+            recipe_id: meal.uses_recipe_id ?? undefined,
+            uses_meal_id: meal.uses_meal_id ?? undefined,
+            is_template: meal.is_template ?? false,
             collapsed: meal.collapsed ?? false,
             editableIngredients: sortedFoods.map(dbFoodToEditableItem),
           };
@@ -182,44 +249,6 @@ export function useMealTracking() {
     }
   }
 
-  function getMealNutrition(meal: TrackedMeal) {
-    let total_weight = 0, kcal = 0, protein = 0, fat = 0, saturated_fat = 0,
-        carbohydrates = 0, fiber = 0, sugar = 0, salt = 0;
-
-    for (const ing of meal.editableIngredients) {
-      if (!ing.foodNameId || !ing.amount || !ing.foodData) continue;
-      const grams = convertToGrams(
-        ing.amount,
-        ing.unit ?? '',
-        ing.foodData.density ?? 1,
-        ing.foodData.countable_units?.[ing.unit ?? ''] ?? 0,
-      );
-      const f = grams / 100;
-      total_weight  += grams;
-      kcal          += (ing.foodData.kcal          ?? 0) * f;
-      protein       += (ing.foodData.protein        ?? 0) * f;
-      fat           += (ing.foodData.fat            ?? 0) * f;
-      saturated_fat += (ing.foodData.saturated_fat  ?? 0) * f;
-      carbohydrates += (ing.foodData.carbohydrates  ?? 0) * f;
-      fiber         += (ing.foodData.fiber          ?? 0) * f;
-      sugar         += (ing.foodData.sugar          ?? 0) * f;
-      salt          += (ing.foodData.salt           ?? 0) * f;
-    }
-
-    const r1 = (n: number) => Math.round(n * 10) / 10;
-    return {
-      total_weight:  Math.round(total_weight),
-      kcal:          Math.round(kcal),
-      protein:       r1(protein),
-      fat:           r1(fat),
-      saturated_fat: r1(saturated_fat),
-      carbohydrates: r1(carbohydrates),
-      fiber:         r1(fiber),
-      sugar:         r1(sugar),
-      salt:          r1(salt),
-    };
-  }
-
   async function saveMeals() {
     if (!user.value || !hasUnsavedChanges.value) return;
 
@@ -231,7 +260,8 @@ export function useMealTracking() {
         .from('tracked_meals')
         .delete()
         .eq('user_id', user.value.id)
-        .eq('meal_date', formatDate(selectedDate.value));
+        .eq('meal_date', formatDate(selectedDate.value))
+        .not('is_template', 'is', true);
 
       if (deleteError) throw deleteError;
 
@@ -241,7 +271,7 @@ export function useMealTracking() {
         mealIndex < trackedMeals.value.length;
         mealIndex++
       ) {
-        const meal = trackedMeals.value[mealIndex];
+        const meal = trackedMeals.value[mealIndex]!;
 
         // Skip meals with no valid ingredients
         const validIngredients = meal.editableIngredients.filter(
@@ -261,6 +291,8 @@ export function useMealTracking() {
             meal_date: formatDate(selectedDate.value),
             collapsed: meal.collapsed,
             meal_order: mealIndex,
+            is_template: false,
+            uses_meal_id: meal.uses_meal_id ?? null,
             uses_recipe_id: meal.recipe_id ?? null,
             ...getMealNutrition(meal!),
           })
@@ -333,6 +365,8 @@ export function useMealTracking() {
     // Meal operations
     addMeal,
     addMealFromRecipe,
+    addMealFromTemplate,
+    getMealNutrition,
 
     // Persistence
     loadMeals,

@@ -3,8 +3,8 @@
     <div class="flex flex-col gap-10 ">
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink v-for="view in views" :key="view.value" :to="view.route"
-          class="animated-button bg-primary-10 px-3 py-2"
-          exact-active-class="primary-gradient text-gray-800 px-3 py-2">
+          class="animated-button bg-primary-10/60 px-3 py-2"
+          exact-active-class="bg-primary/80">
           {{ view.displayName }}
         </NuxtLink>
       </div>
@@ -108,41 +108,47 @@ const submitFromPreparsed = async (recipe: ComputableRecipe) => {
   }
 };
 
-const generateUrlVariations = (url: string | null | undefined) => {
-  if (!url) return [];
-  try {
-    const parsedUrl = new URL(url);
-    const baseUrl = `${parsedUrl.hostname}${parsedUrl.pathname}${parsedUrl.search}`;
-
-    return [url, `https://${baseUrl}`, `http://${baseUrl}`, baseUrl].filter(
-      (variation, index, arr) => arr.indexOf(variation) === index
-    );
-  } catch {
-    return [url];
-  }
-};
-
 const submitFromLink = async (link: string) => {
   isLoading.value = true;
-  const urlVariations = [
-    ...new Set([
-      ...generateUrlVariations(link),
-      ...generateUrlVariations(cleanUrl(link)),
-    ]),
-  ];
+  const supportedVideoSites = ['youtube', 'youtu.be', 'tiktok', 'instagram'];
+  const isVideoLink = supportedVideoSites.some((site) => link.includes(site));
+  const canonical = canonicalUrl(link);
 
-  const recipes = await getRecipeOverviews(supabase, {
-    in: { source: urlVariations },
-  });
-  if (recipes.length > 0) {
-    const recipe = recipes[0]!;
-    isLoading.value = false;
-    navigateTo(getRecipeUrl(recipe.id, recipe.title ?? ''));
-    return;
+  if (canonical) {
+    // 1. Exact match against existing canonical recipes.
+    const recipes = await getRecipeOverviews(supabase, {
+      eq: { source: canonical },
+    });
+    if (recipes.length > 0) {
+      const recipe = recipes[0]!;
+      isLoading.value = false;
+      navigateTo(getRecipeUrl(recipe.id, recipe.title ?? ''));
+      return;
+    }
+
+    // 2. Exact match against absorbed-duplicate source urls.
+    const { data: absorbedMatches } = await supabase
+      .from('recipe_sources' as any)
+      .select('recipe_id')
+      .eq('source_url', canonical)
+      .limit(1);
+    const absorbedCanonicalId = (absorbedMatches as any)?.[0]?.recipe_id as
+      | number
+      | undefined;
+    if (absorbedCanonicalId) {
+      const canonicalOverviews = await getRecipeOverviews(supabase, {
+        eq: { id: absorbedCanonicalId },
+      });
+      const canonicalRecipe = canonicalOverviews[0];
+      if (canonicalRecipe) {
+        isLoading.value = false;
+        navigateTo(getRecipeUrl(canonicalRecipe.id, canonicalRecipe.title ?? ''));
+        return;
+      }
+    }
   }
 
-  const supportedVideoSites = ['youtube', 'youtu.be', 'tiktok', 'instagram'];
-  if (supportedVideoSites.some((site) => link.includes(site))) {
+  if (isVideoLink) {
     job.value = await createJob(supabase, 'media', 'formalizing_ingredients');
     setTimeout(() => {
       loadingMessage.value = '🔍 Analyzing your video...';

@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-20 md:mx-20 space-y-4 sm:space-y-10 m-4 sm:m-10">
+  <div class="mb-20 space-y-4 sm:space-y-10 m-4 sm:mx-10 sm:mt-10 lg:ml-22 lg:mr-18">
     <div class="md:hidden flex justify-between items-center">
       <Logo class="" />
       <Avatar :user="auth.user" class="rounded-full w-10 h-10" v-if="auth.isUser()" />
@@ -16,13 +16,13 @@
               @keyup.enter="handleSearch" @blur="handleSearch" class="flex-grow focus:outline-none min-w-0! p-2" />
           </div>
         </div>
-        <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10 px-3 py-2 shrink-0">
+        <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0" active-class="bg-primary/80">
           All Recipes</NuxtLink>
-        <NuxtLink to="/foods" class="animated-button bg-primary-10 px-3 py-2 shrink-0">All Foods
+        <NuxtLink to="/foods" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0" active-class="bg-primary/80">All Foods
         </NuxtLink>
       </div>
       <div class="items-center gap-2 shrink-0 hidden sm:flex">
-        <NuxtLink to="/" class="text-gray-500 items-center gap-2">
+        <NuxtLink to="/account" class="text-gray-500 items-center gap-2">
           <IconSettings2 class="w-6" />
         </NuxtLink>
       </div>
@@ -79,9 +79,12 @@
       <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(1, 3)" :key="recipe.id + 'mobile'"
         :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
         class="text-[20px] basis-40 flex-1" />
+      <RecipeCardHighlight :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
+        :recipe="recipeStore.indexRecipes[0]!" :id="'mdh-0-0'" :uniqueId="'mdh-0-0'"
+        class="text-[20px] basis-full hidden md:flex" />
       <RecipeCardHighlightMobile :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
         :recipe="recipeStore.indexRecipes[0]!" :id="'mobile-0-0'" :uniqueId="'mobile-0-0'"
-        class="text-[20px] basis-full" />
+        class="text-[20px] basis-full md:hidden" />
       <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(5, 7)" :key="recipe.id + 'mobile'"
         :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
         class="text-[20px] basis-95 flex-1" />
@@ -128,7 +131,7 @@
           </h2>
           <div class="flex flex-wrap gap-4">
             <RecipeCardSocialMedia v-for="recipe in recipeStore.socialIndexRecipes" :key="recipe.id" :recipe="recipe"
-              :uniqueId="'social-' + recipe.id" class="max-h-60 max-w-240 basis-150" />
+              :uniqueId="'social-' + recipe.id" class="max-h-60 max-w-240 basis-140" />
           </div>
         </div>
       </div>
@@ -143,7 +146,7 @@ const loadingStore = useLoadingStore();
 const searchQuery = ref('');
 const auth = useAuthStore();
 
-const recipeCount = ref(1248);
+const recipeCount = ref(1000);
 
 useHead({
   title: 'Kinome - Smart Recipe Platform with Nutrition Analysis',

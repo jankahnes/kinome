@@ -16,6 +16,18 @@ export default function buildQuery(
     }
   }
 
+  if (opts.gte) {
+    for (const [key, value] of Object.entries(opts.gte)) {
+      query = query.gte(key, value);
+    }
+  }
+
+  if (opts.lte) {
+    for (const [key, value] of Object.entries(opts.lte)) {
+      query = query.lte(key, value);
+    }
+  }
+
   if (opts.limit) {
     query = query.limit(opts.limit);
   }

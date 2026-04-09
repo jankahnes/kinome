@@ -136,15 +136,51 @@ export default defineEventHandler(async (event) => {
 
   // ── Phase A complete ──────────────────────────────────────────────────────
   console.log('✅ [Phase A] Complete');
+
+  // ── Variation detection (MEDIA/WEBSITE only) ──────────────────────────────
+  const isFullProcessing = FULL_PROCESSING_SOURCES.includes(
+    baseRecipe.source_type ?? ''
+  );
+
+  if (isFullProcessing) {
+    try {
+      const detection = (await $fetch(
+        '/api/create-recipe/detect-variation',
+        {
+          method: 'POST',
+          body: { recipeId, jobId },
+        }
+      )) as
+        | { outcome: 'duplicate'; canonicalId: number }
+        | { outcome: 'variation'; canonicalId: number }
+        | { outcome: 'unrelated' };
+
+      if (detection.outcome === 'duplicate') {
+        console.log(
+          `🔍 Recipe ${recipeId} absorbed as duplicate into ${detection.canonicalId}; recipe deleted, skipping Phase B`
+        );
+        return {
+          status: 'ok',
+          outcome: 'duplicate',
+          canonicalId: detection.canonicalId,
+        };
+      }
+      if (detection.outcome === 'variation') {
+        console.log(
+          `🔍 Recipe ${recipeId} flagged as variation of ${detection.canonicalId}`
+        );
+      }
+    } catch (err) {
+      console.error('🔍 [Phase A] Variation detection failed:', err);
+      // Continue with Phase B even if detection fails
+    }
+  }
+
   if (jobId) {
     await supabase.from('jobs').delete().eq('id', jobId);
   }
 
   // ── Fire Phase B for full-processing sources (no await) ───────────────────
-  const isFullProcessing = FULL_PROCESSING_SOURCES.includes(
-    baseRecipe.source_type ?? ''
-  );
-
   if (isFullProcessing) {
     console.log(`🔍 Firing Phase B for recipe ${recipeId} (${baseRecipe.source_type})`);
     $fetch('/api/create-recipe/postprocess-enrich-recipe', {

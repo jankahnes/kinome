@@ -6,7 +6,7 @@
   >
     <div class="relative w-[60%] text-lg">
       <NuxtImg
-        class="w-full aspect-square will-change-transform object-contain relative z-10 transition-transform duration-500 group-hover:translate-y-[-1px] group-hover:scale-[1.01]"
+        class="w-full aspect-square will-change-transform object-contain relative z-10 transition-transform duration-500 group-hover:translate-y-[-1px] group-hover:scale-[1.01] filter drop-shadow-xl"
         v-if="recipe?.picture"
         :src="recipe?.picture"
         :alt="recipe?.title"
@@ -22,17 +22,17 @@
         class="pt-4 flex flex-col gap-2 justify-between h-full items-center"
       >
         <span
-          class=" flex text-sm font-bold px-2 py-0.5 rounded-full items-center justify-center tracking-tight gap-1 main-card"
+          class=" flex text-sm font-bold px-2 py-0.5 rounded-full items-center justify-center tracking-tight gap-1 bg-gray-700 text-white"
         >
           <IconFlame class="w-4" strokeWidth="3" />
           <span class="leading-none mt-0.5">TRENDING</span>
         </span>
         <h2
-          class="font-bold leading-10 text-5xl tracking-tight line-clamp-2 text-center text-balance mt-2"
+          class="font-bold leading-10 text-5xl tracking-tight line-clamp-2 text-center text-balance mt-1"
         >
           {{ recipe?.title }}
         </h2>
-        <p class="text-[17px] leading-tight line-clamp-3 text-center text-balance mx-6 xs:mx-10">
+        <p class="text-[17px] text-gray-700/85 leading-tight line-clamp-3 text-center text-balance mx-6 xs:mx-10">
           {{ recipe?.description }}
         </p>
         <div

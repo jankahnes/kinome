@@ -1,10 +1,10 @@
 <template>
   <div :class="{ 'pb-20 lg:pb-0 m-4 lg:m-8 lg:ml-20': !isLandingPage }">
-    <div class="flex items-center gap-2 flex-wrap justify-between" v-if="hasTracking">
+    <div class="flex items-center gap-4 flex-wrap justify-between" v-if="hasTracking">
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink v-for="view in views" :key="view.path" :to="`/tracking${view.path}`"
-          class="animated-button bg-primary-10 px-3 py-2"
-          active-class="primary-gradient text-gray-800 px-3 py-2">
+          class="animated-button bg-primary-10/60 px-3 py-2"
+          active-class="bg-primary/80">
           {{ view.displayName }}
         </NuxtLink>
       </div>
@@ -25,6 +25,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatLogicalDate, isSameLogicalDate, parseLogicalDate } from '~/utils/format/logicalDate';
+
 const auth = useAuthStore();
 const route = useRoute();
 const router = useRouter();
@@ -34,34 +36,28 @@ const isLandingPage = computed(() => route.path === '/tracking/intro');
 const hasTracking = computed(() => auth.user?.user_data?.tracking);
 const isDaily = computed(() => route.path === '/tracking/daily');
 
-function toDateStr(d: Date): string {
-  return d.toISOString().split('T')[0]!;
-}
-
 const currentDate = computed(() => {
   const q = route.query.date;
-  if (typeof q === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(q)) {
-    return new Date(q + 'T12:00:00');
-  }
+  if (typeof q === 'string') return parseLogicalDate(q) ?? new Date();
   return new Date();
 });
 
-const isToday = computed(() => toDateStr(currentDate.value) === toDateStr(new Date()));
+const isToday = computed(() => isSameLogicalDate(currentDate.value, new Date()));
 
 const dateLabel = computed(() => {
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  if (toDateStr(currentDate.value) === toDateStr(today)) return 'Today';
-  if (toDateStr(currentDate.value) === toDateStr(yesterday)) return 'Yesterday';
+  if (isSameLogicalDate(currentDate.value, today)) return 'Today';
+  if (isSameLogicalDate(currentDate.value, yesterday)) return 'Yesterday';
   return currentDate.value.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 });
 
 function navigateDate(offset: number) {
   const d = new Date(currentDate.value);
   d.setDate(d.getDate() + offset);
-  const dateStr = toDateStr(d);
-  const todayStr = toDateStr(new Date());
+  const dateStr = formatLogicalDate(d);
+  const todayStr = formatLogicalDate(new Date());
   router.push({
     path: '/tracking/daily',
     query: dateStr === todayStr ? {} : { date: dateStr },

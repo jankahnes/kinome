@@ -31,6 +31,7 @@ export default defineEventHandler(
           .replace('{ingredient_list}', base_ingredients)
           .replace('{recipe_title}', recipe_context_string),
         type: 'default',
+        schemaKey: 'recipeIngredientFormalization',
       },
     });
     if (!formalizeResponse)

@@ -22,6 +22,9 @@ export default defineEventHandler(
     const hydrationPrompt = (await assets.getItem(
       'recipe-metadata/hydration-consumption.txt'
     )) as string;
+    const flavorProfilePrompt = (await assets.getItem(
+      'recipe-metadata/flavor-profile.txt'
+    )) as string;
 
     const groupedIngredients = groupIngredients(recipe.fullIngredients);
     let message = `
@@ -32,10 +35,11 @@ export default defineEventHandler(
      Ingredients for ${recipe.serves} servings:
      `;
     for (const category of Object.keys(groupedIngredients)) {
+      const categoryIngredients = groupedIngredients[category] ?? [];
       message += `
         Category: ${category}
         `;
-      for (const ingredient of groupedIngredients[category]) {
+      for (const ingredient of categoryIngredients) {
         message += `
         ID: ${ingredient.id} - ${ingredient.name} - ${ingredient.amount} ${ingredient.unit}
         `;
@@ -63,12 +67,13 @@ export default defineEventHandler(
       processing: null,
       salt_and_fat: null,
       hydration: null,
+      flavor_profile: null,
     };
 
     try {
       // Create promises for all requests
-      const promises = [];
-      const promiseTypes = [];
+      const promises: Promise<string>[] = [];
+      const promiseTypes: (keyof GptMetadataResponse)[] = [];
 
       // Processing request (conditional)
       if (considerProcessing) {
@@ -79,6 +84,7 @@ export default defineEventHandler(
               systemPrompt: processingPrompt,
               message: message,
               type: 'default',
+              schemaKey: 'recipeProcessing',
             },
           })
         );
@@ -93,6 +99,7 @@ export default defineEventHandler(
             systemPrompt: tagsPrompt,
             message: messageWithoutInstructions,
             type: 'default',
+            schemaKey: 'recipeTags',
           },
         })
       );
@@ -106,6 +113,7 @@ export default defineEventHandler(
             systemPrompt: saltAndFatPrompt,
             message: message,
             type: 'default',
+            schemaKey: 'recipeSaltFat',
           },
         })
       );
@@ -119,10 +127,24 @@ export default defineEventHandler(
             systemPrompt: hydrationPrompt,
             message: message,
             type: 'default',
+            schemaKey: 'recipeHydrationConsumption',
           },
         })
       );
       promiseTypes.push('hydration');
+
+      promises.push(
+        $fetch('/api/gpt/response', {
+          method: 'POST',
+          body: {
+            systemPrompt: flavorProfilePrompt,
+            message: message,
+            type: 'default',
+            schemaKey: 'recipeFlavorProfile',
+          },
+        })
+      );
+      promiseTypes.push('flavor_profile');
 
       // Wait for all promises to resolve
       const responses = await Promise.all(promises);
@@ -130,7 +152,7 @@ export default defineEventHandler(
       // Process each response
       for (let i = 0; i < responses.length; i++) {
         const response = responses[i];
-        const type = promiseTypes[i];
+        const type = promiseTypes[i]!;
 
         if (!response)
           throw new Error(`No content returned from ${type} GPT response`);

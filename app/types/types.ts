@@ -106,6 +106,7 @@ export type RecipeOverview = RecipeRow & {
   tags: number[];
   user?: User | null;
   social_picture?: string | null;
+  video_metadata?: VideoMetadata | null;
 };
 
 export type CookStep = {
@@ -118,6 +119,7 @@ export type CookStep = {
 };
 
 export type Recipe = RecipeRow & {
+  video_metadata?: VideoMetadata | null;
   full_instructions: CookStep[] | null;
   ingredients?: Ingredient[];
   base_ingredients?: string[];
@@ -125,6 +127,11 @@ export type Recipe = RecipeRow & {
   user: User | null;
   tags: number[];
   social_picture?: string | null;
+  variations: RecipeOverview[];
+  based_on_parent?: {
+    id: number;
+    title: string;
+  } | null;
 };
 
 export type Ingredient = {
@@ -206,6 +213,8 @@ export type GetterOpts = {
   eq?: Record<string, any>;
   or?: string;
   neq?: Record<string, any>;
+  gte?: Record<string, any>;
+  lte?: Record<string, any>;
   in?: Record<string, any[]>;
   not?: Record<string, any>;
   limit?: number;
@@ -288,8 +297,23 @@ export type TrackedMeal = {
   id?: number;
   name: string;
   recipe_id?: number;
+  uses_meal_id?: number;
+  is_template?: boolean;
   editableIngredients: EditableIngredient[];
   collapsed: boolean;
+  summary?: {
+    kcal?: number | null;
+    protein?: number | null;
+    fat?: number | null;
+    carbohydrates?: number | null;
+    fiber?: number | null;
+  };
+  dailySchedule?: {
+    id: number;
+    active: boolean;
+    schedule_until?: string | null;
+    last_materialized_on?: string | null;
+  } | null;
 };
 
 export type VideoMetadata = {
@@ -314,6 +338,12 @@ export type BaseRecipe = {
   source_type: 'WEBSITE' | 'TITLE' | 'PICTURE' | 'MEDIA' | 'TEXT' | 'PREPARSED';
   collection?: string | null;
   description?: string | null;
+  flavor_spicy?: number | null;
+  flavor_sweet?: number | null;
+  flavor_umami?: number | null;
+  flavor_fresh?: number | null;
+  exoticness?: number | null;
+  complexity?: number | null;
   instructions?: string[] | null;
   original_image_base64?: string | null;
   based_on?: number | null;
@@ -457,9 +487,19 @@ export type HeatMedium = Database['public']['Enums']['heat_medium'];
 export type MechanicalDisruption =
   Database['public']['Enums']['mechanical_disruption'];
 
+export type RecipeFlavorProfile = {
+  flavor_spicy: number;
+  flavor_sweet: number;
+  flavor_umami: number;
+  flavor_fresh: number;
+  exoticness: number;
+  complexity: number;
+};
+
 export type GptMetadataResponse = {
   general: any;
   processing: any;
   salt_and_fat: any;
   hydration: any;
+  flavor_profile: RecipeFlavorProfile | null;
 };

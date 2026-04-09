@@ -29,8 +29,12 @@ notes.txt
 .vscode/extensions.json
 .vercel
 ignored/
+scripts/
 server/assets/
 server/utils/foods.csv
 scripts/syncPromptsToBucket.js
 
 .claude/
+.npm-cache/
+server/assetsOld/
+supabase/

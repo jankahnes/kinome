@@ -11,7 +11,7 @@
               {{ user?.username ?? 'Guest' }}
             </h1>
             <p class="text-sm text-gray-400 leading-none mt-1">Member since {{ joinDate }}</p>
-            <NuxtLink v-if="isOwn" :to="'/profile/' + user?.id + '/settings'"
+            <NuxtLink v-if="isOwn" to="/account"
               class="bg-primary-10/50 flex items-center justify-center animated-button px-2 py-1 gap-1 text-gray-500 mt-2"
               title="Settings">
               <IconSettings class="w-4 h-4" />
@@ -194,7 +194,7 @@
           <!-- Taste Radar -->
           <div class="bg-primary-10/50 rounded-4xl main-card-padding overflow-hidden">
             <h3 class="text-xl font-bold tracking-tighter">Taste Radar</h3>
-            <p class="text-xs text-gray-400 mb-5 leading-none">Your cooking profile</p>
+            <p class="text-xs text-gray-400 mb-5 leading-none">Your cooking profile & taste neighbors</p>
 
             <div class="relative flex items-center justify-center" style="height: 290px">
               <ClientOnly>
@@ -213,7 +213,6 @@
 
             <div v-if="tasteNeighbors.length > 0" class="h-px bg-gray-200 mx-2 my-4 -mt-10"></div>
             <div v-if="tasteNeighbors.length > 0" class="flex flex-col items-center -mb-2">
-              <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Taste Neighbors</p>
               <div class="flex group">
                 <NuxtLink v-for="(neighbor, index) in tasteNeighbors" :key="neighbor.id" :to="'/profile/' + neighbor.id"
                   class="flex p-2 flex-col items-center rounded-2xl hover:bg-primary-10 transition-colors animated-button">

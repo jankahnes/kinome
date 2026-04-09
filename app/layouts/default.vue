@@ -1,21 +1,10 @@
 <template>
-  <div class="min-h-svh bg-[#f5eeee]" ref="swipeContainer">
+  <div class="min-h-svh bg-primary-10 " ref="swipeContainer">
     <div class="relative" @click="handleClickOutside">
       <Transition name="sidebar">
-        <div
-          v-if="sidebarOpen"
-          ref="sidebarRef"
-          class="fixed top-0 left-0 z-99 h-full"
-          @click.stop
-        >
-          <NavSidebar
-            ref="sidebarComponentRef"
-            :class="sidebarWidth"
-            :expanded="sidebarExpanded"
-            :toggleSidebar="toggleSidebar"
-            :onClickLink="onClickLink"
-            :sidebarNavigationActive="sidebarExpanded"
-          />
+        <div v-if="sidebarOpen" ref="sidebarRef" class="fixed top-0 left-0 z-99 h-full" @click.stop>
+          <NavSidebar ref="sidebarComponentRef" :class="sidebarWidth" :expanded="sidebarExpanded"
+            :toggleSidebar="toggleSidebar" :onClickLink="onClickLink" :sidebarNavigationActive="sidebarExpanded" />
         </div>
       </Transition>
 
@@ -24,8 +13,7 @@
       </Transition>
 
       <!-- Toggle button in blob notch -->
-      <button
-        @click.stop="toggleSidebar"
+      <button @click.stop="toggleSidebar"
         class="hidden lg:flex text-2xl! fixed z-100 text-white hover:text-primary transition-all duration-300 w-8 h-8 items-center justify-center cursor-pointer top-[11%] -translate-y-1/2"
         :class="[
           buttonMarginLeft,
@@ -33,18 +21,12 @@
             ? 'rotate-0'
             : 'rotate-180 text-primary! rounded-full',
           !sidebarOpen ? 'hover:bg-primary/10' : '',
-        ]"
-      >
-        <IconChevronLeft
-          class="transition-all duration-300 inline-block leading-none"
-        />
+        ]">
+        <IconChevronLeft class="transition-all duration-300 inline-block leading-none" />
       </button>
       <div class="flex-1 flex flex-col min-h-svh">
-        <div
-          class="transition-all duration-300 flex-1 flex flex-col"
-          :class="pageMarginLeft"
-        >
-          <div class="flex-1 text-gray-700">
+        <div class="transition-all duration-300 flex-1 flex flex-col" :class="pageMarginLeft">
+          <div class="flex-1 text-gray-700 bg-[#f5eeee]">
             <slot />
             <GlobalLoadingIndicator :left="pageMarginLeft" />
           </div>
@@ -212,11 +194,13 @@ const onClickLink = async (link: string) => {
 .fade-up-leave-active {
   transition: all 0.3s ease;
 }
+
 .fade-up-enter-from,
 .fade-up-leave-to {
   opacity: 0;
   transform: translateY(10px);
 }
+
 .fade-up-enter-to,
 .fade-up-leave-from {
   opacity: 1;

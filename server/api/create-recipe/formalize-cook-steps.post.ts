@@ -56,6 +56,7 @@ export default defineEventHandler(async (event) => {
     body: {
       message,
       type: 'accurate',
+      schemaKey: 'recipeFormattedInstructions',
     },
   });
 
@@ -70,7 +71,14 @@ export default defineEventHandler(async (event) => {
 
   const result = JSON.parse(jsonString);
   return {
-    steps: result.steps,
+    steps: result.steps.map((step: any) => {
+      const { timers, tip, ...rest } = step;
+      return {
+        ...rest,
+        ...(timers == null ? {} : { timers }),
+        ...(tip == null ? {} : { tip }),
+      };
+    }),
     estimated_total_time: result.estimated_total_time as number,
   };
 });

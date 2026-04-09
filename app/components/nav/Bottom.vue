@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed bottom-0 left-0 right-0 bg-main text-slate-700 z-99 w-full flex justify-between items-center py-3 px-2 xs:px-6 rounded-t-4xl border-t-2 border-slate-200"
+    class="fixed bottom-0 left-0 right-0 bg-primary-10 z-99 w-full flex justify-between items-center py-3 px-2 xs:px-6 rounded-t-4xl shadow-[0_-4px_10px_0_rgba(0,0,0,0.1)]"
   >
     <NuxtLink
       v-for="link in sideLinks.slice(0, 2)"
@@ -11,7 +11,7 @@
     >
       <Icon
         :name="link.icon"
-        :size="isActive ? 30 : 26"
+        :size="isActive ? 26 : 24"
         :strokeWidth="isActive ? 2.2 : 2"
       />
     </NuxtLink>
@@ -66,7 +66,7 @@
     >
       <Icon
         :name="link.icon"
-        :size="isActive ? 30 : 26"
+        :size="isActive ? 26 : 24"
         :strokeWidth="isActive ? 2.2 : 2"
       />
     </NuxtLink>
@@ -92,9 +92,9 @@ const sideLinks = [
     path: '/tracking',
   },
   {
-    name: 'Community',
-    icon: 'users-round',
-    path: '/community',
+    name: 'Feed',
+    icon: 'rss',
+    path: '/feed',
   },
 ];
 

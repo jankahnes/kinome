@@ -41,10 +41,16 @@ export default defineEventHandler(async (event) => {
   } else {
     // Generate image from recipe data
     try {
+      const videoUrl =
+        base_recipe_information.source_type === 'MEDIA' &&
+        base_recipe_information.source != null
+          ? base_recipe_information.source
+          : null;
       const imageGenerationData = {
         title: base_recipe_information.title,
         instructions: removeInstructionFormatting(base_recipe_information.instructions || []),
-        collection: base_recipe_information?.collection || "user-generated"
+        collection: base_recipe_information?.collection || "user-generated",
+        video_url: videoUrl,
       };
       const response = await fetch(
         'https://jk-api.onrender.com/generate-image-from-recipe-data',

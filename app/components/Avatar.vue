@@ -8,7 +8,7 @@
 
       <NuxtImg
         v-else-if="user?.picture"
-        class="rounded-full aspect-square transition-all duration-300"
+        class="rounded-full aspect-square w-full h-full object-cover transition-all duration-300"
         :class="ring ? 'ring-2 ring-primary-500 ring-offset-2' : ''"
         :src="user.picture"
         :alt="user.username + '\'s profile picture'"

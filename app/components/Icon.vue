@@ -49,6 +49,7 @@ const iconMap: Record<string, any> = {
   'trending-down': LucideIcons.TrendingDown,
   'check-check': LucideIcons.CheckCheck,
   'shield-alert': LucideIcons.ShieldAlert,
+  rss: LucideIcons.Rss,
 };
 
 const icon = computed(() => iconMap[props.name]);
@@ -61,10 +62,5 @@ const iconSize = computed(() => {
 </script>
 
 <template>
-  <component
-    :is="icon"
-    :size="iconSize"
-    :class="class"
-    :style="{ minWidth: size + 'px' }"
-  />
+  <component :is="icon" :size="iconSize" :class="class" :style="{ minWidth: size + 'px' }" />
 </template>

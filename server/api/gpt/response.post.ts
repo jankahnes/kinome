@@ -1,24 +1,42 @@
 import OpenAI from 'openai';
 import { getModelConfig } from '~~/server/utils/state';
+import type { GlobalState } from '~~/server/utils/state';
+import {
+  getAiResponseSchema,
+  type AiResponseSchemaKey,
+} from '~~/server/utils/aiResponseSchemas';
+
+interface GptResponseBody {
+  externalFast?: boolean;
+  external?: boolean;
+  type?: keyof GlobalState;
+  systemPrompt?: string;
+  message: string;
+  schemaKey: AiResponseSchemaKey;
+}
 
 export default defineEventHandler(async (event): Promise<string> => {
   const config = useRuntimeConfig();
-  const body = await readBody(event);
+  const body = (await readBody(event)) as GptResponseBody;
   const openai = new OpenAI({ apiKey: config.gptKey });
   let cfg = null;
   if (body?.externalFast) {
-    cfg = { model: 'gpt-5.2', reasoning: { effort: 'none' } };
+    cfg = { model: 'gpt-5.4', reasoning: { effort: 'none' } };
   } else if (body?.external) {
-    cfg = { model: 'gpt-5.2', reasoning: { effort: 'low' } };
+    cfg = { model: 'gpt-5.4', reasoning: { effort: 'low' } };
   } else {
-    cfg = getModelConfig(body.type);
+    cfg = getModelConfig(body.type ?? 'default');
   }
+  const schema = getAiResponseSchema(body.schemaKey);
   try {
     // @ts-ignore - openai library is incorrectly marking 'minimal' as invalid, however gpt-5 models do support it.
     const response = await openai.responses.create({
       ...cfg,
       instructions: body.systemPrompt,
       input: body.message,
+      text: {
+        format: schema,
+      },
     });
     const raw = response.output_text;
     if (!raw) throw new Error('No content returned from GPT response');

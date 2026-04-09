@@ -1,20 +1,20 @@
 <template>
-  <div v-if="recipe?.id"
-    class="flex flex-row items-stretch transition-all duration-300 main-card rounded-4xl overflow-hidden flex-1">
-    <a :href="(recipe.video_metadata as any)?.url ?? recipe.source ?? undefined" target="_blank"
-      class="w-1/3 xs:w-auto flex-shrink-0 my-auto xs:my-0">
-      <NuxtImg v-if="recipe.social_picture" class="w-full xs:w-auto aspect-9/16 xs:h-full object-cover rounded-4xl"
-        :src="recipe.social_picture" :alt="recipe?.title" />
+  <div v-if="recipe?.id" class="flex transition-all duration-300 main-card rounded-4xl  flex-1 group">
+    <a :href="recipe.video_metadata?.url ?? recipe.source ?? undefined" target="_blank"
+      class="h-full aspect-9/17 flex-shrink-0 my-auto xs:my-0 group-hover:scale-[1.01] transition-transform duration-300 will-change-transform group-hover:translate-x-[-1px]">
+      <NuxtImg v-if="recipe.social_picture" class="w-full h-full object-cover rounded-4xl" :src="recipe.social_picture"
+        :alt="recipe?.title" />
       <Skeleton v-else class="w-full xs:w-auto aspect-9/16 xs:h-full object-cover" />
     </a>
-    <NuxtLink :to="getRecipeUrl(recipe.id, recipe.title)" class="z-0 flex-1 h-full flex flex-col px-6 py-3">
-      <div class="flex flex-col gap-3 justify-center flex-1">
+    <NuxtLink :to="getRecipeUrl(recipe.id, recipe.title)"
+      class="z-0 flex-1 flex flex-col main-card-padding lg:mt-2 gap-1 justify-between">
+      <div class="flex flex-col gap-2 flex-1">
         <h2 class="font-semibold leading-6 text-xl xs:text-2xl tracking-tight line-clamp-2">
           {{
             recipe.title
           }}
         </h2>
-        <p class="text-xs text-gray-500 line-clamp-3">
+        <p class="text-xs text-gray-500 line-clamp-3 sm:mt-2">
           {{ recipe.description }}
         </p>
         <div class="gap-1.5 flex-wrap text-xs sm:text-[14px] items-start py-0.5 flex [&>*:nth-child(n+3)]:hidden">
@@ -30,35 +30,35 @@
           </div>
         </div>
       </div>
-      <div class="flex gap-2 flex-wrap sm:flex-nowrap my-2">
-        <span class="text-xs uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
-          (recipe.video_metadata as any).view_count
-        ">
-          <IconEye class="w-4 h-4" />
-          {{
-            getSocialProof(
-              (recipe.video_metadata as any).view_count,
-            )
-          }}
-        </span>
-        <span class="text-xs uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
-          (recipe.video_metadata as any).like_count
-        ">
-          <IconHeart class="w-4 h-4" />
-          {{
-            getSocialProof(
-              (recipe.video_metadata as any).like_count,
-            )
-          }}
-        </span>
-        <div
-          class="flex items-center px-2 py-1 rounded-3xl text-xs font-medium bg-slate-100 gap-1.5 max-w-50 sm:max-w-70"
-          v-if="(recipe.video_metadata as any)?.channel">
+      <div class="flex gap-2 gap-y-1 flex-wrap sm:flex-nowrap">
+        <span class="flex items-center px-2 py-1 rounded-3xl text-xs font-medium bg-slate-100 gap-1.5 max-w-50"
+          v-if="recipe.video_metadata?.channel">
           <img :src="`/${getWebsiteName(recipe.source)}.webp`" :alt="getWebsiteName(recipe.source)" class="h-4" />
-          <span class="flex-shrink-0">Creator:</span>
           <span class="truncate">{{
-            (recipe.video_metadata as any)?.channel
+            recipe.video_metadata?.channel
           }}</span>
+        </span>
+        <div class="flex gap-2">
+          <span class="text-xs uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
+            recipe.video_metadata?.view_count
+          ">
+            <IconEye class="w-4 h-4" />
+            {{
+              getSocialProof(
+                recipe.video_metadata?.view_count,
+              )
+            }}
+          </span>
+          <span class="text-xs uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
+            recipe.video_metadata?.like_count
+          ">
+            <IconHeart class="w-4 h-4" />
+            {{
+              getSocialProof(
+                recipe.video_metadata?.like_count,
+              )
+            }}
+          </span>
         </div>
       </div>
     </NuxtLink>
@@ -96,7 +96,7 @@ const getSocialProof = (number: number) => {
 
 onMounted(async () => {
   props.recipe.social_picture = await recipeStore.getSocialPicture(
-    (props.recipe.video_metadata as any)?.url ?? props.recipe.source ?? ''
+    props.recipe.video_metadata?.url ?? props.recipe.source ?? ''
   );
 });
 

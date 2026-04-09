@@ -26,10 +26,10 @@
             <h2 class="text-2xl font-bold tracking-tight">Nutrition Autopilot</h2>
           </div>
 
-          <div class="flex gap-4 flex-wrap sm:items-end mt-5">
+          <div class="flex gap-4 items-end mt-5">
             <!-- Progress card -->
             <div
-              class="rounded-4xl bg-primary-10/50 main-card-padding flex-shrink-0 flex-1 basis-80 md:max-w-100 flex flex-col gap-5 md:mb-3.5">
+              class="rounded-4xl bg-primary-10/50 main-card-padding flex-shrink-0 flex-1 basis-80 md:basis-100 flex flex-col gap-5 md:mb-3.5">
               <span class="text-xs text-gray-400 uppercase tracking-wide">Today's progress</span>
 
               <!-- Calories -->
@@ -131,22 +131,22 @@
                 <IconChevronRight class="w-4" />
               </NuxtLink>
             </div>
-
-            <!-- Macro-fit recipe suggestions -->
-            <template v-if="isFamiliarLoading">
-              <Skeleton v-for="i in 4" :key="i" class="basis-44 max-w-80 flex-1 h-86 rounded-xl" />
-            </template>
-            <template v-else-if="macroFitRecipes.length">
-              <RecipeCard v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
-                :reason-text="getMacroBadgeText(recipe)" class="basis-50 text-[28px] max-w-80 hidden sm:flex flex-1"
-                @mouseenter="hoveredRecipe = recipe" @mouseleave="hoveredRecipe = null" />
-              <RecipeCardHorizontal v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
-                :reason-text="getMacroBadgeText(recipe)"
-                class="text-[24px] basis-80 sm:hidden flex-1" />
-            </template>
-            <p v-else class="text-sm text-gray-400 self-center">
-              Save some recipes to get personalised meal suggestions.
-            </p>
+            <div class="flex flex-wrap gap-4">
+              <!-- Macro-fit recipe suggestions -->
+              <template v-if="isFamiliarLoading">
+                <Skeleton v-for="i in 4" :key="i" class="basis-44 max-w-80 flex-1 h-86 rounded-xl" />
+              </template>
+              <template v-else-if="macroFitRecipes.length">
+                <RecipeCard v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
+                  :reason-text="getMacroBadgeText(recipe)" class="basis-50 text-[28px] max-w-80 hidden sm:flex flex-1"
+                  @mouseenter="hoveredRecipe = recipe" @mouseleave="hoveredRecipe = null" />
+                <RecipeCardHorizontal v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
+                  :reason-text="getMacroBadgeText(recipe)" class="text-[24px] basis-80 sm:hidden flex-1" />
+              </template>
+              <p v-else class="text-sm text-gray-400 self-center">
+                Save some recipes to get personalised meal suggestions.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -154,7 +154,9 @@
         <section>
           <div class="">
             <h2 class="text-2xl font-bold tracking-tight">For You</h2>
-            <NuxtLink to="/kitchen/recommendations" class="text-sm -mt-1 flex items-center text-gray-500">See all<IconChevronRight class="w-4" /></NuxtLink>
+            <NuxtLink to="/kitchen/recommendations" class="text-sm -mt-1 flex items-center text-gray-500">See all
+              <IconChevronRight class="w-4" />
+            </NuxtLink>
           </div>
           <ForYouGrid :results="forYouResults" :is-loading="isLoading" />
         </section>
@@ -169,16 +171,11 @@
               <span class="text-sm text-gray-400">Under 30 minutes</span>
             </div>
             <BlocksCarousel flex-class="gap-3">
-              <RecipeCard
-                v-for="recipe in quickWins"
-                :key="recipe.id"
-                :recipe="recipe"
-                :reason-text="getQuickTimeLabel(recipe)"
-                class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]"
-              />
+              <RecipeCard v-for="recipe in quickWins" :key="recipe.id" :recipe="recipe"
+                :reason-text="getQuickTimeLabel(recipe)" class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]" />
             </BlocksCarousel>
           </div>
-          
+
           <!-- Fridge Widget -->
           <div :class="quickWins.length ? 'basis-80 flex-1 max-w-104' : 'w-full'" class="flex flex-col gap-4 mb-4">
             <h2 class="text-2xl font-bold tracking-tight">What's in your fridge?</h2>
@@ -186,7 +183,8 @@
 
               <!-- Input state -->
               <template v-if="fridgeResults === null">
-                <p class="text-sm text-gray-500 leading-snug">Enter ingredients — we'll find recipes that use them all.</p>
+                <p class="text-sm text-gray-500 leading-snug">Enter ingredients — we'll find recipes that use them all.
+                </p>
                 <div v-if="fridgeIngredients.length" class="flex flex-wrap gap-2">
                   <div v-for="(ing, i) in fridgeIngredients" :key="i"
                     class="flex items-center gap-1.5 px-2.5 py-1 bg-primary-10 rounded-xl text-sm">
@@ -196,8 +194,7 @@
                   </div>
                 </div>
                 <div class="flex gap-2">
-                  <input v-model="fridgeInput" placeholder="e.g. chicken…"
-                    @keydown.enter.prevent="addFridgeIngredient"
+                  <input v-model="fridgeInput" placeholder="e.g. chicken…" @keydown.enter.prevent="addFridgeIngredient"
                     class="flex-1 bg-primary-10 rounded-2xl px-3 py-2 text-sm focus:outline-none" />
                   <button @click="addFridgeIngredient" class="animated-button bg-primary-10 px-3 py-2 rounded-2xl">
                     <IconPlus class="w-4" />
@@ -214,7 +211,8 @@
               <template v-else>
                 <div class="flex items-center justify-between">
                   <p class="text-sm text-gray-500">
-                    {{ fridgeResults.length ? `${fridgeResults.length} recipe${fridgeResults.length === 1 ? '' : 's'} found` : 'No recipes found' }}
+                    {{ fridgeResults.length ? `${fridgeResults.length} recipe${fridgeResults.length === 1 ? '' : 's'}
+                    found` : 'No recipes found' }}
                   </p>
                   <button @click="clearFridge" class="text-xs text-primary font-semibold">Try again</button>
                 </div>
@@ -233,12 +231,8 @@
         <section v-if="recentlySeen.length">
           <h2 class="text-2xl font-bold tracking-tight mb-4">You Looked at These</h2>
           <BlocksCarousel flex-class="gap-3">
-            <RecipeCard
-              v-for="recipe in recentlySeen"
-              :key="recipe.id"
-              :recipe="recipe"
-              class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]"
-            />
+            <RecipeCard v-for="recipe in recentlySeen" :key="recipe.id" :recipe="recipe"
+              class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]" />
           </BlocksCarousel>
         </section>
 
@@ -250,13 +244,9 @@
               <div v-if="equipmentRecipes[eqId]?.length">
                 <h3 class="text-lg font-semibold tracking-tight mb-4">{{ getEquipmentLabel(eqId) }}</h3>
                 <BlocksCarousel flex-class="gap-3">
-                  <RecipeCard
-                    v-for="recipe in equipmentRecipes[eqId]"
-                    :key="recipe.id"
-                    :recipe="recipe"
+                  <RecipeCard v-for="recipe in equipmentRecipes[eqId]" :key="recipe.id" :recipe="recipe"
                     :reason-text="'For your ' + getEquipmentName(eqId)"
-                    class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]"
-                  />
+                    class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]" />
                 </BlocksCarousel>
               </div>
             </template>
@@ -270,6 +260,8 @@
 </template>
 
 <script setup lang="ts">
+import { todayLogicalDate } from '~/utils/format/logicalDate';
+
 type RecommendationRow = RecipeOverview & {
   nearest_recipe: { id: number; title: string; set: 'own' | 'bookmarks' | 'ratings' } | null;
   matched_tags: number[];
@@ -300,14 +292,15 @@ const isTodayLoading = ref(false);
 
 async function fetchTodayNutrition() {
   if (!auth.user?.id) return;
-  const today = new Date().toISOString().split('T')[0] ?? '';
+  const today = todayLogicalDate();
   isTodayLoading.value = true;
   try {
     const { data } = await supabase
       .from('tracked_meals')
       .select('kcal, protein, fat, carbohydrates, fiber')
       .eq('user_id', auth.user.id)
-      .eq('meal_date', today);
+      .eq('meal_date', today)
+      .not('is_template', 'is', true);
 
     if (data?.length) {
       todayConsumed.value = {
@@ -341,33 +334,29 @@ function previewBarStyle(consumed: number, recipeVal: number, goal: number) {
 }
 
 // ─── Macro-fit scoring ───────────────────────────────────────────────────────
-const EXPONENT = 1.3;
-
-type MacroType = 'positive' | 'negative' | 'bidirectional';
-
-function rawMacroDist(consumed: number, recipeVal: number, target: number, type: MacroType): number {
-  const actual = consumed + recipeVal;
-  if (type === 'positive') return Math.max(0, target - actual);
-  if (type === 'negative') return Math.max(0, actual - target);
-  return Math.abs(target - actual);
-}
-
+// Scores by how evenly a recipe fills all macro targets (low variance = good),
+// with extra penalties for exceeding kcal or fat.
 function macroFitScore(recipe: RecipeOverview): number {
   const c = todayConsumed.value;
-  const entries: Array<{ consumed: number; recipeVal: number; target: number; weight: number; type: MacroType }> = [
-    { consumed: c.protein, recipeVal: recipe.protein ?? 0, target: proteinGoal.value, weight: 2.5, type: 'positive' },
-    { consumed: c.kcal, recipeVal: recipe.kcal ?? 0, target: kcalGoal.value, weight: 2, type: 'bidirectional' },
-    { consumed: c.fiber, recipeVal: recipe.fiber ?? 0, target: fiberGoal.value, weight: 1, type: 'positive' },
-    { consumed: c.fat, recipeVal: recipe.fat ?? 0, target: fatGoal.value, weight: 0.7, type: 'bidirectional' },
-    { consumed: c.carbohydrates, recipeVal: recipe.carbohydrates ?? 0, target: carbsGoal.value, weight: 0.5, type: 'bidirectional' },
+
+  // Post-meal fill % for each macro (1.0 = exactly at target)
+  const pcts = [
+    { v: (c.protein + (recipe.protein ?? 0)) / Math.max(1, proteinGoal.value), w: 2.0 },
+    { v: (c.kcal + (recipe.kcal ?? 0)) / Math.max(1, kcalGoal.value), w: 1.5 },
+    { v: (c.fiber + (recipe.fiber ?? 0)) / Math.max(1, fiberGoal.value), w: 1.0 },
+    { v: (c.fat + (recipe.fat ?? 0)) / Math.max(1, fatGoal.value), w: 0.8 },
+    { v: (c.carbohydrates + (recipe.carbohydrates ?? 0)) / Math.max(1, carbsGoal.value), w: 0.6 },
   ];
-  let total = 0;
-  for (const e of entries) {
-    if (e.target <= 0) continue;
-    const normalized = rawMacroDist(e.consumed, e.recipeVal, e.target, e.type) / e.target;
-    total += e.weight * Math.pow(normalized, EXPONENT);
-  }
-  return total;
+
+  const totalW = pcts.reduce((s, e) => s + e.w, 0);
+  const mean = pcts.reduce((s, e) => s + e.v * e.w, 0) / totalW;
+  const variance = pcts.reduce((s, e) => s + e.w * (e.v - mean) ** 2, 0) / totalW;
+
+  // Quadratic penalty for going over kcal or fat
+  const kcalOver = Math.max(0, pcts[1].v - 1);
+  const fatOver = Math.max(0, pcts[3].v - 1);
+
+  return variance + 2.5 * kcalOver ** 2 + 1.5 * fatOver ** 2;
 }
 
 // ─── Familiar recipes (for nutrition section) ────────────────────────────────

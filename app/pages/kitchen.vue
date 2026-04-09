@@ -1,8 +1,8 @@
 <template>
-  <div class="pb-16 m-4 sm:m-10 sm:ml-20">
+  <div class="mb-20 sm:mt-10 m-4 sm:mx-10 lg:ml-22 lg:mr-18">
     <div class="flex gap-2 flex-wrap">
       <NuxtLink v-for="view in views" :key="view.path" :to="`/kitchen${view.path}`"
-        class="animated-button bg-primary-10 px-3 py-2" active-class="primary-gradient text-gray-800 px-3 py-2">
+        class="animated-button bg-primary-10/60 px-3 py-2" active-class="bg-primary/80">
         {{ view.displayName }}
       </NuxtLink>
     </div>

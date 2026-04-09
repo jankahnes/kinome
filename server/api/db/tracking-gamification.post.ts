@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
     .from('tracked_meals')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .eq('meal_date', logicalDate);
+    .eq('meal_date', logicalDate)
+    .not('is_template', 'is', true);
 
   if (error) {
     throw createError({ statusCode: 500, statusMessage: 'Failed to inspect tracking day' });

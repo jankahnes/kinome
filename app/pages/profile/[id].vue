@@ -1,8 +1,9 @@
 <template>
   <div class="pb-20 lg:pb-0 m-4 lg:m-8 lg:ml-20">
     <div class="flex items-center gap-2 flex-wrap" v-if="!isOverviewPage">
-      <NuxtLink v-for="view in views" :key="view.path" :to="view.path" class="animated-button bg-primary-10 px-3 py-2 flex gap-1 items-center"
-        exact-active-class="primary-gradient text-gray-800 px-3 py-2">
+      <NuxtLink v-for="view in views" :key="view.path" :to="view.path"
+        class="animated-button bg-primary-10/60 px-3 py-2 flex gap-1 items-center"
+        exact-active-class="bg-primary/80">
         <IconChevronLeft v-if="view.path === '/profile/' + userID" class="w-4 h-4" />
         {{ view.displayName }}
       </NuxtLink>
@@ -35,12 +36,6 @@ const views = computed(() => [
   { path: '/profile/' + userID + '/recipes', displayName: 'Recipes' },
   { path: '/profile/' + userID + '/bookmarks', displayName: 'Saved' },
   { path: '/profile/' + userID + '/activity', displayName: 'Activity' },
-  ...(isOwn.value
-    ? [{ path: '/profile/' + userID + '/settings', displayName: 'Settings' }]
-    : []),
-  ...(isOwn.value
-    ? [{ path: '/logout', displayName: 'Log Out' }]
-    : []),
 ]);
 
 watchEffect(async () => {

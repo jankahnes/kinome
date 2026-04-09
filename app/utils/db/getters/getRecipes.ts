@@ -62,7 +62,10 @@ export async function getRecipes(
   client: SupabaseClient<Database>,
   opts: GetterOpts = {},
 ): Promise<Recipe[]> {
-  let query = client.from('recipes').select(`
+  let query = client
+    .from('recipes')
+    .select(
+      `
         *,
         tags:recipe_tags(tag_id),
         ingredients:recipe_foods(
@@ -88,7 +91,9 @@ export async function getRecipes(
           user:profiles(id, username, picture)
         ),
         user:profiles!recipes_user_id_fkey(id, username, picture)
-      `).neq('visibility', 'HIDDEN');
+      `,
+    )
+    .neq('visibility', 'HIDDEN');
 
   query = buildQuery(query, opts);
 
@@ -104,11 +109,30 @@ export async function getRecipes(
     r.comments.map((c: { user_id: string }) => c.user_id),
   );
   const recipeIds = recipes.map((r: Recipe) => r.id);
-  const ratings = await getRatings(client, {
-    in: { user_id: userIds, recipe_id: recipeIds },
-  });
+  const [ratings, variationOverviews] = await Promise.all([
+    getRatings(client, {
+      in: { user_id: userIds, recipe_id: recipeIds },
+    }),
+    getRecipeOverviews(client, { in: { based_on: recipeIds } }),
+  ]);
+
+  const variationsByParent = new Map<number, RecipeOverview[]>();
+  for (const v of variationOverviews) {
+    const parentId = v.based_on;
+    if (parentId == null) continue;
+    const list = variationsByParent.get(parentId);
+    if (list) list.push(v);
+    else variationsByParent.set(parentId, [v]);
+  }
 
   for (const recipe of recipes) {
+    if (recipe.based_on) {
+      const { data } = await client
+        .from('recipes')
+        .select('id, title')
+        .eq('id', recipe.based_on);
+      recipe.based_on_parent = data?.[0] ?? null;
+    }
     for (const c of recipe.comments) {
       const match = ratings.find(
         (r) => r.user_id === c.user_id && r.recipe_id === recipe.id,
@@ -155,6 +179,8 @@ export async function getRecipes(
       } as Ingredient;
     });
     recipe.ingredients.forEach(fillForUnits);
+
+    recipe.variations = variationsByParent.get(recipe.id) ?? [];
   }
   return recipes as Recipe[];
 }
@@ -170,10 +196,15 @@ export async function getRecipeOverviews(
   client: SupabaseClient<Database>,
   opts: GetterOpts = {},
 ): Promise<RecipeOverview[]> {
-  let query = client.from('recipes').select(`
-        id, hidx, kcal, price, title, created_at, visibility, picture, rating, protein, carbohydrates, fat, sugar, salt, fiber, user_id, collection, 
-        tags:recipe_tags(tag_id), source, description, video_metadata, source_type, total_time_mins
-      `).neq('visibility', 'HIDDEN');
+  let query = client
+    .from('recipes')
+    .select(
+      `
+        id, hidx, kcal, price, title, created_at, visibility, picture, rating, protein, carbohydrates, fat, sugar, salt, fiber, user_id, collection, based_on, variation_name, variation_summary,
+        tags:recipe_tags(tag_id), source, description, video_metadata, source_type, total_time_mins, variation_display_name
+      `,
+    )
+    .neq('visibility', 'HIDDEN');
   let similarityMap: Map<number, number> | null = null;
   if (opts.vector_search?.embedding?.length) {
     const { data: vectorResults, error: vectorError } = await client.rpc(
@@ -270,4 +301,13 @@ export async function getRecipeOverview(
   opts: GetterOpts = {},
 ): Promise<RecipeOverview> {
   return expectSingle(await getRecipeOverviews(client, opts));
+}
+
+export async function getTrendingThisMonth(
+  client: SupabaseClient<Database>,
+): Promise<RecipeOverview[]> {
+  const { data, error } = await client.rpc('get_trending_this_week');
+
+  if (error) throw error;
+  return data;
 }

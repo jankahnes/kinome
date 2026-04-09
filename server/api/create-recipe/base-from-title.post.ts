@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
     body: {
       message: ingredientsPrompt.replace('{title}', titleString),
       type: 'accurate',
+      schemaKey: 'recipeIngredientsFromTitle',
     },
   });
   if (!ingredientsResponse)

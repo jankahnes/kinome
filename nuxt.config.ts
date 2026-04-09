@@ -71,6 +71,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxtjs/sitemap',
     'nuxt-lucide-icons',
+    '@nuxt/content',
   ],
   lucide: {
     namePrefix: 'Icon',
@@ -99,6 +100,7 @@ export default defineNuxtConfig({
       '/profile/**',
       '/tracking/saved/**',
       '/tracking/settings/**',
+      '/tracking/trends/**',
       '/logout/**',
     ],
   },

@@ -1,3 +1,5 @@
+import { todayLogicalDate } from '~/utils/format/logicalDate';
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<FullUser | null>(null);
   const authListenerSet = ref(false);
@@ -24,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
       await $fetch('/api/db/visit', {
         method: 'POST',
         body: {
-          date: new Date().toISOString().slice(0, 10),
+          date: todayLogicalDate(),
         },
       });
     } catch (error) {

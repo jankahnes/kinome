@@ -1,38 +1,22 @@
 <template>
   <div class="relative ignore-swipe">
     <div class="relative">
-      <div
-        v-if="canScrollLeft"
-        class="absolute top-0 -left-[1px] h-full w-8 bg-gradient-to-r from-main to-transparent pointer-events-none z-20"
-      ></div>
-      <div
-        v-if="canScrollRight"
-        class="absolute top-0 -right-[1px] h-full w-8 bg-gradient-to-l from-main to-transparent pointer-events-none z-20"
-      ></div>
-      <div
-        ref="desktopContainer"
-        :class="{ 'overflow-hidden': canScrollLeft || canScrollRight }"
-      >
-        <div
-          ref="desktopSlider"
-          class="flex select-none cursor-grab active:cursor-grabbing w-max"
-          :class="[
-            {
-              'transition-transform duration-300 ease-in-out':
-                !isDragging && !isDecelerating,
-            },
-            flexClass,
-          ]"
-          :style="{ transform: `translateX(${-currentOffset}px)` }"
-          @mousedown="startDrag"
-          @touchstart="startDrag"
-          @mousemove="onDrag"
-          @touchmove="onDrag"
-          @mouseup="endDrag"
-          @mouseleave="endDrag"
-          @touchend="endDrag"
-          @touchcancel="endDrag"
-        >
+      <div v-if="canScrollLeft"
+        class="absolute top-0 -left-[1px] h-full w-8 bg-gradient-to-r from-main to-transparent pointer-events-none z-20">
+      </div>
+      <div v-if="canScrollRight"
+        class="absolute top-0 -right-[1px] h-full w-8 bg-gradient-to-l from-main to-transparent pointer-events-none z-20">
+      </div>
+      <div ref="desktopContainer" class="overflow-x-hidden">
+        <div ref="desktopSlider" class="flex select-none cursor-grab active:cursor-grabbing w-max" :class="[
+          {
+            'transition-transform duration-300 ease-in-out':
+              !isDragging && !isDecelerating,
+          },
+          flexClass,
+        ]" :style="{ transform: `translateX(${-currentOffset}px)` }" @mousedown="startDrag" @touchstart="startDrag"
+          @mousemove="onDrag" @touchmove="onDrag" @mouseup="endDrag" @mouseleave="endDrag" @touchend="endDrag"
+          @touchcancel="endDrag">
           <slot />
         </div>
       </div>
@@ -40,10 +24,8 @@
 
     <div v-if="showProgress" class="mt-3 flex justify-center">
       <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden relative">
-        <div
-          class="h-full bg-gray-500 rounded-full transition-all duration-300 ease-out"
-          :style="{ width: `${progressPercentage}%` }"
-        ></div>
+        <div class="h-full bg-gray-500 rounded-full transition-all duration-300 ease-out"
+          :style="{ width: `${progressPercentage}%` }"></div>
       </div>
     </div>
   </div>

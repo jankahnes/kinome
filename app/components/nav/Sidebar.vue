@@ -14,14 +14,14 @@
           <Logo />
         </div>
 
-        <div class="mx-5 bg-secondary/70 self-center rounded-3xl  mr-6">
-          <NuxtLink :to="`/profile/${auth.user?.id}`" class="flex gap-3 items-center animated-button overflow-hidden group pr-3 -ml-1" v-if="auth.isUser()">
+        <div class="mx-5 self-start min-w-30 bg-secondary/70 rounded-3xl  mr-6">
+          <NuxtLink :to="`/profile/${auth.user?.id}`"
+            class="flex gap-3 items-center animated-button overflow-hidden group pr-3 -ml-1" v-if="auth.isUser()">
             <Avatar :user="auth.user" class="w-14" :placeholder="!auth.profileFetched"
               :ring="focusedIndex === 0 && sidebarNavigationActive" @click="onClickLink(accountLink)" />
-            <div class="flex flex-col flex-1">
-              <span class="text-lg text-wrap tracking-tight text-gray-800 group-hover:text-black transition-all duration-300">{{
+            <span
+              class="flex-1 text-center mr-1 text-lg text-wrap tracking-tight text-gray-800 group-hover:text-black transition-all duration-300">{{
                 auth.user?.username }}</span>
-            </div>
           </NuxtLink>
           <div class="flex gap-3 transition-all duration-300 pr-2" v-else>
             <Avatar :user="auth.user" class="rounded-full w-18" :placeholder="!auth.profileFetched"
@@ -79,13 +79,13 @@
               tracking</span>
           </NuxtLink>
 
-          <NuxtLink to="/community"
+          <NuxtLink to="/feed"
             class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all" :class="{
               'ring-2 ring-primary-500 ring-offset-2':
                 focusedIndex === 5 && sidebarNavigationActive,
-            }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/community')">
-            <IconUsersRound class="w-6 h-6" />
-            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Community</span>
+            }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/feed')">
+            <IconRss class="w-6 h-6" />
+            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Feed</span>
           </NuxtLink>
         </div>
       </div>
@@ -136,8 +136,8 @@ const linkPaths = computed(() => [
     focusPath: '/tracking',
   },
   {
-    linkPath: '/community',
-    focusPath: '/community',
+    linkPath: '/feed',
+    focusPath: '/feed',
   },
 ]);
 

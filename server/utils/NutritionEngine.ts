@@ -235,6 +235,9 @@ export default class NutritionEngine {
       this.recipe.effort = gptResponse.general.effort || 'MODERATE';
       this.recipe.yield_factor =
         gptResponse.hydration.overall_yield_multiplier || 1;
+      if (gptResponse.flavor_profile) {
+        Object.assign(this.recipe, gptResponse.flavor_profile);
+      }
       this.gptInformation.tags = gptResponse.general.tags || [];
       this.gptInformation.processing =
         gptResponse.processing.processing_info || [];

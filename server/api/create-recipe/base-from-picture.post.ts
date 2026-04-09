@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
       mimetype: imageFile.mimetype,
       prompt: promptContent,
       imageBase64: imageBuffer.toString('base64'),
+      schemaKey: 'recipePictureParsing',
     };
     // Call GPT picture analysis endpoint
     const pictureAnalysisResponse = (await $fetch('/api/gpt/pictureResponse', {

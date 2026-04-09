@@ -1,15 +1,27 @@
 import OpenAI from 'openai';
 import { getModelConfig } from '~~/server/utils/state';
+import {
+  getAiResponseSchema,
+  type AiResponseSchemaKey,
+} from '~~/server/utils/aiResponseSchemas';
+
+interface PictureResponseBody {
+  prompt: string;
+  mimetype: string;
+  imageBase64: string;
+  schemaKey: AiResponseSchemaKey;
+}
 
 export default defineEventHandler(async (event): Promise<any> => {
   const config = useRuntimeConfig();
   const openai = new OpenAI({ apiKey: config.gptKey });
 
   try {
-    const body = await readBody(event);
+    const body = (await readBody(event)) as PictureResponseBody;
     const prompt = body.prompt;
     const mimeType = body.mimetype;
     const base64Image = body.imageBase64;
+    const schema = getAiResponseSchema(body.schemaKey);
     
     if (!base64Image) {
       throw new Error('No image file found in request');
@@ -22,6 +34,9 @@ export default defineEventHandler(async (event): Promise<any> => {
     // @ts-ignore - openai library is incorrectly marking 'minimal' as invalid, however gpt-5 models do support it.
     const response = await openai.responses.create({
       ...getModelConfig('vision'),
+      text: {
+        format: schema,
+      },
       input: [
         { 
           role: 'user',
@@ -44,19 +59,7 @@ export default defineEventHandler(async (event): Promise<any> => {
     if (!rawContent) {
       throw new Error('No content returned from GPT response');
     }
-
-    // Try to parse JSON from the response
-    let jsonMatch = rawContent.match(/```json\s*([\s\S]*?)\s*```/);
-    if (!jsonMatch) {
-      // Try to find JSON without code blocks
-      jsonMatch = rawContent.match(/\{[\s\S]*\}/);
-    }
-
-    if (!jsonMatch) {
-      throw new Error('Could not extract JSON from GPT response');
-    }
-
-    const extractedData = JSON.parse(jsonMatch[0] || jsonMatch[1]);
+    const extractedData = JSON.parse(rawContent);
     
     // Check for error responses
     if (extractedData.error) {
