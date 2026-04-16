@@ -1,29 +1,28 @@
 <template>
   <div class="mt-4 mb-20 md:mb-4 mx-2 lg:px-14 flex justify-center">
     <div class="max-w-[1360px]" v-if="food">
-      <p class="text-lg m-4">
+      <p class="text-lg m-4 leading-tight">
         <NuxtLink to="/" class="text-gray-500">Home</NuxtLink> ›
         <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> ›
-        <span class="font-bold">{{ foodName }}</span>
+        <span class="font-semibold">{{ foodName }}</span>
       </p>
       <div class="flex flex-col 2xl:flex-row gap-6">
         <div class="contents xl:flex flex-col gap-6 lg:flex-1">
-
           <div
             class="bg-primary-10/40 rounded-4xl main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-none xl:items-start">
             <div class="relative xl:basis-1/5 h-40">
               <img class="object-cover rounded-4xl h-full" src="/wood.png" :alt="foodName" />
 
               <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-10 h-[60%] aspect-square flex items-center justify-center">
-                <img :src="`/foods/${food?.visual_category ?? 'herb_fresh'}.webp`" class="h-[60%] object-contain"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-10/80 h-[70%] aspect-square flex items-center justify-center">
+                <img :src="`/foods/${food?.visual_category ?? 'herb_fresh'}.webp`" class="h-[50%] object-contain"
                   :alt="(food?.visual_category ?? 'herb_fresh') + ' illustration'" />
               </div>
             </div>
             <div class="flex-1 flex flex-col gap-2">
               <div class="flex justify-between">
                 <div class="flex flex-col">
-                  <h1 class="text-5xl font-bold">{{ foodName }}</h1>
+                  <h1 class="text-4xl font-bold tracking-tight leading-tighter">{{ foodName }}</h1>
                   <p class="text-xs text-gray-400 uppercase">
                     {{ food?.aisle || 'Food' }}
                   </p>
@@ -73,8 +72,22 @@
               @view-full-nutrition="contextMode = 'nutrition'; contextModalOpen = true" />
           </div>
           <div class="order-3 xl:order-none" v-if="qualityCards.length">
-            <NutritionQualityCards :cards="qualityCards" mode="info" @view-overall-report="openHealthReport" />
-            <div class="flex flex-col sm:flex-row gap-2 mt-2 px-4 justify-between">
+            <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
+              <div class="flex justify-between items-center mb-3 mx-2">
+                <h3 class="text-4xl font-bold tracking-tighter">Nutrition Quality</h3>
+                <button @click="openHealthReport"
+                  class="flex items-center gap-0.5 animated-button text-sm p-2 bg-primary-10">
+                  <span class="hidden sm:inline">Full Analysis</span>
+                  <IconChevronRight class="w-5" />
+                </button>
+              </div>
+              <NutritionQualityCards :cards="qualityCards" :gut-health="food?.report?.details?.gutHealth"
+                :fat-profile="food?.report?.details?.fatProfile"
+                :fat-profile-readable="food?.report?.humanReadable?.fatProfile ?? []"
+                :micronutrients="food?.report?.details?.micronutrients" :kcal-progress="food?.kcal / 2000"
+                mode="info" />
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 gap-y-0 mt-2 px-4 justify-between">
               <div class="flex flex-wrap gap-3 gap-y-0">
                 <div v-for="pill in dietaryPills" :key="pill.text"
                   class="flex items-center gap-1.5 rounded-4xl text-xs  text-slate-500">
@@ -276,7 +289,7 @@ const qualityCards = computed(() => {
   const cards = getDailyQualityCards(food.value.report, {
     totalFat: food.value.fat,
     protectiveScore: food.value.protective_score,
-  }).map((c) => ({ ...c, clickable: false }));
+  });
   const wholeIdx = cards.findIndex((c) => c.title === 'Whole Food %');
   if (wholeIdx >= 0) {
     const nova = food.value.nova as number | undefined;

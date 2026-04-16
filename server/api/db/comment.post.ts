@@ -15,11 +15,13 @@ export default defineEventHandler(async (event) => {
     recipe_id?: number;
     content?: string;
     replying_to?: number | null;
+    picture?: string | null;
   }>(event);
 
   const recipeId = body.recipe_id;
-  const content = body.content?.trim();
-  if (!recipeId || !content) {
+  const content = body.content?.trim() || null;
+  const picture = body.picture ?? null;
+  if (!recipeId || (!content && !picture)) {
     throw createError({ statusCode: 400, statusMessage: 'Missing comment payload' });
   }
 
@@ -29,8 +31,9 @@ export default defineEventHandler(async (event) => {
     .insert({
       user_id: user.id,
       recipe_id: recipeId,
-      content,
+      content: content ?? '',
       replying_to: body.replying_to ?? null,
+      picture,
     })
     .select('id')
     .single();

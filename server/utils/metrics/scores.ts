@@ -114,7 +114,7 @@ export function rankArchetypes(
     const S = scores[key as ArchetypeKey]!;
     if (S < def.threshold) continue;
     const p = lookupPercentile(percentiles[key as ArchetypeKey], S);
-    const O = 0.7 * S + 0.3 * p;
+    const O = 0.4 * S + 0.6 * p;
     ranked.push({
       key: def.key,
       label: def.label,

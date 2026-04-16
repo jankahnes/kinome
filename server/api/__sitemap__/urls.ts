@@ -1,10 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
 
+const RECIPE_LASTMOD_FLOOR = '2026-04-01';
+
+function getMaxLastmod(createdAt?: string | null) {
+  if (!createdAt) {
+    return RECIPE_LASTMOD_FLOOR;
+  }
+
+  const createdDate = new Date(createdAt);
+
+  if (Number.isNaN(createdDate.getTime())) {
+    return RECIPE_LASTMOD_FLOOR;
+  }
+
+  const createdDay = createdDate.toISOString().slice(0, 10);
+  return createdDay > RECIPE_LASTMOD_FLOOR ? createdDay : RECIPE_LASTMOD_FLOOR;
+}
+
 export default defineEventHandler(async () => {
   const config = useRuntimeConfig();
   const supabase = createClient(
     config.public.supabase.url,
-    config.supabase.serviceKey
+    config.supabase.serviceKey,
   );
 
   const urls: any[] = [];
@@ -17,7 +34,7 @@ export default defineEventHandler(async () => {
   while (hasMoreRecipes) {
     const { data: recipes, error } = await supabase
       .from('recipes')
-      .select('id, title, picture')
+      .select('id, title, picture, created_at')
       .eq('visibility', 'PUBLIC')
       .range(recipeOffset, recipeOffset + recipeBatchSize - 1);
 
@@ -40,7 +57,7 @@ export default defineEventHandler(async () => {
           .replace(/-+$/, '');
         const urlEntry: any = {
           loc: `/recipe/${recipe.id}-${slug}`,
-          lastmod: '2026-04-01',
+          lastmod: getMaxLastmod(recipe.created_at),
           changefreq: 'weekly',
           priority: 0.8,
         };
@@ -105,5 +122,6 @@ export default defineEventHandler(async () => {
       hasMoreFoods = false;
     }
   }
+
   return urls;
 });

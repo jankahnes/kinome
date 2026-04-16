@@ -112,6 +112,7 @@ export const useRecipeStore = defineStore('recipe', () => {
         content: comment.content,
         recipe_id: recipe.value.id,
         replying_to: comment.replying_to,
+        picture: comment.picture ?? null,
       });
 
       const newComment = {

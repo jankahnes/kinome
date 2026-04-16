@@ -4,18 +4,12 @@
       <h3 class="text-4xl font-bold tracking-tighter shrink-0">Nutrition Overview</h3>
       <div class="flex items-center gap-2 justify-between sm:justify-end flex-1 ">
         <div v-if="mode === 'info' && dropdownChoices?.length" class="relative min-w-36">
-          <FormsDropdown
-            :choices="dropdownChoices"
-            :model-value="selectedUnit ?? dropdownChoices[0]"
-            @update:model-value="emit('update:selectedUnit', $event)"
-            :style="'bg-primary-10'"
-          />
+          <FormsDropdown :choices="dropdownChoices" :model-value="selectedUnit ?? dropdownChoices[0]"
+            @update:model-value="emit('update:selectedUnit', $event)" :style="'bg-primary-10'" />
         </div>
-        <button
-          @click="mode === 'info' ? emit('viewFullNutrition') : emit('viewOverallReport')"
+        <button @click="mode === 'info' ? emit('viewFullNutrition') : emit('viewOverallReport')"
           class="flex items-center gap-0.5 animated-button text-sm p-2"
-          :class="mode === 'info' ? 'bg-primary-10' : 'text-slate-400'"
-        >
+          :class="mode === 'info' ? 'bg-primary-10' : 'text-slate-400'">
           <span v-if="mode === 'info'" class="hidden sm:inline">View Full</span>
           <IconChevronRight class="w-5" />
         </button>
@@ -29,31 +23,21 @@
           <div class="text-2xl font-bold leading-none">Kcal</div>
           <div class="text-[58px] leading-none font-bold">
             {{ kcalValue
-            }}<span v-if="mode === 'tracking'" class="text-xl text-nowrap">/{{ kcalGoal }} kcal</span
-            ><span v-else class="text-xl text-slate-400"> kcal</span>
+            }}<span v-if="mode === 'tracking'" class="text-xl text-nowrap">/{{ kcalGoal }} kcal</span><span v-else
+              class="text-xl text-slate-400"> kcal</span>
           </div>
         </div>
         <div class="flex w-full h-3 rounded-full overflow-hidden bg-slate-200">
-          <div
-            class="h-full rounded-full transition-all duration-300 bg-slate-400"
-            :style="{ width: Math.min(100, (kcalValue / kcalGoal) * 100) + '%' }"
-          />
+          <div class="h-full rounded-full transition-all duration-300 bg-slate-400"
+            :style="{ width: Math.min(100, (kcalValue / kcalGoal) * 100) + '%' }" />
         </div>
       </div>
 
       <!-- Fiber, Salt, Protein, Fat -->
-      <div
-        v-for="item in overviewItems.slice(0, 4)"
-        :key="item.title"
-        class="flex flex-col items-center justify-between p-4 bg-primary-10 rounded-3xl gap-1 flex-1 basis-30"
-        :class="{'opacity-80': item.total < 0.5}"
-      >
+      <div v-for="item in overviewItems.slice(0, 4)" :key="item.title"
+        class="flex flex-col items-center justify-between p-4 bg-primary-10 rounded-3xl gap-1 flex-1 basis-30">
         <div class="w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
-          <img
-            class="w-full h-full object-contain"
-            :src="`/nutrition-highlights/${item.img}`"
-            :alt="item.title"
-          />
+          <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
         </div>
         <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
         <div class="font-bold text-xl leading-none">
@@ -62,55 +46,35 @@
         </div>
         <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
           <template v-if="item.saturatedFatPct !== undefined">
-            <div
-              class="h-full rounded-full transition-all duration-300 bg-saturated-fat z-10"
-              :style="{ width: item.saturatedFatPct + '%' }"
-            />
-            <div
-              class="h-full rounded-full transition-all duration-300 -ml-2 z-0"
-              :class="item.bgClass"
-              :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }"
-            />
+            <div class="h-full rounded-full transition-all duration-300 bg-saturated-fat z-10"
+              :style="{ width: item.saturatedFatPct + '%' }" />
+            <div class="h-full rounded-full transition-all duration-300 -ml-2 z-0" :class="item.bgClass"
+              :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
           </template>
-          <div
-            v-else
-            class="h-full rounded-full transition-all duration-300"
-            :class="item.bgClass"
-            :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }"
-          />
+          <div v-else class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
+            :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
         </div>
       </div>
 
       <!-- Carbs + Sugar paired card -->
       <div class="col-span-2 flex gap-2 rounded-3xl bg-primary-10/50 p-1 flex-2 basis-60">
-        <div
-          v-for="item in overviewItems.slice(4)"
-          :key="item.title"
-          class="flex flex-col items-center justify-between p-3 bg-primary-10 rounded-[1.25rem] gap-1 flex-1"
-          :class="{'opacity-80': item.total < 0.5}"
-        >
-          <div class="w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
-            <img
-              class="w-full h-full object-contain"
-              :src="`/nutrition-highlights/${item.img}`"
-              :alt="item.title"
-            />
-          </div>
-          <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
-          <div class="font-bold text-xl leading-none">
-            {{ item.total }}{{ item.unit
-            }}<span v-if="mode === 'tracking'" class="text-sm font-normal">/{{ item.goal }}{{ item.unit }}</span>
-          </div>
-          <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
-            <div
-              class="h-full rounded-full transition-all duration-300"
-              :class="item.bgClass"
-              :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }"
-            />
-          </div>
+        <div v-for="item in overviewItems.slice(4)" :key="item.title"
+          class="flex flex-col items-center justify-between p-3 bg-primary-10 rounded-[1.25rem] gap-1 flex-1" ">
+          <div class=" w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
+          <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
+        </div>
+        <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
+        <div class="font-bold text-xl leading-none">
+          {{ item.total }}{{ item.unit
+          }}<span v-if="mode === 'tracking'" class="text-sm font-normal">/{{ item.goal }}{{ item.unit }}</span>
+        </div>
+        <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
+          <div class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
+            :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -167,26 +131,6 @@ const overviewItems = computed(() => {
 
   return [
     {
-      title: 'Fiber',
-      img: 'fiber2.webp',
-      bgClass: 'bg-fiber',
-      bgLightClass: 'bg-fiber/30',
-      total: Math.round(val('fiber')),
-      goal: g.fiber ?? 30,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-    {
-      title: 'Salt',
-      img: 'salt2.webp',
-      bgClass: 'bg-salt',
-      bgLightClass: 'bg-salt/30',
-      total: Math.round(val('salt')),
-      goal: g.salt ?? 5,
-      unit: 'g',
-      saturatedFatPct: undefined as number | undefined,
-    },
-    {
       title: 'Protein',
       img: 'protein2.webp',
       bgClass: 'bg-protein',
@@ -207,6 +151,26 @@ const overviewItems = computed(() => {
       saturatedFatPct: n
         ? Math.min(100, ((n.saturated_fat ?? 0) / (n.fat ?? 1)) * 100)
         : (undefined as number | undefined),
+    },
+    {
+      title: 'Fiber',
+      img: 'fiber2.webp',
+      bgClass: 'bg-fiber',
+      bgLightClass: 'bg-fiber/30',
+      total: Math.round(val('fiber')),
+      goal: g.fiber ?? 30,
+      unit: 'g',
+      saturatedFatPct: undefined as number | undefined,
+    },
+    {
+      title: 'Salt',
+      img: 'salt2.webp',
+      bgClass: 'bg-salt',
+      bgLightClass: 'bg-salt/30',
+      total: Math.round(val('salt')),
+      goal: g.salt ?? 5,
+      unit: 'g',
+      saturatedFatPct: undefined as number | undefined,
     },
     {
       title: 'Carbs',

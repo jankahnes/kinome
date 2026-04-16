@@ -30,21 +30,31 @@
             </p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button class="animated-button flex items-center gap-2 px-3 py-1 text-xs" @click="copyIngredients">
+        <div class="flex items-center gap-2 relative">
+          <button class="animated-button flex items-center gap-2 px-2 py-1 text-xs" @click="copyIngredients"
+            v-if="!quickEditMode">
             <IconCopy class="w-4" />
             Copy
           </button>
           <transition name="fade-slide" mode="out-in">
-            <button v-if="notOnDefaultUnits"
+            <button v-if="notOnDefaultUnits && !quickEditMode"
               class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform"
               @click="resetUnits">
               <IconRefreshCcw class="w-4" />
               <span>Reset Units</span>
             </button>
           </transition>
+          <button v-if="ingredients && ingredients.length > 0"
+            class="animated-button flex items-center gap-2 px-2 py-1 text-xs" " @click="toggleQuickEdit">
+            <IconSlidersHorizontal v-if="!quickEditMode" class="w-4" />
+            <IconCheck v-if="quickEditMode" class="w-4" />
+            {{ quickEditMode ? 'Done' : 'Tweak' }}
+          </button>
         </div>
       </div>
+      <p v-if="quickEditMode" class="text-xs text-gray-500 ml-1 -mt-3 mb-1 italic">
+        Drag ingredients left or right to change amounts
+      </p>
 
       <div class="flex-1">
         <div class="max-w-100 space-y-4 select-none" v-if="ingredients && ingredients.length > 0">
@@ -57,16 +67,26 @@
 
             <ul class="flex flex-col gap-4 items-start" role="list">
               <li v-for="ingredient in group" :key="ingredient.name"
-                class="flex items-center rounded-2xl px-2 py-1 transition-colors duration-200 gap-2"
-                :class="backgroundClass(ingredient)" @click="toggleIfNotLongPress(ingredient.name)">
-                <img class="h-5 min-w-7 object-contain object-center" :src="`/foods/${ingredient.visual_category}.webp`"
-                  v-if="ingredient.visual_category" />
-                <span class="leading-none">
-                  <Transition name="fade-slide" mode="out-in">
-                    <span :key="`${servingSize}-${ingredient?.currentUnit}`"
-                      class="tabular-nums whitespace-nowrap font-bold cursor-pointer"
-                      @pointerdown="startLongPress(() => onClickIngredient(ingredient))" @pointerup="cancelLongPress"
-                      @pointerleave="cancelLongPress" @pointercancel="cancelLongPress">
+                class="relative overflow-hidden flex items-center rounded-2xl px-2 py-1 transition-colors duration-200 gap-2"
+                :class="[backgroundClass(ingredient), { 'select-none touch-pan-y cursor-ew-resize': quickEditMode && !isFreeUnit(ingredient) }]"
+                @click="quickEditMode ? null : toggleIfNotLongPress(ingredient.name)"
+                @pointerdown="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerDown($event, ingredient) : undefined"
+                @pointermove="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerMove($event, ingredient) : undefined"
+                @pointerup="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerUp($event, ingredient) : undefined"
+                @pointercancel="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerUp($event, ingredient) : undefined">
+                <div v-if="quickEditMode && !isFreeUnit(ingredient)"
+                  class="absolute inset-y-0 left-0 bg-secondary-700/70 pointer-events-none transition-all duration-200 ease-out"
+                  :style="{ width: fillPct(ingredient) + '%', opacity: draggingIngredientId === ingredient.id ? 1 : 0 }" />
+                <img class="relative h-5 min-w-7 object-contain object-center"
+                  :src="`/foods/${ingredient.visual_category}.webp`" v-if="ingredient.visual_category" />
+                <span class="relative leading-none">
+                  <Transition :name="quickEditMode ? '' : 'fade-slide'" mode="out-in">
+                    <span :key="`${servingSize}-${ingredient?.currentUnit}${quickEditMode ? '-edit' : ''}`"
+                      class="tabular-nums whitespace-nowrap font-bold" :class="[quickEditMode ? '' : 'cursor-pointer']"
+                      @pointerdown="quickEditMode ? undefined : startLongPress(() => onClickIngredient(ingredient))"
+                      @pointerup="quickEditMode ? undefined : cancelLongPress()"
+                      @pointercancel="quickEditMode ? undefined : cancelLongPress()"
+                      @pointerleave="quickEditMode ? undefined : cancelLongPress()">
                       {{
                         getStringFromAmountInfo(
                           ingredient?.amountInfo?.[ingredient?.currentUnit],
@@ -84,9 +104,11 @@
                     )
                   ">
                     of</span>
-                  <span class="cursor-pointer"
-                    @pointerdown="startLongPress(() => navigateTo(getFoodUrl(ingredient.id, getIngredientName(ingredient))))"
-                    @pointerup="cancelLongPress" @pointerleave="cancelLongPress" @pointercancel="cancelLongPress">
+                  <span :class="quickEditMode ? '' : 'cursor-pointer'"
+                    @pointerdown="quickEditMode ? undefined : startLongPress(() => navigateTo(getFoodUrl(ingredient.id, getIngredientName(ingredient))))"
+                    @pointerup="quickEditMode ? undefined : cancelLongPress()"
+                    @pointerleave="quickEditMode ? undefined : cancelLongPress()"
+                    @pointercancel="quickEditMode ? undefined : cancelLongPress()">
                     <span class="font-medium">{{
                       ' ' + getIngredientName(ingredient)
                     }}</span>
@@ -94,7 +116,8 @@
                       ingredient.preparation_description }}
                     </span>
                   </span>
-                  <span v-if="false" class="font-light text-gray-600 text-sm mt-1">, {{ ingredient?.consumption_factor * 100
+                  <span v-if="false" class="font-light text-gray-600 text-sm mt-1">, {{ ingredient?.consumption_factor *
+                    100
                     }}% eaten</span>
                 </span>
               </li>
@@ -160,6 +183,8 @@
 </template>
 
 <script setup lang="ts">
+import { computeDraggedAmount } from '~/utils/format/quickEditSnap';
+
 type AddedInfo = {
   addedFat: number;
   addedSalt: number;
@@ -193,6 +218,9 @@ const getAdded = (added: number) => {
 const backgroundClass = (ingredient: any) => {
   const isChecked = checkedIngredients.value.has(ingredient.name);
   const isMarked = props.markedIngredients?.includes(ingredient.id);
+  if (quickEditMode.value) {
+    return 'bg-secondary/70';
+  }
   if (isChecked && isMarked) {
     return 'bg-secondary-700';
   }
@@ -205,7 +233,12 @@ const backgroundClass = (ingredient: any) => {
   return 'bg-secondary/70 hover:bg-secondary';
 }
 
-const emit = defineEmits(['update:servingSize']);
+const emit = defineEmits([
+  'update:servingSize',
+  'quick-edit-change',
+  'amounts-changed',
+  'tweak-drag-end',
+]);
 
 const authStore = useAuthStore();
 
@@ -306,6 +339,122 @@ function copyIngredients() {
 function resetUnits() {
   for (const ingredient of props.ingredients || []) {
     ingredient.currentUnit = 0;
+  }
+}
+
+// Quick-edit (drag amounts) state
+const quickEditMode = ref(false);
+const draggingIngredientId = ref<number | null>(null);
+// Per-ingredient baseline (displayed per-serving amount captured on first tweak entry).
+// Fill bar renders 50% at baseline and clamps at 2x baseline (so 2x = 100% fill, 0 = empty).
+const baselinesById = ref<Map<number, number>>(new Map());
+type DragState = {
+  startX: number;
+  startY: number;
+  startAmount: number;
+  unit: string;
+  captured: boolean;
+  horizontal: boolean;
+};
+const dragState = ref<DragState | null>(null);
+
+function captureBaselines() {
+  if (baselinesById.value.size > 0) return;
+  const next = new Map<number, number>();
+  for (const ing of props.ingredients ?? []) {
+    const info = ing?.amountInfo?.[ing?.currentUnit];
+    if (info) next.set(ing.id, Number(info[0]) || 0);
+  }
+  baselinesById.value = next;
+}
+
+function toggleQuickEdit() {
+  quickEditMode.value = !quickEditMode.value;
+  if (quickEditMode.value) captureBaselines();
+  emit('quick-edit-change', quickEditMode.value);
+}
+
+function isFreeUnit(ingredient: any): boolean {
+  const info = ingredient?.amountInfo?.[ingredient?.currentUnit];
+  return info?.[1] === 'FREE';
+}
+
+function fillPct(ingredient: any): number {
+  const baseline = baselinesById.value.get(ingredient.id);
+  if (baseline == null || baseline <= 0) return 50;
+  const info = ingredient?.amountInfo?.[ingredient?.currentUnit];
+  if (!info) return 50;
+  const current = Number(info[0]) || 0;
+  return Math.min(100, Math.max(0, (current / (2 * baseline)) * 100));
+}
+
+function onTweakPointerDown(ev: PointerEvent, ingredient: any) {
+  const info = ingredient?.amountInfo?.[ingredient?.currentUnit];
+  if (!info) return;
+  const perServing = info[0];
+  const unit = info[1];
+  if (unit === 'FREE') return;
+  // We display amount * servingSize, so dragging should act on the displayed amount
+  const displayedAmount = perServing * (servingSize.value ?? 1);
+  dragState.value = {
+    startX: ev.clientX,
+    startY: ev.clientY,
+    startAmount: displayedAmount,
+    unit,
+    captured: false,
+    horizontal: false,
+  };
+  draggingIngredientId.value = ingredient.id;
+}
+
+function onTweakPointerMove(ev: PointerEvent, ingredient: any) {
+  const s = dragState.value;
+  if (!s) return;
+  const dx = ev.clientX - s.startX;
+  const dy = ev.clientY - s.startY;
+
+  if (!s.captured) {
+    // Wait until the user has moved enough to classify intent
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    if (absX < 4 && absY < 4) return;
+    if (absX <= absY) {
+      // Vertical scroll — abandon drag
+      dragState.value = null;
+      draggingIngredientId.value = null;
+      return;
+    }
+    s.captured = true;
+    s.horizontal = true;
+    try {
+      (ev.target as Element)?.setPointerCapture?.(ev.pointerId);
+    } catch { }
+  }
+
+  ev.preventDefault();
+  const newDisplayed = computeDraggedAmount(s.startAmount, s.unit, dx);
+  const perServing = newDisplayed / (servingSize.value ?? 1);
+  const info = ingredient.amountInfo[ingredient.currentUnit];
+  if (info[0] !== perServing) {
+    ingredient.amountInfo[ingredient.currentUnit] = [perServing, s.unit];
+    emit('amounts-changed');
+  }
+}
+
+function onTweakPointerUp(ev: PointerEvent, ingredient: any) {
+  const s = dragState.value;
+  if (!s) {
+    draggingIngredientId.value = null;
+    return;
+  }
+  try {
+    (ev.target as Element)?.releasePointerCapture?.(ev.pointerId);
+  } catch { }
+  const didDrag = s.captured;
+  dragState.value = null;
+  draggingIngredientId.value = null;
+  if (didDrag) {
+    emit('tweak-drag-end');
   }
 }
 

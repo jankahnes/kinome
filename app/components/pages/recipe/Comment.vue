@@ -15,9 +15,11 @@
       <span class="text-xs text-gray-500 leading-none">{{
         timeAgo(comment.created_at)
       }}</span>
-      <div class="mt-1 text-base" v-if="!isEditing">
+      <div class="mt-1 text-base" v-if="!isEditing && comment.content">
         {{ comment.content }}
       </div>
+      <img v-if="!isEditing && comment.picture" :src="comment.picture"
+        class="mt-2 rounded-2xl object-cover w-full max-h-72" />
       <textarea v-else v-model="editText" v-auto-resize
         class="w-full p-2 rounded-xl border border-[#DCCAB2] focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-16 mt-2"
         rows="2"></textarea>

@@ -242,22 +242,51 @@
                 </div>
               </div>
 
-              <!-- Photo upload (unwired) -->
-              <div class="rounded-3xl p-4">
+              <!-- Photo upload -->
+              <div class="rounded-3xl p-4" v-if="auth.user && props.recipeId">
                 <div class="flex items-center gap-2 mb-1">
-                  <IconCamera class="w-4 h-4 text-gray-500" />
-                  <h3 class="font-semibold text-sm text-gray-700">Snap a photo</h3>
-                  <span
-                    class="ml-auto text-[10px] px-2 py-0.5 bg-gray-200 text-gray-500 rounded-full font-semibold uppercase tracking-wide">
-                    Soon
-                  </span>
+                  <IconCamera class="w-4 h-4" :class="photoShared ? 'text-green-600' : 'text-gray-500'" />
+                  <h3 class="font-semibold text-sm" :class="photoShared ? 'text-green-800' : 'text-gray-700'">Snap a photo</h3>
                 </div>
-                <p class="text-sm text-gray-400 mb-3">Show off your dish and save the memory.</p>
-                <div
-                  class="h-20 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center gap-2 text-gray-400 text-sm cursor-not-allowed select-none">
-                  <IconCamera class="w-4 h-4" />
-                  Upload photo
-                </div>
+                <Transition name="phase-forward" mode="out-in">
+                  <div v-if="photoShared" key="done" class="flex items-center gap-2 py-2 text-green-700 text-sm font-medium">
+                    <IconCheck class="w-4 h-4" />
+                    Photo shared!
+                  </div>
+                  <div v-else key="upload" class="flex flex-col gap-3">
+                    <p class="text-sm text-gray-400">Show off your dish and save the memory.</p>
+                    <div v-if="photoPreview" class="relative">
+                      <img :src="photoPreview" class="w-full rounded-2xl object-cover max-h-48" />
+                      <button
+                        class="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center"
+                        @click="clearPhoto">
+                        <IconX class="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                    <div v-else class="flex gap-2">
+                      <button
+                        class="animated-button flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-sm"
+                        @click="triggerPhotoFile">
+                        <IconUpload class="w-4 h-4" />
+                        Upload
+                      </button>
+                      <button
+                        class="animated-button flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-sm"
+                        @click="triggerPhotoCamera">
+                        <IconCamera class="w-4 h-4" />
+                        Camera
+                      </button>
+                    </div>
+                    <button v-if="photoPreview"
+                      class="animated-button w-full flex items-center justify-center gap-2 py-2.5 bg-primary-500 text-gray-900 font-semibold text-sm disabled:opacity-60"
+                      @click="sharePhoto"
+                      :disabled="photoUploading">
+                      <IconLoaderCircle v-if="photoUploading" class="w-4 h-4 animate-spin" />
+                      <IconCheck v-else class="w-4 h-4" />
+                      {{ photoUploading ? 'Sharing…' : 'Share photo' }}
+                    </button>
+                  </div>
+                </Transition>
               </div>
 
               <!-- Rating -->
@@ -352,6 +381,9 @@
       </div>
     </Transition>
   </Teleport>
+
+  <input ref="photoFileInput" type="file" accept="image/*" class="hidden" @change="handlePhotoSelected" />
+  <input ref="photoCameraInput" type="file" accept="image/*" capture="environment" class="hidden" @change="handlePhotoSelected" />
 </template>
 
 <script setup lang="ts">
@@ -496,6 +528,55 @@ async function submitReview() {
   }
 }
 
+// --- Snap a photo ---
+const photoFileInput = ref<HTMLInputElement | null>(null);
+const photoCameraInput = ref<HTMLInputElement | null>(null);
+const photoPreview = ref<string | null>(null);
+const photoUploading = ref(false);
+const photoShared = ref(false);
+
+const triggerPhotoFile = () => photoFileInput.value?.click();
+const triggerPhotoCamera = () => photoCameraInput.value?.click();
+
+function clearPhoto() {
+  photoPreview.value = null;
+  if (photoFileInput.value) photoFileInput.value.value = '';
+  if (photoCameraInput.value) photoCameraInput.value.value = '';
+}
+
+function handlePhotoSelected(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  photoPreview.value = URL.createObjectURL(file);
+}
+
+async function sharePhoto() {
+  const file = photoFileInput.value?.files?.[0] ?? photoCameraInput.value?.files?.[0];
+  if (!file || !props.recipeId || !auth.user) return;
+  photoUploading.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('bucket', 'recipe_user_pictures');
+    formData.append('id', `${(auth.user as any).id}-${Date.now()}`);
+    const result = await $fetch('/api/db/upload-image', { method: 'POST', body: formData });
+    await recipeStore.addNewComment({
+      user: auth.user as any,
+      user_id: (auth.user as any).id,
+      content: '',
+      recipe_id: props.recipeId,
+      replying_to: null,
+      rating: null,
+      picture: (result as any).publicUrl,
+    } as any);
+    photoShared.value = true;
+  } catch (e) {
+    console.error('Failed to share photo:', e);
+  } finally {
+    photoUploading.value = false;
+  }
+}
+
 // --- Open/close reset ---
 watch(isOpen, (val) => {
   if (val) {
@@ -512,6 +593,9 @@ watch(isOpen, (val) => {
     reviewText.value = '';
     reviewSubmitted.value = false;
     reviewLoading.value = false;
+    photoPreview.value = null;
+    photoShared.value = false;
+    photoUploading.value = false;
   }
 });
 

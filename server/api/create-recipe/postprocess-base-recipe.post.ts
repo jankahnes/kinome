@@ -3,7 +3,8 @@ import { Database } from '~/types/supabase';
 import { RecipeRow, UploadableRecipe } from '~/types/types';
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
 
-const FULL_PROCESSING_SOURCES = ['MEDIA', 'WEBSITE'];
+// WEBSITE: uncomment to auto-enrich and publish website imports (same pipeline as MEDIA)
+const FULL_PROCESSING_SOURCES = ['MEDIA' /*, 'WEBSITE'*/];
 
 export default defineEventHandler(async (event) => {
   const input = await readBody(event);
@@ -29,7 +30,10 @@ export default defineEventHandler(async (event) => {
   if (jobId) {
     await supabase
       .from('jobs')
-      .update({ step: 'formalizing_ingredients', updated_at: new Date().toISOString() })
+      .update({
+        step: 'formalizing_ingredients',
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', jobId);
   }
 
@@ -42,13 +46,14 @@ export default defineEventHandler(async (event) => {
         recipe_context_string: baseRecipe.title,
         jobId,
       },
-    }
+    },
   );
 
   if (
     !ingredients?.length ||
     ingredients.some(
-      (ingredient: any) => ingredient.id === null || ingredient.id === undefined
+      (ingredient: any) =>
+        ingredient.id === null || ingredient.id === undefined,
     )
   ) {
     throw createError({
@@ -68,7 +73,7 @@ export default defineEventHandler(async (event) => {
 
   const computableRecipe = await convertUploadableToComputable(
     uploadableRecipe,
-    supabase
+    supabase,
   );
 
   const nutritionResponse = await $fetch(
@@ -80,7 +85,7 @@ export default defineEventHandler(async (event) => {
         authorization: headers.authorization || '',
       },
       body: { ...computableRecipe, full: false },
-    }
+    },
   );
 
   if ((nutritionResponse as any).status !== 'ok') {
@@ -95,7 +100,10 @@ export default defineEventHandler(async (event) => {
   if (jobId) {
     await supabase
       .from('jobs')
-      .update({ step: 'formalizing_instructions', updated_at: new Date().toISOString() })
+      .update({
+        step: 'formalizing_instructions',
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', jobId);
   }
 
@@ -104,8 +112,12 @@ export default defineEventHandler(async (event) => {
     {
       method: 'POST',
       body: { ...uploadableRecipe },
-    }
-  )) as { description: string; instructions: string[]; equipment_tag_ids: number[] };
+    },
+  )) as {
+    description: string;
+    instructions: string[];
+    equipment_tag_ids: number[];
+  };
 
   // Carry Phase A outputs into uploadableRecipe so Phase B has fresh data for embedding
   uploadableRecipe.description = description;
@@ -126,9 +138,14 @@ export default defineEventHandler(async (event) => {
   // ── Phase A: Step 4 — Insert equipment tags ───────────────────────────────
   if (equipment_tag_ids.length > 0) {
     console.log(`🔍 [Phase A] Inserting equipment tags: ${equipment_tag_ids}`);
-    const { error: tagError } = await supabase.from('recipe_tags').insert(
-      equipment_tag_ids.map((tag_id) => ({ recipe_id: recipeId, tag_id })) as any
-    );
+    const { error: tagError } = await supabase
+      .from('recipe_tags')
+      .insert(
+        equipment_tag_ids.map((tag_id) => ({
+          recipe_id: recipeId,
+          tag_id,
+        })) as any,
+      );
     if (tagError) {
       console.error('🔍 [Phase A] Failed to insert equipment tags:', tagError);
     }
@@ -139,25 +156,22 @@ export default defineEventHandler(async (event) => {
 
   // ── Variation detection (MEDIA/WEBSITE only) ──────────────────────────────
   const isFullProcessing = FULL_PROCESSING_SOURCES.includes(
-    baseRecipe.source_type ?? ''
+    baseRecipe.source_type ?? '',
   );
 
   if (isFullProcessing) {
     try {
-      const detection = (await $fetch(
-        '/api/create-recipe/detect-variation',
-        {
-          method: 'POST',
-          body: { recipeId, jobId },
-        }
-      )) as
+      const detection = (await $fetch('/api/create-recipe/detect-variation', {
+        method: 'POST',
+        body: { recipeId, jobId },
+      })) as
         | { outcome: 'duplicate'; canonicalId: number }
         | { outcome: 'variation'; canonicalId: number }
         | { outcome: 'unrelated' };
 
       if (detection.outcome === 'duplicate') {
         console.log(
-          `🔍 Recipe ${recipeId} absorbed as duplicate into ${detection.canonicalId}; recipe deleted, skipping Phase B`
+          `🔍 Recipe ${recipeId} absorbed as duplicate into ${detection.canonicalId}; recipe deleted, skipping Phase B`,
         );
         return {
           status: 'ok',
@@ -167,7 +181,7 @@ export default defineEventHandler(async (event) => {
       }
       if (detection.outcome === 'variation') {
         console.log(
-          `🔍 Recipe ${recipeId} flagged as variation of ${detection.canonicalId}`
+          `🔍 Recipe ${recipeId} flagged as variation of ${detection.canonicalId}`,
         );
       }
     } catch (err) {
@@ -182,7 +196,9 @@ export default defineEventHandler(async (event) => {
 
   // ── Fire Phase B for full-processing sources (no await) ───────────────────
   if (isFullProcessing) {
-    console.log(`🔍 Firing Phase B for recipe ${recipeId} (${baseRecipe.source_type})`);
+    console.log(
+      `🔍 Firing Phase B for recipe ${recipeId} (${baseRecipe.source_type})`,
+    );
     $fetch('/api/create-recipe/postprocess-enrich-recipe', {
       method: 'POST',
       body: {

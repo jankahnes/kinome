@@ -29,19 +29,28 @@ const RECIPE_SELECT = `
 `;
 
 // Maps food.visual_category → which category-grams bucket it contributes to.
-function bucketFor(visualCategory: string | null | undefined): keyof MetricsRecipe['category_grams'] | null {
+function bucketFor(
+  visualCategory: string | null | undefined,
+): keyof MetricsRecipe['category_grams'] | null {
   switch (visualCategory) {
-    case 'grain_pasta':       return 'pasta';
-    case 'grain_rice':        return 'rice';
+    case 'grain_pasta':
+      return 'pasta';
+    case 'grain_rice':
+      return 'rice';
     case 'seafood_fish':
-    case 'seafood_shellfish': return 'fish';
-    case 'meat_poultry':      return 'poultry';
-    default:                  return null;
+    case 'seafood_shellfish':
+      return 'fish';
+    case 'meat_poultry':
+      return 'poultry';
+    default:
+      return null;
   }
 }
 
 function normalizeRow(row: any): MetricsRecipe {
-  const tag_ids: number[] = (row.tags ?? []).map((t: { tag_id: number }) => t.tag_id);
+  const tag_ids: number[] = (row.tags ?? []).map(
+    (t: { tag_id: number }) => t.tag_id,
+  );
   const ingredients = (row.ingredients ?? []) as any[];
 
   const category_grams = { pasta: 0, rice: 0, fish: 0, poultry: 0 };
@@ -50,7 +59,12 @@ function normalizeRow(row: any): MetricsRecipe {
     const bucket = bucketFor(food?.visual_category);
     if (!bucket) continue;
     const unitWeight = food?.countable_units?.[ing.unit] ?? 0;
-    const grams = convertToGrams(ing.amount, ing.unit, food?.density ?? 1, unitWeight);
+    const grams = convertToGrams(
+      ing.amount,
+      ing.unit,
+      food?.density ?? 1,
+      unitWeight,
+    );
     category_grams[bucket] += grams;
   }
   return {
@@ -78,7 +92,9 @@ function normalizeRow(row: any): MetricsRecipe {
   };
 }
 
-export async function fetchAllRecipesProjection(client: AnyClient): Promise<MetricsRecipe[]> {
+export async function fetchAllRecipesProjection(
+  client: AnyClient,
+): Promise<MetricsRecipe[]> {
   const { data, error } = await client
     .from('recipes')
     .select(RECIPE_SELECT)
@@ -112,7 +128,9 @@ export type UserEdgeRow = {
 };
 
 /** Fetch every user's (user_id, recipe_id) edges in three flat queries. */
-export async function fetchAllUserEdges(client: AnyClient): Promise<Map<string, UserEdgeRow>> {
+export async function fetchAllUserEdges(
+  client: AnyClient,
+): Promise<Map<string, UserEdgeRow>> {
   const users = new Map<string, UserEdgeRow>();
   const ensure = (id: string): UserEdgeRow => {
     let u = users.get(id);
@@ -158,7 +176,8 @@ export async function fetchAllUserEdges(client: AnyClient): Promise<Map<string, 
   {
     const { data, error } = await client
       .from('bookmarks')
-      .select('user_id, recipe_id');
+      .select('user_id, recipe_id, recipes!inner(visibility)')
+      .neq('recipes.visibility', 'HIDDEN');
     if (error) throw error;
     for (const r of data ?? []) {
       if (!r.user_id || r.recipe_id == null) continue;
@@ -169,7 +188,10 @@ export async function fetchAllUserEdges(client: AnyClient): Promise<Map<string, 
 }
 
 /** Fetch the edges for a single user (used by the on-visit endpoint). */
-export async function fetchUserEdges(client: AnyClient, userId: string): Promise<UserEdgeRow> {
+export async function fetchUserEdges(
+  client: AnyClient,
+  userId: string,
+): Promise<UserEdgeRow> {
   const row: UserEdgeRow = {
     user_id: userId,
     ownedIds: new Set(),
@@ -180,7 +202,11 @@ export async function fetchUserEdges(client: AnyClient, userId: string): Promise
   };
 
   const [owned, rated, saved] = await Promise.all([
-    client.from('recipes').select('id').eq('user_id', userId).neq('visibility', 'HIDDEN'),
+    client
+      .from('recipes')
+      .select('id')
+      .eq('user_id', userId)
+      .neq('visibility', 'HIDDEN'),
     client.from('ratings').select('recipe_id, rating').eq('user_id', userId),
     client.from('bookmarks').select('recipe_id').eq('user_id', userId),
   ]);

@@ -76,6 +76,37 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Store alternate source URLs in recipe_sources so that importing the same
+  // recipe via a different link resolves to this recipe instead of creating a
+  // duplicate.  Two cases:
+  //   1. website_url – a blog/website the video references
+  //   2. video_metadata.url – the resolved (long) video URL, which may differ
+  //      from the short/share link stored in `source`
+  const recipeSource = canonicalUrl(baseRecipe.source);
+  const altUrls: string[] = [];
+
+  const websiteUrl = canonicalUrl((baseRecipe as any).website_url ?? null);
+  if (websiteUrl) altUrls.push(websiteUrl);
+
+  const videoLongUrl = canonicalUrl(
+    (baseRecipe as any).video_metadata?.url ?? null,
+  );
+  if (videoLongUrl && videoLongUrl !== recipeSource) altUrls.push(videoLongUrl);
+
+  for (const altUrl of altUrls) {
+    const platform = (() => {
+      try {
+        return new URL(altUrl).hostname.replace(/^www\./, '').split('.')[0] || null;
+      } catch { return null; }
+    })();
+    const { error: sourceError } = await client
+      .from('recipe_sources' as any)
+      .insert({ recipe_id: data.id, source_url: altUrl, platform } as any);
+    if (sourceError) {
+      console.error('🔍 Failed to insert alt URL into recipe_sources:', sourceError);
+    }
+  }
+
   if (baseRecipe.original_image_base64) {
     const { image_base64 }: { image_base64: string } = await $fetch(
       '/api/create-recipe/get-processed-image',

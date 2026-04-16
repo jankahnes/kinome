@@ -26,7 +26,7 @@
         </div>
       </div>
 
-      <div v-else class="flex-1 flex items-center justify-center p-6 pb-32">
+      <div v-else class="flex-1 flex items-center justify-center px-6 py-20">
         <div class="text-center max-w-sm">
           <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <IconBookOpen class="w-6 h-6 text-gray-400" />

@@ -54,7 +54,7 @@
           <!-- ── HERO BANNER: Archetype ───────────────── -->
           <div class="main-card flex gap-6 overflow-hidden items-center py-6 relative">
             <img class="w-30 -ml-10 rotate-160 scale-250 z-0" src="/blob.webp">
-            <img class="h-30 w-25 z-10 -ml-18" src="/temp/archetype-icon.png">
+            <img class="h-30 w-25 z-10 -ml-20" src="/temp/archetype-icon.png">
             <div class="ml-16">
               <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-0.5">Archetype</p>
               <h2 v-if="metrics?.archetype" class="text-[54px] font-bold tracking-tighter leading-none">
@@ -123,7 +123,7 @@
               </div>
             </div>
             <button v-else type="button"
-              class="animated-button flex min-h-52 w-full flex-col items-center justify-center gap-3 rounded-[34px] border-2 border-dashed border-primary/60 bg-primary-10/40 px-6 py-10 text-center"
+              class="animated-button flex min-h-52 w-full flex-col items-center justify-center gap-3 rounded-4xl! border-2 border-dashed border-primary/60 bg-primary-10/40 px-6 py-10 text-center"
               @click="goToSignatureSelection">
               <div class="rounded-full bg-primary p-3 text-white">
                 <IconPencil class="h-6 w-6" />
@@ -248,7 +248,8 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-sm leading-snug"
                     :class="{ 'group-hover:underline decoration-primary underline-offset-2': item.href }"
-                    v-html="item.text"></p>
+                    v-html="item.text">
+                  </p>
                   <p class="text-xs text-gray-400 mt-0.5">{{ item.time }}</p>
                 </div>
               </component>
@@ -653,5 +654,4 @@ const recentActivity = computed<ActivityEntry[]>(() =>
 );
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

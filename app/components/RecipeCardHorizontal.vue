@@ -18,11 +18,11 @@
         ? '-ml-22 !pl-25 xs:-ml-28 xs:!pl-31'
         : ''
         ">
-        <p v-if="variationLabel"
+        <p v-if="recipe?.variation_name && recipe?.variation_display_name"
           class="text-[10px] uppercase tracking-widest text-gray-400 leading-none -mb-1">
-          {{ variationLabel }}
+          {{ recipe?.variation_name }}
         </p>
-        <h2 class="font-bold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-balance">
+        <h2 class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-balance">
           {{ recipe?.title }}
         </h2>
         <div class="flex gap-1.5 flex-wrap text-xs max-h-[1.7rem] xs:max-h-[3.4rem] overflow-hidden items-start py-0.5">
@@ -54,10 +54,6 @@ const props = defineProps<{
   reasonText?: string;
 }>();
 const top3Tags = ref(getTop3Tags(props.recipe));
-
-const variationLabel = computed(
-  () => (props.recipe as any)?.variation_name ?? null
-);
 
 function getTop3Tags(recipe: RecipeOverview) {
   const tags = recipe.tags.map((tag) => getTagByID(tag));

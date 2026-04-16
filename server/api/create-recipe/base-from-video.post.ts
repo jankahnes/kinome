@@ -47,5 +47,7 @@ export default defineEventHandler(async (event) => {
     .map((ingredient: string) => ingredient.trim())
     .filter((ingredient: string) => ingredient.length > 3);
 
+  responseBase.website_url = responseBase.website_url ?? null;
+
   return responseBase as BaseRecipe;
 });

@@ -7,6 +7,20 @@ import { getRatings } from '~/utils/db/getters/getRatings';
 import fillForUnits from '~/utils/format/fillForUnits';
 import type { Database } from '~/types/supabase';
 
+const PROCESSING_PICTURE_PREFIX = 'PROCESSING:';
+const LEGACY_PROCESSING_PICTURE = 'PROCESSING';
+
+function sanitizeRecipePicture<T extends { picture: string | null }>(recipe: T): T {
+  if (
+    recipe.picture &&
+    (recipe.picture === LEGACY_PROCESSING_PICTURE ||
+      recipe.picture.startsWith(PROCESSING_PICTURE_PREFIX))
+  ) {
+    recipe.picture = null;
+  }
+  return recipe;
+}
+
 function getTagCategory(tagId: number): string {
   if (tagId >= 400) return 'EQUIPMENT';
   if (tagId >= 300) return 'CUISINE';
@@ -101,6 +115,7 @@ export async function getRecipes(
   const recipes = data as any;
   if (error) throw error;
   for (const recipe of recipes) {
+    sanitizeRecipePicture(recipe);
     recipe.tags = recipe.tags.map((t: { tag_id: number }) => t.tag_id);
   }
   if (recipes.length === 0) return [];
@@ -277,6 +292,7 @@ export async function getRecipeOverviews(
   const recipes = data;
 
   for (const recipe of recipes) {
+    sanitizeRecipePicture(recipe as { picture: string | null });
     (recipe as any).tags = recipe.tags.map((t: { tag_id: number }) => t.tag_id);
   }
   let recipeOverviews = recipes as unknown as RecipeOverview[];
@@ -306,8 +322,11 @@ export async function getRecipeOverview(
 export async function getTrendingThisMonth(
   client: SupabaseClient<Database>,
 ): Promise<RecipeOverview[]> {
-  const { data, error } = await client.rpc('get_trending_this_week');
+  const { data, error } = await client.rpc('get_trending_this_month');
 
   if (error) throw error;
+  data.forEach((recipe) =>
+    sanitizeRecipePicture(recipe as { picture: string | null }),
+  );
   return data;
 }

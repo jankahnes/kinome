@@ -1,32 +1,16 @@
 export const getPublishingRequirements = (
   recipe: { instructions?: string[] | null; picture?: string | null } | null
 ) => {
-  if (!recipe) {
-    return {
-      hasInstructions: false,
-      hasPicture: false,
-      instructionsMatchedToIngredients: false,
-    };
-  }
-  const hasInstructions =
-    recipe.instructions &&
-    recipe.instructions.length > 0 &&
-    recipe.instructions.every((instruction) => instruction.trim() !== '') &&
-    recipe.instructions.some(
-      (instruction) => instruction.trim().split(' ').length > 2
-    );
+  if (!recipe) return { hasInstructions: false, hasPicture: false };
 
-  const hasPicture = Boolean(recipe.picture);
-
-  const instructionsMatchedToIngredients =
-    recipe.instructions &&
-    recipe.instructions.some((instruction) =>
-      instruction.match(/\[.*?\]\((\d+)\)/g)
-    );
+  const hasInstructions = Boolean(
+    recipe.instructions?.length &&
+    recipe.instructions.some((i) => i.trim() !== '') &&
+    recipe.instructions.some((i) => i.trim().split(' ').length > 2)
+  );
 
   return {
     hasInstructions,
-    hasPicture,
-    instructionsMatchedToIngredients,
+    hasPicture: Boolean(recipe.picture),
   };
 };

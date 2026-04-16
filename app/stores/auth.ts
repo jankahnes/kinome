@@ -22,15 +22,13 @@ export const useAuthStore = defineStore('auth', () => {
       }
     }
     profileFetched.value = true;
-    try {
-      await $fetch('/api/db/visit', {
+    if (user.value?.username && user.value?.id) {
+      $fetch('/api/db/visit', {
         method: 'POST',
         body: {
           date: todayLogicalDate(),
         },
       });
-    } catch (error) {
-      console.error('Failed to record daily visit:', error);
     }
   }
 
@@ -81,7 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
           if (payload.new.shopping_list) {
             shoppingList.value = payload.new.shopping_list;
           }
-        }
+        },
       )
       .subscribe();
   }
@@ -153,13 +151,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function addToShoppingList(
     ingredients: any[],
     recipeId: number,
-    servingSize: number
+    servingSize: number,
   ) {
     if (!ingredients || ingredients.length === 0) return;
     for (const ingredient of ingredients) {
       const amount = ingredient.amount * servingSize;
       const existingIndex = shoppingList.value.findIndex(
-        (item) => item.ingredientId === ingredient.id
+        (item) => item.ingredientId === ingredient.id,
       );
 
       if (existingIndex !== -1) {
@@ -169,13 +167,13 @@ export const useAuthStore = defineStore('auth', () => {
           existing.amount,
           existing.unit,
           ingredient.density || 1,
-          ingredient.countable_units[existing.unit] || 0
+          ingredient.countable_units[existing.unit] || 0,
         );
         const newGrams = convertToGrams(
           amount || 0,
           ingredient.unit ?? 'G',
           ingredient.density || 1,
-          ingredient.countable_units[ingredient.unit] || 0
+          ingredient.countable_units[ingredient.unit] || 0,
         );
 
         existing.amount = existingGrams + newGrams;
@@ -205,7 +203,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function removeFromShoppingList(ingredientId: number) {
     shoppingList.value = shoppingList.value.filter(
-      (item) => item.ingredientId !== ingredientId
+      (item) => item.ingredientId !== ingredientId,
     );
     if (shoppingList.value.length === 0) {
       shoppingListOpen.value = false;

@@ -2216,9 +2216,10 @@ export default class NutritionEngine {
         }
       }
     }
+    const _recipeRowForReport = this.getRecipeRow();
     this.report.humanReadable = getReportHumanReadable(
       this.report,
-      this.getRecipeRow() as Recipe,
+      _recipeRowForReport as Recipe,
       this.isFood,
     );
     this.recipe.report = this.getTrimmedReport();

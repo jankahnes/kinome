@@ -106,7 +106,7 @@ const wholeFoodTiers: Threshold[] = [
 const electrolyteTiers: Threshold[] = [
   {
     minScore: -Infinity,
-    rating: 'High Na Load',
+    rating: 'High Sodium',
     pillClass: 'bg-red-100 text-red-700',
   },
   {
@@ -143,15 +143,27 @@ const fiberTiers: Threshold[] = [
   { minScore: -Infinity, rating: 'Low', pillClass: 'bg-red-100 text-red-700' },
   { minScore: 30, rating: 'Some', pillClass: 'bg-orange-100 text-orange-700' },
   { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
-  { minScore: 68, rating: 'High', pillClass: 'bg-emerald-100 text-emerald-700' },
+  {
+    minScore: 68,
+    rating: 'High',
+    pillClass: 'bg-emerald-100 text-emerald-700',
+  },
   { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
 const proteinTiers: Threshold[] = [
   { minScore: -Infinity, rating: 'Low', pillClass: 'bg-red-100 text-red-700' },
-  { minScore: 30, rating: 'Moderate', pillClass: 'bg-orange-100 text-orange-700' },
+  {
+    minScore: 30,
+    rating: 'Moderate',
+    pillClass: 'bg-orange-100 text-orange-700',
+  },
   { minScore: 55, rating: 'Good', pillClass: 'bg-green-100 text-green-700' },
-  { minScore: 68, rating: 'High', pillClass: 'bg-emerald-100 text-emerald-700' },
+  {
+    minScore: 68,
+    rating: 'High',
+    pillClass: 'bg-emerald-100 text-emerald-700',
+  },
   { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
@@ -239,9 +251,9 @@ type GutSubKey =
 
 const gutSubLabels: Record<GutSubKey, { positive: string; negative: string }> =
   {
-    fiberSubScore: { positive: 'Good Fiber', negative: 'Low Fiber' },
+    fiberSubScore: { positive: 'High Fiber', negative: 'Low Fiber' },
     polyphenolSubScore: {
-      positive: 'Rich in Polyphenols',
+      positive: 'High Polyphenols',
       negative: 'Low Polyphenols',
     },
     sugarSubScore: { positive: 'Low Sugar', negative: 'High Sugar' },
@@ -336,7 +348,11 @@ function satietySubtitle(
   return '';
 }
 
-function protectiveSubtitle(compounds: any, negative: boolean, resolved: { rating: string; pillClass: string }): string {
+function protectiveSubtitle(
+  compounds: any,
+  negative: boolean,
+  resolved: { rating: string; pillClass: string },
+): string {
   if (!compounds) return '';
   if (negative) return '';
   const candidates = [
@@ -347,7 +363,9 @@ function protectiveSubtitle(compounds: any, negative: boolean, resolved: { ratin
   const significant = candidates
     .filter((c) => (compounds[c.key] ?? 0) > 0)
     .sort((a, b) => (compounds[b.key] ?? 0) - (compounds[a.key] ?? 0));
-  return significant[0] ? `${resolved.rating} ${resolved.rating === 'Rich' ? 'in' : ''} ${significant[0].label}` : '';
+  return significant[0]
+    ? `${resolved.rating} ${resolved.rating === 'Rich' ? 'in' : ''} ${significant[0].label}`
+    : '';
 }
 
 export interface QualityCardContext {
@@ -372,9 +390,9 @@ export function getDailyQualityCards(
   );
 
   // --- Fat Quality (order 6, condition: meaningful fat content) ---
-  const totalFat = context?.totalFat ?? details?.fatProfile?.totalFatPer100g ?? 0;
-  const fatConditionMet =
-    overall?.fat_profile_score >= 70 || overall?.fat_profile_score <= 30 || totalFat > 5;
+  const totalFat =
+    context?.totalFat ?? details?.fatProfile?.totalFatPer100g ?? 0;
+  const fatConditionMet = totalFat > 5;
   let fatResolved = resolve(overall?.fat_profile_score, qualityTiers);
   let fatOrder = 9;
   let fatSubtitle = fatQualitySubtitle(
@@ -406,7 +424,8 @@ export function getDailyQualityCards(
 
   // --- Electrolytes (order 5, condition: Na:K ratio data available) ---
   const naKRatio: number | null = details?.salt?.naKRatio ?? null;
-  const electrolyteConditionMet = naKRatio != null;
+  const electrolyteConditionMet =
+    naKRatio != null && details?.salt?.totalElectrolytesPer100g > 400;
   const electrolyteScore =
     naKRatio != null
       ? Math.round(
@@ -445,16 +464,24 @@ export function getDailyQualityCards(
   // --- Fiber (order 3, condition: notably high or low) ---
   const fiberScore: number | null = overall?.fiber_score ?? null;
   const fiberResolved = resolve(fiberScore, fiberTiers);
-  const fiberConditionMet = fiberScore != null && (fiberScore >= 68 || fiberScore <= 25);
+  const fiberConditionMet =
+    fiberScore != null && (fiberScore >= 68 || fiberScore <= 25);
   const fiberOrder = fiberConditionMet ? 6 : 6 - 20;
-  const fiberSubtitle = fiberConditionMet ? `${report.details?.fiber?.fiberTotal?.toFixed(0)}g per serving` : '';
+  const fiberSubtitle = fiberConditionMet
+    ? `${details?.fiber?.fiberTotal?.toFixed(0)}g per serving`
+    : '';
 
   // --- Protein (order 2, condition: notably high) ---
   const proteinScore: number | null = overall?.protein_score ?? null;
+  const totalProtein =
+    details?.protein?.proteinPerServing?.toFixed(0) ?? 0;
   const proteinResolved = resolve(proteinScore, proteinTiers);
-  const proteinConditionMet = proteinScore != null && proteinScore >= 68;
+  const proteinConditionMet =
+    proteinScore != null && proteinScore >= 68 && totalProtein > 5;
   const proteinOrder = proteinConditionMet ? 7 : 7 - 20;
-  const proteinSubtitle = proteinConditionMet ? `${report.details?.protein?.proteinPerServing?.toFixed(0)}g per serving` : '';
+  const proteinSubtitle = proteinConditionMet
+    ? `${totalProtein}g per serving`
+    : '';
 
   const allCards: DailyQualityCard[] = [
     {
@@ -494,7 +521,7 @@ export function getDailyQualityCards(
       img: 'fat.webp',
       ...fatResolved,
       subtitle: fatSubtitle,
-      clickable: fatConditionMet,
+      clickable: true,
       orderValue: fatOrder,
     },
     {

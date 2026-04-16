@@ -1,9 +1,9 @@
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 
-const nullableNumber = z.number().nullable();
-const nullableInteger = z.number().int().nullable();
-const nullableString = z.string().nullable();
+const nullableNumber = z.union([z.number(), z.null()]);
+const nullableInteger = z.union([z.number().int(), z.null()]);
+const nullableString = z.union([z.string(), z.null()]);
 const countableUnitsSchema = z.array(
   z.object({
     unit_name: z.string(),

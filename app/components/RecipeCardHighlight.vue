@@ -3,12 +3,12 @@
     class="transition-all duration-300 group flex items-center main-card" :class="{ 'bg-primary-10/70!': isSignature }">
     <!-- circular -->
     <NuxtImg v-if="recipe?.picture"
-      class="-ml-10 z-10 h-[94%] max-h-70 aspect-square object-contain shadow-[#00000035] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.008]"
+      class="-ml-4 sm:-ml-10 z-10 h-[70%] sm:h-[94%] max-h-70 aspect-square object-contain shadow-[#00000035] [filter:drop-shadow(36px_45px_40px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.008]"
       :src="recipe?.picture || ''" fetchpriority="high" :alt="recipe?.title" />
 
     <div class="flex-1 flex flex-col gap-2 md:gap-3 pl-6 pr-10 py-7">
       <h2
-        class="font-bold text-3xl md:text-5xl tracking-tighter line-clamp-2 items-center gap-4 leading-none "
+        class="font-semibold text-3xl md:text-5xl tracking-tighter line-clamp-2 items-center gap-4 leading-none "
         :class="{ 'underline decoration-primary underline-offset-4': true, 'text-4xl!': isSignature }">
         {{ recipe?.title }}
       </h2>

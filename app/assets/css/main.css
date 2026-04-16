@@ -16,6 +16,48 @@
   font-display: swap;
 }
 
+/*
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/Fraunces_72pt-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/Fraunces_72pt-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/Fraunces_72pt-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/Fraunces_72pt-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/Fraunces_72pt-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
 @theme {
   --breakpoint-new-comment-wrap: 485px;
   --breakpoint-4xl: 2200px;
@@ -27,7 +69,7 @@
   --font-main: 'Libertinus Sans', sans-serif;
   --color-main: #f5eeee;
   --color-primary: #FFC340;
-  --color-primary-gradient: #fdd835;
+  --color-primary-2: color-mix(in srgb, var(--color-primary) 1%, white);
   --color-primary-5: color-mix(in srgb, var(--color-primary) 2%, white);
   --color-primary-10: color-mix(in srgb, var(--color-primary) 4%, white);
   --color-primary-15: color-mix(in srgb, var(--color-primary) 4.5%, white);

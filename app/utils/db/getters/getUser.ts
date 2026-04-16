@@ -4,7 +4,7 @@ import { getRecipeOverviews } from '~/utils/db/getters/getRecipes';
 
 export async function getUser(
   client: SupabaseClient,
-  userID: string | undefined | null
+  userID: string | undefined | null,
 ): Promise<FullUser | null> {
   if (!userID) {
     return null;
@@ -13,6 +13,9 @@ export async function getUser(
   const { data, error } = await query;
   if (error) throw error;
   const user = data[0];
+  if (!user) {
+    return null;
+  }
   const ownRecipes = await getRecipeOverviews(client, {
     eq: { user_id: userID },
   });
@@ -51,7 +54,7 @@ export async function getUser(
 
 export async function getUsersPartial(
   client: SupabaseClient,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<User[]> {
   let query = client.from('profiles').select(`*`);
   query = buildQuery(query, opts);
@@ -62,7 +65,7 @@ export async function getUsersPartial(
 
 export async function getUserPartial(
   client: SupabaseClient,
-  opts: GetterOpts = {}
+  opts: GetterOpts = {},
 ): Promise<User> {
   return expectSingle(await getUsersPartial(client, opts));
 }

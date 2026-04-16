@@ -350,6 +350,7 @@ export type BaseRecipe = {
   ingredients?: any | null;
   base_ingredients: string[];
   video_metadata?: VideoMetadata | null;
+  website_url?: string | null;
 };
 
 export type UploadableRecipe = Omit<BaseRecipe, 'base_ingredients'> & {

@@ -40,6 +40,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     gptKey: process.env.NUXT_PRIVATE_GPT_KEY,
     adminUuid: process.env.NUXT_PUBLIC_ADMIN_ID,
+    bypassAuth: process.env.NUXT_PRIVATE_BYPASS_AUTH,
   },
   imports: {
     dirs: [

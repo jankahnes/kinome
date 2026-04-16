@@ -7,7 +7,7 @@
         alt="Kinome Leaves"
       />
       <span
-        class="text-5xl font-bold text-primary-500 tracking-tighter z-10 -ml-1"
+        class="text-5xl font-semibold text-primary-500 tracking-tighter z-10 -ml-1"
       >
         kinome
       </span>

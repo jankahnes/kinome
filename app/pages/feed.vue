@@ -363,13 +363,13 @@ onMounted(async () => {
     orderBy: { column: 'created_at', ascending: false },
     eq: { visibility: 'PUBLIC' },
     not: { picture: null },
-    limit: 6,
+    limit: 5,
   }).then((recipes) => {
     todayRecipes.value = recipes;
   });
   getActivity(supabase, {
     orderBy: { column: 'created_at', ascending: false },
-    limit: 10,
+    limit: 8,
   }).then((activity) => {
     activityFeed.value = activity;
   });

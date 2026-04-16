@@ -1,45 +1,20 @@
 <template>
   <div class="relative aspect-square">
-    <svg
-      class="absolute inset-0 w-full h-full -rotate-90"
-      viewBox="0 0 100 100"
-    >
+    <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
       <!-- Background ring -->
-      <circle
-        cx="50"
-        cy="50"
-        :r="radius"
-        fill="none"
-        :stroke-width="strokeWidth"
-        stroke-linecap="round"
-        :class="ringBackground"
-      />
+      <circle cx="50" cy="50" :r="radius" fill="none" :stroke-width="strokeWidth" stroke-linecap="round"
+        :class="ringBackground" />
 
       <!-- Segment rings -->
-      <circle
-        v-for="(segment, index) in segments"
-        :key="index"
-        cx="50"
-        cy="50"
-        :r="radius"
-        fill="none"
-        :stroke-width="strokeWidth"
-        :stroke-dasharray="segment.dashArray"
-        :stroke-dashoffset="segment.dashOffset"
-        stroke-linecap="round"
-        class="transition-all duration-300"
-        :class="segment.color"
-        :style="{
+      <circle v-for="(segment, index) in segments" :key="index" cx="50" cy="50" :r="radius" fill="none"
+        :stroke-width="strokeWidth" :stroke-dasharray="segment.dashArray" :stroke-dashoffset="segment.dashOffset"
+        stroke-linecap="round" class="transition-all duration-300" :class="segment.color" :style="{
           transform: `rotate(${segment.rotation}deg)`,
           transformOrigin: '50% 50%',
-        }"
-      />
+        }" />
     </svg>
 
-    <div
-      class="absolute inset-0 flex items-center justify-center"
-      :style="{ padding: `${strokeWidth}px` }"
-    >
+    <div class="absolute inset-0 flex items-center justify-center" :style="{ padding: `${strokeWidth}px` }">
       <slot />
     </div>
   </div>
@@ -73,8 +48,8 @@ const segments = computed(() => {
   let currentRotation = 0;
 
   props.segments.forEach((segment, index) => {
-    const clampedValue = Math.max(0, Math.min(1, segment.value));
-    const segmentLength = circumference.value * clampedValue;
+    const clampedValue = Math.max(0, Math.min(1, segment.value)) - 0.01;
+    const segmentLength = circumference.value * clampedValue + 10;
     const halfLength = segmentLength / 2;
     const fullCircle = circumference.value;
 
@@ -99,5 +74,4 @@ const segments = computed(() => {
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

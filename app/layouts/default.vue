@@ -26,7 +26,7 @@
       </button>
       <div class="flex-1 flex flex-col min-h-svh">
         <div class="transition-all duration-300 flex-1 flex flex-col" :class="pageMarginLeft">
-          <div class="flex-1 text-gray-700 bg-[#f5eeee]">
+          <div class="flex-1 text-gray-700 bg-main">
             <slot />
             <GlobalLoadingIndicator :left="pageMarginLeft" />
           </div>

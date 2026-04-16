@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-20 space-y-4 sm:space-y-10 m-4 sm:mx-10 sm:mt-10 lg:ml-22 lg:mr-18">
+  <div class="mb-20 space-y-4 sm:space-y-10 m-4 sm:mx-10 sm:mt-10 md:mb-10 lg:ml-22 lg:mr-18">
     <div class="md:hidden flex justify-between items-center">
       <Logo class="" />
       <Avatar :user="auth.user" class="rounded-full w-10 h-10" v-if="auth.isUser()" />
@@ -16,9 +16,11 @@
               @keyup.enter="handleSearch" @blur="handleSearch" class="flex-grow focus:outline-none min-w-0! p-2" />
           </div>
         </div>
-        <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0" active-class="bg-primary/80">
+        <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0"
+          active-class="bg-primary/80">
           All Recipes</NuxtLink>
-        <NuxtLink to="/foods" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0" active-class="bg-primary/80">All Foods
+        <NuxtLink to="/foods" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0" active-class="bg-primary/80">
+          All Foods
         </NuxtLink>
       </div>
       <div class="items-center gap-2 shrink-0 hidden sm:flex">
@@ -28,7 +30,7 @@
       </div>
     </div>
     <div class="items-center gap-2 justify-between hidden md:flex">
-      <h1 class="text-5xl font-bold pt-4">
+      <h1 class="text-5xl font-semibold pt-4">
         🌟<span class="ml-0.5">Discover</span>
       </h1>
       <div class="items-center gap-4 hidden sm:flex">
@@ -79,12 +81,11 @@
       <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(1, 3)" :key="recipe.id + 'mobile'"
         :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
         class="text-[20px] basis-40 flex-1" />
-      <RecipeCardHighlight :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
-        :recipe="recipeStore.indexRecipes[0]!" :id="'mdh-0-0'" :uniqueId="'mdh-0-0'"
-        class="text-[20px] basis-full hidden md:flex" />
+      <RecipeCardHighlight :key="recipeStore.indexRecipes[0]?.id + 'mobile'" :recipe="recipeStore.indexRecipes[0]!"
+        :id="'mdh-0-0'" :uniqueId="'mdh-0-0'" class="text-[20px] basis-full hidden xs:flex" />
       <RecipeCardHighlightMobile :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
         :recipe="recipeStore.indexRecipes[0]!" :id="'mobile-0-0'" :uniqueId="'mobile-0-0'"
-        class="text-[20px] basis-full md:hidden" />
+        class="text-[20px] basis-full xs:hidden" />
       <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(5, 7)" :key="recipe.id + 'mobile'"
         :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
         class="text-[20px] basis-95 flex-1" />
@@ -124,9 +125,9 @@
       <div class="flex flex-wrap pt-4">
         <div class="flex flex-col gap-6 items-start">
           <h2 class="text-2xl font-bold">
-            <NuxtLink to="/kitchen/social" class="inline-block">
-              <span class="text-3xl">✨</span>
-              New on Social Media
+            <NuxtLink to="/kitchen/social">
+              <span class="text-2xl">🚀</span>
+              <span> Trending on Social Media</span>
             </NuxtLink>
           </h2>
           <div class="flex flex-wrap gap-4">
@@ -218,7 +219,7 @@ if (!recipeStore.socialIndexRecipes.length) {
     getRecipeOverviews(supabase, {
       orderBy: { column: 'created_at', ascending: false },
       limit: 6,
-      eq: { source_type: 'MEDIA' },
+      eq: { source_type: 'MEDIA', visibility: 'PUBLIC' },
     })
   ).then(({ data }) => recipeStore.setSocialIndexRecipes(data.value ?? []));
 }

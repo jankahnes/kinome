@@ -46,7 +46,7 @@ const isBaked = (r: WeightedRecipe['recipe']) =>
 // population collapses the p95 to a tiny number and everyone clamps to S=100.
 // Once the user base is large enough that p95 exceeds the floor, the anchor
 // becomes pure-percentile (matching the original spec).
-const GLOBAL_EXPLORER_FLOOR = 12; // ~half the cuisine tag set
+const GLOBAL_EXPLORER_FLOOR = 16; // ~half the cuisine tag set
 const PROLIFIC_CREATOR_FLOOR = 30; // "power author" baseline
 
 export type ArchetypeContext = {

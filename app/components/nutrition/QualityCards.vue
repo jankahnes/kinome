@@ -1,18 +1,10 @@
 <template>
-  <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
-    <div class="flex justify-between items-center mb-3 mx-2">
-      <h3 class="text-4xl font-bold tracking-tighter">Nutrition Quality</h3>
-      <button @click="emit('viewOverallReport')" class="flex items-center gap-0.5 animated-button text-sm p-2"
-        :class="mode === 'info' ? 'bg-primary-10' : 'text-slate-400'">
-        <span v-if="mode === 'info'" class="hidden sm:inline">View Full</span>
-        <IconChevronRight class="w-5" />
-      </button>
-    </div>
+  <div>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
       <div v-for="item in sortedCards" :key="item.title"
         class="relative flex flex-col items-center p-4 bg-primary-10 rounded-3xl transition-all gap-1"
-        :class="{ 'cursor-pointer hover:bg-secondary-700/30': item.clickable, 'opacity-40': item.orderValue < 0 }"
-        @click="item.clickable && emit('cardClick', item.title)">
+        :class="{ 'cursor-pointer hover:bg-primary-2': item.clickable, 'opacity-40': item.orderValue < 0 }"
+        @click="item.clickable && handleCardClick(item.title)">
         <IconChevronRight v-if="item.clickable" class="absolute top-3 right-3 w-5 text-slate-400" />
         <img class="h-14 object-contain mt-1" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
         <div class="text-lg font-bold tracking-tighter leading-none text-center mt-1">{{ item.title }}</div>
@@ -22,6 +14,10 @@
         </div>
       </div>
     </div>
+    <NutritionGutHealthQualityPanel v-model="showGutPanel" :gut-health="gutHealth" />
+    <NutritionFatQualityPanel v-model="showFatPanel" :fat-profile="fatProfile"
+      :fat-profile-readable="fatProfileReadable" />
+    <NutritionMicronutrientsQualityPanel v-model="showMicroPanel" :micronutrients="micronutrients" :kcal-progress="kcalProgress" />
   </div>
 </template>
 
@@ -30,13 +26,27 @@ import type { DailyQualityCard } from '~/utils/nutrition/getDailyQualityCards';
 
 const props = defineProps<{
   cards: DailyQualityCard[];
+  gutHealth: any;
+  fatProfile: any;
+  fatProfileReadable: any;
+  micronutrients: any;
+  kcalProgress: number | null;
   mode: 'info' | 'full';
 }>();
 
-const emit = defineEmits<{
-  viewOverallReport: [];
-  cardClick: [title: string];
-}>();
+const showGutPanel = ref(false);
+const showFatPanel = ref(false);
+const showMicroPanel = ref(false);
+
+const handleCardClick = (title: string) => {
+  if (title === 'Gut Health') {
+    showGutPanel.value = true;
+  } else if (title === 'Fat Quality') {
+    showFatPanel.value = true;
+  } else if (title === 'Micronutrients') {
+    showMicroPanel.value = true;
+  }
+};
 
 const sortedCards = computed(() =>
   [...props.cards].sort((a, b) => b.orderValue - a.orderValue),

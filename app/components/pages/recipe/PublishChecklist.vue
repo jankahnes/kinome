@@ -1,146 +1,157 @@
 <template>
-  <div
-    class="main-card main-card-padding flex flex-col gap-4 !pb-3 items-start disabled:opacity-20 disabled:cursor-not-allowed">
-    <div v-if="recipe.visibility === 'PUBLIC'" class="space-y-2 opacity-60">
-      <div class="flex gap-2 items-center">
-        <IconCheck class="w-6" />
-        <span class="text-lg flex-1">Your recipe is public!</span>
+  <div class="main-card main-card-padding flex flex-col gap-4 items-start">
+
+    <!-- Public state -->
+    <div v-if="recipe.visibility === 'PUBLIC'" class="w-full flex flex-col gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+          <IconCheck class="w-5 text-green-600" />
+        </div>
+        <div>
+          <p class="font-semibold text-base leading-tight">This recipe is public</p>
+          <p class="text-xs text-gray-500">Discoverable in search and recommendations</p>
+        </div>
       </div>
-      <div class="flex gap-2 items-center">
-        <IconChartLine class="w-6" />
-        <span class="text-lg">Relevancy</span>
-        <div class="progress-ring ml-2" :style="{ '--progress': recipe.relevancy + '%' }">
-          <div class="inner text-xs font-light">
-            {{ recipe.relevancy }}
+      <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
+        <IconChartLine class="w-4 text-gray-400 shrink-0" />
+        <span class="text-sm text-gray-600 flex-1">Relevancy score</span>
+        <div class="flex items-center gap-2">
+          <div class="progress-ring" :style="{ '--progress': recipe.relevancy + '%' }">
+            <div class="inner text-[10px] font-medium">{{ recipe.relevancy }}</div>
           </div>
         </div>
       </div>
     </div>
-    <div class="flex flex-col gap-3" v-else>
-      <div class="max-w-md">
-        <p class="text-lg">Your recipe is unlisted.</p>
-        <p class="text-xs text-gray-500">
-          Your recipe is still visible to others through your profile, but not
-          in search results and recommendations.
-        </p>
-      </div>
-      <div class="flex gap-2 items-center flex-wrap gap-y-1 mt-4" :class="{
-        'opacity-50': publishingRequirements.hasInstructions,
-      }">
-        <IconCheck class="w-6" v-if="publishingRequirements.hasInstructions" />
-        <IconArrowRight class="w-6" v-else />
-        <span class="text-[18px] flex-1 text-nowrap">Add cooking instructions</span>
-        <div class="flex gap-2 items-center flex-wrap">
-          <button class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="!publishingRequirements.hasInstructions" @click="generateInstructions"
-            :disabled="generateInstructionsLoading || generatePictureLoading">
-            <IconLoader class="w-4 animate-spin" v-if="generateInstructionsLoading" />
-            <IconSparkles class="w-4" v-else />
-            <span>{{
-              generateInstructionsLoading ? 'Generating...' : 'Generate'
-            }}</span>
-          </button>
-          <button class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
-            v-if="!publishingRequirements.hasInstructions" @click="scrollToEditableInstructions"
-            :disabled="generateInstructionsLoading || generatePictureLoading">
-            <IconPencil class="w-4" />
-            <span>Add</span>
-          </button>
-        </div>
-      </div>
-      <div class="flex gap-2 items-center flex-wrap gap-y-1"
-        :class="{ 'opacity-50': publishingRequirements.hasPicture }">
-        <IconCheck class="w-6" v-if="publishingRequirements.hasPicture" />
-        <IconArrowRight class="w-6" v-else />
-        <span class="text-[18px] flex-1 text-nowrap mr-4">Add picture</span>
-        <div class="flex gap-2 items-center flex-wrap">
-          <button class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="!publishingRequirements.hasPicture" @click="generatePicture"
-            :disabled="generatePictureLoading || generateInstructionsLoading">
-            <IconSparkles class="w-4" v-if="!generatePictureLoading" />
-            <IconLoader class="w-4 animate-spin" v-else />
-            <span>Generate</span>
-          </button>
-          <button class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="!publishingRequirements.hasPicture" @click="triggerFileUpload"
-            :disabled="generatePictureLoading || generateInstructionsLoading">
-            <IconUpload class="w-4" />
-            <span>Upload</span>
-          </button>
 
-          <button class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary"
-            v-if="!publishingRequirements.hasPicture" @click="triggerPhotoEnv"
-            :disabled="generatePictureLoading || generateInstructionsLoading">
-            <IconCamera class="w-4" />
-            <span>Take picture</span>
-          </button>
-        </div>
+    <!-- Processing state -->
+    <div v-else-if="recipe.visibility === 'PUBLISH_PENDING'" class="w-full space-y-1.5">
+      <div class="flex gap-2 items-center">
+        <IconLoader class="w-5 animate-spin text-primary" />
+        <span class="text-lg font-medium">Processing your recipe…</span>
       </div>
-      <div class="md:hidden border-t border-gray-200 mt-2"></div>
-      <div class="flex gap-2 items-center flex-wrap-reverse mt-2 md:mt-4">
-        <!--
-          <button
-            @click="publishRecipeWithGenerate"
-            class="button px-2 py-1 flex gap-2 items-center text-primary outline-1 outline-primary"
-            v-if="
-              !publishingRequirements.hasInstructions ||
-              !publishingRequirements.hasPicture
-            "
-            :disabled="
-              publishLoading ||
-              generateInstructionsLoading ||
-              generatePictureLoading
-            "
-          >
-            <IconChevronsUp class="w-4" />
-            <span>{{
-              publishLoading ? 'Generating...' : 'Generate & Publish'
-            }}</span>
-          </button>
-          -->
-        <button v-if="
-          publishingRequirements.hasInstructions &&
-          publishingRequirements.hasPicture &&
-          publishingRequirements.instructionsMatchedToIngredients
-        " class="button px-2 py-[5px] flex gap-2 items-center !text-white !bg-primary" @click="publishRecipe"
-          :disabled="publishLoading ||
-            generateInstructionsLoading ||
-            generatePictureLoading
-            ">
-          <IconLoader class="w-4 animate-spin" v-if="publishLoading" />
-          <IconChevronsUp class="w-4" v-else />
-          <span>{{ publishLoading ? 'Publishing...' : 'Publish' }}</span>
-        </button>
+      <p class="text-sm text-gray-500">It will be public in a few minutes.</p>
+    </div>
+
+    <!-- Unlisted / checklist state -->
+    <div v-else class="flex flex-col gap-3 w-full">
+      <div>
+        <p class="text-lg leading-none">Your recipe is unlisted.</p>
+        <p class="text-xs text-gray-500 mt-1">Visible on your profile, but not in search or recommendations.</p>
+      </div>
+
+      <!-- Two-col requirement cards -->
+      <div class="grid grid-cols-2 gap-2">
+
+        <!-- Instructions card -->
+        <div
+          class="rounded-xl border p-4 flex flex-col gap-2 transition-all select-none"
+          :class="publishingRequirements.hasInstructions
+            ? 'border-green-200 bg-green-50/40'
+            : 'border-dashed border-gray-300 bg-gray-50/50 cursor-pointer hover:bg-primary-5/60 hover:border-primary/40 active:scale-[0.98]'"
+          @click="!publishingRequirements.hasInstructions && goToEditInstructions()">
+          <div class="flex items-center gap-2">
+            <IconCheck class="w-4 text-green-500 shrink-0" v-if="publishingRequirements.hasInstructions" />
+            <IconList class="w-4 text-gray-400 shrink-0" v-else />
+            <span class="font-medium text-sm">Instructions</span>
+          </div>
+          <p class="text-xs text-gray-400 leading-snug" v-if="!publishingRequirements.hasInstructions">
+            How to cook this recipe
+          </p>
+          <p class="text-xs text-green-600" v-else>Ready</p>
+          <div class="mt-0.5" v-if="!publishingRequirements.hasInstructions">
+            <button
+              class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
+              @click.stop="generateInstructions"
+              :disabled="generateInstructionsLoading">
+              <IconLoader class="w-3 animate-spin" v-if="generateInstructionsLoading" />
+              <IconSparkles class="w-3" v-else />
+              <span>{{ generateInstructionsLoading ? 'Generating…' : 'Generate' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Picture card -->
+        <div
+          class="rounded-xl border p-4 flex flex-col gap-2 transition-all select-none"
+          :class="publishingRequirements.hasPicture
+            ? 'border-green-200 bg-green-50/40'
+            : 'border-dashed border-gray-300 bg-gray-50/50'">
+          <div class="flex items-center gap-2">
+            <IconCheck class="w-4 text-green-500 shrink-0" v-if="publishingRequirements.hasPicture" />
+            <IconCamera class="w-4 text-gray-400 shrink-0" v-else />
+            <span class="font-medium text-sm">Photo</span>
+          </div>
+          <p class="text-xs text-gray-400 leading-snug" v-if="!publishingRequirements.hasPicture">
+            A photo of your finished dish
+          </p>
+          <p class="text-xs text-green-600" v-else>Ready</p>
+          <div class="flex gap-1.5 mt-0.5 flex-wrap" v-if="!publishingRequirements.hasPicture">
+            <button
+              class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
+              @click="triggerFileUpload"
+              :disabled="generatePictureLoading">
+              <IconLoader class="w-3 animate-spin" v-if="generatePictureLoading" />
+              <IconUpload class="w-3" v-else />
+              <span>Upload</span>
+            </button>
+            <button
+              class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
+              @click="triggerCamera"
+              :disabled="generatePictureLoading">
+              <IconCamera class="w-3" />
+              <span>Camera</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Publish button -->
+      <button
+        v-if="canPublish"
+        class="w-full button py-3 flex gap-2 items-center justify-center !text-white !bg-primary text-base font-semibold rounded-xl"
+        @click="publishRecipe"
+        :disabled="publishLoading">
+        <IconLoader class="w-5 animate-spin" v-if="publishLoading" />
+        <IconChevronsUp class="w-5" v-else />
+        <span>{{ publishLoading ? 'Publishing…' : 'Publish Recipe' }}</span>
+      </button>
+      <div
+        v-else
+        class="w-full rounded-xl border border-dashed border-gray-200 py-3 flex items-center justify-center">
+        <span class="text-xs text-gray-400">Add instructions and a photo to publish</span>
       </div>
     </div>
+
+    <!-- Admin section -->
     <div v-if="auth.isAdmin()" class="flex flex-wrap gap-2 items-center self-start w-full mt-1">
       <button
         class="button px-2 py-[3px] inline-flex gap-2 items-center text-primary outline-1 outline-primary"
         type="button"
         @click="regeneratePicture"
-        :disabled="generatePictureLoading || generateInstructionsLoading || deleteLoading || deleteImageLoading">
+        :disabled="generatePictureLoading || deleteLoading || deleteImageLoading">
         <IconLoader class="w-4 animate-spin" v-if="generatePictureLoading" />
         <IconRefreshCcw class="w-4" v-else />
-        <span>{{ generatePictureLoading ? 'Regenerating...' : 'Regenerate picture' }}</span>
+        <span>{{ generatePictureLoading ? 'Regenerating…' : 'Regenerate picture' }}</span>
       </button>
       <button
         v-if="recipe.picture"
         class="button px-2 py-[3px] inline-flex gap-2 items-center outline-1 outline-red-500/70 text-red-700 hover:bg-red-50"
         type="button"
         @click="deleteRecipeImage"
-        :disabled="deleteImageLoading || generatePictureLoading || generateInstructionsLoading || deleteLoading">
+        :disabled="deleteImageLoading || generatePictureLoading || deleteLoading">
         <IconLoader class="w-4 animate-spin" v-if="deleteImageLoading" />
         <IconImageOff class="w-4" v-else />
-        <span>{{ deleteImageLoading ? 'Removing...' : 'Delete image' }}</span>
+        <span>{{ deleteImageLoading ? 'Removing…' : 'Delete image' }}</span>
       </button>
       <button
         class="button px-2 py-[3px] inline-flex gap-2 items-center !text-white !bg-red-600 hover:!bg-red-700"
         type="button"
         @click="deleteRecipeAdmin"
-        :disabled="deleteLoading || generatePictureLoading || generateInstructionsLoading || deleteImageLoading">
+        :disabled="deleteLoading || generatePictureLoading || deleteImageLoading">
         <IconLoader class="w-4 animate-spin" v-if="deleteLoading" />
         <IconTrash class="w-4" v-else />
-        <span>{{ deleteLoading ? 'Deleting...' : 'Delete recipe' }}</span>
+        <span>{{ deleteLoading ? 'Deleting…' : 'Delete recipe' }}</span>
       </button>
       <button
         class="button px-2 py-[3px] inline-flex gap-2 items-center !text-gray-800 !bg-primary-10/70"
@@ -151,6 +162,10 @@
       </button>
     </div>
   </div>
+
+  <!-- Hidden file inputs -->
+  <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileSelected" />
+  <input ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" @change="handleFileSelected" />
 </template>
 
 <script setup lang="ts">
@@ -162,107 +177,30 @@ const props = defineProps<{
 const supabase = useSupabaseClient<Database>();
 const router = useRouter();
 const recipeStore = useRecipeStore();
+const auth = useAuthStore();
+const loadingStore = useLoadingStore();
+
 const generatePictureLoading = ref(false);
 const generateInstructionsLoading = ref(false);
 const publishLoading = ref(false);
-const replaceImageLoading = ref(false);
 const deleteLoading = ref(false);
 const deleteImageLoading = ref(false);
-const auth = useAuthStore();
+
 const fileInput = ref<HTMLInputElement | null>(null);
-const loadingStore = useLoadingStore();
-const publishingRequirements = computed(() =>
-  getPublishingRequirements(props.recipe)
+const cameraInput = ref<HTMLInputElement | null>(null);
+
+const publishingRequirements = computed(() => getPublishingRequirements(props.recipe));
+const canPublish = computed(() =>
+  publishingRequirements.value.hasInstructions && publishingRequirements.value.hasPicture
 );
 
-const generatePicture = async () => {
-  if (publishingRequirements.value.hasPicture) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Picture already there',
-    });
-  }
-  generatePictureLoading.value = true;
-  loadingStore.displayToast('Generating picture ✨');
+const isUserCreated = computed(() =>
+  ['PREPARSED', 'TEXT', 'PICTURE', 'TITLE'].includes(props.recipe.source_type ?? '')
+);
 
-  const payload = {
-    title: props.recipe.title,
-    instructions: props.recipe.instructions,
-    source_type: props.recipe.source_type,
-    source: props.recipe.source,
-  };
-  const response = await $fetch('/api/create-recipe/get-processed-image', {
-    method: 'POST',
-    body: payload,
-  });
-  if (!response.image_base64) {
-    generatePictureLoading.value = false;
-    loadingStore.displayTransientToast('Failed to generate picture ❌');
-    throw new Error('Failed to generate picture');
-  }
-  const imageData = await $fetch('/api/db/upload-image', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: {
-      image: response.image_base64,
-      bucket: 'recipe',
-      id: props.recipe.id,
-    },
-  });
-  props.recipe.picture = imageData.publicUrl;
-  await supabase
-    .from('recipes')
-    .update({
-      picture: imageData.publicUrl,
-    })
-    .eq('id', props.recipe.id);
-  generatePictureLoading.value = false;
-  loadingStore.displayTransientToast('Picture generated successfully! ✨');
-};
-
-const regeneratePicture = async () => {
-  generatePictureLoading.value = true;
-  loadingStore.displayToast('Regenerating picture ✨');
-
-  const payload = {
-    title: props.recipe.title,
-    instructions: props.recipe.instructions,
-    source_type: props.recipe.source_type,
-    source: props.recipe.source,
-  };
-  const response = await $fetch('/api/create-recipe/get-processed-image', {
-    method: 'POST',
-    body: payload,
-  });
-  if (!response.image_base64) {
-    generatePictureLoading.value = false;
-    loadingStore.displayTransientToast('Failed to regenerate picture ❌');
-    throw new Error('Failed to regenerate picture');
-  }
-  const imageData = await $fetch('/api/db/upload-image', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: {
-      image: response.image_base64,
-      bucket: 'recipe',
-      id: props.recipe.id,
-      shouldUpsert: Boolean(props.recipe.picture),
-    },
-  });
-  props.recipe.picture = imageData.publicUrl;
-  await supabase
-    .from('recipes')
-    .update({
-      picture: imageData.publicUrl,
-    })
-    .eq('id', props.recipe.id);
-  generatePictureLoading.value = false;
-  await props.refresh(props.recipe.id, true);
-  loadingStore.displayTransientToast('Picture regenerated successfully! ✨');
+const goToEditInstructions = () => {
+  recipeStore.setRecipe(props.recipe);
+  router.push('/recipe/new?editCurrent=true');
 };
 
 const generateInstructions = async () => {
@@ -280,92 +218,120 @@ const generateInstructions = async () => {
   Object.assign(props.recipe, response);
   await supabase.from('recipes').update(response).eq('id', props.recipe.id);
   generateInstructionsLoading.value = false;
-  loadingStore.displayTransientToast('Instructions generated successfully! ✨');
+  loadingStore.displayTransientToast('Instructions generated! ✨');
 };
 
-const publishRecipe = async () => {
-  publishLoading.value = true;
-  loadingStore.displayToast('Publishing recipe ✨');
-  //if all processing_requirements are true, just publish the recipe
-  if (
-    !Object.values(publishingRequirements.value).every(
-      (requirement) => requirement === true
-    )
-  ) {
-    publishLoading.value = false;
-    loadingStore.displayTransientToast(
-      'Recipe is not ready to be published ❌'
-    );
-    throw new Error(
-      'Publishing requirements not met: ' +
-      Object.values(publishingRequirements.value)
-        .filter((requirement) => requirement === false)
-        .join(', ')
-    );
-  }
-  await supabase
-    .from('recipes')
-    .update({
-      visibility: 'PUBLIC',
-    })
-    .eq('id', props.recipe.id);
-  publishLoading.value = false;
-  loadingStore.displayTransientToast('Recipe published successfully! ✨');
-  props.refresh(props.recipe.id, true);
-};
-
-const scrollToEditableInstructions = () => {
-  console.log('scrollToEditableInstructions');
-};
-
-const triggerFileUpload = () => {
-  console.log('triggerFileUpload');
-};
-
-const triggerPhotoEnv = () => {
-  console.log('triggerPhotoEnv');
-};
-
-const replaceImage = () => {
-  fileInput.value?.click();
-};
+const triggerFileUpload = () => fileInput.value?.click();
+const triggerCamera = () => cameraInput.value?.click();
 
 const handleFileSelected = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const shouldUpsert = Boolean(props.recipe.picture);
   const file = target.files?.[0];
   if (!file) return;
 
-  replaceImageLoading.value = true;
+  generatePictureLoading.value = true;
+  loadingStore.displayToast('Processing your photo ✨');
+
   try {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('bucket', 'recipe');
-    formData.append('id', props.recipe.id.toString());
-    formData.append('shouldUpsert', shouldUpsert ? 'true' : 'false');
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const response = await $fetch('/api/create-recipe/get-processed-image', {
+      method: 'POST',
+      body: {
+        original_image_base64: base64,
+        title: props.recipe.title,
+        instructions: props.recipe.instructions,
+        collection: (props.recipe as any).collection || 'user-generated',
+      },
+    });
+
+    if (!(response as any).image_base64) {
+      loadingStore.displayTransientToast('Failed to process photo ❌');
+      return;
+    }
 
     const imageData = await $fetch('/api/db/upload-image', {
       method: 'POST',
-      body: formData,
+      body: {
+        image: (response as any).image_base64,
+        bucket: 'recipe',
+        id: props.recipe.id,
+        shouldUpsert: Boolean(props.recipe.picture),
+      },
     });
 
     props.recipe.picture = imageData.publicUrl;
-    await supabase
-      .from('recipes')
-      .update({
-        picture: imageData.publicUrl,
-      })
-      .eq('id', props.recipe.id);
-
-    // Reset the file input so the same file can be selected again
-    if (fileInput.value) {
-      fileInput.value.value = '';
-    }
+    await supabase.from('recipes').update({ picture: imageData.publicUrl }).eq('id', props.recipe.id);
+    loadingStore.displayTransientToast('Photo added! ✨');
   } catch (error) {
-    console.error('Failed to upload image:', error);
+    console.error('Failed to process photo:', error);
+    loadingStore.displayTransientToast('Failed to process photo ❌');
   } finally {
-    replaceImageLoading.value = false;
+    generatePictureLoading.value = false;
+    if (target) target.value = '';
   }
+};
+
+const publishRecipe = async () => {
+  if (!canPublish.value) return;
+  publishLoading.value = true;
+  loadingStore.displayToast('Publishing recipe ✨');
+
+  try {
+    if (isUserCreated.value) {
+      await $fetch('/api/create-recipe/publish-user-recipe', {
+        method: 'POST',
+        body: { recipeId: props.recipe.id },
+      });
+      props.recipe.visibility = 'PUBLISH_PENDING' as any;
+      loadingStore.displayTransientToast('Recipe submitted — will be public in a few minutes ✨');
+    } else {
+      await supabase.from('recipes').update({ visibility: 'PUBLIC' }).eq('id', props.recipe.id);
+      loadingStore.displayTransientToast('Recipe published! ✨');
+      await props.refresh(props.recipe.id, true);
+    }
+  } finally {
+    publishLoading.value = false;
+  }
+};
+
+const regeneratePicture = async () => {
+  generatePictureLoading.value = true;
+  loadingStore.displayToast('Regenerating picture ✨');
+  const payload = {
+    title: props.recipe.title,
+    instructions: props.recipe.instructions,
+    source_type: props.recipe.source_type,
+    source: props.recipe.source,
+  };
+  const response = await $fetch('/api/create-recipe/get-processed-image', {
+    method: 'POST',
+    body: payload,
+  });
+  if (!response.image_base64) {
+    generatePictureLoading.value = false;
+    loadingStore.displayTransientToast('Failed to regenerate picture ❌');
+    return;
+  }
+  const imageData = await $fetch('/api/db/upload-image', {
+    method: 'POST',
+    body: {
+      image: response.image_base64,
+      bucket: 'recipe',
+      id: props.recipe.id,
+      shouldUpsert: Boolean(props.recipe.picture),
+    },
+  });
+  props.recipe.picture = imageData.publicUrl;
+  await supabase.from('recipes').update({ picture: imageData.publicUrl }).eq('id', props.recipe.id);
+  generatePictureLoading.value = false;
+  await props.refresh(props.recipe.id, true);
+  loadingStore.displayTransientToast('Picture regenerated! ✨');
 };
 
 const deboost = async () => {
@@ -380,20 +346,12 @@ const deboost = async () => {
 
 const deleteRecipeImage = async () => {
   if (!props.recipe.picture) return;
-  if (
-    !confirm(
-      'Remove the image file from storage and clear the picture on this recipe?'
-    )
-  ) {
-    return;
-  }
+  if (!confirm('Remove the image file from storage and clear the picture on this recipe?')) return;
   deleteImageLoading.value = true;
   try {
     await $fetch('/api/db/delete-recipe-image', {
       method: 'POST',
-      body: {
-        recipeId: props.recipe.id,
-      },
+      body: { recipeId: props.recipe.id },
     });
     props.recipe.picture = null;
     await props.refresh(props.recipe.id, true);
@@ -407,16 +365,12 @@ const deleteRecipeImage = async () => {
 };
 
 const deleteRecipeAdmin = async () => {
-  if (!confirm('Delete this recipe permanently? This cannot be undone.')) {
-    return;
-  }
+  if (!confirm('Delete this recipe permanently? This cannot be undone.')) return;
   deleteLoading.value = true;
   try {
     await $fetch('/api/db/delete-recipe', {
       method: 'POST',
-      body: {
-        recipeId: props.recipe.id,
-      },
+      body: { recipeId: props.recipe.id },
     });
     recipeStore.deleteRecipe(props.recipe.id);
     recipeStore.setRecipe({} as Recipe);
@@ -436,8 +390,7 @@ const deleteRecipeAdmin = async () => {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: conic-gradient(var(--color-primary) var(--progress),
-      #ffffff var(--progress));
+  background: conic-gradient(var(--color-primary) var(--progress), #ffffff var(--progress));
   display: flex;
   align-items: center;
   justify-content: center;

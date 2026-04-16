@@ -40,11 +40,11 @@
                   <div>
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Avatar</h3>
                   </div>
-                  <p class="text-sm text-gray-400" v-if="avatars.length">{{ avatars.length }} available</p>
+                  <p class="text-sm text-gray-400" v-if="ACCOUNT_AVATARS.length">{{ ACCOUNT_AVATARS.length }} available</p>
                 </div>
 
-                <div v-if="avatars.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  <button v-for="avatar in avatars" :key="avatar.path" type="button"
+                <div v-if="ACCOUNT_AVATARS.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  <button v-for="avatar in ACCOUNT_AVATARS" :key="avatar.path" type="button"
                     class="group rounded-3xl p-2 bg-white/60 animated-button transition-all border-2"
                     :class="selectedAvatar === avatar.path ? 'border-primary shadow-lg' : 'border-transparent hover:border-primary/30'"
                     @click="selectedAvatar = avatar.path">
@@ -119,7 +119,6 @@ const auth = useAuthStore();
 const supabase = useSupabaseClient<Database>();
 const loadingStore = useLoadingStore();
 
-const avatars = ref<{ name: string; path: string }[]>([]);
 const username = ref('');
 const selectedAvatar = ref<string | null>(null);
 const savingProfile = ref(false);
@@ -142,11 +141,6 @@ const hasProfileChanges = computed(() => {
     (selectedAvatar.value ?? '') !== (auth.user?.picture ?? '')
   );
 });
-
-async function loadAvatars() {
-  const response = await $fetch<{ avatars: { name: string; path: string }[] }>('/api/account/avatars');
-  avatars.value = response.avatars;
-}
 
 async function saveProfile() {
   if (!auth.user?.id || !hasProfileChanges.value || !isUsernameValid.value || savingProfile.value) return;
@@ -219,10 +213,6 @@ watch(
   },
   { immediate: true },
 );
-
-onMounted(async () => {
-  await loadAvatars();
-});
 
 useHead({
   meta: [

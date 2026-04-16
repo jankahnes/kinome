@@ -65,7 +65,16 @@ async function existingEvent(
     tier,
     logicalDate,
     oncePerDay,
-  }: Pick<EventInsert, 'userId' | 'eventType' | 'refType' | 'refId' | 'tier' | 'logicalDate' | 'oncePerDay'>,
+  }: Pick<
+    EventInsert,
+    | 'userId'
+    | 'eventType'
+    | 'refType'
+    | 'refId'
+    | 'tier'
+    | 'logicalDate'
+    | 'oncePerDay'
+  >,
 ) {
   let query = client
     .from('profile_xp_events')
@@ -110,7 +119,9 @@ export async function insertXpEvent(
   client: AnyClient,
   input: EventInsert,
 ): Promise<AwardResult> {
-  const logicalDate = input.logicalDate ? normalizeDay(input.logicalDate) : null;
+  const logicalDate = input.logicalDate
+    ? normalizeDay(input.logicalDate)
+    : null;
 
   const alreadyExists = await existingEvent(client, {
     userId: input.userId,
@@ -197,13 +208,18 @@ export async function awardAchievement(
   client: AnyClient,
   userId: string,
   key: AchievementKey,
-  options: { tier?: number | null; refType?: string | null; refId?: number | null } = {},
+  options: {
+    tier?: number | null;
+    refType?: string | null;
+    refId?: number | null;
+  } = {},
 ) {
   const conf = ACHIEVEMENTS[key];
   const tier = options.tier ?? null;
-  const xpDelta = conf.kind === 'special'
-    ? conf.xp
-    : conf.thresholds.find((entry) => entry.tier === tier)?.xp ?? 0;
+  const xpDelta =
+    conf.kind === 'special'
+      ? conf.xp
+      : (conf.thresholds.find((entry) => entry.tier === tier)?.xp ?? 0);
 
   if (!xpDelta) {
     return { inserted: false, xpDelta: 0 };
@@ -242,8 +258,12 @@ async function countRatingsByUser(client: AnyClient, userId: string) {
 async function countBookmarksByUser(client: AnyClient, userId: string) {
   const { count, error } = await client
     .from('bookmarks')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .select('recipe_id, recipes!inner(visibility)', {
+      count: 'exact',
+      head: true,
+    })
+    .eq('user_id', userId)
+    .neq('recipes.visibility', 'HIDDEN');
   if (error) throw error;
   return count ?? 0;
 }
@@ -266,7 +286,11 @@ async function trackedDatesByUser(client: AnyClient, userId: string) {
     .not('meal_date', 'is', null);
 
   if (error) throw error;
-  return [...new Set((data ?? []).map((row) => String(row.meal_date)).filter(Boolean))].sort();
+  return [
+    ...new Set(
+      (data ?? []).map((row) => String(row.meal_date)).filter(Boolean),
+    ),
+  ].sort();
 }
 
 function longestStreak(dates: string[]) {
@@ -301,14 +325,21 @@ async function visitDatesByUser(client: AnyClient, userId: string) {
   return (data ?? []).map((row) => normalizeDay(row.created_at));
 }
 
-async function distinctBookmarkedCuisineCount(client: AnyClient, userId: string) {
+async function distinctBookmarkedCuisineCount(
+  client: AnyClient,
+  userId: string,
+) {
   const { data: bookmarks, error: bookmarksError } = await client
     .from('bookmarks')
     .select('recipe_id')
     .eq('user_id', userId);
   if (bookmarksError) throw bookmarksError;
 
-  const recipeIds = [...new Set((bookmarks ?? []).map((row) => row.recipe_id).filter((id) => id != null))];
+  const recipeIds = [
+    ...new Set(
+      (bookmarks ?? []).map((row) => row.recipe_id).filter((id) => id != null),
+    ),
+  ];
   if (recipeIds.length === 0) return 0;
 
   const { data: tags, error: tagsError } = await client
@@ -388,7 +419,15 @@ async function commentCountForRecipe(client: AnyClient, recipeId: number) {
 async function maybeUnlockTieredAchievement(
   client: AnyClient,
   userId: string,
-  key: Extract<AchievementKey, 'recipe_maker' | 'tastemaker' | 'collector' | 'sous_critic' | 'tracker' | 'streak_keeper'>,
+  key: Extract<
+    AchievementKey,
+    | 'recipe_maker'
+    | 'tastemaker'
+    | 'collector'
+    | 'sous_critic'
+    | 'tracker'
+    | 'streak_keeper'
+  >,
   value: number,
 ) {
   const conf = ACHIEVEMENTS[key];
@@ -404,7 +443,15 @@ async function maybeUnlockTieredAchievement(
 }
 
 function derivedTier(
-  key: Extract<AchievementKey, 'recipe_maker' | 'tastemaker' | 'collector' | 'sous_critic' | 'tracker' | 'streak_keeper'>,
+  key: Extract<
+    AchievementKey,
+    | 'recipe_maker'
+    | 'tastemaker'
+    | 'collector'
+    | 'sous_critic'
+    | 'tracker'
+    | 'streak_keeper'
+  >,
   value: number,
 ) {
   const conf = ACHIEVEMENTS[key];
@@ -426,7 +473,10 @@ function hasAchievementEvent(events: AchievementEventRow[], key: string) {
   return events.some((row) => row.event_type === key);
 }
 
-export async function buildProfileGamificationSummary(client: AnyClient, userId: string) {
+export async function buildProfileGamificationSummary(
+  client: AnyClient,
+  userId: string,
+) {
   const [
     profile,
     achievementEvents,
@@ -455,30 +505,49 @@ export async function buildProfileGamificationSummary(client: AnyClient, userId:
   );
 
   const ownRecipeIds = ownedRecipes.map((recipe) => recipe.id);
-  const [bookmarkRows, commentRows] = ownRecipeIds.length > 0
-    ? await Promise.all([
-        client.from('bookmarks').select('recipe_id').in('recipe_id', ownRecipeIds),
-        client.from('comments').select('recipe_id').in('recipe_id', ownRecipeIds),
-      ])
-    : [{ data: [], error: null }, { data: [], error: null }];
+  const [bookmarkRows, commentRows] =
+    ownRecipeIds.length > 0
+      ? await Promise.all([
+          client
+            .from('bookmarks')
+            .select('recipe_id, recipes!inner(visibility)')
+            .in('recipe_id', ownRecipeIds)
+            .neq('recipes.visibility', 'HIDDEN'),
+          client
+            .from('comments')
+            .select('recipe_id')
+            .in('recipe_id', ownRecipeIds),
+        ])
+      : [
+          { data: [], error: null },
+          { data: [], error: null },
+        ];
 
   if (bookmarkRows.error) throw bookmarkRows.error;
   if (commentRows.error) throw commentRows.error;
 
   const bookmarkCounts = new Map<number, number>();
   for (const row of bookmarkRows.data ?? []) {
-    bookmarkCounts.set(row.recipe_id, (bookmarkCounts.get(row.recipe_id) ?? 0) + 1);
+    bookmarkCounts.set(
+      row.recipe_id,
+      (bookmarkCounts.get(row.recipe_id) ?? 0) + 1,
+    );
   }
   const commentCounts = new Map<number, number>();
   for (const row of commentRows.data ?? []) {
-    commentCounts.set(row.recipe_id, (commentCounts.get(row.recipe_id) ?? 0) + 1);
+    commentCounts.set(
+      row.recipe_id,
+      (commentCounts.get(row.recipe_id) ?? 0) + 1,
+    );
   }
 
-  const crowdPleaserLive = ownedRecipes.some((recipe) =>
-    Number(recipe.relevancy ?? 0) >= CROWD_PLEASER_THRESHOLDS.relevancy &&
-    (bookmarkCounts.get(recipe.id) ?? 0) >= CROWD_PLEASER_THRESHOLDS.saves &&
-    (commentCounts.get(recipe.id) ?? 0) >= CROWD_PLEASER_THRESHOLDS.comments &&
-    Number(recipe.rating_count ?? 0) >= CROWD_PLEASER_THRESHOLDS.ratings,
+  const crowdPleaserLive = ownedRecipes.some(
+    (recipe) =>
+      Number(recipe.relevancy ?? 0) >= CROWD_PLEASER_THRESHOLDS.relevancy &&
+      (bookmarkCounts.get(recipe.id) ?? 0) >= CROWD_PLEASER_THRESHOLDS.saves &&
+      (commentCounts.get(recipe.id) ?? 0) >=
+        CROWD_PLEASER_THRESHOLDS.comments &&
+      Number(recipe.rating_count ?? 0) >= CROWD_PLEASER_THRESHOLDS.ratings,
   );
 
   const currentValues = {
@@ -495,94 +564,132 @@ export async function buildProfileGamificationSummary(client: AnyClient, userId:
   const achievements = [
     (() => {
       const key = 'recipe_maker' as const;
-      const tier = Math.max(eventTier(achievementEvents, key), derivedTier(key, currentValues[key]));
+      const tier = Math.max(
+        eventTier(achievementEvents, key),
+        derivedTier(key, currentValues[key]),
+      );
       return {
         key,
         unlocked: tier > 0,
         currentTier: tier,
         currentValue: currentValues[key],
-        nextThreshold: ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)?.threshold ?? null,
+        nextThreshold:
+          ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)
+            ?.threshold ?? null,
       };
     })(),
     (() => {
       const key = 'tastemaker' as const;
-      const tier = Math.max(eventTier(achievementEvents, key), derivedTier(key, currentValues[key]));
+      const tier = Math.max(
+        eventTier(achievementEvents, key),
+        derivedTier(key, currentValues[key]),
+      );
       return {
         key,
         unlocked: tier > 0,
         currentTier: tier,
         currentValue: currentValues[key],
-        nextThreshold: ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)?.threshold ?? null,
+        nextThreshold:
+          ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)
+            ?.threshold ?? null,
       };
     })(),
     (() => {
       const key = 'collector' as const;
-      const tier = Math.max(eventTier(achievementEvents, key), derivedTier(key, currentValues[key]));
+      const tier = Math.max(
+        eventTier(achievementEvents, key),
+        derivedTier(key, currentValues[key]),
+      );
       return {
         key,
         unlocked: tier > 0,
         currentTier: tier,
         currentValue: currentValues[key],
-        nextThreshold: ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)?.threshold ?? null,
+        nextThreshold:
+          ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)
+            ?.threshold ?? null,
       };
     })(),
     (() => {
       const key = 'sous_critic' as const;
-      const tier = Math.max(eventTier(achievementEvents, key), derivedTier(key, currentValues[key]));
+      const tier = Math.max(
+        eventTier(achievementEvents, key),
+        derivedTier(key, currentValues[key]),
+      );
       return {
         key,
         unlocked: tier > 0,
         currentTier: tier,
         currentValue: currentValues[key],
-        nextThreshold: ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)?.threshold ?? null,
+        nextThreshold:
+          ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)
+            ?.threshold ?? null,
       };
     })(),
     (() => {
       const key = 'tracker' as const;
-      const tier = Math.max(eventTier(achievementEvents, key), derivedTier(key, currentValues[key]));
+      const tier = Math.max(
+        eventTier(achievementEvents, key),
+        derivedTier(key, currentValues[key]),
+      );
       return {
         key,
         unlocked: tier > 0,
         currentTier: tier,
         currentValue: currentValues[key],
-        nextThreshold: ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)?.threshold ?? null,
+        nextThreshold:
+          ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)
+            ?.threshold ?? null,
       };
     })(),
     (() => {
       const key = 'streak_keeper' as const;
-      const tier = Math.max(eventTier(achievementEvents, key), derivedTier(key, currentValues[key]));
+      const tier = Math.max(
+        eventTier(achievementEvents, key),
+        derivedTier(key, currentValues[key]),
+      );
       return {
         key,
         unlocked: tier > 0,
         currentTier: tier,
         currentValue: currentValues[key],
-        nextThreshold: ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)?.threshold ?? null,
+        nextThreshold:
+          ACHIEVEMENTS[key].thresholds.find((entry) => entry.tier > tier)
+            ?.threshold ?? null,
       };
     })(),
     {
       key: 'signature_dish' as const,
-      unlocked: hasAchievementEvent(achievementEvents, 'signature_dish') || profile.signature_recipe != null,
+      unlocked:
+        hasAchievementEvent(achievementEvents, 'signature_dish') ||
+        profile.signature_recipe != null,
       currentTier: null,
       currentValue: profile.signature_recipe != null ? 1 : 0,
       nextThreshold: 1,
     },
     {
       key: 'passport_pantry' as const,
-      unlocked: hasAchievementEvent(achievementEvents, 'passport_pantry') || cuisineCount >= PASSPORT_PANTRY_CUISINE_THRESHOLD,
+      unlocked:
+        hasAchievementEvent(achievementEvents, 'passport_pantry') ||
+        cuisineCount >= PASSPORT_PANTRY_CUISINE_THRESHOLD,
       currentTier: null,
       currentValue: cuisineCount,
       nextThreshold: PASSPORT_PANTRY_CUISINE_THRESHOLD,
     },
     {
       key: 'alchemist' as const,
-      unlocked: hasAchievementEvent(achievementEvents, 'alchemist') || maxOwnedExoticness >= ALCHEMIST_EXOTICNESS_THRESHOLD,
+      unlocked:
+        hasAchievementEvent(achievementEvents, 'alchemist') ||
+        maxOwnedExoticness >= ALCHEMIST_EXOTICNESS_THRESHOLD,
       currentTier: null,
       currentValue: Number(maxOwnedExoticness.toFixed(1)),
       nextThreshold: ALCHEMIST_EXOTICNESS_THRESHOLD,
     },
     {
       key: 'crowd_pleaser' as const,
-      unlocked: hasAchievementEvent(achievementEvents, 'crowd_pleaser') || crowdPleaserLive,
+      unlocked:
+        hasAchievementEvent(achievementEvents, 'crowd_pleaser') ||
+        crowdPleaserLive,
       currentTier: null,
       currentValue: null,
       nextThreshold: null,
@@ -602,14 +709,23 @@ export async function buildProfileGamificationSummary(client: AnyClient, userId:
   };
 }
 
-export async function handleRecipeCreated(client: AnyClient, userId: string, recipeId: number) {
+export async function handleRecipeCreated(
+  client: AnyClient,
+  userId: string,
+  recipeId: number,
+) {
   await awardActionXp(client, userId, 'recipe_created', {
     refType: 'recipe',
     refId: recipeId,
   });
 
   const createdCount = await countRecipesByUser(client, userId);
-  await maybeUnlockTieredAchievement(client, userId, 'recipe_maker', createdCount);
+  await maybeUnlockTieredAchievement(
+    client,
+    userId,
+    'recipe_maker',
+    createdCount,
+  );
   await evaluateAlchemistForRecipe(client, recipeId);
 }
 
@@ -640,7 +756,12 @@ export async function handleFirstBookmarkCreated(
   });
 
   const bookmarkCount = await countBookmarksByUser(client, userId);
-  await maybeUnlockTieredAchievement(client, userId, 'collector', bookmarkCount);
+  await maybeUnlockTieredAchievement(
+    client,
+    userId,
+    'collector',
+    bookmarkCount,
+  );
 
   const cuisineCount = await distinctBookmarkedCuisineCount(client, userId);
   if (cuisineCount >= PASSPORT_PANTRY_CUISINE_THRESHOLD) {
@@ -660,10 +781,19 @@ export async function handleCommentCreated(
   });
 
   const commentCount = await countCommentsByUser(client, userId);
-  await maybeUnlockTieredAchievement(client, userId, 'sous_critic', commentCount);
+  await maybeUnlockTieredAchievement(
+    client,
+    userId,
+    'sous_critic',
+    commentCount,
+  );
 }
 
-export async function handleSignatureSet(client: AnyClient, userId: string, recipeId: number) {
+export async function handleSignatureSet(
+  client: AnyClient,
+  userId: string,
+  recipeId: number,
+) {
   await awardActionXp(client, userId, 'signature_set', {
     refType: 'recipe',
     refId: recipeId,
@@ -684,10 +814,19 @@ export async function handleTrackingSaved(
   });
 
   const trackedDays = await trackedDatesByUser(client, userId);
-  await maybeUnlockTieredAchievement(client, userId, 'tracker', trackedDays.length);
+  await maybeUnlockTieredAchievement(
+    client,
+    userId,
+    'tracker',
+    trackedDays.length,
+  );
 }
 
-export async function handleDailyVisit(client: AnyClient, userId: string, logicalDate: string) {
+export async function handleDailyVisit(
+  client: AnyClient,
+  userId: string,
+  logicalDate: string,
+) {
   await awardActionXp(client, userId, 'app_visit_daily', {
     refType: 'visit_day',
     logicalDate,
@@ -695,7 +834,12 @@ export async function handleDailyVisit(client: AnyClient, userId: string, logica
   });
 
   const dates = await visitDatesByUser(client, userId);
-  await maybeUnlockTieredAchievement(client, userId, 'streak_keeper', longestStreak(dates));
+  await maybeUnlockTieredAchievement(
+    client,
+    userId,
+    'streak_keeper',
+    longestStreak(dates),
+  );
 }
 
 export async function maybeAwardSaveReceived(
@@ -724,7 +868,10 @@ export async function maybeAwardRatingReceived(
   });
 }
 
-export async function evaluateAlchemistForRecipe(client: AnyClient, recipeId: number) {
+export async function evaluateAlchemistForRecipe(
+  client: AnyClient,
+  recipeId: number,
+) {
   const recipe = await recipeSnapshot(client, recipeId);
   if (!recipe?.user_id) return;
   if ((recipe.exoticness ?? 0) >= ALCHEMIST_EXOTICNESS_THRESHOLD) {
@@ -735,7 +882,10 @@ export async function evaluateAlchemistForRecipe(client: AnyClient, recipeId: nu
   }
 }
 
-export async function evaluateCrowdPleaserForRecipe(client: AnyClient, recipeId: number) {
+export async function evaluateCrowdPleaserForRecipe(
+  client: AnyClient,
+  recipeId: number,
+) {
   const recipe = await recipeSnapshot(client, recipeId);
   if (!recipe?.user_id) return;
 

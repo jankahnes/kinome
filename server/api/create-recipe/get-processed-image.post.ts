@@ -3,40 +3,32 @@ import removeInstructionFormatting from '~/utils/format/removeInstructionFormatt
 export default defineEventHandler(async (event) => {
   const base_recipe_information = await readBody(event);
   if (base_recipe_information.original_image_base64) {
-    // Remove background from existing image
+    // Route user-uploaded photo through the same flux-editing pipeline as video stills:
+    // enhance plating/garnish, place on white background, remove bg — matches app's visual style.
     try {
-      // Convert base64 to blob
-      const base64Data = base_recipe_information.original_image_base64.replace(
-        /^data:image\/[a-z]+;base64,/,
-        ''
-      );
-      const buffer = Buffer.from(base64Data, 'base64');
-
-      // Create FormData with blob
-      const formData = new FormData();
-      const blob = new Blob([buffer], { type: 'image/png' });
-      formData.append('file', blob, 'image.png');
-
-      // Call remove-background endpoint
+      const imageGenerationData = {
+        title: base_recipe_information.title,
+        instructions: removeInstructionFormatting(base_recipe_information.instructions || []),
+        collection: base_recipe_information?.collection || 'user-generated',
+        video_url: null,
+        user_image_base64: base_recipe_information.original_image_base64,
+      };
       const response = await fetch(
-        'https://jk-api.onrender.com/remove-background',
+        'https://jk-api.onrender.com/generate-image-from-recipe-data',
         {
           method: 'POST',
-          body: formData,
-        }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(imageGenerationData),
+        },
       );
-
       if (response.ok) {
-        const processedImageBuffer = await response.arrayBuffer();
-        const processedImageBase64 = `data:image/png;base64,${Buffer.from(
-          processedImageBuffer
-        ).toString('base64')}`;
-
-        base_recipe_information.image_base64 = processedImageBase64;
+        const processedBuffer = await response.arrayBuffer();
+        base_recipe_information.image_base64 = `data:image/png;base64,${Buffer.from(processedBuffer).toString('base64')}`;
+      } else {
+        console.error('Failed to process user image:', response.statusText);
       }
     } catch (error) {
-      console.error('Failed to remove background:', error);
-      // Continue with original image if background removal fails
+      console.error('Failed to process user image:', error);
     }
   } else {
     // Generate image from recipe data

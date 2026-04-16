@@ -15,6 +15,7 @@ export default async function (
       recipe_id: comment.recipe_id,
       content: comment.content,
       replying_to: comment.replying_to ?? null,
+      picture: comment.picture ?? null,
     },
   });
 

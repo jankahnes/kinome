@@ -21,7 +21,7 @@
       class="flex-1 flex flex-col justify-between gap-2 sm:gap-3 items-center p-4 pt-3 will-change-transform transition-transform duration-300 group-hover:translate-y-[1px] ">
       <div class="flex-1 flex flex-col justify-center items-center">
         <h2
-          class=" text-xl sm:text-2xl tracking-tight font-bold line-clamp-2 text-center text-balance leading-5 sm:leading-6.5">
+          class=" text-xl sm:text-2xl tracking-tight font-semibold line-clamp-2 text-center text-balance leading-5 sm:leading-6.5">
           {{ recipe?.title }}</h2>
         <p v-if="recipe?.variation_name && recipe?.variation_display_name"
           class="text-[11px] sm:text-[12px] uppercase tracking-[2px] text-gray-400 font-light mt-0.5">
