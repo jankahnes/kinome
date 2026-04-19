@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex min-w-0 flex-col">
+    <div class="main-card main-card-padding main-card-rounded flex min-w-0 flex-col">
         <div class="flex flex-col justify-between flex-1">
             <div>
                 <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Nutrients To Watch</h2>
@@ -12,7 +12,7 @@
                                 class="text-gray-300 text-xl leading-none select-none tracking-widest font-serif">...</span>
                         </div>
 
-                        <div class="rounded-3xl bg-secondary/60 hover:bg-secondary border-secondary/80 cursor-pointer transition-all border p-4 flex items-center justify-between gap-6 group"
+                        <div class="rounded-3xl bg-primary/5 hover:bg-primary/8 border-primary/10 cursor-pointer transition-all border p-4 flex items-center justify-between gap-6 group"
                             @click="selectedNutrient = item; panelOpen = true">
 
                             <div class="flex flex-col justify-center gap-1 flex-1">

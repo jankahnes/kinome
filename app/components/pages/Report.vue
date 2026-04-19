@@ -8,18 +8,21 @@
       </div>
     </div>
 
-    <div v-else class="flex flex-col gap-1">
-      <!-- Hero Card -->
-      <div class="p-5">
-        <div class="flex-1">
-          <p class="text-sm text-gray-500">NUTRITIONAL ANALYSIS</p>
-          <h2 class="text-4xl font-bold tracking-tight mb-2">
-            {{ title }}
-          </h2>
-          <div class="flex items-center justify-between mt-6 mb-4">
+    <div v-else>
+      <div v-if="showTitle">
+        <p class="text-[11px] text-gray-400 font-mono uppercase tracking-wider">NUTRITIONAL ANALYSIS</p>
+        <h2 class="text-3xl font-headers tracking-tight mb-2">
+          {{ title }}
+        </h2>
+      </div>
+      <div class="flex flex-wrap gap-6 mt-6" :class="{ 'gap-12': showTitle }">
+        <!-- Hero Card -->
+        <div class="basis-100 flex-1" :class="{ 'rounded-3xl bg-white shadow-xs p-4 ': !showTitle }">
+
+          <div class="flex items-center justify-between mb-4">
             <div class="flex flex-col">
-              <h3 class="text-xl font-bold mb-1">🔎 Overview</h3>
-              <div class="percentile-badge !py-1 px-1" :class="report.percentiles?.hidx?.color"
+              <h3 class="text-xl font-semibold mb-1">🔎 Overview</h3>
+              <div class="percentile-badge py-1! px-1" :class="report.percentiles?.hidx?.color"
                 v-if="report.percentiles?.hidx">
                 <Icon :name="report.percentiles.hidx.icon" :size="20" />
                 <span>{{ report.percentiles.hidx.description }}</span>
@@ -33,7 +36,7 @@
               :class="grade.color">
               <Icon :name="grade.icon" :size="28" />
               <div class="flex flex-col">
-                <span class="font-bold">{{ grade.description }}</span>
+                <span class="font-medium">{{ grade.description }}</span>
                 <span class="text-xs" v-if="grade.subtitle">{{
                   grade.subtitle
                 }}</span>
@@ -41,42 +44,44 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Readable Summary Cards -->
-      <div class="basis-auto min-w-80 flex-1 p-5 space-y-4 flex flex-col" v-for="card in readableSummaryCards"
-        :key="card.title" :class="card.class">
-        <div class="flex items-center justify-between mb-4">
-          <div class="">
-            <h3 class="text-xl font-bold mb-1">
-              {{ card.title }}
-            </h3>
-            <div class="percentile-badge" :class="card.percentile?.color" v-if="card.percentile">
-              <Icon :name="card.percentile.icon" :size="20" />
-              <span>{{ card.percentile.description }}</span>
+        <!-- Readable Summary Cards -->
+        <div class="basis-100 flex-1 space-y-4 flex flex-col"
+          :class="{ 'rounded-3xl bg-white shadow-xs p-4': !showTitle, [card.class]: true }"
+          v-for="card in readableSummaryCards" :key="card.title">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col items-start">
+              <h3 class="text-xl font-semibold mb-1">
+                {{ card.title }}
+              </h3>
+              <div class="percentile-badge" :class="card.percentile?.color" v-if="card.percentile">
+                <Icon :name="card.percentile.icon" :size="20" />
+                <span>{{ card.percentile.description }}</span>
+              </div>
+              <Skeleton v-else-if="!computedRecipe" class="w-52 h-8 rounded-xl" />
             </div>
-            <Skeleton v-else-if="!computedRecipe" class="w-52 h-8 rounded-xl" />
+            <GradeContainer :score="card.score" :type="'single'" class="rounded-lg text-2xl" />
           </div>
-          <GradeContainer :score="card.score" :type="'single'" class="rounded-lg text-2xl" />
-        </div>
-        <div v-for="nutrient in card.humanReadable" :key="nutrient.description">
-          <div class="flex gap-2" :class="nutrient.color">
-            <Icon :name="nutrient.icon" :size="28" />
-            <div class="flex flex-col">
-              <span class="font-semibold">{{ nutrient.description }}</span>
-              <span class="text-xs font-light" v-if="nutrient.subtitle">{{
-                nutrient.subtitle
-              }}</span>
+          <div v-for="nutrient in card.humanReadable" :key="nutrient.description">
+            <div class="flex gap-2" :class="nutrient.color">
+              <Icon :name="nutrient.icon" :size="28" />
+              <div class="flex flex-col">
+                <span class="font-medium">{{ nutrient.description }}</span>
+                <span class="text-xs font-light" v-if="nutrient.subtitle">{{
+                  nutrient.subtitle
+                }}</span>
+              </div>
             </div>
           </div>
+          <button
+            class="main-button animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform self-start ml-8"
+            v-if="
+              card.name == 'micronutrients' &&
+              report.humanReadable.micronutrients.length > 5
+            " @click="toggleMicronutrientOverview">
+            {{ micronutrientOverviewExpanded ? 'Show less' : 'Show more' }}
+          </button>
         </div>
-        <button class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform self-start ml-8"
-          v-if="
-            card.name == 'micronutrients' &&
-            report.humanReadable.micronutrients.length > 5
-          " @click="toggleMicronutrientOverview">
-          {{ micronutrientOverviewExpanded ? 'Show less' : 'Show more' }}
-        </button>
       </div>
     </div>
   </div>
@@ -91,9 +96,11 @@ const props = defineProps<{
   isFood: boolean;
   hideNutrition?: boolean;
   computedRecipe?: ComputedRecipe;
+  showTitle?: boolean;
 }>();
 
 const id = isNaN(Number(props.id)) ? props.id : Number(props.id);
+const showTitle = props.showTitle ?? true;
 const recipeStore = useRecipeStore();
 const loading = ref(true);
 const recipeComputed = ref<any>(null);

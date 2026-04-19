@@ -4,7 +4,7 @@ import { createTemplateFromMeal, createTemplateFromPayload } from '~~/server/uti
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
 
   const client = serverSupabaseServiceRole<Database>(event);
   if (body.mealId) {
-    return createTemplateFromMeal(client as any, user.id, body.mealId);
+    return createTemplateFromMeal(client as any, user.sub, body.mealId);
   }
 
-  return createTemplateFromPayload(client as any, user.id, body.meal);
+  return createTemplateFromPayload(client as any, user.sub, body.meal);
 });

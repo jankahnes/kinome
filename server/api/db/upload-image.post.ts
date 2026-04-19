@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
   let userId: string | null = null;
   try {
     const user = await serverSupabaseUser(event);
-    userId = user?.id || null;
+    userId = user?.sub || null;
   } catch {
     // No auth session — userId stays null unless bypass below
   }
@@ -184,7 +184,7 @@ export default defineEventHandler(async (event) => {
         });
       }
       const adminUuid = runtimeConfig.adminUuid;
-      if (userId && userId == adminUuid) {
+      if (userId && userId === adminUuid) {
         console.log('Overriding user check for admin');
       } else if (authBypassed) {
         // internal caller — same as admin for ownership

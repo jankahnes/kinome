@@ -82,7 +82,7 @@
 
     <!-- Empty state -->
     <div v-else class="flex flex-col items-center gap-4 py-20 text-center">
-      <div class="w-16 h-16 rounded-2xl bg-primary-10 flex items-center justify-center">
+      <div class="w-16 h-16 rounded-2xl bg-primary-5 flex items-center justify-center">
         <IconActivity class="w-7 text-primary" />
       </div>
       <div>
@@ -116,7 +116,7 @@ function dotColor(type: string) {
 
 function iconBg(type: string) {
   switch (type as ActivityType) {
-    case 'RECIPE_CREATION': return 'bg-primary-10';
+    case 'RECIPE_CREATION': return 'bg-primary-5';
     case 'COMMENT_CREATION': return 'bg-blue-50';
     case 'RATING_CREATION': return 'bg-amber-50';
     case 'USER_CREATION': return 'bg-purple-50';

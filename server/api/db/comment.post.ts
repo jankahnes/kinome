@@ -7,7 +7,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   const { data, error } = await client
     .from('comments')
     .insert({
-      user_id: user.id,
+      user_id: user.sub,
       recipe_id: recipeId,
       content: content ?? '',
       replying_to: body.replying_to ?? null,
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await handleCommentCreated(client as any, user.id, data.id);
+  await handleCommentCreated(client as any, user.sub, data.id);
   await evaluateCrowdPleaserForRecipe(client as any, recipeId);
 
   return { id: data.id };

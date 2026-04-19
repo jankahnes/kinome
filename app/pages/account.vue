@@ -1,17 +1,17 @@
 <template>
-  <div class="mx-4 sm:mx-10 mb-10 ">
+  <div class="mx-4 mt-6 sm:mx-10 mb-20 md:mb-10 ">
     <div class="max-w-220 mt-8 mx-auto" v-if="!auth.profileFetched"></div>
 
-    <div class="max-w-220 mt-8 mx-auto" v-else-if="auth.isUser()">
+    <div class="max-w-220 md:mt-12 mx-auto" v-else-if="auth.isUser()">
       <div class="flex flex-col gap-8">
         <div>
-          <h1 class="text-5xl font-bold tracking-tight mt-1">Account Settings</h1>
-          <p class="text-lg text-gray-500 ">
+          <h1 class="text-4xl font-headers tracking-tight">Account Settings</h1>
+          <p class="text-gray-500 ">
             Manage your avatar, username, and account access.
           </p>
         </div>
 
-        <section class="bg-primary-10/40 rounded-4xl p-5 sm:p-8 flex flex-col gap-6">
+        <section class="bg-primary-5/40 main-card-rounded p-5 sm:p-8 flex flex-col gap-6">
           <div>
             <h2 class="text-3xl font-bold tracking-tight">Profile</h2>
           </div>
@@ -40,12 +40,14 @@
                   <div>
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Avatar</h3>
                   </div>
-                  <p class="text-sm text-gray-400" v-if="ACCOUNT_AVATARS.length">{{ ACCOUNT_AVATARS.length }} available</p>
+                  <p class="text-sm text-gray-400" v-if="ACCOUNT_AVATARS.length">{{ ACCOUNT_AVATARS.length }} available
+                  </p>
                 </div>
 
-                <div v-if="ACCOUNT_AVATARS.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <div v-if="ACCOUNT_AVATARS.length"
+                  class="grid grid-cols-3 xs:grid-cols-4 lg:grid-cols-5 gap-3">
                   <button v-for="avatar in ACCOUNT_AVATARS" :key="avatar.path" type="button"
-                    class="group rounded-3xl p-2 bg-white/60 animated-button transition-all border-2"
+                    class="group rounded-3xl p-2 bg-white/60 main-button animated-button transition-all border-2"
                     :class="selectedAvatar === avatar.path ? 'border-primary shadow-lg' : 'border-transparent hover:border-primary/30'"
                     @click="selectedAvatar = avatar.path">
                     <img :src="avatar.path" :alt="avatar.name"
@@ -57,7 +59,7 @@
 
               <div class="flex justify-end">
                 <button type="button"
-                  class="bg-primary text-white px-4 py-1 font-bold text-lg animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="bg-primary text-white px-4 py-1 font-bold text-lg main-button animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
                   :disabled="!hasProfileChanges || !isUsernameValid || savingProfile" @click="saveProfile">
                   {{ savingProfile ? 'Saving...' : 'Save Changes' }}
                 </button>
@@ -68,11 +70,11 @@
         <section>
           <div class="flex items-center justify-end gap-3 flex-wrap border-t border-black/8 pt-5">
             <NuxtLink to="/logout"
-              class="bg-primary text-white px-4 py-1 font-bold text-lg animated-button rounded-full!">
+              class="bg-primary! text-white px-4 py-1 font-bold text-lg main-button animated-button rounded-full!">
               Log Out
             </NuxtLink>
             <button type="button"
-              class="bg-red-100 text-red-700 px-4 py-1 font-bold text-lg animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
+              class="bg-red-100! text-red-700 px-4 py-1 font-bold text-lg main-button animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="deletingAccount" @click="deleteModalOpen = true">
               {{ deletingAccount ? 'Deleting...' : 'Delete Account' }}
             </button>
@@ -99,12 +101,13 @@
           placeholder="Type DELETE" />
 
         <div class="flex justify-end gap-3 flex-wrap">
-          <button type="button" class="bg-primary-10 px-5 py-3 font-bold text-base animated-button rounded-full!"
+          <button type="button"
+            class="bg-primary-5 px-5 py-3 font-bold text-base main-button animated-button rounded-full!"
             @click="closeDeleteModal">
             Cancel
           </button>
           <button type="button"
-            class="bg-red-600 text-white px-6 py-3 font-bold text-base animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
+            class="bg-red-600 text-white px-6 py-3 font-bold text-base main-button animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="deleteConfirmation.trim().toUpperCase() !== 'DELETE' || deletingAccount" @click="deleteAccount">
             {{ deletingAccount ? 'Deleting...' : 'Delete Account' }}
           </button>

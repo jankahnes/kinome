@@ -4,12 +4,13 @@
     <div class="md:hidden flex justify-between items-center">
       <Logo />
       <Avatar :user="auth.user" class="rounded-full w-10 h-10" v-if="auth.isUser()" />
-      <NuxtLink to="/login" class="animated-button mt-1" v-else>
+      <NuxtLink to="/login" class="main-button animated-button mt-1" v-else>
         <IconLogIn :size="26" />
       </NuxtLink>
     </div>
-    <h1 class="text-4xl sm:text-5xl font-bold pt-2 md:pt-4">
-      📡<span class="ml-1">Feed</span>
+    <h1 class="text-3xl sm:text-4xl font-headers pt-2 md:pt-4 flex items-end gap-1">
+      <IconRss class="" :size="44" :strokeWidth="2" />
+      <span class="ml-1">Feed</span>
     </h1>
 
     <div class="flex flex-col lg:flex-row gap-12">
@@ -18,28 +19,28 @@
         <section v-if="socialRecipes.length" class="">
           <div class="flex items-center gap-2 mb-4">
             <IconTrendingUp class="w-6 h-6 " />
-            <h2 class="text-xl sm:text-2xl font-bold">Trending this month</h2>
-            <NuxtLink to="/kitchen/social" class="ml-auto text-sm text-gray-400 animated-button">
+            <h2 class="text-xl sm:text-2xl font-headers">Trending this month</h2>
+            <NuxtLink to="/kitchen/social" class="ml-auto text-xs text-gray-600 flex items-center gap-0.5">
               See all
               <IconChevronRight class="w-4 h-4 inline" />
             </NuxtLink>
           </div>
           <div class="flex flex-wrap gap-4">
             <RecipeCardSocialMedia v-for="recipe in socialRecipes" :key="recipe.id" :recipe="recipe"
-              class="max-h-56 basis-120" />
+              class="basis-120" />
           </div>
         </section>
         <!-- Latest Articles -->
         <section v-if="articles.length">
           <div class="flex items-center gap-2 mb-4">
             <IconBookOpen class="w-6 h-6" />
-            <h2 class="text-xl sm:text-2xl font-bold">Latest Articles</h2>
+            <h2 class="text-xl sm:text-2xl font-headers">Latest Articles</h2>
           </div>
           <div class="flex flex-col sm:flex-row gap-4">
             <NuxtLink v-for="article in articles" :key="article.path" :to="article.path"
-              class="flex-1 main-card rounded-4xl overflow-hidden group cursor-pointer transition-all duration-300 hover:shadow-lg">
+              class="flex-1 main-card main-card-rounded overflow-hidden group cursor-pointer transition-all duration-300 hover:shadow-lg">
               <div class="h-36 sm:h-44 overflow-hidden">
-                <div class="w-full h-full bg-gradient-to-br flex items-center justify-center text-5xl"
+                <div class="w-full h-full bg-linear-to-br flex items-center justify-center text-5xl"
                   :class="article.gradient">
                   {{ article.emoji }}
                 </div>
@@ -57,17 +58,17 @@
         <section class="overflow-hidden">
           <div class="flex items-center gap-2 mb-4">
             <IconBrain class="w-6 h-6" />
-            <h2 class="text-xl sm:text-2xl font-bold">Guess the Health Score</h2>
+            <h2 class="text-xl sm:text-2xl font-headers">Guess the Health Score</h2>
           </div>
-          <div v-if="guessRecipe" class="flex flex-col sm:flex-row gap-6 items-center main-card main-card-padding ">
-            <NuxtLink :to="getRecipeUrl(guessRecipe.id, guessRecipe.title)"
-              class="flex-shrink-0 w-40 h-40 sm:w-52 sm:h-52">
+          <div v-if="guessRecipe"
+            class="flex flex-col sm:flex-row gap-6 items-center main-card main-card-padding main-card-rounded">
+            <NuxtLink :to="getRecipeUrl(guessRecipe.id, guessRecipe.title)" class="shrink-0 w-40 h-40 sm:w-52 sm:h-52">
               <NuxtImg v-if="guessRecipe.picture" :src="guessRecipe.picture" :alt="guessRecipe.title"
-                class="w-full h-full object-contain [filter:drop-shadow(0_0_8px_rgba(0,0,0,0.1))]" />
+                class="w-full h-full object-contain filter-[drop-shadow(0_0_8px_rgba(0,0,0,0.1))]" />
             </NuxtLink>
             <div class="flex-1 flex flex-col gap-4 items-center sm:items-start w-full">
               <NuxtLink :to="getRecipeUrl(guessRecipe.id, guessRecipe.title)">
-                <h3 class="text-2xl sm:text-3xl font-bold tracking-tight text-center sm:text-left">
+                <h3 class="text-2xl sm:text-3xl font-headers tracking-tight text-center sm:text-left">
                   {{ guessRecipe.title }}
                 </h3>
               </NuxtLink>
@@ -81,7 +82,7 @@
                   <button v-for="grade in guessGrades" :key="grade"
                     class="px-5 py-2.5 rounded-2xl font-bold text-lg cursor-pointer transition-all duration-200" :class="guessSelected === grade
                       ? 'bg-primary text-white scale-105 shadow-md'
-                      : 'bg-primary-10 hover:bg-primary/20'" @click="selectGuess(grade)">
+                      : 'bg-primary-5 hover:bg-primary/20'" @click="selectGuess(grade)">
                     {{ grade }}
                   </button>
                   <button v-if="guessSelected" @click="revealGuess"
@@ -105,7 +106,7 @@
                     <span class="text-sm text-gray-400">Health score: {{ guessRecipe.hidx }}/100</span>
                   </div>
                   <button @click="nextGuessRecipe"
-                    class="px-4 py-2 rounded-2xl bg-primary-10 hover:bg-primary/20 font-medium ml-auto text-sm cursor-pointer transition-colors">
+                    class="px-4 py-2 rounded-2xl bg-primary-5 hover:bg-primary/20 font-medium ml-auto text-sm cursor-pointer transition-colors">
                     Next
                     <IconChevronRight class="w-4 h-4 inline" />
                   </button>
@@ -119,21 +120,22 @@
         <section v-if="showdownPair.length === 2">
           <div class="flex items-center gap-2 mb-4">
             <IconSwords class="w-6 h-6" />
-            <h2 class="text-xl sm:text-2xl font-bold">Nutrition Showdown</h2>
+            <h2 class="text-xl sm:text-2xl font-headers">Nutrition Showdown</h2>
           </div>
           <div class="flex flex-col sm:flex-row gap-6">
             <div v-for="(recipe, i) in showdownPair" :key="recipe.id"
               class="flex-1  flex flex-col sm:flex-row sm:first:flex-[1.1] items-center gap-6 group">
               <NuxtLink :to="getRecipeUrl(recipe.id, recipe.title)"
-                class="w-full main-card rounded-4xl main-card-padding flex flex-col items-center gap-3 group transition-all duration-300 hover:shadow-lg">
+                class="w-full main-card main-card-rounded main-card-padding flex flex-col items-center gap-3 group transition-all duration-300 hover:shadow-lg">
                 <div class="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">
                   <NuxtImg v-if="recipe.picture" :src="recipe.picture" :alt="recipe.title"
                     class="w-full h-full object-contain [filter:drop-shadow(0_0_6px_rgba(0,0,0,0.1))] transition-transform duration-500 group-hover:scale-[1.03]" />
                 </div>
-                <h3 class="text-lg sm:text-xl font-bold tracking-tight text-center line-clamp-2">{{ recipe.title }}</h3>
+                <h3 class="text-lg sm:text-xl font-headers tracking-tight text-center line-clamp-2">{{ recipe.title }}
+                </h3>
                 <div class="flex flex-wrap gap-2 justify-center text-sm">
-                  <span class="tag bg-secondary">{{ Math.round(recipe.kcal ?? 0) }} kcal</span>
-                  <span class="tag bg-secondary">{{ Math.round(recipe.protein ?? 0) }}g protein</span>
+                  <span class="tag bg-primary/8">{{ Math.round(recipe.kcal ?? 0) }} kcal</span>
+                  <span class="tag bg-primary/8">{{ Math.round(recipe.protein ?? 0) }}g protein</span>
                   <span class="tag" :class="(recipe.hidx ?? 0) >= 60 ? 'bg-green-100' : 'bg-amber-100'">
                     Health: {{ getGradeFromScore(recipe.hidx ?? 0) }}
                   </span>
@@ -154,7 +156,7 @@
                   </div>
                 </div>
               </NuxtLink>
-              <div class="hidden group-first:flex items-center text-4xl font-black text-gray-300 z-10">VS</div>
+              <div class="hidden group-first:flex items-center text-4xl font-headers italic text-gray-300">vs</div>
             </div>
           </div>
         </section>
@@ -163,9 +165,9 @@
         <!-- Recipes Added Today -->
         <section v-if="todayRecipes.length">
           <div class="flex items-center gap-2 mb-4">
-            <IconSparkles class="w-6 h-6" />
-            <h2 class="text-xl sm:text-2xl font-bold">Added Today</h2>
-            <NuxtLink to="/kitchen/recipes" class="ml-auto text-sm text-gray-400 animated-button">
+            <IconSparkles class="w-6 h-6" :strokeWidth="1.5" />
+            <h2 class="text-xl sm:text-2xl font-headers">Added Today</h2>
+            <NuxtLink to="/kitchen/recipes" class="ml-auto text-xs text-gray-600 flex items-center gap-0.5">
               Browse all
               <IconChevronRight class="w-4 h-4 inline" />
             </NuxtLink>
@@ -179,24 +181,24 @@
         <section>
           <div class="flex items-center gap-2 mb-4">
             <IconActivity class="w-6 h-6" />
-            <h2 class="text-xl sm:text-2xl font-bold">Recent Activity</h2>
+            <h2 class="text-xl sm:text-2xl font-headers">Recent Activity</h2>
           </div>
           <div class="space-y-3">
             <div v-for="item in activityFeed" :key="item.id"
               class="main-card rounded-3xl px-4 py-3 flex items-center gap-3 transition-all duration-200 hover:shadow-md">
-              <Avatar :user="item.user ?? null" class="w-9 h-9 flex-shrink-0" />
+              <Avatar :user="item.user ?? null" class="w-9 h-9 shrink-0" />
               <div class="flex-1 flex flex-col gap-0.5">
                 <p class="text-sm flex items-center gap-1 justify-between">
                   <span>
-                    <span class="font-bold">{{ item.user?.username ?? 'Guest' }}</span>
-                    <span class="text-gray-500"> {{ ' ' + getActivityVerb(item) + ' ' }} </span>
+                    <span class="">{{ item.user?.username ?? 'Guest' }}</span>
+                    <span class=""> {{ ' ' + getActivityVerb(item) + ' ' }} </span>
                   </span>
                   <span class="text-xs text-gray-400">{{ timeAgo(item.created_at) }}</span>
                 </p>
                 <p class="flex items-center gap-1">
                   <NuxtLink v-if="getActivityRecipe(item)"
                     :to="getRecipeUrl(getActivityRecipe(item)!.id, getActivityRecipe(item)!.title)"
-                    class="font-bold line-clamp-1">
+                    class="line-clamp-1">
                     {{ getActivityRecipe(item)!.title }}
                   </NuxtLink>
                   <span v-if="item.type === 'RATING_CREATION' && item.rating" class="inline-flex items-center ml-1">
@@ -225,9 +227,53 @@ const supabase = useSupabaseClient<Database>();
 const auth = useAuthStore();
 
 useHead({
-  title: 'Feed - Kinome',
+  title: 'Recipe Feed - Trending Recipes, Nutrition Games & Community Activity | Kinome',
   meta: [
-    { name: 'robots', content: 'noindex, nofollow' },
+    {
+      name: 'description',
+      content:
+        'Explore the Kinome recipe feed with trending healthy recipes, latest nutrition articles, new community recipes, and interactive nutrition challenges.',
+    },
+    {
+      property: 'og:title',
+      content: 'Recipe Feed | Kinome',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Explore trending healthy recipes, latest nutrition articles, new community recipes, and interactive nutrition challenges on Kinome.',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      property: 'og:url',
+      content: 'https://kinome.app/feed',
+    },
+    {
+      name: 'twitter:card',
+      content: 'summary',
+    },
+    {
+      name: 'twitter:title',
+      content: 'Recipe Feed | Kinome',
+    },
+    {
+      name: 'twitter:description',
+      content:
+        'Explore trending healthy recipes, latest nutrition articles, new community recipes, and interactive nutrition challenges on Kinome.',
+    },
+    {
+      name: 'robots',
+      content: 'index, follow, max-image-preview:large',
+    },
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://kinome.app/feed',
+    },
   ],
 });
 

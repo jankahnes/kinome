@@ -10,7 +10,7 @@ function addDays(logicalDate: string, days: number) {
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = serverSupabaseServiceRole<Database>(event);
-  await updateTemplateSchedule(client as any, user.id, body.templateId, {
+  await updateTemplateSchedule(client as any, user.sub, body.templateId, {
     active: true,
     scheduleUntil: addDays(body.startDate.slice(0, 10), body.days),
   });

@@ -8,31 +8,30 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'en',
       },
-      link: [
-        {
-          rel: 'preload',
-          href: '/fonts/LibertinusSans-Regular.woff2',
-          as: 'font',
-          type: 'font/woff2',
-          crossorigin: '',
-        },
-        {
-          rel: 'preload',
-          href: '/fonts/LibertinusSans-Bold.woff2',
-          as: 'font',
-          type: 'font/woff2',
-          crossorigin: '',
-        },
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      ],
+      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     },
     pageTransition: {
       name: 'page-slide-right',
       mode: 'out-in',
     },
   },
+  site: {
+    url: 'https://kinome.app',
+  },
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        '@vercel/analytics/vue',
+        'vue3-apexcharts',
+        '@lucide/vue',
+        'pluralize', // CJS
+        '@vueuse/core',
+        '@supabase/supabase-js',
+        '@ericblade/quagga2', // CJS
+        '@supabase/postgrest-js',
+      ],
+    },
   },
   devtools: {
     enabled: false,
@@ -73,16 +72,33 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
     'nuxt-lucide-icons',
     '@nuxt/content',
+    '@nuxt/fonts',
+    'nuxt-og-image',
   ],
+  fonts: {
+    defaults: {
+      weights: [400, 600, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+    },
+    families: [
+      { name: 'Inter', provider: 'google', global: true },
+      { name: 'Fraunces', provider: 'google', global: true },
+      { name: 'JetBrains Mono', provider: 'google', global: true },
+    ],
+  },
   lucide: {
     namePrefix: 'Icon',
   },
   supabase: {
     url: process.env.NUXT_PUBLIC_SUPABASE_URL,
     key: process.env.NUXT_PUBLIC_SUPABASE_KEY,
-    serviceKey: process.env.NUXT_PRIVATE_SERVICE_ROLE_KEY,
+    secretKey: process.env.NUXT_PRIVATE_SERVICE_ROLE_KEY,
     redirect: false,
     types: 'types/supabase.ts',
+  },
+  routeRules: {
+    '/recipe-analyzer': { sitemap: { priority: 1.0, changefreq: 'weekly' } },
   },
   sitemap: {
     sources: ['/api/__sitemap__/urls'],

@@ -1,47 +1,41 @@
 <template>
-  <div class="mt-4 mb-20 md:mb-4 mx-2 lg:px-14 flex justify-center">
+  <div class="mt-4 mb-20 md:mb-10 mx-2 lg:px-14 flex justify-center">
     <div class="max-w-[1360px]" v-if="food">
-      <p class="text-lg m-4 leading-tight">
+      <p class="text-xs font-mono uppercase m-4 leading-tight tracking-wider">
         <NuxtLink to="/" class="text-gray-500">Home</NuxtLink> ›
         <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> ›
-        <span class="font-semibold">{{ foodName }}</span>
+        <span class="text-primary font-headers">{{ foodName }}</span>
       </p>
-      <div class="flex flex-col 2xl:flex-row gap-6">
+      <div class="flex flex-col 2xl:flex-row gap-10">
         <div class="contents xl:flex flex-col gap-6 lg:flex-1">
           <div
-            class="bg-primary-10/40 rounded-4xl main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-none xl:items-start">
+            class="bg-primary-5 main-card-rounded main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-0 xl:items-start">
             <div class="relative xl:basis-1/5 h-40">
-              <img class="object-cover rounded-4xl h-full" src="/wood.png" :alt="foodName" />
+              <img class="object-cover main-card-rounded h-full" src="/wood.png" :alt="foodName" />
 
               <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-10/80 h-[70%] aspect-square flex items-center justify-center">
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-5/80 h-[70%] aspect-square flex items-center justify-center">
                 <img :src="`/foods/${food?.visual_category ?? 'herb_fresh'}.webp`" class="h-[50%] object-contain"
                   :alt="(food?.visual_category ?? 'herb_fresh') + ' illustration'" />
               </div>
             </div>
             <div class="flex-1 flex flex-col gap-2">
-              <div class="flex justify-between">
+              <div class="flex justify-between items-end">
                 <div class="flex flex-col">
-                  <h1 class="text-4xl font-bold tracking-tight leading-tighter">{{ foodName }}</h1>
-                  <p class="text-xs text-gray-400 uppercase">
-                    {{ food?.aisle || 'Food' }}
+                  <h1 class="text-5xl font-headers tracking-tight leading-tighter">{{ foodName }}</h1>
+                  <p class="text-[11px] text-gray-400 uppercase font-mono ml-1 mt-1">
+                    {{ food?.aisle ?? 'Food' }}
                   </p>
                 </div>
-                <div class="flex flex-col items-end text-end">
-                  <button
-                    class="flex justify-center items-center w-14 h-14 rounded-2xl p-2 shrink-0 hover:opacity-80 transition-opacity"
-                    :class="gradeColors[getGrade(food?.hidx, 'ovr')]" @click="openHealthReport">
-                    <span class="text-3xl font-bold leading-none">{{
-                      getGrade(food?.hidx, 'ovr')
-                    }}</span>
-                  </button>
-                  <p class="text-[11px] tracking-tight text-gray-400 uppercase text-nowrap">
+                <div class="flex flex-col items-end text-end gap-0.5">
+                  <GradeContainer :score="food?.hidx" type="ovr" class="text-2xl" />
+                  <p class="text-[11px] text-gray-400 uppercase font-mono text-nowrap">
                     Health Grade
                   </p>
                 </div>
               </div>
 
-              <p v-if="food?.description" class="text-lg leading-snug">
+              <p v-if="food?.description" class="text-sm text-gray-700">
                 <span class="hidden lg:inline">
                   {{
                     descExpanded
@@ -66,17 +60,17 @@
               </div>
             </div>
           </div>
-          <div class="order-2 xl:order-none">
+          <div class="order-2 xl:order-0">
             <NutritionOverviewCard mode="info" :nutrition="food" :portion-multiplier="portionMultiplier"
               :dropdown-choices="dropdownChoices" v-model:selected-unit="selectedUnit"
               @view-full-nutrition="contextMode = 'nutrition'; contextModalOpen = true" />
           </div>
-          <div class="order-3 xl:order-none" v-if="qualityCards.length">
-            <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
+          <div class="order-3 xl:order-0" v-if="qualityCards.length">
+            <div class="flex flex-col">
               <div class="flex justify-between items-center mb-3 mx-2">
-                <h3 class="text-4xl font-bold tracking-tighter">Nutrition Quality</h3>
+                <h3 class="text-4xl font-headers tracking-tighter">Nutrition Quality</h3>
                 <button @click="openHealthReport"
-                  class="flex items-center gap-0.5 animated-button text-sm p-2 bg-primary-10">
+                  class="flex items-center gap-0.5 main-button animated-button text-sm p-2 main-card hover:bg-white!">
                   <span class="hidden sm:inline">Full Analysis</span>
                   <IconChevronRight class="w-5" />
                 </button>
@@ -87,21 +81,21 @@
                 :micronutrients="food?.report?.details?.micronutrients" :kcal-progress="food?.kcal / 2000"
                 mode="info" />
             </div>
-            <div class="flex flex-col sm:flex-row gap-2 gap-y-0 mt-2 px-4 justify-between">
+            <div class="flex flex-col sm:flex-row gap-2 gap-y-0 mt-2 px-6 justify-between">
               <div class="flex flex-wrap gap-3 gap-y-0">
                 <div v-for="pill in dietaryPills" :key="pill.text"
-                  class="flex items-center gap-1.5 rounded-4xl text-xs  text-slate-500">
+                  class="flex items-center gap-1.5 main-card-rounded text-xs  text-slate-500">
                   <IconCheck v-if="pill.active" class="w-3" />
                   <IconX v-else class="w-3" />
                   <span>{{ pill.text }}</span>
                 </div>
               </div>
               <div class="flex gap-2">
-                <div class="flex items-center gap-1.5 rounded-4xl px-2 py-1 text-xs  text-slate-500">
+                <div class="flex items-center gap-1.5 main-card-rounded px-2 py-1 text-xs  text-slate-500">
                   <IconDollarSign class="w-3" />
                   <span>~{{ formatMoney(food?.price ?? 0) }}/100g</span>
                 </div>
-                <div class="flex items-center gap-1.5 rounded-4xl px-2 py-1 text-xs  text-slate-500">
+                <div class="flex items-center gap-1.5 main-card-rounded px-2 py-1 text-xs  text-slate-500">
                   <IconWeight class="w-3" />
                   <span>{{ food?.density.toFixed(1) ?? 0 }}g/ml</span>
                 </div>
@@ -111,27 +105,22 @@
         </div>
         <div class="contents xl:flex xl:flex-col gap-6 lg:basis-1/3">
           <!-- Healthy Swaps Card -->
-          <div class="space-y-2 order-5 xl:order-none bg-primary-10/40 rounded-4xl p-4"
+          <div class="space-y-2 order-5 xl:order-0"
             v-if="(food as any)?.suggested_swaps && (food as any).suggested_swaps.length > 0">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            <h2 class="text-4xl font-headers tracking-tighter ml-2 mb-2">
               Healthy Swaps
             </h2>
-            <div class="flex flex-col gap-2 order-4 2xl:order-none">
-              <div class="flex gap-4 justify-between items-center cursor-pointer bg-primary-10 rounded-3xl p-2"
+            <div class="flex flex-col gap-2 order-4 2xl:order-0">
+              <div class="flex gap-4 justify-between items-center cursor-pointer main-card rounded-3xl px-4 py-3"
                 v-for="swap in (food as any)?.suggested_swaps" @click="navigateTo(getFoodUrl(swap.id, swap.name))"
                 :key="swap.id">
                 <div class="flex gap-3 items-center">
-                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                    :class="gradeColors[getGrade(swap.hidx, 'ovr')]">
-                    <span class="text-2xl font-bold leading-none">{{
-                      getGrade(swap.hidx, 'ovr')
-                    }}</span>
-                  </div>
+                  <GradeContainer :score="swap.hidx" type="ovr" class="text-xl shrink-0" />
                   <div class="flex flex-col">
-                    <p class="text-lg font-bold leading-none line-clamp-3">
+                    <p class="text-lg font-headers line-clamp-3 leading-tight">
                       {{ swap.name }}
                     </p>
-                    <span class="text-sm text-gray-500 leading-none flex items-center gap-1">
+                    <span class="text-sm text-gray-500 leading-none flex items-center gap-1 -mt-1">
                       <IconChevronsUp class="w-4" />
                       <span>{{ getSwapReason(swap) }}</span>
                     </span>
@@ -143,19 +132,18 @@
           </div>
 
           <!-- Found in Card -->
-          <div class="space-y-2 order-6 xl:order-none bg-primary-10/40 rounded-4xl p-4"
-            v-if="containedInRecipes?.length">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+          <div class="space-y-2 order-6 xl:order-0" v-if="containedInRecipes?.length">
+            <h2 class="text-4xl font-headers tracking-tighter ml-2 mb-2">
               Found in
             </h2>
-            <div class="flex flex-col order-5 2xl:order-none gap-2">
+            <div class="flex flex-col order-5 2xl:order-0 gap-2">
               <RecipeCardHorizontal v-for="recipe in containedInRecipes" :key="recipe.id" :recipe="recipe"
                 class="text-[22px] lg:text-[30px]" />
             </div>
           </div>
           <!-- FAQ Card -->
-          <div class="space-y-2 order-7 xl:order-none bg-primary-10/40 rounded-4xl p-4" v-if="faqItems.length">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-3">FAQ</h2>
+          <div class="space-y-2 order-7 xl:order-0" v-if="faqItems.length">
+            <h2 class="text-4xl font-headers tracking-tighter ml-2 mb-3">FAQ</h2>
             <div class="space-y-2 ml-2">
               <details v-for="item in faqItems" :key="item.question" class="group">
                 <summary
@@ -171,18 +159,18 @@
       </div>
       <BlocksResponsiveInfo v-model="contextModalOpen" sidePanelClass="w-120">
         <div v-if="contextMode === 'nutrition'" class="m-4">
-          <h2 class="text-4xl font-bold tracking-tighter mb-8">Full Nutrition</h2>
-          <FoodNutritionFacts :computable="food" />
-          <FoodFullNutritionFacts :food="food" class="mt-10" />
+          <h2 class="text-3xl font-headers tracking-tighter mb-8">Full Nutrition</h2>
+          <FoodNutritionFacts :computable="food" :portion-multiplier="portionMultiplier" subtitle="per 100g" />
+          <FoodFullNutritionFacts :food="food" :portion-multiplier="portionMultiplier" class="mt-10" />
         </div>
-        <PagesReport v-if="contextMode === 'health' && id" :id="id" :isFood="true" class="" />
+        <PagesReport v-if="contextMode === 'health' && id" :id="id" :isFood="true" class="m-4" :showTitle="true" />
       </BlocksResponsiveInfo>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getGrade, gradeColors } from '~/utils/constants/grades';
+import { getGrade } from '~/utils/constants/grades';
 import capitalize from '~/utils/format/capitalize';
 import type { Food } from '~/types/types';
 import { getDailyQualityCards } from '~/utils/nutrition/getDailyQualityCards';
@@ -297,7 +285,7 @@ const qualityCards = computed(() => {
       ...cards[wholeIdx]!,
       title: 'Processing',
       rating: nova ? (novaLabels[nova] ?? '–') : '–',
-      pillClass: nova ? (novaPillClass[nova] ?? 'bg-secondary') : 'bg-secondary',
+      pillClass: nova ? (novaPillClass[nova] ?? 'bg-primary/8') : 'bg-primary/8',
       subtitle: nova ? `NOVA ${nova}` : '',
     };
   }
@@ -505,6 +493,21 @@ const faqItems = computed<{ question: string; answer: string }[]>(() => {
 
   return items;
 });
+
+
+defineOgImage('Food.takumi', {
+  name: foodName,
+  aisle: computed(() => food.value?.aisle ?? 'Food'),
+  illustration: computed(() =>
+    `https://kinome.app/foods/${food.value?.visual_category ?? 'herb_fresh'}.webp`
+  ),
+  grade: healthGrade,
+  kcal: computed(() => food.value?.kcal ?? 0),
+  protein: computed(() => food.value?.protein ?? 0),
+  carbs: computed(() => food.value?.carbohydrates ?? 0),
+  fat: computed(() => food.value?.fat ?? 0),
+  fiber: computed(() => food.value?.fiber ?? 0),
+})
 
 useHead(() => ({
   title: `${foodName.value} - Complete Nutrition Facts & Analysis`,

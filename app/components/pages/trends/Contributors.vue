@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex min-w-0 flex-col gap-5">
+    <div class="main-card main-card-padding main-card-rounded flex min-w-0 flex-col gap-5">
         <div>
             <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Top Contributors
             </h2>
@@ -8,7 +8,7 @@
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 flex-1">
             <div v-for="metric in metricsToDisplay" :key="metric.key"
-                class="flex flex-col gap-3 rounded-2xl border bg-secondary/60 border-secondary/80 p-4">
+                class="flex flex-col gap-3 rounded-2xl border bg-primary/5 border-primary/10 p-4">
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-bold text-gray-700">{{ metric.label }}</span>

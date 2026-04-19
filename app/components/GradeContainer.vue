@@ -1,6 +1,6 @@
 <template>
   <div
-    class="font-bold w-[2em] aspect-square text-center flex items-center justify-center rounded-[0.5em]!"
+    class="font-headers font-semibold w-[2em] aspect-square text-center flex items-center justify-center rounded-[0.5em]!"
     :class="props.score != null
       ? gradeColors[getGrade(props.score, props.type)[0] as keyof typeof gradeColors]
       : 'bg-gray-100 text-gray-300'"

@@ -1,11 +1,11 @@
 <template>
-    <div class="main-card main-card-padding flex min-w-0 flex-col gap-4">
+    <div class="main-card main-card-padding main-card-rounded flex min-w-0 flex-col gap-4">
         <div>
             <div class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Processing Mix</div>
         </div>
 
         <div v-if="segments.length" class="flex flex-col items-center gap-4">
-            <div class="w-30 flex-shrink-0">
+            <div class="w-30 shrink-0">
                 <Ring :segments="segments.map(segment => ({ value: segment.value / 100, color: segment.color }))"
                     :stroke-width="10" ring-background="stroke-slate-100">
                     <div class="flex flex-col items-center justify-center text-xs uppercase font-bold rounded-full w-16 h-16"
@@ -18,7 +18,7 @@
 
             <div class="flex flex-1 flex-wrap max-w-30">
                 <div v-for="segment in segments" :key="segment.label" class="flex items-center gap-3 flex-1">
-                    <div class="h-2.5 w-2.5 rounded-full flex-shrink-0" :class="segment.bgClass" />
+                    <div class="h-2.5 w-2.5 rounded-full shrink-0" :class="segment.bgClass" />
                     <div class="min-w-0 flex-1 text-xs text-gray-500">{{ segment.label }}</div>
                     <div class="text-xs font-semibold text-gray-800">{{ segment.value }}%</div>
                 </div>
@@ -58,7 +58,7 @@ const overallPill = computed(() => {
         icon: "check"
     };
     if (props.processingLevel.overall < 78) return {
-        color: 'text-green-700 bg-secondary',
+        color: 'text-green-700 bg-primary/8',
         label: 'good',
         icon: 'check-check',
     };

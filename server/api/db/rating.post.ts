@@ -8,7 +8,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     client
       .from('ratings')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', user.sub)
       .eq('recipe_id', recipeId)
       .maybeSingle(),
     client
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     .from('ratings')
     .upsert(
       {
-        user_id: user.id,
+        user_id: user.sub,
         recipe_id: recipeId,
         rating,
       },
@@ -56,8 +56,8 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!existing?.id) {
-    await handleFirstRatingGiven(client as any, user.id, recipeId);
-    await maybeAwardRatingReceived(client as any, recipe.user_id, user.id, recipeId);
+    await handleFirstRatingGiven(client as any, user.sub, recipeId);
+    await maybeAwardRatingReceived(client as any, recipe.user_id, user.sub, recipeId);
   }
 
   await evaluateCrowdPleaserForRecipe(client as any, recipeId);

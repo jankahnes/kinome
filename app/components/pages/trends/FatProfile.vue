@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex min-w-0 flex-col gap-4">
+    <div class="main-card main-card-padding main-card-rounded flex min-w-0 flex-col gap-4">
         <div>
             <div class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Fat Profile</div>
         </div>
@@ -8,8 +8,8 @@
             <div class="w-30 flex-shrink-0">
                 <Ring :segments="segments.map(segment => ({ value: segment.value / 100, color: segment.color }))"
                     :stroke-width="10" ring-background="stroke-slate-100">
-                    <div class="flex flex-col items-center justify-center text-xs uppercase font-bold rounded-full w-16 h-16" :class="overallPill.color"
-                        >
+                    <div class="flex flex-col items-center justify-center text-xs uppercase font-bold rounded-full w-16 h-16"
+                        :class="overallPill.color">
                         <Icon :name="overallPill.icon" class="w-4 h-4" />
                         {{ overallPill.label }}
                     </div>
@@ -65,7 +65,7 @@ const overallPill = computed(() => {
         icon: "check"
     };
     if (props.fatProfile.overall < 78) return {
-        color: 'text-green-700 bg-secondary',
+        color: 'text-green-700 bg-primary/8',
         label: 'Good',
         icon: 'check-check',
     };

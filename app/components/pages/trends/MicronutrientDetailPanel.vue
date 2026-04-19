@@ -6,16 +6,15 @@
                 <div v-if="!localSelected" key="list" class="flex flex-col min-h-0 space-y-4 p-4">
                     <div class="px-1">
                         <h2 class="text-2xl font-bold">All Micronutrients</h2>
-                        <p class="text-gray-400 text-sm text-balance">Ranked by your average intake over the last 14 days, compared to the previous 14 days.</p>
+                        <p class="text-gray-400 text-sm text-balance">Ranked by your average intake over the last 14
+                            days, compared to the previous 14 days.</p>
                     </div>
 
                     <div class="overflow-y-auto flex-1 custom-scrollbar min-h-0">
                         <div v-if="allNutrients && allNutrients.length" class="flex flex-col gap-3 pb-4">
                             <template v-for="(item, index) in allNutrients" :key="item.name">
-                                <div
-                                    class="micronutrient-list-row rounded-3xl bg-secondary/40 hover:bg-secondary border-secondary/80 cursor-pointer transition-all border p-4 flex items-center justify-between gap-4 group"
-                                    :style="{ '--stagger': index }"
-                                    @click="selectNutrient(item)">
+                                <div class="micronutrient-list-row rounded-3xl bg-primary/8 hover:bg-primary/8 border-primary/20 cursor-pointer transition-all border p-4 flex items-center justify-between gap-4 group"
+                                    :style="{ '--stagger': index }" @click="selectNutrient(item)">
 
                                     <div class="flex flex-col justify-center gap-1.5 w-[55%]">
                                         <div class="font-bold text-[15px] truncate text-gray-800 transition-colors">{{
@@ -51,10 +50,11 @@
                 </div>
 
                 <!-- State 2: Detail View -->
-                <div v-else key="detail" class="h-full min-h-0 flex flex-col px-4 gap-6 overflow-y-auto custom-scrollbar">
+                <div v-else key="detail"
+                    class="h-full min-h-0 flex flex-col px-4 gap-6 overflow-y-auto custom-scrollbar">
                     <div>
                         <button v-if="allNutrients && allNutrients.length" @click="backToList"
-                            class="animated-button -ml-2 p-2 hover:bg-black/5 transition-colors text-gray-500 hover:text-gray-800 flex items-center justify-center shrink-0"
+                            class="main-button animated-button -ml-2 p-2 hover:bg-black/5 transition-colors text-gray-500 hover:text-gray-800 flex items-center justify-center shrink-0"
                             title="Back to list">
                             <IconChevronLeft class="w-6" />
                         </button>
@@ -64,13 +64,13 @@
                     </div>
 
                     <div v-if="nutrientInfo?.sources?.length"
-                        class="text-sm text-gray-600 bg-secondary/20 shadow-sm p-3 rounded-3xl self-start -mx-2">
+                        class="text-sm text-gray-600 bg-primary/8 shadow-sm p-3 rounded-3xl self-start -mx-2">
                         <span class="font-semibold mb-1 flex items-center gap-1">
                             <IconInfo class="w-4 text-gray-500" /><span class="leading-none">Common sources:</span>
                         </span>
                         <p> {{
                             nutrientInfo.sources.join(', ')
-                            }}</p>
+                        }}</p>
                     </div>
 
                     <div class="flex min-w-0 flex-col gap-2 flex-1 pt-4 border-t border-black/5">
@@ -78,16 +78,20 @@
                             <p class="text-base mt-1">Your intake over the last 30 days</p>
                             <div class="flex gap-3 flex-wrap text-sm">
                                 <div class="flex items-center gap-2 bg-black/5 px-3 py-1.5 rounded-xl">
-                                    <span class="text-gray-500 text-[10px] uppercase tracking-wider font-bold">Avg</span>
-                                    <span class="font-bold border-l pl-2 border-black/10">{{ Number(trackedAvg).toFixed(1)
+                                    <span
+                                        class="text-gray-500 text-[10px] uppercase tracking-wider font-bold">Avg</span>
+                                    <span class="font-bold border-l pl-2 border-black/10">{{
+                                        Number(trackedAvg).toFixed(1)
                                         }}{{
                                             unit
                                         }}</span>
                                 </div>
                                 <div v-if="targetValue != null"
                                     class="flex items-center gap-2 bg-black/5 px-3 py-1.5 rounded-xl">
-                                    <span class="text-gray-500 text-[10px] uppercase tracking-wider font-bold">Target</span>
-                                    <span class="font-bold border-l pl-2 border-black/10">{{ Number(targetValue).toFixed(1)
+                                    <span
+                                        class="text-gray-500 text-[10px] uppercase tracking-wider font-bold">Target</span>
+                                    <span class="font-bold border-l pl-2 border-black/10">{{
+                                        Number(targetValue).toFixed(1)
                                         }}{{
                                             unit
                                         }}</span>
@@ -228,7 +232,7 @@ const chartOptions = {
             animateGradually: { enabled: false },
         },
     },
-    colors: ['#FFC340', '#d1d5db'],
+    colors: ['var(--color-primary)', 'var(--color-primary-100)'],
     stroke: {
         width: [2.5, 1.5],
         curve: 'smooth' as const,
@@ -236,7 +240,7 @@ const chartOptions = {
     },
     markers: {
         size: [5, 0],
-        colors: ['#FFC340'],
+        colors: ['var(--color-primary)'],
         strokeColors: '#FFFDF7',
         strokeWidth: 2,
         hover: { size: 6, sizeOffset: 2 },
@@ -340,6 +344,7 @@ const chartOptions = {
         opacity: 0;
         transform: translateX(14px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -347,6 +352,7 @@ const chartOptions = {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .micronutrient-panel-forward-enter-active,
     .micronutrient-panel-forward-leave-active,
     .micronutrient-panel-back-enter-active,

@@ -2,14 +2,15 @@
   <div class="mt-10 mb-20 m-4 sm:mx-10 lg:ml-22 lg:mr-18">
     <div class="max-w-3xl mx-auto">
       <!-- Back link -->
-      <NuxtLink to="/feed" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6">
+      <NuxtLink to="/feed"
+        class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6">
         <IconChevronLeft class="w-4 h-4" />
         Back to Feed
       </NuxtLink>
 
       <template v-if="article">
         <!-- Hero -->
-        <div class="rounded-4xl overflow-hidden mb-8">
+        <div class="main-card-rounded overflow-hidden mb-8">
           <div class="h-48 sm:h-64 bg-gradient-to-br flex items-center justify-center text-7xl sm:text-8xl"
             :class="article.gradient">
             {{ article.emoji }}
@@ -37,7 +38,7 @@
       </template>
 
       <div v-else class="space-y-4">
-        <Skeleton class="h-64 rounded-4xl" />
+        <Skeleton class="h-64 main-card-rounded" />
         <Skeleton class="h-8 w-2/3 rounded-xl" />
         <Skeleton class="h-6 w-1/3 rounded-xl" />
       </div>

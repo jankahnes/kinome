@@ -1,74 +1,9 @@
 <template>
   <div
-    class="fixed bottom-0 left-0 right-0 bg-primary-10 z-99 w-full flex justify-between items-center py-3 px-2 xs:px-6 rounded-t-4xl shadow-[0_-4px_10px_0_rgba(0,0,0,0.1)]"
-  >
-    <NuxtLink
-      v-for="link in sideLinks.slice(0, 2)"
-      :key="link.path"
-      :to="link.path"
-      class="flex-1 flex justify-center"
-      v-slot="{ isActive }"
-    >
-      <Icon
-        :name="link.icon"
-        :size="isActive ? 26 : 24"
-        :strokeWidth="isActive ? 2.2 : 2"
-      />
-    </NuxtLink>
-    <div class="flex-1 flex justify-center text-white">
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center justify-center">
-          <NuxtLink
-            to="/recipe/new"
-            class="flex items-center justify-center sublink-circle sublink-circle-1 bg-primary-400 transition-colors duration-300"
-            exact-active-class="bg-primary!"
-            :class="isNewRouteActive ? 'sublink-active' : ''"
-          >
-            <IconPencil class="w-5 h-5" strokeWidth="2.5" />
-          </NuxtLink>
-          <NuxtLink
-            to="/recipe/new/import"
-            class="flex items-center justify-center sublink-circle sublink-circle-2 bg-primary-400 transition-colors duration-300"
-            active-class="bg-primary!"
-            :class="isNewRouteActive ? 'sublink-active' : ''"
-          >
-            <IconImport class="w-5 h-5" strokeWidth="2.5" />
-          </NuxtLink>
-          <NuxtLink
-            to="/recipe/new/scan"
-            class="flex items-center justify-center sublink-circle sublink-circle-3 bg-primary-400 transition-colors duration-300"
-            active-class="bg-primary!"
-            :class="isNewRouteActive ? 'sublink-active' : ''"
-          >
-            <IconEye class="w-5 h-5" strokeWidth="2.5" />
-          </NuxtLink>
-        </div>
-        <NuxtLink
-          to="/recipe/new"
-          class="rounded-full bg-primary h-15 w-15 flex items-center justify-center -mt-7 button-shadow shadow-primary-600 transition-all duration-300 will-change-transform relative z-2"
-          active-class="scale-110"
-        >
-          <Icon
-            name="add"
-            :size="isNewRouteActive ? 30 : 26"
-            strokeWidth="2.2"
-          />
-        </NuxtLink>
-      </div>
-    </div>
-    <NuxtLink
-      v-for="link in sideLinks.slice(2)"
-      :key="link.path"
-      :to="link.path"
-      class="flex-1 flex justify-center"
-      v-slot="{ isActive }"
-      active-class="icon-fill font-bold!"
-    >
-      <Icon
-        :name="link.icon"
-        :size="isActive ? 26 : 24"
-        :strokeWidth="isActive ? 2.2 : 2"
-      />
+    class="fixed bottom-2 left-1/2 -translate-x-1/2 bg-primary-5 z-99 min-w-80 w-[66%] flex justify-between items-center py-1 px-4 rounded-full shadow-[0_0_10px_0_rgba(0,0,0,0.08)]">
+    <NuxtLink v-for="link in sideLinks" :key="link.path" :to="link.path"
+      class="flex h-10 aspect-square items-center justify-center" active-class="rounded-2xl bg-primary-100/30">
+      <Icon :name="link.icon" :size="26" :strokeWidth="2" />
     </NuxtLink>
   </div>
 </template>
@@ -83,12 +18,16 @@ const sideLinks = [
   {
     name: 'Kitchen',
     icon: 'chef-hat',
-    path: '/kitchen/home',
+    path: '/kitchen',
   },
-
+  {
+    name: 'New',
+    icon: 'add',
+    path: '/recipe/new',
+  },
   {
     name: 'Tracking',
-    icon: 'chart-line',
+    icon: 'notebook-pen',
     path: '/tracking',
   },
   {
@@ -97,54 +36,4 @@ const sideLinks = [
     path: '/feed',
   },
 ];
-
-const route = useRoute();
-
-const isNewRouteActive = computed(() => {
-  return route.path.startsWith('/recipe/new');
-});
 </script>
-
-<style scoped>
-.button-shadow {
-  box-shadow: 0 0 14px var(--tw-shadow-color);
-}
-
-.sublink-circle {
-  position: absolute;
-  width: 42px;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) translate(0, 0);
-  opacity: 0;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.sublink-circle.sublink-active {
-  transform: translate(-50%, -50%) translate(var(--orbit-x), var(--orbit-y));
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.sublink-circle-1 {
-  --orbit-x: -48px;
-  --orbit-y: -50px;
-  transition-delay: 0s;
-}
-
-.sublink-circle-2 {
-  --orbit-x: 0px;
-  --orbit-y: -74px;
-  transition-delay: 0.05s;
-}
-
-.sublink-circle-3 {
-  --orbit-x: 48px;
-  --orbit-y: -50px;
-  transition-delay: 0.1s;
-}
-</style>

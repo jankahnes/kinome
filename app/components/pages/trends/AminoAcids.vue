@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex min-w-0 flex-col gap-10 overflow-hidden">
+    <div class="main-card main-card-padding main-card-rounded flex min-w-0 flex-col gap-10 overflow-hidden">
         <div>
             <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Amino Acids</h2>
             <p class="text-sm text-gray-400">Protein completeness, last 14 days</p>
@@ -45,7 +45,7 @@
                 </ul>
             </div>
             <div class="px-6 py-4 flex flex-col -mx-4 -mb-4 md:-mx-6 md:-mb-6"
-                :class="minProfileComplete ? 'text-emerald-900 bg-secondary/60' : 'text-amber-900 bg-amber-50/90'">
+                :class="minProfileComplete ? 'text-emerald-900 bg-primary/8' : 'text-amber-900 bg-amber-50/90'">
                 <div class="text-xl font-bold tracking-tight">
                     <span v-if="minProfileComplete">✓ Optimal Profile</span>
                     <span v-else>Not Complete on All Days</span>
@@ -155,13 +155,13 @@ const chartKey = computed(() => {
     return `${segs.map(s => `${s.min}-${s.max}`).join('|')}-${vmax}`;
 });
 
-const RADAR_PRIMARY_COLOR = '#FFC340';
+const RADAR_PRIMARY_COLOR = 'var(--color-primary)';
 
 const STROKE_MAX = RADAR_PRIMARY_COLOR;
 const STROKE_MIN = 'rgba(148, 163, 184, 0.9)';
 const STROKE_GUIDE = '#64748b';
 
-const FILL_MAX = 'rgba(255, 195, 64, 0.18)';
+const FILL_MAX = 'rgba(207, 97, 57, 0.1)';
 const FILL_MIN = 'rgba(255, 255, 255, 0.5)';
 
 const chartSeries = computed(() => {

@@ -21,7 +21,7 @@ export default defineEventHandler(async () => {
   const config = useRuntimeConfig();
   const supabase = createClient(
     config.public.supabase.url,
-    config.supabase.serviceKey,
+    config.supabase.secretKey,
   );
 
   const urls: any[] = [];
@@ -122,6 +122,39 @@ export default defineEventHandler(async () => {
       hasMoreFoods = false;
     }
   }
+
+  urls.push(
+    {
+      loc: '/articles/healthiest-cuisines-ranked',
+      lastmod: '2026-04-01',
+      changefreq: 'monthly',
+      priority: 0.8,
+    },
+    {
+      loc: '/articles/how-health-scores-work',
+      lastmod: '2026-04-01',
+      changefreq: 'monthly',
+      priority: 0.8,
+    },
+    {
+      loc: '/articles/psychology-of-recipe-saving',
+      lastmod: '2026-04-01',
+      changefreq: 'monthly',
+      priority: 0.8,
+    },
+    {
+      loc: '/articles/why-nobody-talks-about-fiber',
+      lastmod: '2026-04-01',
+      changefreq: 'monthly',
+      priority: 0.8,
+    },
+    {
+      loc: '/articles/protein-is-overrated',
+      lastmod: '2026-04-01',
+      changefreq: 'monthly',
+      priority: 0.8,
+    },
+  );
 
   return urls;
 });

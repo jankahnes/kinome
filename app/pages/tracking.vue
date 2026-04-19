@@ -1,20 +1,20 @@
 <template>
-  <div :class="{ 'pb-20 lg:pb-0 m-4 lg:m-8 lg:ml-20': !isLandingPage }">
-    <div class="flex items-center gap-4 flex-wrap justify-between" v-if="hasTracking">
+  <div :class="{ 'pb-20 lg:pb-0 m-4 lg:m-8 lg:mx-16': !isLandingPage }">
+    <div class="flex gap-4 flex-wrap justify-between" v-if="hasTracking">
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink v-for="view in views" :key="view.path" :to="`/tracking${view.path}`"
-          class="animated-button bg-primary-10/60 px-3 py-2"
-          active-class="bg-primary/80">
+          class="main-button animated-button main-card px-3 py-2.5 shrink-0 text-xs text-gray-600"
+          active-class="bg-white! shadow-xs">
           {{ view.displayName }}
         </NuxtLink>
       </div>
       <!-- Date navigator — only on /tracking/daily -->
-      <div v-if="isDaily" class="flex items-center  rounded-4xl bg-primary-10/40">
-        <button class="animated-button py-1 px-3" @click="navigateDate(-1)">
+      <div v-if="isDaily" class="flex items-center  main-card-rounded bg-primary-5/40">
+        <button class="main-button animated-button py-1 px-3" @click="navigateDate(-1)">
           <IconChevronLeft class="w-4 h-4" />
         </button>
-        <span class="text-sm font-semibold min-w-28 text-center p-1 bg-primary-10/80 rounded-full">{{ dateLabel }}</span>
-        <button class="animated-button py-1 px-3" @click="navigateDate(1)" :disabled="isToday"
+        <span class="text-xs font-mono min-w-28 text-center py-1.5 main-card main-card-rounded">{{ dateLabel }}</span>
+        <button class="main-button animated-button py-1 px-3" @click="navigateDate(1)" :disabled="isToday"
           :class="{ 'opacity-30 cursor-not-allowed': isToday }">
           <IconChevronRight class="w-4 h-4" />
         </button>
@@ -85,16 +85,16 @@ const views = computed(() => [
 
 useHead({
   title:
-    'Diet Tracking - Smart Nutrition Tracking with AI Ingredient Parser | Kinome',
+    'Smart Nutrition Tracking with AI Ingredient Parser | Kinome',
   meta: [
     {
       name: 'description',
       content:
-        'Track your diet effortlessly with AI-powered ingredient parsing, barcode scanning, and comprehensive nutrition analysis. Monitor calories, macros, and micronutrients to reach your health goals.',
+        'Track your diet effortlessly with easy ingredient parsing, barcode scanning, and comprehensive analysis. Monitor calories and nutrients to reach your goals.',
     },
     {
       property: 'og:title',
-      content: 'Diet Tracking | Kinome',
+      content: 'Smart Nutrition Tracking | Kinome',
     },
     {
       property: 'og:description',

@@ -1,5 +1,5 @@
 <template>
-  <div class="main-card main-card-padding flex flex-col gap-4 items-start">
+  <div class="main-card main-card-padding main-card-rounded flex flex-col gap-4 items-start">
 
     <!-- Public state -->
     <div v-if="recipe.visibility === 'PUBLIC'" class="w-full flex flex-col gap-3">
@@ -43,8 +43,7 @@
       <div class="grid grid-cols-2 gap-2">
 
         <!-- Instructions card -->
-        <div
-          class="rounded-xl border p-4 flex flex-col gap-2 transition-all select-none"
+        <div class="rounded-xl border p-4 flex flex-col gap-2 transition-all select-none"
           :class="publishingRequirements.hasInstructions
             ? 'border-green-200 bg-green-50/40'
             : 'border-dashed border-gray-300 bg-gray-50/50 cursor-pointer hover:bg-primary-5/60 hover:border-primary/40 active:scale-[0.98]'"
@@ -59,10 +58,8 @@
           </p>
           <p class="text-xs text-green-600" v-else>Ready</p>
           <div class="mt-0.5" v-if="!publishingRequirements.hasInstructions">
-            <button
-              class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
-              @click.stop="generateInstructions"
-              :disabled="generateInstructionsLoading">
+            <button class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
+              @click.stop="generateInstructions" :disabled="generateInstructionsLoading">
               <IconLoader class="w-3 animate-spin" v-if="generateInstructionsLoading" />
               <IconSparkles class="w-3" v-else />
               <span>{{ generateInstructionsLoading ? 'Generating…' : 'Generate' }}</span>
@@ -71,11 +68,9 @@
         </div>
 
         <!-- Picture card -->
-        <div
-          class="rounded-xl border p-4 flex flex-col gap-2 transition-all select-none"
-          :class="publishingRequirements.hasPicture
-            ? 'border-green-200 bg-green-50/40'
-            : 'border-dashed border-gray-300 bg-gray-50/50'">
+        <div class="rounded-xl border p-4 flex flex-col gap-2 transition-all select-none" :class="publishingRequirements.hasPicture
+          ? 'border-green-200 bg-green-50/40'
+          : 'border-dashed border-gray-300 bg-gray-50/50'">
           <div class="flex items-center gap-2">
             <IconCheck class="w-4 text-green-500 shrink-0" v-if="publishingRequirements.hasPicture" />
             <IconCamera class="w-4 text-gray-400 shrink-0" v-else />
@@ -86,18 +81,14 @@
           </p>
           <p class="text-xs text-green-600" v-else>Ready</p>
           <div class="flex gap-1.5 mt-0.5 flex-wrap" v-if="!publishingRequirements.hasPicture">
-            <button
-              class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
-              @click="triggerFileUpload"
-              :disabled="generatePictureLoading">
+            <button class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
+              @click="triggerFileUpload" :disabled="generatePictureLoading">
               <IconLoader class="w-3 animate-spin" v-if="generatePictureLoading" />
               <IconUpload class="w-3" v-else />
               <span>Upload</span>
             </button>
-            <button
-              class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
-              @click="triggerCamera"
-              :disabled="generatePictureLoading">
+            <button class="button px-2 py-1 flex gap-1.5 items-center text-primary outline-1 outline-primary text-xs"
+              @click="triggerCamera" :disabled="generatePictureLoading">
               <IconCamera class="w-3" />
               <span>Camera</span>
             </button>
@@ -107,55 +98,43 @@
       </div>
 
       <!-- Publish button -->
-      <button
-        v-if="canPublish"
+      <button v-if="canPublish"
         class="w-full button py-3 flex gap-2 items-center justify-center !text-white !bg-primary text-base font-semibold rounded-xl"
-        @click="publishRecipe"
-        :disabled="publishLoading">
+        @click="publishRecipe" :disabled="publishLoading">
         <IconLoader class="w-5 animate-spin" v-if="publishLoading" />
         <IconChevronsUp class="w-5" v-else />
         <span>{{ publishLoading ? 'Publishing…' : 'Publish Recipe' }}</span>
       </button>
-      <div
-        v-else
-        class="w-full rounded-xl border border-dashed border-gray-200 py-3 flex items-center justify-center">
+      <div v-else class="w-full rounded-xl border border-dashed border-gray-200 py-3 flex items-center justify-center">
         <span class="text-xs text-gray-400">Add instructions and a photo to publish</span>
       </div>
     </div>
 
     <!-- Admin section -->
     <div v-if="auth.isAdmin()" class="flex flex-wrap gap-2 items-center self-start w-full mt-1">
-      <button
-        class="button px-2 py-[3px] inline-flex gap-2 items-center text-primary outline-1 outline-primary"
-        type="button"
-        @click="regeneratePicture"
+      <button class="button px-2 py-[3px] inline-flex gap-2 items-center text-primary outline-1 outline-primary"
+        type="button" @click="regeneratePicture"
         :disabled="generatePictureLoading || deleteLoading || deleteImageLoading">
         <IconLoader class="w-4 animate-spin" v-if="generatePictureLoading" />
         <IconRefreshCcw class="w-4" v-else />
         <span>{{ generatePictureLoading ? 'Regenerating…' : 'Regenerate picture' }}</span>
       </button>
-      <button
-        v-if="recipe.picture"
+      <button v-if="recipe.picture"
         class="button px-2 py-[3px] inline-flex gap-2 items-center outline-1 outline-red-500/70 text-red-700 hover:bg-red-50"
-        type="button"
-        @click="deleteRecipeImage"
+        type="button" @click="deleteRecipeImage"
         :disabled="deleteImageLoading || generatePictureLoading || deleteLoading">
         <IconLoader class="w-4 animate-spin" v-if="deleteImageLoading" />
         <IconImageOff class="w-4" v-else />
         <span>{{ deleteImageLoading ? 'Removing…' : 'Delete image' }}</span>
       </button>
-      <button
-        class="button px-2 py-[3px] inline-flex gap-2 items-center !text-white !bg-red-600 hover:!bg-red-700"
-        type="button"
-        @click="deleteRecipeAdmin"
+      <button class="button px-2 py-[3px] inline-flex gap-2 items-center !text-white !bg-red-600 hover:!bg-red-700"
+        type="button" @click="deleteRecipeAdmin"
         :disabled="deleteLoading || generatePictureLoading || deleteImageLoading">
         <IconLoader class="w-4 animate-spin" v-if="deleteLoading" />
         <IconTrash class="w-4" v-else />
         <span>{{ deleteLoading ? 'Deleting…' : 'Delete recipe' }}</span>
       </button>
-      <button
-        class="button px-2 py-[3px] inline-flex gap-2 items-center !text-gray-800 !bg-primary-10/70"
-        type="button"
+      <button class="button px-2 py-[3px] inline-flex gap-2 items-center !text-gray-800 !bg-primary-5/70" type="button"
         @click="deboost">
         <IconChevronsDown class="w-5" />
         <span>Deboost</span>
@@ -165,7 +144,8 @@
 
   <!-- Hidden file inputs -->
   <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileSelected" />
-  <input ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" @change="handleFileSelected" />
+  <input ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
+    @change="handleFileSelected" />
 </template>
 
 <script setup lang="ts">

@@ -1,57 +1,34 @@
 <template>
   <BlocksResponsiveInfo v-model="open" sidePanelClass="w-100">
-    <div class="p-5 flex flex-col gap-5">
+    <div class="p-5 flex flex-col gap-6">
       <div>
-        <div class="text-xs text-slate-400 uppercase tracking-wide mb-1">Nutrition Quality</div>
-        <h2 class="text-2xl font-bold">Micronutrients</h2>
+        <div class="text-[11px] text-gray-400 uppercase font-mono tracking-wider">Nutrition Quality</div>
+        <h2 class="text-3xl font-headers tracking-tight">Micronutrients</h2>
       </div>
-      <template v-if="micronutrientGroups.hasAny">
-        <div v-if="micronutrientGroups.vitamins.length">
-          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Vitamins</div>
-          <div class="flex flex-col gap-3">
-            <div v-for="nutrient in micronutrientGroups.vitamins" :key="nutrient.name">
-              <div class="flex justify-between items-center mb-1.5">
-                <span class="text-sm font-semibold">{{ nutrient.displayName }}</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs text-slate-400">{{ Math.min(nutrient.rdaPerServing, 999) }}%</span>
-                  <span v-if="getOnTrackBadge(nutrient.rdaPerServing)" class="text-xs px-1.5 py-0.5 rounded-full"
-                  :class="getOnTrackBadge(nutrient.rdaPerServing)!.cls">
-                  {{ getOnTrackBadge(nutrient.rdaPerServing)!.label }}
-                </span>
-                </div>
-              </div>
-              <div class="h-1.5 rounded-full bg-secondary overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-300"
-                  :class="getMicroBarClass(nutrient.rdaPerServing)"
-                  :style="{ width: Math.min(120, nutrient.rdaPerServing) + '%' }" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="micronutrientGroups.minerals.length">
-          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Minerals</div>
-          <div class="flex flex-col gap-3">
-            <div v-for="nutrient in micronutrientGroups.minerals" :key="nutrient.name">
-              <div class="flex justify-between items-center mb-1.5">
-                <span class="text-sm font-semibold">{{ nutrient.displayName }}</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs text-slate-400">{{ Math.min(nutrient.rdaPerServing, 999) }}%</span>
-                  <span v-if="getOnTrackBadge(nutrient.rdaPerServing)" class="text-xs px-1.5 py-0.5 rounded-full"
-                    :class="getOnTrackBadge(nutrient.rdaPerServing)!.cls">
-                    {{ getOnTrackBadge(nutrient.rdaPerServing)!.label }}
-                  </span>
-                </div>
-              </div>
-              <div class="h-1.5 rounded-full bg-secondary overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-300"
-                  :class="getMicroBarClass(nutrient.rdaPerServing)"
-                  :style="{ width: Math.min(120, nutrient.rdaPerServing) + '%' }" />
-              </div>
-            </div>
-          </div>
-        </div>
+
+      <template v-if="hasAny">
+        <NutritionMicroGroup
+          v-if="vitaminItems.length"
+          title="Vitamins"
+          accent-class="bg-purple-400"
+          bar-class="bg-purple-200"
+          kind="rda"
+          :items="vitaminItems"
+          :kcal="normalizingKcal"
+          color-coded-bars
+        />
+        <NutritionMicroGroup
+          v-if="mineralItems.length"
+          title="Minerals"
+          accent-class="bg-orange-400"
+          bar-class="bg-orange-200"
+          kind="rda"
+          :items="mineralItems"
+          :kcal="normalizingKcal"
+          color-coded-bars
+        />
       </template>
-      <p v-else class="text-sm text-slate-400">Log some food to see micronutrient data.</p>
+      <p v-else class="text-sm text-gray-400">Log some food to see micronutrient data.</p>
     </div>
   </BlocksResponsiveInfo>
 </template>
@@ -72,48 +49,50 @@ const VITAMIN_SET = new Set(VITAMIN_ORDER);
 
 const props = defineProps<{
   micronutrients?: MicroNutrient[] | null;
+  /** Share of the reference kcal day the user has consumed so far (e.g. 0.4 = 40%). */
   kcalProgress?: number | null;
 }>();
 
 const open = defineModel<boolean>({ default: false });
 
-const micronutrientGroups = computed(() => {
-  const all = props.micronutrients ?? [];
-  const vitamins = all
+// Map each nutrient's rdaPerServing into the { value, rda, unit } shape MicroGroup expects.
+// value = rdaPerServing, rda = 100 → rawPct matches the source %.
+// kcal is set so MicroGroup's density math equals the old "projected = rda / kcalProgress".
+function toItem(n: MicroNutrient) {
+  return {
+    key: n.name,
+    label: n.displayName,
+    unit: '',
+    value: n.rdaPerServing,
+    rda: 100,
+  };
+}
+
+const vitaminItems = computed(() =>
+  (props.micronutrients ?? [])
     .filter((n) => VITAMIN_SET.has(n.name))
-    .sort((a, b) => VITAMIN_ORDER.indexOf(a.name) - VITAMIN_ORDER.indexOf(b.name));
-  const minerals = all
+    .sort((a, b) => VITAMIN_ORDER.indexOf(a.name) - VITAMIN_ORDER.indexOf(b.name))
+    .map(toItem),
+);
+
+const mineralItems = computed(() =>
+  (props.micronutrients ?? [])
     .filter((n) => !VITAMIN_SET.has(n.name))
     .sort((a, b) => {
       const ai = MINERAL_ORDER.indexOf(a.name);
       const bi = MINERAL_ORDER.indexOf(b.name);
       return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
-    });
-  return { vitamins, minerals, hasAny: all.length > 0 };
+    })
+    .map(toItem),
+);
+
+const hasAny = computed(() => (props.micronutrients?.length ?? 0) > 0);
+
+// MicroGroup's density math: (value/rda) * (2200/kcal) * 100
+// We want: rdaPerServing / kcalProgress  (the panel's old "projected")
+// So kcal = 2200 * kcalProgress gives (rdaPerServing/100) * (2200 / (2200*p)) * 100 = rdaPerServing/p ✓
+const normalizingKcal = computed(() => {
+  const p = Math.max(0.0001, props.kcalProgress ?? 1);
+  return 2200 * p;
 });
-
-/** Same meaning as daily tracking: share of reference day (goal or 2000 kcal). */
-const effectiveKcalProgress = computed(() => {
-  if (props.kcalProgress != null) {
-    return Math.max(0, props.kcalProgress);
-  }
-  const ref = props.referenceKcal ?? 2000;
-  return Math.max(0, (props.kcal ?? 0) / ref);
-});
-
-function getMicroBarClass(rda: number): string {
-  if (rda >= 100) return 'bg-blue-400';
-  if (rda >= 70) return 'bg-emerald-400';
-  if (rda >= 40) return 'bg-yellow-400';
-  return 'bg-red-400';
-}
-
-function getOnTrackBadge(rda: number): { label: string; cls: string } | null {
-  const p = effectiveKcalProgress.value;
-  const projected = rda / p;
-  if (projected >= 100) return { label: 'On track', cls: 'bg-blue-100 text-blue-700' };
-  if (projected >= 70) return { label: 'On track', cls: 'bg-green-100 text-green-700' };
-  if (projected >= 40) return { label: 'Moderate', cls: 'bg-yellow-100 text-yellow-700' };
-  return { label: 'Low', cls: 'bg-red-100 text-red-700' };
-}
 </script>

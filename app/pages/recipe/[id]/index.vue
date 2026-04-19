@@ -1,26 +1,25 @@
 <template>
   <div>
-    <div class="flex flex-col items-center lg:ml-1 mb-30" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
-      <NuxtImg class="w-full h-54 sm:h-64 object-cover rounded-br-4xl object-top"
+    <div class="flex flex-col items-center lg:ml-1 mb-20" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
+      <NuxtImg class="w-full h-40 sm:h-64 object-cover  object-top opacity-90"
         :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.png" alt="Light wooden background" />
       <NuxtImg v-if="recipeStore.recipe?.picture"
-        class="-mt-50 h-70 sm:h-82 sm:-mt-60 shadow-[#00000038] [filter:drop-shadow(10px_10px_20px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
+        class="-mt-36 h-50 sm:h-82 sm:-mt-60 shadow-[#00000038] filter-[drop-shadow(10px_10px_20px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
         :src="recipeStore.recipe?.picture" :alt="recipeStore.recipe?.title ?? 'Recipe picture'" />
       <!-- Central overview -->
       <div class="max-w-[850px] flex flex-col items-center text-center mx-2 lg:mx-8 mt-2"
         :class="{ 'mt-8!': !recipeStore.recipe?.picture }">
-        <h1 class="leading-none text-4xl xl:text-6xl font-bold tracking-tighter text-balance">
+        <h1 class="leading-none text-4xl xl:text-6xl font-headers tracking-tight text-balance">
           {{ recipeStore.recipe?.title }}
         </h1>
-        <p class="text-lg text-gray-600 mt-1 leading-snug hidden xl:block">
+        <p class="text-gray-600 mt-2 hidden xl:block">
           {{ recipeStore.recipe?.description }}
         </p>
-        <p class="text-lg text-gray-600 mt-1 leading-snug block xl:hidden" v-if="mobileDescriptionExpanded"
+        <p class="text-gray-600 mt-2 leading-snug block xl:hidden" v-if="mobileDescriptionExpanded"
           @click="mobileDescriptionExpanded = false">
           {{ recipeStore.recipe?.description }}
         </p>
-        <p class="text-lg text-gray-600 mt-1 leading-snug block xl:hidden" v-else
-          @click="mobileDescriptionExpanded = true">
+        <p class="text-gray-600 mt-2 leading-snug block xl:hidden" v-else @click="mobileDescriptionExpanded = true">
           {{ mobileDescription }}...
           <span class="text-gray-600 text-sm cursor-pointer font-bold">Show more
           </span>
@@ -58,27 +57,26 @@
           </span>
         </p>
 
-        <p class="flex gap-2 mt-3">
+        <p class="flex gap-2 mt-4">
           <button
-            class="animated-button bg-primary text-white flex-1 flex justify-center items-center gap-2 py-0.5 text-lg font-bold px-4"
+            class="main-button animated-button bg-primary! text-white flex-1 flex justify-center items-center gap-2 py-0.5 font-semibold px-4"
             @click="cookModeOpen = true">
-            <IconRocket class="w-6" :size="30" />
+            <IconRocket class="w-6" :size="24" />
             Start Cooking
           </button>
-          <button class="animated-button bg-primary-10 flex justify-center items-center gap-1 px-2"
+          <button class="main-button animated-button flex justify-center items-center gap-1 px-2"
             v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'" @click="scrollToWatchSection()">
             <IconChevronDown class="h-5" />
-            <span class="leading-none font-bold">Video</span>
+            <span class="leading-none font-semibold">Video</span>
           </button>
-          <button v-if="!trackingAdded"
-            class="animated-button flex justify-center items-center gap-2 p-1 text-slate-600"
+          <button v-if="!trackingAdded" class="flex justify-center items-center gap-2 p-1 text-slate-600"
             :class="{ 'opacity-60 cursor-not-allowed': trackingLoading }" :disabled="trackingLoading"
             title="Track this meal" @click="trackFromRecipePage">
             <IconLoaderCircle v-if="trackingLoading" class="w-5.5 animate-spin" />
             <IconNotebookPen v-else class="w-5.5" />
           </button>
           <button v-else
-            class="animated-button flex justify-center items-center gap-0.5 pt-0.5 px-3 bg-green-100 text-green-800"
+            class="rounded-2xl flex justify-center items-center gap-0.5 pt-0.5 px-3 bg-green-100/70 text-green-800"
             disabled>
             <IconCheck class="w-5" />
             <div class="flex flex-col items-start ml-2">
@@ -86,12 +84,10 @@
               <span class="leading-none text-[11px] -mt-0.5">Added to today</span>
             </div>
           </button>
-          <button
-            class="animated-button flex justify-center items-center gap-2 p-1 text-slate-600 transition-all duration-200"
-            :class="{
-              '': isBookmarked,
-              'opacity-60 cursor-not-allowed': bookmarkLoading,
-            }" :disabled="bookmarkLoading" :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this recipe'"
+          <button class="flex justify-center items-center gap-2 p-1 text-slate-600 transition-all duration-200" :class="{
+            '': isBookmarked,
+            'opacity-60 cursor-not-allowed': bookmarkLoading,
+          }" :disabled="bookmarkLoading" :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this recipe'"
             @click="toggleBookmark">
             <IconLoaderCircle v-if="bookmarkLoading" class="w-5.5 animate-spin" />
             <IconBookmark v-else class="w-6" :class="{ 'fill-current': isBookmarked }" />
@@ -102,19 +98,21 @@
         <div v-if="top7Tags.length > 0"
           class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-sm mt-2 justify-center">
           <div v-if="recipeStore.recipe?.rating && recipeStore.recipe?.rating >= 4"
-            class="flex items-center justify-center text-nowrap bg-secondary px-2 py-1 rounded-4xl leading-none gap-1">
+            class="flex items-center justify-center text-nowrap bg-primary/8 px-2 py-1 main-card-rounded leading-none gap-1">
             <FormsRatingField :model-value="recipeStore.recipe?.rating" :star-width="16" :star-height="16" :spacing="-1"
-              :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`" class="text-primary opacity-78" />
+              :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`" class="" />
             <span class="text-sm leading-none font-bold">{{ recipeStore.recipe?.rating?.toFixed(1) }}</span>
           </div>
-          <div class="flex items-center justify-center text-nowrap bg-slate-200/70 px-2 py-1 rounded-4xl leading-none">
+          <div
+            class="flex items-center justify-center text-nowrap bg-primary/8 px-2 py-1 main-card-rounded leading-none">
             <IconClock class="h-4" />
-            <span class="text-sm leading-none">{{ getTotalTime() }}</span>
+            <span class="text-sm leading-none">{{ getTotalTime(recipeStore.recipe?.total_time_mins,
+              recipeStore.recipe?.effort) }}</span>
           </div>
           <div
-            class="flex items-center justify-center text-nowrap bg-slate-200/50 px-2 py-1 rounded-4xl gap-2 leading-none"
+            class="flex items-center justify-center text-nowrap bg-primary/8 px-2 py-1 main-card-rounded gap-2 leading-none"
             :class="specialTags.includes(tag?.id ?? 0) || tag?.id === 4
-              ? 'bg-slate-200/70!'
+              ? 'bg-primary/8!'
               : ''
               " v-for="(tag, index) in top7Tags" :key="index">
             <img :src="`/${tag?.name}.webp`" :alt="tag?.name" class="h-4" v-if="specialTags.includes(tag?.id ?? 0)" />
@@ -136,14 +134,14 @@
           <div class="xl:hidden order-1">
             <div class="w-0 h-0" ref="mobileTabTarget"></div>
             <div
-              class="flex gap-4 justify-between sticky top-0 bg-main p-4 rounded-b-4xl z-10 select-none cursor-pointer">
-              <h2 class="text-3xl 2xs:text-4xl font-bold tracking-tighter flex-1" @click="
+              class="flex gap-4 justify-between sticky top-0 bg-[#fffefb] md:bg-main p-4 rounded-b-4xl z-10 select-none cursor-pointer">
+              <h2 class="text-3xl 2xs:text-4xl font-headers tracking-tight flex-1" @click="
                 mobileTab = 'ingredients';
               scrollIntoView(mobileTabTarget);
               " :class="mobileTab === 'ingredients' ? '' : 'text-gray-300'">
                 Ingredients
               </h2>
-              <h2 class="text-3xl 2xs:text-4xl font-bold tracking-tighter" @click="
+              <h2 class="text-3xl 2xs:text-4xl font-headers tracking-tight" @click="
                 mobileTab = 'method';
               scrollIntoView(mobileTabTarget);
               " :class="mobileTab === 'method' ? '' : 'text-gray-300'">
@@ -170,55 +168,54 @@
               @quick-edit-change="onQuickEditChange" @amounts-changed="onAmountsChanged"
               @tweak-drag-end="onTweakDragEnd" />
           </div>
-          <div class="space-y-2 order-3 xl:order-none" v-if="recipeStore.recipe?.kcal">
-            <div class="bg-primary-10/40 rounded-4xl p-4 space-y-3">
-              <div class="flex items-center gap-2 gap-y-1 justify-between flex-wrap">
-                <h2 class="text-4xl font-bold tracking-tighter leading-none ml-2">Nutrition</h2>
-                <div class="flex gap-2">
-                  <button @click="contextMode = 'nutrition'; contextModalOpen = true"
-                    class="bg-primary-10/80 flex items-center gap-0.5 animated-button text-sm p-2">
-                    <span class="">Full Nutrition</span>
-                    <IconChevronRight class="w-5" />
-                  </button>
-                  <button @click="contextMode = 'health'; contextModalOpen = true"
-                    class="bg-primary-10/80 flex items-center gap-0.5 animated-button text-sm p-2">
-                    <span class="">Full Analysis</span>
-                    <IconChevronRight class="w-5" />
-                  </button>
-                </div>
-              </div>
-              <div class="flex flex-col xs:flex-row gap-3">
-                <NutritionMacroCard :kcal="liveMacros.kcal" :carbohydrates="liveMacros.carbohydrates"
-                  :protein="liveMacros.protein" :fat="liveMacros.fat"
-                  class="main-card main-card-padding py-8! flex-1" />
-                <div v-if="liveHidx && liveHidx >= 41"
-                  class="main-card main-card-padding items-center justify-center flex-col gap-2 hidden xs:flex">
-                  <GradeContainer :score="liveHidx" :type="'ovr'" class="text-4xl" />
-                  <span class="text-sm text-slate-600">Health Grade</span>
-                </div>
-                <div v-if="liveHidx && liveHidx >= 41" class="flex xs:hidden justify-between main-card items-center ">
-                  <span class="font-bold text-lg mx-5">Health Grade</span>
-                  <GradeContainer :score="liveHidx" :type="'ovr'" class="text-2xl" />
-                </div>
-              </div>
-              <div class="relative" :class="{ 'overflow-hidden rounded-4xl': quickEditRecomputing }">
-                <NutritionQualityCards :cards="getDailyQualityCards(liveReport, {
-                  totalFat: liveMacros.fat,
-                  protectiveScore: liveProtectiveScore,
-                })" :gut-health="liveReport?.details?.gutHealth" :fat-profile="liveReport?.details?.fatProfile"
-                  :fat-profile-readable="liveReport?.humanReadable?.fatProfile ?? []"
-                  :micronutrients="liveReport?.details?.micronutrients" :kcal-progress="liveMacros.kcal/2000" mode="full" />
-                <div v-if="quickEditRecomputing"
-                  class="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent pointer-events-none" />
+          <div class="space-y-2 order-3 xl:order-0" v-if="recipeStore.recipe?.kcal">
+            <div class="flex items-center gap-2 gap-y-1 justify-between flex-wrap">
+              <h2 class="text-4xl font-headers tracking-tight leading-none ml-2">Nutrition</h2>
+              <div class="flex gap-2">
+                <button @click="contextMode = 'nutrition'; contextModalOpen = true"
+                  class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
+                  <span class="">Full Nutrition</span>
+                  <IconChevronRight class="w-5" />
+                </button>
+                <button @click="contextMode = 'health'; contextModalOpen = true"
+                  class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
+                  <span class="">Full Analysis</span>
+                  <IconChevronRight class="w-5" />
+                </button>
               </div>
             </div>
+            <div class="flex flex-col xs:flex-row gap-3">
+              <NutritionMacroCard :kcal="liveMacros.kcal" :carbohydrates="liveMacros.carbohydrates"
+                :protein="liveMacros.protein" :fat="liveMacros.fat"
+                class="main-card main-card-padding main-card-rounded flex-1" />
+              <div v-if="liveHidx && liveHidx >= 41"
+                class="main-card main-card-padding main-card-rounded items-center justify-center flex-col gap-2 hidden xs:flex">
+                <GradeContainer :score="liveHidx" :type="'ovr'" class="text-4xl" />
+                <span class="text-sm text-slate-600">Health Grade</span>
+              </div>
+              <div v-if="liveHidx && liveHidx >= 41" class="flex xs:hidden justify-between main-card items-center ">
+                <span class="font-semibold text-lg mx-5">Health Grade</span>
+                <GradeContainer :score="liveHidx" :type="'ovr'" class="text-2xl" />
+              </div>
+            </div>
+            <div class="relative mt-3" :class="{ 'overflow-hidden main-card-rounded': quickEditRecomputing }">
+              <NutritionQualityCards :cards="getDailyQualityCards(liveReport, {
+                totalFat: liveMacros.fat,
+                protectiveScore: liveProtectiveScore,
+              })" :gut-health="liveReport?.details?.gutHealth" :fat-profile="liveReport?.details?.fatProfile"
+                :fat-profile-readable="liveReport?.humanReadable?.fatProfile ?? []"
+                :micronutrients="liveReport?.details?.micronutrients" :kcal-progress="liveMacros.kcal / 2000"
+                mode="full" />
+              <div v-if="quickEditRecomputing"
+                class="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/70 to-transparent pointer-events-none" />
+            </div>
           </div>
-          <div class="space-y-2 order-4 xl:order-none" v-if="auth.isAdmin()">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">Publish</h2>
+          <div class="space-y-2 order-4 xl:order-0" v-if="auth.isAdmin()">
+            <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2">Publish</h2>
             <PagesRecipePublishChecklist :recipe="recipeStore.recipe!" :refresh="async (r, f) => { }" />
           </div>
-          <div class="space-y-2 order-5 xl:order-none">
-            <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+          <div class="space-y-2 order-5 xl:order-0">
+            <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2">
               {{
                 recipeStore.recipe?.comments?.length
                   ? 'What others say'
@@ -247,10 +244,10 @@
                 @tweak-drag-end="onTweakDragEnd">
               </PagesRecipeIngredientList>
             </div>
-            <div class="space-y-2 order-2 xl:order-none rounded-4xl" :class="{ 'watch-flash': watchSectionFlashing }"
+            <div class="space-y-2 order-2 xl:order-0 main-card-rounded" :class="{ 'watch-flash': watchSectionFlashing }"
               v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'">
-              <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2" ref="watchSectionTarget">Watch</h2>
-              <div class="flex main-card main-card-padding sm:gap-6">
+              <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2" ref="watchSectionTarget">Watch</h2>
+              <div class="flex main-card main-card-padding main-card-rounded sm:gap-6">
                 <div class="flex flex-col flex-1 justify-between ">
                   <div>
                     <a class="text-sm uppercase text-slate-400 tracking-tight" :href="effectiveSource ?? ''"
@@ -259,13 +256,13 @@
                     </a>
                     <p class="text-xs text-slate-400 tracking-tight -mt-1">Uploaded {{ uploadDate }}</p>
                   </div>
-                  <div class="flex flex-col gap-2 items-center p-4 -mx-6 bg-secondary">
+                  <div class="flex flex-col gap-2 items-center p-4 -mx-6 bg-primary/8">
                     <img class="w-20 h-20 object-cover rounded-full opacity-80 shadow-[0_0_10px_#00000020]"
                       src="/neutral-avatar1.webp" alt="Guest avatar" />
-                    <div class="flex items-center gap-2 bg-primary-10 px-3 rounded-3xl ">
+                    <div class="flex items-center gap-2 bg-primary-5 px-3 rounded-3xl ">
                       <img :src="`/${getWebsiteName(effectiveSource)}.webp`" :alt="getWebsiteName(effectiveSource)"
                         class="h-5" />
-                      <h3 class="text-lg sm:text-xl font-bold tracking-tight truncate max-w-48">
+                      <h3 class="text-lg sm:text-xl font-semibold tracking-tight truncate max-w-48">
                         {{ recipeStore.recipe?.video_metadata?.channel }}
                       </h3>
                     </div>
@@ -279,47 +276,43 @@
                       </span>
                     </div>
                     <div class="flex gap-2">
-                      <span class="text-sm uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
+                      <span class=" bg-primary/8 px-2 py-1 rounded-3xl flex items-center gap-0.5 font-mono" v-if="
                         recipeStore.recipe?.video_metadata?.view_count
                       ">
-                        <IconEye class="w-4 h-4" />
-                        {{
-                          getSocialProof(
-                            recipeStore.recipe?.video_metadata?.view_count,
-                          )
-                        }}
+                        <IconEye class="h-4" />
+                        <span class="leading-none pt-0.5 text-xs uppercase">
+                          {{
+                            getSocialProof(
+                              recipeStore.recipe?.video_metadata?.view_count,
+                            )
+                          }}
+                        </span>
                       </span>
-                      <span class="text-sm uppercase bg-slate-100 px-2 py-1 rounded-3xl flex items-center gap-1" v-if="
+                      <span class=" bg-primary/8 px-2 py-1 rounded-3xl flex items-center gap-0.5 font-mono" v-if="
                         recipeStore.recipe?.video_metadata?.like_count
                       ">
-                        <IconHeart class="w-4 h-4" />
-                        {{
-                          getSocialProof(
+                        <IconHeart class="h-4" />
+                        <span class="leading-none pt-0.5 text-xs uppercase">
+                          {{ getSocialProof(
                             recipeStore.recipe?.video_metadata?.like_count,
-                          )
-                        }}
+                          ) }}
+                        </span>
                       </span>
                     </div>
                   </div>
                 </div>
                 <iframe :src="embedSrc" title="Video" frameborder="0"
-                  class="rounded-3xl self-center w-[150px] h-[270px] sm:w-[202px] sm:h-[360px]" allow="
-                accelerometer;
-                autoplay;
-                clipboard-write;
-                encrypted-media;
-                gyroscope;
-                picture-in-picture;
-                web-share;
-              " allowfullscreen v-if="embedSrc">
+                  class="rounded-3xl self-center w-[150px] h-[270px] sm:w-[202px] sm:h-[360px]"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share;"
+                  allowfullscreen v-if="embedSrc">
                 </iframe>
               </div>
             </div>
-            <div class="space-y-2 order-6 xl:order-none">
-              <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">
+            <div class="space-y-2 order-6 xl:order-0">
+              <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2">
                 You might also like
               </h2>
-              <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-3 ml-2">
                 <RecipeCardHorizontal v-for="recipe in similarRecipes" :key="recipe.id" :recipe="recipe"
                   class="-ml-2" />
               </div>
@@ -338,21 +331,55 @@
       <BlocksResponsiveInfo v-if="recipeStore.recipe?.kcal && recipeStore.recipe?.hidx" v-model="contextModalOpen"
         :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`">
         <div v-if="contextMode === 'nutrition'" class="m-4">
-          <h2 class="text-4xl font-bold tracking-tighter mb-8">Full Nutrition</h2>
+          <h2 class="text-3xl font-headers tracking-tight mb-8">Full Nutrition</h2>
           <FoodNutritionFacts :computable="recipeStore.recipe" />
           <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" />
         </div>
-        <PagesReport v-if="contextMode === 'health'" :id="recipeStore.recipe?.id?.toString() ?? ''" :isFood="false" />
+        <PagesReport v-if="contextMode === 'health'" :id="recipeStore.recipe?.id?.toString() ?? ''" :isFood="false"
+          :showTitle="true" class="m-3" />
       </BlocksResponsiveInfo>
       <PagesRecipeVariationsModal v-if="recipeStore.recipe?.id" v-model="variationsModalOpen"
         :variations="modalVariations" :currentId="recipeStore.recipe.id" />
+      <Transition name="tweak-pill">
+        <div v-if="tweakPillVisible"
+          class="fixed left-1/2 -translate-x-1/2 bottom-[64px] sm:bottom-[24px] z-40 pointer-events-none">
+          <div
+            class="flex items-center gap-2 bg-[#fffefb]/85 backdrop-blur-md border border-slate-200/70 shadow-[0_4px_20px_#00000012] rounded-full px-3.5 py-1.5 font-mono text-[11px] tracking-tight text-slate-500">
+            <span class="flex items-baseline gap-0.5">
+              <RollingNumber :number="liveMacros.kcal" />
+              <span class="opacity-60">kcal</span>
+            </span>
+            <span class="opacity-30">·</span>
+            <span class="flex items-baseline gap-0.5">
+              <RollingNumber :number="liveMacros.protein" /><span class="opacity-60">P</span>
+            </span>
+            <span class="opacity-30">·</span>
+            <span class="flex items-baseline gap-0.5">
+              <RollingNumber :number="liveMacros.carbohydrates" /><span class="opacity-60">C</span>
+            </span>
+            <span class="opacity-30">·</span>
+            <span class="flex items-baseline gap-0.5">
+              <RollingNumber :number="liveMacros.fat" /><span class="opacity-60">F</span>
+            </span>
+            <template v-if="liveHidx">
+              <span class="opacity-30">·</span>
+              <span class="flex items-baseline gap-1">
+                <span class="opacity-60">Health </span>
+                <span :class="gradeTextColors[getGrade(liveHidx, 'ovr')] ?? ''" class="font-semibold">
+                  {{ getGrade(liveHidx, 'ovr') }}
+                </span>
+              </span>
+            </template>
+          </div>
+        </div>
+      </Transition>
     </div>
     <div v-else-if="recipeError" class="flex items-center justify-center h-screen">
       <div class="flex flex-col items-center justify-center gap-2">
         <IconAlertCircle class="w-10 h-10 text-red-500" />
         <h2 class="text-4xl font-bold tracking-tighter">Recipe not found</h2>
         <p class="text-lg text-gray-600">The recipe you are looking for does not exist.</p>
-        <NuxtLink to="/" class="bg-primary-10/80 flex items-center gap-0.5 animated-button text-sm p-2">
+        <NuxtLink to="/" class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
           <span>Go to homepage</span>
           <IconChevronRight class="w-5" />
         </NuxtLink>
@@ -363,7 +390,7 @@
 
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core';
-import { getGrade, gradeColors } from '~/utils/constants/grades';
+import { getGrade, gradeColors, gradeTextColors } from '~/utils/constants/grades';
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
 
 const route = useRoute();
@@ -994,6 +1021,27 @@ const jsonLd = computed(() => {
   return schema;
 });
 
+defineOgImage('Recipe.takumi', {
+  title: computed(() => recipeStore.recipe?.title ?? 'Recipe'),
+  description: computed(() => recipeStore.recipe?.description ?? ''),
+  picture: computed(
+    () => recipeStore.recipe?.picture ?? recipeStore.recipe?.social_picture ?? null
+  ),
+  grade: healthGrade,
+  pills: computed(() => {
+    const r = recipeStore.recipe
+    if (!r) return []
+    const out: string[] = []
+    if (r.rating && r.rating >= 4) out.push(`Rated ${r.rating.toFixed(1)}/5`)
+    const time = getTotalTime(r.total_time_mins, r.effort)
+    if (time) out.push(time)
+    for (const t of top7Tags.value.slice(0, 3)) {
+      if (t?.name) out.push(t.name)
+    }
+    return out.slice(0, 4)
+  }),
+})
+
 useHead(() => ({
   title: `${recipeStore.recipe?.title} Recipe - Method & Nutrition | Kinome`,
   script: jsonLd.value
@@ -1246,46 +1294,7 @@ const deleteRecipe = async () => {
   router.push('/');
 };
 
-function getTotalTime() {
-  const total = recipeStore.recipe?.total_time_mins;
 
-  if (total) {
-    let rounded;
-
-    if (total < 60) {
-      rounded = Math.floor(total / 5) * 5;
-    } else if (total < 120) {
-      rounded = Math.floor(total / 10) * 10;
-    } else {
-      rounded = Math.floor(total / 30) * 30;
-    }
-
-    rounded = Math.max(5, rounded);
-
-    const hours = Math.floor(rounded / 60);
-    const minutes = rounded % 60;
-
-    if (hours > 0 && minutes > 0) {
-      return `${hours}h ${minutes}min`;
-    }
-    if (hours > 0) {
-      return `${hours}h`;
-    }
-    return `${minutes}min`;
-  }
-
-  if (recipeStore.recipe?.effort === 'LIGHT') {
-    return '<20min';
-  }
-  if (recipeStore.recipe?.effort === 'MODERATE') {
-    return '35min';
-  }
-  if (recipeStore.recipe?.effort === 'HEAVY') {
-    return '>60min';
-  }
-
-  return null;
-}
 
 // Quick-edit (drag amounts) — lazy-hydrated food data + live nutrition
 type FoodMacros = {
@@ -1409,6 +1418,9 @@ async function hydrateIngredientFoodData() {
   }
 }
 
+const tweakPillVisible = ref(false);
+let tweakPillHideTimer: ReturnType<typeof setTimeout> | null = null;
+
 async function onQuickEditChange(active: boolean) {
   // Once tweaks are enabled, keep showing tweaked values even after the user
   // exits drag mode. Baseline is captured only once per recipe so the
@@ -1416,6 +1428,11 @@ async function onQuickEditChange(active: boolean) {
   // re-entering after a tweak would recapture the new state as baseline and
   // break the relative math.
   if (active) {
+    if (tweakPillHideTimer) {
+      clearTimeout(tweakPillHideTimer);
+      tweakPillHideTimer = null;
+    }
+    tweakPillVisible.value = true;
     if (!quickEditActive.value) {
       await hydrateIngredientFoodData();
       const base = computeAbsoluteTotals(recipeStore.recipe?.ingredients ?? []);
@@ -1423,9 +1440,16 @@ async function onQuickEditChange(active: boolean) {
       baselineTotalGrams.value = base.totalGrams;
       quickEditActive.value = true;
     }
+  } else {
+    // On active=false (Done pressed): keep quickEditActive + baseline + quickEditResult
+    // so the displayed nutrition/quality cards continue to reflect the tweaks.
+    // The pill itself should fade away shortly after exit, though.
+    if (tweakPillHideTimer) clearTimeout(tweakPillHideTimer);
+    tweakPillHideTimer = setTimeout(() => {
+      tweakPillVisible.value = false;
+      tweakPillHideTimer = null;
+    }, 1500);
   }
-  // On active=false (Done pressed): keep quickEditActive + baseline + quickEditResult
-  // so the displayed nutrition/quality cards continue to reflect the tweaks.
 }
 
 function resetQuickEditState() {
@@ -1434,6 +1458,11 @@ function resetQuickEditState() {
   quickEditRecomputing.value = false;
   baselineAbs.value = null;
   baselineTotalGrams.value = 0;
+  tweakPillVisible.value = false;
+  if (tweakPillHideTimer) {
+    clearTimeout(tweakPillHideTimer);
+    tweakPillHideTimer = null;
+  }
   if (tweakDebounceTimer) clearTimeout(tweakDebounceTimer);
   tweakAbortController?.abort();
 }
@@ -1562,5 +1591,22 @@ const metaPills = computed(() => {
 
 .watch-flash {
   animation: watchFlash 0.8s ease-out;
+}
+
+.tweak-pill-enter-active,
+.tweak-pill-leave-active {
+  transition: opacity 0.25s ease, translate 0.25s ease;
+}
+
+.tweak-pill-enter-from,
+.tweak-pill-leave-to {
+  opacity: 0;
+  translate: -50% 10px;
+}
+
+.tweak-pill-enter-to,
+.tweak-pill-leave-from {
+  opacity: 1;
+  translate: -50% 0;
 }
 </style>

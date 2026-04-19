@@ -1,11 +1,11 @@
 <template>
   <div class="space-y-2" ref="root">
-    <h2 class="text-4xl font-bold tracking-tighter ml-2" v-if="!hideHeader">
+    <h2 class="text-4xl font-headers tracking-tighter ml-2" v-if="!hideHeader">
       Ingredients
     </h2>
 
-    <div class="main-card main-card-padding flex flex-col relative gap-2"
-      :class="{ '!bg-primary-20/80 overflow-hidden': formalizationLoading }">
+    <div class="main-card main-card-padding main-card-rounded flex flex-col relative gap-2"
+      :class="{ 'bg-primary-20/80! overflow-hidden': formalizationLoading }">
       <div class="flex justify-between items-center w-full mb-4">
         <div v-if="ingredients && ingredients.length > 0">
           <div class="" v-if="batchSize && !servingMode">
@@ -31,21 +31,19 @@
           </div>
         </div>
         <div class="flex items-center gap-2 relative">
-          <button class="animated-button flex items-center gap-2 px-2 py-1 text-xs" @click="copyIngredients"
-            v-if="!quickEditMode">
+          <button class="flex items-center gap-2 px-2 py-1 text-xs" @click="copyIngredients" v-if="!quickEditMode">
             <IconCopy class="w-4" />
             Copy
           </button>
           <transition name="fade-slide" mode="out-in">
             <button v-if="notOnDefaultUnits && !quickEditMode"
-              class="animated-button flex items-center gap-2 px-2 py-1 text-xs will-change-transform"
-              @click="resetUnits">
+              class="flex items-center gap-2 px-2 py-1 text-xs will-change-transform" @click="resetUnits">
               <IconRefreshCcw class="w-4" />
               <span>Reset Units</span>
             </button>
           </transition>
-          <button v-if="ingredients && ingredients.length > 0"
-            class="animated-button flex items-center gap-2 px-2 py-1 text-xs" " @click="toggleQuickEdit">
+          <button v-if="ingredients && ingredients.length > 0" class="flex items-center gap-2 px-2 py-1 text-xs"
+            @click="toggleQuickEdit">
             <IconSlidersHorizontal v-if="!quickEditMode" class="w-4" />
             <IconCheck v-if="quickEditMode" class="w-4" />
             {{ quickEditMode ? 'Done' : 'Tweak' }}
@@ -65,28 +63,24 @@
               </h3>
             </div>
 
-            <ul class="flex flex-col gap-4 items-start" role="list">
+            <ul class="flex flex-col gap-3.5 items-start" role="list">
               <li v-for="ingredient in group" :key="ingredient.name"
                 class="relative overflow-hidden flex items-center rounded-2xl px-2 py-1 transition-colors duration-200 gap-2"
                 :class="[backgroundClass(ingredient), { 'select-none touch-pan-y cursor-ew-resize': quickEditMode && !isFreeUnit(ingredient) }]"
-                @click="quickEditMode ? null : toggleIfNotLongPress(ingredient.name)"
                 @pointerdown="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerDown($event, ingredient) : undefined"
                 @pointermove="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerMove($event, ingredient) : undefined"
                 @pointerup="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerUp($event, ingredient) : undefined"
                 @pointercancel="quickEditMode && !isFreeUnit(ingredient) ? onTweakPointerUp($event, ingredient) : undefined">
                 <div v-if="quickEditMode && !isFreeUnit(ingredient)"
-                  class="absolute inset-y-0 left-0 bg-secondary-700/70 pointer-events-none transition-all duration-200 ease-out"
+                  class="absolute inset-y-0 left-0 bg-primary/5 pointer-events-none transition-all duration-200 ease-out"
                   :style="{ width: fillPct(ingredient) + '%', opacity: draggingIngredientId === ingredient.id ? 1 : 0 }" />
                 <img class="relative h-5 min-w-7 object-contain object-center"
                   :src="`/foods/${ingredient.visual_category}.webp`" v-if="ingredient.visual_category" />
                 <span class="relative leading-none">
                   <Transition :name="quickEditMode ? '' : 'fade-slide'" mode="out-in">
                     <span :key="`${servingSize}-${ingredient?.currentUnit}${quickEditMode ? '-edit' : ''}`"
-                      class="tabular-nums whitespace-nowrap font-bold" :class="[quickEditMode ? '' : 'cursor-pointer']"
-                      @pointerdown="quickEditMode ? undefined : startLongPress(() => onClickIngredient(ingredient))"
-                      @pointerup="quickEditMode ? undefined : cancelLongPress()"
-                      @pointercancel="quickEditMode ? undefined : cancelLongPress()"
-                      @pointerleave="quickEditMode ? undefined : cancelLongPress()">
+                      class="tabular-nums whitespace-nowrap font-semibold" :class="{ 'cursor-pointer': !quickEditMode }"
+                      @click="quickEditMode ? undefined : onClickIngredient(ingredient)">
                       {{
                         getStringFromAmountInfo(
                           ingredient?.amountInfo?.[ingredient?.currentUnit],
@@ -104,21 +98,26 @@
                     )
                   ">
                     of</span>
-                  <span :class="quickEditMode ? '' : 'cursor-pointer'"
-                    @pointerdown="quickEditMode ? undefined : startLongPress(() => navigateTo(getFoodUrl(ingredient.id, getIngredientName(ingredient))))"
-                    @pointerup="quickEditMode ? undefined : cancelLongPress()"
-                    @pointerleave="quickEditMode ? undefined : cancelLongPress()"
-                    @pointercancel="quickEditMode ? undefined : cancelLongPress()">
-                    <span class="font-medium">{{
-                      ' ' + getIngredientName(ingredient)
+
+                  <span>
+                    <span>{{ ' ' }}</span>
+                    <span class="" v-if="quickEditMode">{{
+                      getIngredientName(ingredient)
                     }}</span>
-                    <span v-if="ingredient.preparation_description" class="font-light text-gray-600 text-sm mt-1">, {{
-                      ingredient.preparation_description }}
+                    <NuxtLink v-else :to="getFoodUrl(ingredient.id, getIngredientName(ingredient))"
+                      class="hover:underline">
+                      <span class="">{{
+                        getIngredientName(ingredient)
+                      }}</span>
+                    </NuxtLink>
+                    <span v-if="ingredient.preparation_description"
+                      class="font-main font-light text-gray-600 text-sm mt-1">, {{
+                        ingredient.preparation_description }}
                     </span>
                   </span>
                   <span v-if="false" class="font-light text-gray-600 text-sm mt-1">, {{ ingredient?.consumption_factor *
                     100
-                    }}% eaten</span>
+                  }}% eaten</span>
                 </span>
               </li>
             </ul>
@@ -141,24 +140,15 @@
                 salt</span>
             </div>
           </div>
-          <div v-if="checkedIngredients.size > 0" class="w-full h-px bg-gray-200 my-6"></div>
           <!--
           <div class="flex items-center gap-2">
             <span class="ml-2">= ~<strong>{{ formatMoney(price) }}</strong> per Serving</span>
           </div>-->
-          <Transition name="fade-slide" mode="out-in">
-            <button v-if="checkedIngredients.size > 0"
-              class="animated-button flex items-center gap-2 px-4 py-1 font-medium !bg-primary !text-white will-change-transform"
-              @click="addToShoppingList">
-              <IconShoppingCart class="w-5 h-5" />
-              Add to Shopping List
-            </button>
-          </Transition>
           <!--
 
           <div class="flex flex-wrap gap-2 mt-2">
             <div v-for="pill in metaPills" :key="pill.text" :class="pill.class"
-              class="flex items-center gap-2 rounded-4xl px-2 py-0.5 text-xs justify-center">
+              class="flex items-center gap-2 main-card-rounded px-2 py-0.5 text-xs justify-center">
               <Icon :name="pill.icon" :size="14" />
               <span>{{ pill.text }}</span>
             </div>
@@ -175,9 +165,9 @@
         </div>
       </div>
       <div
-        class="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent p-4 pointer-events-none"
+        class="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/70 to-transparent p-4 pointer-events-none"
         v-if="formalizationLoading" />
-      <div class="hidden bg-secondary-700/50 bg-secondary-700/70" />
+      <div class="hidden bg-primary/8-700/50 bg-primary/8-700/70" />
     </div>
   </div>
 </template>
@@ -216,21 +206,14 @@ const getAdded = (added: number) => {
 };
 
 const backgroundClass = (ingredient: any) => {
-  const isChecked = checkedIngredients.value.has(ingredient.name);
   const isMarked = props.markedIngredients?.includes(ingredient.id);
   if (quickEditMode.value) {
-    return 'bg-secondary/70';
-  }
-  if (isChecked && isMarked) {
-    return 'bg-secondary-700';
-  }
-  if (isChecked) {
-    return 'bg-secondary-700/70';
+    return 'bg-primary/5';
   }
   if (isMarked) {
-    return 'bg-secondary-700/50';
+    return 'bg-primary/10';
   }
-  return 'bg-secondary/70 hover:bg-secondary';
+  return '';
 }
 
 const emit = defineEmits([
@@ -239,8 +222,6 @@ const emit = defineEmits([
   'amounts-changed',
   'tweak-drag-end',
 ]);
-
-const authStore = useAuthStore();
 
 const { track } = useEngagement();
 
@@ -265,7 +246,6 @@ const groupedIngredients = computed(() => {
 });
 
 const servingMode = ref(!props.batchSize);
-const checkedIngredients = ref<Set<string>>(new Set());
 const notOnDefaultUnits = computed(() => {
   return props.ingredients?.some(
     (ingredient: any) => ingredient.currentUnit !== 0
@@ -285,40 +265,6 @@ function getIngredientName(ingredient: any) {
     return pluralizeWord(ingredient.name);
   }
   return ingredient.name;
-}
-
-const longPressActive = ref(false);
-let longPressTimer: ReturnType<typeof setTimeout> | null = null;
-
-function startLongPress(callback: () => void, duration = 500) {
-  longPressActive.value = false;
-  longPressTimer = setTimeout(() => {
-    longPressActive.value = true;
-    callback();
-  }, duration);
-}
-
-function cancelLongPress() {
-  if (longPressTimer) {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-  }
-}
-
-function toggleIfNotLongPress(ingredientName: string) {
-  if (longPressActive.value) {
-    longPressActive.value = false;
-    return;
-  }
-  toggleIngredientChecked(ingredientName);
-}
-
-function toggleIngredientChecked(ingredientName: string) {
-  if (checkedIngredients.value.has(ingredientName)) {
-    checkedIngredients.value.delete(ingredientName);
-  } else {
-    checkedIngredients.value.add(ingredientName);
-  }
 }
 
 function onClickIngredient(ingredient: any) {
@@ -458,22 +404,6 @@ function onTweakPointerUp(ev: PointerEvent, ingredient: any) {
   }
 }
 
-async function addToShoppingList() {
-  if (!props.recipeId) return;
-
-  if (checkedIngredients.value.size > 0 && props.ingredients) {
-    const ingredients = props.ingredients.filter((ingredient: any) =>
-      checkedIngredients.value.has(ingredient.name)
-    );
-    checkedIngredients.value.clear();
-    await authStore.addToShoppingList(
-      ingredients,
-      props.recipeId,
-      props.servingSize ?? 1
-    );
-    track(props.recipeId, 'shopping_list');
-  }
-}
 </script>
 
 <style scoped>

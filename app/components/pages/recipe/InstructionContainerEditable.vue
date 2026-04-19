@@ -1,18 +1,18 @@
 <template>
-  <div class="main-card bg-primary-10/40! main-card-padding flex gap-4 items-start">
+  <div class="flex gap-4 items-start">
     <ol class="flex-1 flex flex-col gap-2">
       <li v-for="i in modelValue.length" :key="i"
-        class="flex gap-4 rounded-2xl px-3 py-2 min-h-12 bg-primary-10 flex-1">
+        class="flex gap-4 rounded-2xl md:px-3 py-2 min-h-12 md:bg-primary-5/70 flex-1">
         <div v-if="i <= modelValue.length"
-          class="min-w-9 h-9 p-1 rounded-xl flex items-center text-xl font-bold justify-center bg-primary-500 text-white flex-shrink-0 leading-none">
+          class="min-w-9 h-9 p-1 rounded-full flex items-center text-xl font-semibold justify-center bg-primary/10  font-headers shrink-0 leading-none">
           {{ i }}
         </div>
 
         <textarea v-model="modelValue[i - 1]" v-auto-resize :placeholder="`Step ${i}`"
-          class="bg-transparent border-none outline-none resize-none overflow-hidden break-words scrollbar-hide flex-1 text-gray-800 leading-relaxed text-lg" />
+          class="bg-transparent border-none outline-none resize-none overflow-hidden wrap-break-word scrollbar-hide flex-1" />
       </li>
       <li class="flex gap-2 mt-2">
-        <button class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10 text-lg"
+        <button class="main-button animated-button flex items-center gap-2 px-4 py-1 main-card"
           @click="modelValue.push('')">
           <IconPlus class="w-4" />
           Add step
@@ -20,7 +20,7 @@
       </li>
     </ol>
     <!--
-    <button class="animated-button bg-secondary flex items-center gap-1 px-2 py-1 text-xs leading-none"
+    <button class="main-button animated-button bg-primary/8 flex items-center gap-1 px-2 py-1 text-xs leading-none"
       @click="pasteInstructions">
       <IconCopy class="w-4" />
       <span>Paste</span>

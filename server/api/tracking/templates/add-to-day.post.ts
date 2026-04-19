@@ -4,7 +4,7 @@ import { buildTemplateForDay } from '~~/server/utils/tracking';
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -14,5 +14,5 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = serverSupabaseServiceRole<Database>(event);
-  return buildTemplateForDay(client as any, user.id, body.templateId);
+  return buildTemplateForDay(client as any, user.sub, body.templateId);
 });

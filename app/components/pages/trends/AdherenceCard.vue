@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex flex-col gap-3 flex-1">
+    <div class="main-card main-card-padding main-card-rounded flex flex-col gap-3 flex-1">
         <div class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Adherence</div>
         <div v-if="adherenceScore != null" class="flex flex-col my-auto">
             <div class="text-5xl font-bold tracking-tighter leading-none transition-colors" :class="adherenceLabelClass">

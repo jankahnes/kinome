@@ -4,7 +4,7 @@ import { deleteTemplateMeal } from '~~/server/utils/tracking';
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -14,6 +14,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = serverSupabaseServiceRole<Database>(event);
-  await deleteTemplateMeal(client as any, user.id, body.templateId);
+  await deleteTemplateMeal(client as any, user.sub, body.templateId);
   return { success: true };
 });

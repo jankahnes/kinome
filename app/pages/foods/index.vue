@@ -1,48 +1,35 @@
 <template>
-  <div class="sm:mx-10 mx-4 space-y-4 max-w-screen-lg m-4 p-10">
-    <h1 class="text-2xl font-bold">Foods Database</h1>
+  <div class="lg:mx-12 space-y-4 max-w-screen-lg m-4 my-10">
+    <h1 class="text-5xl font-headers">Foods Database</h1>
     <div class="flex gap-2 w-full">
-      <div
-        class="flex ring-1 ring-primary focus-within:ring-2 transition-all rounded-xl px-4 items-center gap-2 text-gray-600 bg-primary-10 shrink-1 min-w-0! flex-1"
-      >
-        <input
-          type="text"
-          placeholder="Search for a food"
-          v-model="foodResultsStore.searchQuery"
-          @keyup.enter="search"
-          class="flex-grow focus:outline-none py-2 min-w-0!"
-        />
+      <div class="ai-ring main-card-rounded p-px flex items-center flex-1">
+        <div class="flex items-center rounded-[31px] px-4 bg-primary-5 flex-1">
+          <IconSearch class="w-4 " />
+          <input type="text" :placeholder="'Search for a food'" v-model="foodResultsStore.searchQuery"
+            @keyup.enter="search" @blur="search" class="text-xs focus:outline-none flex-1 px-2 py-[9px]" />
+        </div>
       </div>
-      <button class="button px-3 flex items-center justify-center flex-shrink-0" @click="search">
+      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center flex-shrink-0"
+        @click="search">
         <IconSearch class="w-5" />
       </button>
-      <button
-        class="button px-3 flex items-center justify-center flex-shrink-0"
-        @click="navigateTo('/foods/new')"
-      >
+      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center flex-shrink-0"
+        @click="navigateTo('/foods/new')">
         <IconPlus class="w-5" />
       </button>
-      <button
-        class="button px-3 flex items-center justify-center flex-shrink-0"
-        @click="navigateTo('/foods/scan')"
-      >
+      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center flex-shrink-0"
+        @click="navigateTo('/foods/scan')">
         <IconFlipHorizontal class="w-5" />
       </button>
     </div>
-    <div class="flex flex-col gap-4 w-full mb-10">
+    <div class="flex flex-col gap-3 w-full mb-10">
       <NuxtLink
-        class="flex gap-2 w-full bg-primary-10 pl-4 py-0 rounded-lg select-none cursor-pointer items-center"
-        v-for="food in foodResultsStore.foodResults"
-        :to="getFoodUrl(food.id, food.name)"
-      >
+        class="flex gap-2 w-full bg-primary-5 pl-4 py-0 rounded-2xl overflow-hidden select-none cursor-pointer items-center"
+        v-for="food in foodResultsStore.foodResults" :to="getFoodUrl(food.id, food.name)">
         <div class="flex-grow">
           <h2>{{ food.name }}</h2>
         </div>
-        <GradeContainer
-          :score="food.food.hidx ?? 0"
-          :type="'ovr'"
-          class="text-xl !h-14 !w-12 rounded-r-lg"
-        />
+        <GradeContainer :score="food.food.hidx ?? 0" :type="'ovr'" class="text-xl w-12! h-12!" />
       </NuxtLink>
     </div>
   </div>

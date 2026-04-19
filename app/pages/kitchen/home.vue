@@ -6,42 +6,49 @@
       <div v-if="!auth.isUser()">
         <HerocardsHome />
         <div class="mt-10">
-          <div class="flex items-baseline gap-3 mb-5">
-            <h2 class="text-2xl font-bold tracking-tight">For You</h2>
-            <span class="text-sm text-gray-400">
+          <div class="">
+            <h2 class="text-2xl font-headers tracking-tight">For You</h2>
+            <span class="text-sm text-gray-500 -mt-1 ">
               <NuxtLink to="/login" class="underline">Sign in</NuxtLink> to personalise
             </span>
           </div>
-          <ForYouGrid :results="allResults" :is-loading="isLoading" />
+          <ForYouGrid :results="allResults.slice(0, 23)" :is-loading="isLoading" />
         </div>
       </div>
 
       <!-- ─── LOGGED IN VIEW ───────────────────────────────────────── -->
       <div v-else class="space-y-6 lg:space-y-10 mt-4 lg:mt-10">
-        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">{{ greeting }}</h1>
+        <h1 class="text-4xl sm:text-5xl font-headers tracking-tight">Welcome back, <span class="text-primary italic">{{
+          auth.user?.username }}</span>.</h1>
 
         <!-- NUTRITION AUTOPILOT ─────────────────────────────────────── -->
         <section v-if="hasTracking">
           <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold tracking-tight">Nutrition Autopilot</h2>
+            <h2 class="text-2xl font-headers tracking-tight">Nutrition Autopilot</h2>
           </div>
 
-          <div class="flex gap-4 items-end mt-5">
+          <div class="flex gap-4 sm:items-end flex-col sm:flex-row">
             <!-- Progress card -->
             <div
-              class="rounded-4xl bg-primary-10/50 main-card-padding flex-shrink-0 flex-1 basis-80 md:basis-100 flex flex-col gap-5 md:mb-3.5">
-              <span class="text-xs text-gray-400 uppercase tracking-wide">Today's progress</span>
+              class="main-card main-card-rounded main-card-padding shrink-0 flex-1 basis-80 flex flex-col gap-5 md:mb-4">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-gray-500 font-mono uppercase tracking-widest">Today's progress</span>
 
+                <NuxtLink to="/tracking/daily" class="flex items-center self-center gap-1 text-xs text-gray-500">
+                  See details
+                  <IconChevronRight class="w-4" />
+                </NuxtLink>
+              </div>
               <!-- Calories -->
               <div class="flex flex-col gap-1.5">
-                <div class="flex justify-between text-sm">
-                  <span class="font-semibold">Calories</span>
-                  <span class="transition-all duration-400"
+                <div class="flex justify-between text-xs">
+                  <span class="">Calories</span>
+                  <span class="transition-all duration-400 font-mono"
                     :class="previewConsumed.kcal > kcalGoal * 1.2 ? 'text-amber-500 font-medium' : 'text-gray-500'">
-                    {{ Math.round(previewConsumed.kcal) }} / {{ kcalGoal }} kcal
+                    <strong>{{ Math.round(previewConsumed.kcal) }}</strong> / {{ kcalGoal }} kcal
                   </span>
                 </div>
-                <div class="h-2.5 rounded-full bg-primary-10 overflow-hidden relative">
+                <div class="h-2.5 rounded-full bg-gray-200/70 overflow-hidden relative">
                   <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                     :class="previewConsumed.kcal > kcalGoal * 1.2 ? 'bg-amber-400' : 'bg-primary'"
                     :style="{ width: Math.min(100, (todayConsumed.kcal / kcalGoal) * 100) + '%' }" />
@@ -53,13 +60,13 @@
 
               <!-- Protein -->
               <div class="flex flex-col gap-1.5">
-                <div class="flex justify-between text-sm">
-                  <span class="font-semibold">Protein</span>
-                  <span class="text-gray-500">
-                    {{ Math.round(previewConsumed.protein) }}g / {{ proteinGoal }}g
+                <div class="flex justify-between text-xs">
+                  <span class="">Protein</span>
+                  <span class="font-mono text-gray-500">
+                    <strong>{{ Math.round(previewConsumed.protein) }}</strong> / {{ proteinGoal }} g
                   </span>
                 </div>
-                <div class="h-2.5 rounded-full bg-protein/20 overflow-hidden relative">
+                <div class="h-2.5 rounded-full bg-gray-200/70 overflow-hidden relative">
                   <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-protein"
                     :style="{ width: Math.min(100, (todayConsumed.protein / proteinGoal) * 100) + '%' }" />
                   <div v-if="hoveredRecipe"
@@ -70,14 +77,14 @@
 
               <!-- Carbs -->
               <div class="flex flex-col gap-1.5">
-                <div class="flex justify-between text-sm">
-                  <span class="font-semibold">Carbs</span>
-                  <span class="transition-all duration-400"
+                <div class="flex justify-between text-xs">
+                  <span class="">Carbs</span>
+                  <span class="transition-all duration-400 font-mono"
                     :class="previewConsumed.carbohydrates > carbsGoal * 1.2 ? 'text-amber-500 font-medium' : 'text-gray-500'">
-                    {{ Math.round(previewConsumed.carbohydrates) }}g / {{ carbsGoal }}g
+                    <strong>{{ Math.round(previewConsumed.carbohydrates) }}</strong> / {{ carbsGoal }} g
                   </span>
                 </div>
-                <div class="h-2.5 rounded-full bg-carbs/20 overflow-hidden relative">
+                <div class="h-2.5 rounded-full bg-gray-200/70 overflow-hidden relative">
                   <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                     :class="previewConsumed.carbohydrates > carbsGoal * 1.2 ? 'bg-amber-300' : 'bg-carbs'"
                     :style="{ width: Math.min(100, (todayConsumed.carbohydrates / carbsGoal) * 100) + '%' }" />
@@ -89,14 +96,14 @@
 
               <!-- Fat -->
               <div class="flex flex-col gap-1.5">
-                <div class="flex justify-between text-sm">
-                  <span class="font-semibold">Fat</span>
-                  <span class="transition-all duration-400"
+                <div class="flex justify-between text-xs">
+                  <span class="">Fat</span>
+                  <span class="transition-all duration-400 font-mono"
                     :class="previewConsumed.fat > fatGoal * 1.2 ? 'text-amber-500 font-medium' : 'text-gray-500'">
-                    {{ Math.round(previewConsumed.fat) }}g / {{ fatGoal }}g
+                    <strong>{{ Math.round(previewConsumed.fat) }}</strong> / {{ fatGoal }} g
                   </span>
                 </div>
-                <div class="h-2.5 rounded-full bg-fat/20 overflow-hidden relative">
+                <div class="h-2.5 rounded-full bg-gray-200/70 overflow-hidden relative">
                   <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                     :class="previewConsumed.fat > fatGoal * 1.2 ? 'bg-amber-300' : 'bg-fat'"
                     :style="{ width: Math.min(100, (todayConsumed.fat / fatGoal) * 100) + '%' }" />
@@ -108,13 +115,13 @@
 
               <!-- Fiber -->
               <div class="flex flex-col gap-1.5">
-                <div class="flex justify-between text-sm">
-                  <span class="font-semibold">Fiber</span>
-                  <span class="text-gray-500">
-                    {{ Math.round(previewConsumed.fiber) }}g / {{ fiberGoal }}g
+                <div class="flex justify-between text-xs">
+                  <span class="">Fiber</span>
+                  <span class="font-mono text-gray-500">
+                    <strong>{{ Math.round(previewConsumed.fiber) }}</strong> / {{ fiberGoal }} g
                   </span>
                 </div>
-                <div class="h-2.5 rounded-full bg-fiber/20 overflow-hidden relative">
+                <div class="h-2.5 rounded-full bg-gray-200/70 overflow-hidden relative">
                   <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-fiber"
                     :style="{ width: Math.min(100, (todayConsumed.fiber / fiberGoal) * 100) + '%' }" />
                   <div v-if="hoveredRecipe"
@@ -125,11 +132,6 @@
 
 
 
-              <NuxtLink to="/tracking/daily"
-                class="animated-button bg-primary-10 text-sm text-center py-2 px-3 mt-auto flex items-center self-center gap-2">
-                See details
-                <IconChevronRight class="w-4" />
-              </NuxtLink>
             </div>
             <div class="flex flex-wrap gap-4">
               <!-- Macro-fit recipe suggestions -->
@@ -153,8 +155,8 @@
         <!-- FOR YOU ────────────────────────────────────────────────── -->
         <section>
           <div class="">
-            <h2 class="text-2xl font-bold tracking-tight">For You</h2>
-            <NuxtLink to="/kitchen/recommendations" class="text-sm -mt-1 flex items-center text-gray-500">See all
+            <h2 class="text-2xl font-headers tracking-tight">For You</h2>
+            <NuxtLink to="/kitchen/recommendations" class="text-xs -mt-1 flex items-center text-gray-500">See all
               <IconChevronRight class="w-4" />
             </NuxtLink>
           </div>
@@ -167,7 +169,7 @@
           <!-- Quick Wins carousel -->
           <div v-if="quickWins.length" class="flex-1 min-w-0 space-y-4 basis-80">
             <div class="flex items-baseline gap-3">
-              <h2 class="text-2xl font-bold tracking-tight">Quick Wins</h2>
+              <h2 class="text-2xl font-headers tracking-tight">Quick Wins</h2>
               <span class="text-sm text-gray-400">Under 30 minutes</span>
             </div>
             <BlocksCarousel flex-class="gap-3">
@@ -178,8 +180,8 @@
 
           <!-- Fridge Widget -->
           <div :class="quickWins.length ? 'basis-80 flex-1 max-w-104' : 'w-full'" class="flex flex-col gap-4 mb-4">
-            <h2 class="text-2xl font-bold tracking-tight">What's in your fridge?</h2>
-            <div class="rounded-4xl bg-primary-10/50 main-card-padding space-y-4 flex-1">
+            <h2 class="text-2xl font-headers tracking-tight">What's in your fridge?</h2>
+            <div class="main-card main-card-rounded main-card-padding space-y-4 flex-1">
 
               <!-- Input state -->
               <template v-if="fridgeResults === null">
@@ -187,7 +189,7 @@
                 </p>
                 <div v-if="fridgeIngredients.length" class="flex flex-wrap gap-2">
                   <div v-for="(ing, i) in fridgeIngredients" :key="i"
-                    class="flex items-center gap-1.5 px-2.5 py-1 bg-primary-10 rounded-xl text-sm">
+                    class="flex items-center gap-1.5 px-2.5 py-1 bg-primary-5 rounded-xl text-sm">
                     <span>{{ ing }}</span>
                     <button @click="removeFridgeIngredient(i)"
                       class="text-gray-400 hover:text-gray-600 leading-none text-base">×</button>
@@ -195,13 +197,14 @@
                 </div>
                 <div class="flex gap-2">
                   <input v-model="fridgeInput" placeholder="e.g. chicken…" @keydown.enter.prevent="addFridgeIngredient"
-                    class="flex-1 bg-primary-10 rounded-2xl px-3 py-2 text-sm focus:outline-none" />
-                  <button @click="addFridgeIngredient" class="animated-button bg-primary-10 px-3 py-2 rounded-2xl">
+                    class="flex-1 bg-primary-5 rounded-2xl px-3 py-2 text-sm focus:outline-none" />
+                  <button @click="addFridgeIngredient"
+                    class="main-button animated-button bg-primary-5 px-3 py-2 rounded-2xl">
                     <IconPlus class="w-4" />
                   </button>
                 </div>
                 <button @click="searchFridge" :disabled="fridgeIngredients.length === 0 || fridgeLoading"
-                  class="animated-button bg-primary text-white w-full py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-40 transition-opacity mt-auto">
+                  class="main-button animated-button bg-primary text-white w-full py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-40 transition-opacity mt-auto">
                   <span v-if="fridgeLoading">Searching…</span>
                   <span v-else>Find Recipes</span>
                 </button>
@@ -229,7 +232,7 @@
 
         <!-- RECENTLY SEEN ───────────────────────────────────────────── -->
         <section v-if="recentlySeen.length">
-          <h2 class="text-2xl font-bold tracking-tight mb-4">You Looked at These</h2>
+          <h2 class="text-2xl font-headers tracking-tight mb-4">You Looked at These</h2>
           <BlocksCarousel flex-class="gap-3">
             <RecipeCard v-for="recipe in recentlySeen" :key="recipe.id" :recipe="recipe"
               class="w-50 flex-shrink-0 ml-2 mb-2 text-[24px]" />
@@ -271,10 +274,6 @@ type RecommendationRow = RecipeOverview & {
 const supabase = useSupabaseClient<Database>();
 const auth = useAuthStore();
 
-// ─── Greeting ────────────────────────────────────────────────────────────────
-const greeting = computed(() =>
-  auth.user?.username ? `Welcome back, ${auth.user.username}!` : 'Welcome back!'
-);
 
 // ─── Tracking config ─────────────────────────────────────────────────────────
 // @ts-ignore

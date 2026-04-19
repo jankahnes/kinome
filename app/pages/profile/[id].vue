@@ -1,8 +1,9 @@
 <template>
-  <div class="pb-20 lg:pb-0 m-4 lg:m-8 lg:ml-20">
+  <div class="mt-10 mb-20 lg:pb-0 m-4 lg:mx-12">
     <div class="flex items-center gap-2 flex-wrap" v-if="!isOverviewPage">
       <NuxtLink v-for="view in views" :key="view.path" :to="view.path"
-        class="animated-button bg-primary-10/60 px-3 py-2 flex gap-1 items-center" exact-active-class="bg-primary/80">
+        class="main-button animated-button flex items-center gap-1 bg-primary-5 px-3 py-2.5 shrink-0 text-xs text-gray-600"
+        exact-active-class="bg-white shadow-xs">
         <IconChevronLeft v-if="view.path === '/profile/' + userID" class="w-4 h-4" />
         {{ view.displayName }}
       </NuxtLink>

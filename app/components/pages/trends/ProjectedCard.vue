@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex flex-col gap-3 flex-1" v-if="tdee != null">
+    <div class="main-card main-card-padding main-card-rounded flex flex-col gap-3 flex-1" v-if="tdee != null">
         <div class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Projected</div>
         <div v-if="projectedBodyChange != null" class="flex flex-col my-auto">
             <div class="text-5xl font-bold tracking-tighter leading-none transition-colors"

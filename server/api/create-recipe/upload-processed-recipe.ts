@@ -284,7 +284,7 @@ export default defineEventHandler(async (event) => {
   let userId: string | null = null;
   try {
     const user = await serverSupabaseUser(event);
-    userId = user?.id || null;
+    userId = user?.sub || null;
   } catch (error) {
     console.log('No auth session, proceeding with null userId');
   }

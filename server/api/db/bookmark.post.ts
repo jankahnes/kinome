@@ -8,7 +8,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     const { error } = await client
       .from('bookmarks')
       .delete()
-      .eq('user_id', user.id)
+      .eq('user_id', user.sub)
       .eq('recipe_id', recipeId);
 
     if (error) {
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
   const { data: existing } = await client
     .from('bookmarks')
     .select('id')
-    .eq('user_id', user.id)
+    .eq('user_id', user.sub)
     .eq('recipe_id', recipeId)
     .maybeSingle();
 
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
     const { error } = await client
       .from('bookmarks')
       .insert({
-        user_id: user.id,
+        user_id: user.sub,
         recipe_id: recipeId,
       });
 
@@ -64,8 +64,8 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: 'Failed to add bookmark' });
     }
 
-    await handleFirstBookmarkCreated(client as any, user.id, recipeId);
-    await maybeAwardSaveReceived(client as any, recipe.user_id, user.id, recipeId);
+    await handleFirstBookmarkCreated(client as any, user.sub, recipeId);
+    await maybeAwardSaveReceived(client as any, recipe.user_id, user.sub, recipeId);
   }
 
   await evaluateCrowdPleaserForRecipe(client as any, recipeId);

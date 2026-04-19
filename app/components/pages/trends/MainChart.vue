@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex flex-col gap-2">
+    <div class="main-card main-card-padding main-card-rounded flex flex-col gap-2">
         <div class="flex flex-wrap items-end justify-between">
             <div>
                 <div class="text-sm font-semibold text-gray-500 tracking-wide uppercase">progress chart</div>
@@ -33,10 +33,10 @@
 
         <div class="flex flex-wrap gap-4 -mb-1 md:-mb-2">
             <div class="flex-1 basis-50 flex shrink-0 rounded-full justify-center md:justify-start">
-                <div class="bg-secondary/60 rounded-full">
+                <div class="bg-primary/5 rounded-full">
                     <button v-for="tf in timeframes" :key="tf.key" type="button" @click="selectedTimeframe = tf.key"
                         class="px-4 py-1 rounded-full text-sm font-semibold transition-all" :class="selectedTimeframe === tf.key
-                            ? 'bg-primary shadow-sm text-gray-800'
+                            ? 'bg-primary shadow-sm text-white'
                             : 'text-gray-500 hover:text-gray-700 '">
                         {{ tf.label }}
                     </button>
@@ -44,10 +44,10 @@
             </div>
 
             <div class="basis-105 min-w-0 flex-1 overflow-x-auto flex justify-center md:justify-end">
-                <div class="flex gap-2 bg-secondary/60 rounded-full flex-wrap justify-center">
+                <div class="flex gap-2 bg-primary/5 rounded-full flex-wrap justify-center">
                     <button v-for="m in metrics" :key="m.key" type="button" @click="selectedMetric = m.key"
                         class="px-3 py-1 rounded-full text-sm font-semibold transition-all shrink-0" :class="selectedMetric === m.key
-                            ? 'text-gray-800'
+                            ? 'text-white'
                             : 'text-gray-500 hover:text-gray-700'"
                         :style="selectedMetric === m.key ? { backgroundColor: m.color } : {}">
                         {{ m.label }}
@@ -69,7 +69,7 @@ const props = defineProps<{
 const selectedTimeframe = defineModel<TimeframeKey>('selectedTimeframe', { required: true });
 
 const metrics = [
-    { key: 'kcal', label: 'Kcal', color: '#FFC340', unit: ' kcal' },
+    { key: 'kcal', label: 'Kcal', color: 'var(--color-primary)', unit: ' kcal' },
     { key: 'protein', label: 'Protein', color: '#fea1a2', unit: 'g' },
     { key: 'fat', label: 'Fat', color: '#d6c755', unit: 'g' },
     { key: 'carbohydrates', label: 'Carbs', color: '#bddafe', unit: 'g' },
@@ -155,7 +155,7 @@ const chartOptions = computed(() => {
                 animateGradually: { enabled: false },
             },
         },
-        colors: [currentMetric.value?.color ?? '#FFC340', '#d1d5db'],
+        colors: [currentMetric.value?.color ?? 'var(--color-primary)', 'var(--color-primary-100)'],
         stroke: {
             width: [2.5, 1.5],
             curve: 'smooth' as const,
@@ -163,7 +163,7 @@ const chartOptions = computed(() => {
         },
         markers: {
             size: [is1W.value ? 10 : 5, 0],
-            colors: [currentMetric.value?.color ?? '#FFC340'],
+            colors: [currentMetric.value?.color ?? 'var(--color-primary)'],
             strokeColors: '#FFFDF7',
             strokeWidth: 2,
             hover: { size: is1W.value ? 14 : 6, sizeOffset: 2 },

@@ -5,7 +5,7 @@
                 <div class="flex gap-4 flex-wrap flex-col xl:flex-row" v-if="mounted">
                     <PagesTrendsMainChart v-model:selected-timeframe="selectedTimeframe" :meals-data="mealsData"
                         :user-tracking-goals="userTrackingGoals" class="flex-1 min-w-0" />
-                    <div class="flex flex-row xl:flex-col gap-4 flex-shrink-0 basis-1/5">
+                    <div class="flex flex-row xl:flex-col gap-4 shrink-0 basis-1/5">
                         <PagesTrendsAdherenceCard :meals-data="mealsData" :selected-timeframe="selectedTimeframe"
                             :user-tracking-goals="userTrackingGoals" />
                         <PagesTrendsProjectedCard :meals-data="mealsData" :selected-timeframe="selectedTimeframe"
@@ -42,7 +42,7 @@
             <div v-else class="flex flex-col gap-4">
                 <div class="flex gap-4 flex-wrap flex-col md:flex-row">
                     <Skeleton class="flex-1 basis-100 h-117" />
-                    <div class="flex flex-row sm:flex-col gap-4 flex-shrink-0 basis-1/5">
+                    <div class="flex flex-row sm:flex-col gap-4 shrink-0 basis-1/5">
                         <Skeleton class="flex-1 min-h-50" />
                         <Skeleton class="flex-1 min-h-50" />
                     </div>
@@ -144,7 +144,7 @@ async function fetchMacroMeals() {
         const { data, error } = await supabase
             .from('tracked_meals')
             .select('meal_date, kcal, protein, fat, carbohydrates, fiber, sugar, salt')
-            .eq('user_id', user.value.id)
+            .eq('user_id', user.value.sub)
             .not('is_template', 'is', true)
             .gte('meal_date', formatTrendsDate(dr.start))
             .lte('meal_date', formatTrendsDate(dr.end))
@@ -278,7 +278,7 @@ async function fetchPeriodNutrition() {
                     branded_food:branded_foods(*, food_name:food_names(id, name, food:food_data(*)))
                 )
             `)
-            .eq('user_id', user.value.id)
+            .eq('user_id', user.value.sub)
             .not('is_template', 'is', true)
             .gte('meal_date', formatTrendsDate(analysisDateRange.value.start))
             .lte('meal_date', formatTrendsDate(analysisDateRange.value.end))

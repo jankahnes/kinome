@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mt-12">For You</h1>
+    <h1 class="text-4xl sm:text-5xl font-headers tracking-tight mt-12">For You</h1>
     <div class="mt-4">
       <ForYouGrid :results="results" :is-loading="isLoading" />
     </div>
@@ -26,7 +26,7 @@ async function load() {
   try {
     const { data, error } = await (supabase as any).rpc('get_recommendations', {
       p_user_id: auth.user.id,
-      max: 24,
+      max: 23,
       explore: true,
     });
     if (error) throw error;

@@ -2,34 +2,37 @@
   <Transition name="loaded-content">
     <div class="pt-10 pb-20 sm:pb-4 relative" v-if="mounted">
       <div class="flex gap-8 flex-wrap">
-        <div class="space-y-2 flex-1 2xl:min-w-100 bg-primary-10/40 rounded-4xl p-4">
-          <h2 class="text-4xl font-bold tracking-tighter">Tracking</h2>
-          <div class="flex flex-col gap-4">
-            <div class="flex flex-wrap gap-2 sm:text-lg">
+        <div class="flex flex-col gap-4 flex-1 2xl:min-w-100">
+          <h2 class="text-4xl font-headers tracking-tighter">Tracking</h2>
+          <div class="flex flex-col gap-6">
+            <div class="flex flex-wrap gap-2">
 
               <button v-for="mealPreset in savedTemplates" :key="mealPreset.id"
-                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+                class="main-button animated-button flex items-center gap-2 px-4 py-1 bg-primary-5"
                 @click="addMealFromTemplate(mealPreset.id)">
-                <IconBookMarked class="w-5" />
+                <IconBookMarked class="w-5" :stroke-width="1.5" />
                 Add {{ mealPreset.name }}
               </button>
-              <button class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10"
+              <button class="main-button animated-button flex items-center gap-2 px-4 py-1 bg-primary-5"
                 @click="showRecipeSearchModal = true">
-                <IconSalad class="w-5" />
+                <IconSalad class="w-5" :stroke-width="1.5" />
                 Add Meal from Recipe
               </button>
               <button v-for="mealPreset in mealPresets" :key="mealPreset"
-                class="animated-button flex items-center gap-2 px-4 py-1 bg-primary-10" @click="addMeal(mealPreset)">
+                class="main-button animated-button flex items-center gap-2 px-4 py-1 bg-primary-5"
+                @click="addMeal(mealPreset)">
                 Add {{ mealPreset }}
               </button>
 
             </div>
 
+            <div class="h-px bg-gray-200 mx-4 my-1"></div>
+
             <EditableGroupList v-model="trackedMeals" :show-collapse="true" :show-group-header="true"
               group-name-placeholder="Meal name" :show-kcal="true">
               <template #header-actions="{ group }">
                 <button v-if="group.editableIngredients?.some((ingredient) => ingredient.rawText?.trim())" type="button"
-                  class="animated-button rounded-xl p-1.5"
+                  class="p-1.5"
                   :title="savedMealActionState[groupKey(group)] === 'saved' ? 'Meal saved' : 'Save meal'"
                   @click.stop="saveMealAsTemplate(group)">
                   <IconCheck v-if="savedMealActionState[groupKey(group)] === 'saved'" class="w-5 text-emerald-600" />
@@ -43,18 +46,17 @@
         <div class="flex-1 flex flex-col gap-6 2xl:min-w-140">
           <NutritionOverviewCard mode="tracking" :nutrition="computedDailyNutrition"
             :tracking-goals="userTrackingGoals?.targets" @view-overall-report="showOverallReportPanel = true" />
-          <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
+          <div class="flex flex-col">
             <div class="flex justify-between items-center mb-3 mx-2">
-              <h3 class="text-4xl font-bold tracking-tighter">Nutrition Quality</h3>
+              <h3 class="text-4xl font-headers tracking-tighter">Nutrition Quality</h3>
               <button @click="showOverallReportPanel = true"
-                class="flex items-center gap-0.5 animated-button text-sm p-2 text-slate-400">
-                <IconChevronRight class="w-5" />
+                class="flex items-center gap-0.5 text-sm p-2 text-slate-400">
+                <IconChevronRight class="w-6" />
               </button>
             </div>
             <NutritionQualityCards mode="full" :cards="qualityItems" :gut-health="gutHealth" :fat-profile="fatProfile"
               :fat-profile-readable="fatProfileReadable"
-              :micronutrients="computedDailyNutrition?.report?.details?.micronutrients"
-              :kcal-progress="kcalProgress"
+              :micronutrients="computedDailyNutrition?.report?.details?.micronutrients" :kcal-progress="kcalProgress"
               @view-overall-report="showOverallReportPanel = true" />
           </div>
         </div>
@@ -62,9 +64,9 @@
 
       <div class="fixed bottom-16 lg:bottom-4 right-2 lg:right-10 z-50">
         <button @click="saveMeals" :disabled="isSaving || !hasUnsavedChanges"
-          class="animated-button flex items-center gap-2 px-4 py-2 shadow-lg transition-all" :class="{
-            'bg-primary-10': hasUnsavedChanges,
-            'bg-primary-10/20': !hasUnsavedChanges,
+          class="main-button animated-button flex items-center gap-2 px-4 py-2 shadow-lg transition-all" :class="{
+            'bg-primary-5': hasUnsavedChanges,
+            'bg-primary-5/20': !hasUnsavedChanges,
             'opacity-50 cursor-not-allowed': isSaving,
           }">
           <IconLoader class="w-4 animate-spin" v-if="isSaving" />
@@ -81,7 +83,7 @@
       </div>
 
       <BlocksResponsiveInfo v-model="showOverallReportPanel" sidePanelClass="w-96">
-        <PagesReport id="tracking-day" :is-food="false" :computedRecipe="computedDailyNutrition as any" />
+        <PagesReport id="tracking-day" :is-food="false" :computedRecipe="computedDailyNutrition as any" :showTitle="true" />
       </BlocksResponsiveInfo>
 
       <BlocksResponsiveModal v-model="showRecipeSearchModal">

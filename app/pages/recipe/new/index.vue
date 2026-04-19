@@ -2,37 +2,37 @@
   <div class="flex justify-center w-full">
     <div class="w-full flex flex-col gap-4 items-start">
       <textarea v-model="baseRecipe.title" v-auto-resize rows="1" placeholder="✍️ New Recipe"
-        class="w-full md:w-auto min-w-[40%] font-bold text-3xl border-box bg-primary-10/40! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto break-words scrollbar-hide" />
+        class="w-full md:w-auto min-w-[40%] font-headers text-3xl border-box main-card md:bg-primary-5/80! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto wrap-break-word scrollbar-hide" />
 
       <textarea v-model="baseRecipe.description" v-auto-resize rows="1" placeholder="✍️ Description"
-        class="min-w-[60%] bg-primary-10/40! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto break-words scrollbar-hide text-sm" />
+        class="min-w-[60%] main-card md:bg-primary-5/80! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto wrap-break-word scrollbar-hide text-sm" />
 
-      <div class="flex w-full flex-wrap gap-4 mt-6">
+      <div class="flex w-full flex-wrap gap-4 mt-6 flex-col md:flex-row">
         <!-- Ingredients column -->
         <div class="flex-1 space-y-2">
-          <h2 class="text-4xl font-bold tracking-tighter">Ingredients</h2>
-          <div class="main-card bg-primary-10/40! main-card-padding space-y-2">
+          <h2 class="text-4xl font-headers tracking-tight">Ingredients</h2>
+          <div class="py-4 space-y-2">
             <div class="flex gap-4 flex-wrap justify-between">
               <div class="flex gap-4">
                 <!-- Serves -->
-                <div class="flex items-center gap-2 bg-primary-10 rounded-4xl px-3 py-1">
-                  <span class="text-xs uppercase text-gray-400 font-bold">Serves</span>
+                <div class="flex items-center gap-2 bg-primary-5 main-card-rounded px-3 py-1">
+                  <span class="text-xs uppercase text-gray-400 font-mono">Serves</span>
                   <div class="w-px bg-gray-300 self-stretch"></div>
                   <input v-model.number="serves" type="number" min="1" max="16"
-                    class="w-8 text-center font-bold focus:outline-none bg-transparent" />
+                    class="w-8 text-center font-mono focus:outline-none bg-transparent" />
                 </div>
 
                 <!-- Nutrition preview -->
-                <div class="flex items-center gap-2 bg-primary-10 rounded-4xl px-3 py-1">
-                  <span class="text-xs uppercase text-gray-400 font-bold">kcal/serving</span>
+                <div class="flex items-center gap-2 bg-primary-5 main-card-rounded px-3 py-1">
+                  <span class="text-xs uppercase text-gray-400 font-mono">kcal/serving</span>
                   <div class="w-px bg-gray-300 self-stretch"></div>
-                  <span class="font-semibold text-slate-700">
+                  <span class="font-mono text-slate-700">
                     {{ Math.round((computedRecipe ?? {}).kcal ?? 0) }}
                   </span>
                 </div>
               </div>
               <!-- NL toggle -->
-              <button class="animated-button flex items-center gap-2 px-3 py-1 text-sm bg-primary-10"
+              <button class="main-button animated-button flex items-center gap-2 px-3 py-1 text-sm bg-primary-5"
                 @click="useNaturalLanguage = !useNaturalLanguage">
                 <IconRefreshCcw class="w-4" />
                 {{ !useNaturalLanguage ? 'Natural language' : 'Structured' }}
@@ -43,27 +43,26 @@
             <div v-if="useNaturalLanguage">
               <textarea v-model="base_ingredients" rows="10"
                 placeholder="For the sauce: &#10;1 cup of wine&#10;1 cup of tomato sauce&#10;2 tbsp of olive oil"
-                class="w-full bg-primary-20/70! rounded-4xl p-3 outline-none resize-y text-sm font-mono" />
+                class="w-full bg-primary-20/70! main-card-rounded p-3 outline-none resize-y text-sm font-mono" />
             </div>
 
             <!-- Structured ingredient groups -->
             <div v-else>
               <EditableGroupList v-model="categories" :show-collapse="false" :show-group-header="false"
-                group-name-placeholder="Category name" add-group-label="Add category" new-group-name="New Category" />
+                group-name-placeholder="For the sauce" add-group-label="Add category" new-group-name="" />
             </div>
           </div>
         </div>
-
+        <div class="h-px bg-gray-100 self-stretch md:hidden"></div>
         <!-- Method column -->
         <div class="space-y-2 flex-1">
-          <h2 class="text-4xl font-bold tracking-tighter ml-2 mb-2">Method</h2>
+          <h2 class="text-4xl font-headers tracking-tight ml-2 mb-6">Method</h2>
           <PagesRecipeInstructionContainerEditable v-model="instructionsEditableInformation.instructions" />
         </div>
       </div>
 
-      <div class="flex gap-2 w-full justify-start md:mt-6">
-        <button
-          class="flex gap-2 items-center justify-center bg-primary text-white border-3 border-primary rounded-xl px-2 py-1 font-bold shadow-lg"
+      <div class="flex gap-2 w-full justify-end md:justify-start md:mt-6">
+        <button class="main-button animated-button bg-primary! text-white px-4 py-2 font-bold shadow-lg"
           @click="submit()">
           Submit
         </button>
@@ -85,7 +84,7 @@ const recipeStore = useRecipeStore();
 // Flat state replacing the old `ingredientListEditableInformation` blob
 const serves = ref(4);
 const categories = ref<TrackedMeal[]>([
-  { name: '', editableIngredients: [{ rawText: '', displayText: '' }], collapsed: false },
+  { name: null, editableIngredients: [{ rawText: '', displayText: '' }], collapsed: false },
 ]);
 const useNaturalLanguage = ref(false);
 const base_ingredients = ref('');
@@ -181,16 +180,15 @@ function setEditableInformation(computableRecipe: ComputableRecipe | null) {
 
   if (grouped.size === 0) {
     categories.value = [
-      { name: '', editableIngredients: [{ rawText: '', displayText: '' }], collapsed: false },
+      { name: null, editableIngredients: [{ rawText: '', displayText: '' }], collapsed: false },
     ];
   } else {
     categories.value = [...grouped.entries()].map(([catName, ings]) => ({
-      name: catName,
+      name: catName ?? null,
       editableIngredients: ings.map((ing) => fullIngredientToEditableItem(ing, batchSize)),
       collapsed: false,
     }));
   }
-
   serves.value = batchSize;
   base_ingredients.value = computableRecipe.fullIngredients
     .map((ing) => {

@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex flex-col gap-2 overflow-hidden">
+    <div class="main-card main-card-padding main-card-rounded flex flex-col gap-2 overflow-hidden">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Plant Diversity
@@ -7,15 +7,16 @@
                 <p class="text-sm text-gray-400">Unique plants detected this week</p>
             </div>
 
-            <div class="bg-secondary/70 text-green-800 px-6 text-sm -mr-4 -mt-4 md:-mr-6 md:-mt-6 rounded-bl-3xl h-18 flex items-center justify-center">
+            <div
+                class="bg-primary/8 text-green-800 px-6 text-sm -mr-4 -mt-4 md:-mr-6 md:-mt-6 rounded-bl-3xl h-18 flex items-center justify-center">
                 <span class="text-2xl font-bold">{{ plants.length }}</span>/30
             </div>
         </div>
 
-        <div class="relative mx-auto aspect-square rounded-4xl w-full bg-gradient-to-center from-secondary/10 via-secondary/30 to-secondary/10"
+        <div class="relative mx-auto aspect-square main-card-rounded w-full bg-gradient-to-center from-secondary/10 via-secondary/30 to-secondary/10"
             v-if="plants.length">
             <div v-for="plant in plants" :key="plant.id"
-                class="absolute rounded-full shadow-md transition-transform will-change-transform duration-200 hover:scale-[1.03]"
+                class="absolute rounded-full shadow-md transition-transform will-change-transform duration-200 hover:scale-[1.01]"
                 :title="`${plant.name} • ${formatGrams(plant.grams)} g this week`" :style="plant.style" tabindex="0"
                 @mouseenter="hoveredPlant = plant" @mouseleave="hoveredPlant = null" @focus="hoveredPlant = plant"
                 @blur="hoveredPlant = null">

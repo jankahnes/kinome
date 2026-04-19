@@ -1,15 +1,15 @@
 <template>
   <div class="w-full space-y-2 max-w-screen-md">
-    <h1 class="text-3xl font-bold text-gray-900">Scan a Recipe</h1>
+    <h1 class="text-3xl font-headers tracking-tight">Scan a Recipe</h1>
     <div class="inline-flex flex-col">
       <p class="text-gray-800">
         Take a picture of a handwritten or printed recipe
       </p>
       <p class="text-gray-400 text-sm font-extralight">or</p>
       <p class="text-gray-800">Take a picture of your plate</p>
-      <p class="text-gray-400">...and we'll handle the rest!</p>
+      <p class="text-gray-800 font-bold">...and we'll handle the rest!</p>
     </div>
-    <div class="space-y-8 mt-2">
+    <div class="space-y-8 mt-4">
       <div class="text-sm text-gray-800">
         <p class="mb-2">📱 <strong>Tips for best results:</strong></p>
         <ul class="list-disc list-inside space-y-1 text-xs">

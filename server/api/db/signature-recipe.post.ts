@@ -6,14 +6,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{ recipeId?: number | null }>(event);
   const recipeId = body?.recipeId ?? null;
 
-  let user: { id: string } | null = null;
+  let user: { sub: string } | null = null;
   try {
     user = await serverSupabaseUser(event);
   } catch (error) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     const { error } = await client
       .from('profiles')
       .update({ signature_recipe: null })
-      .eq('id', user.id);
+      .eq('id', user.sub);
 
     if (error) {
       throw createError({ statusCode: 500, statusMessage: 'Failed to clear signature recipe' });
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Recipe not found' });
   }
 
-  if (recipe.user_id !== user.id) {
+  if (recipe.user_id !== user.sub) {
     throw createError({ statusCode: 403, statusMessage: 'Not authorized to sign this recipe' });
   }
 
@@ -57,13 +57,13 @@ export default defineEventHandler(async (event) => {
   const { error: updateError } = await client
     .from('profiles')
     .update({ signature_recipe: recipeId })
-    .eq('id', user.id);
+    .eq('id', user.sub);
 
   if (updateError) {
     throw createError({ statusCode: 500, statusMessage: 'Failed to save signature recipe' });
   }
 
-  await handleSignatureSet(client as any, user.id, recipeId);
+  await handleSignatureSet(client as any, user.sub, recipeId);
 
   return { success: true, recipeId };
 });

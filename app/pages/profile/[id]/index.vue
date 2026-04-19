@@ -1,18 +1,19 @@
 <template>
-  <div class="mt-10 mb-20 md:mb-8 mx-2 lg:px-8 flex justify-center">
-    <div class="max-w-[1300px] w-full flex flex-col gap-8">
+  <div class="flex justify-center">
+    <div class="max-w-[1300px] w-full flex flex-col gap-6 sm:gap-8">
 
       <!-- ── HEADER ──────────────────────────────────────────────── -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5" v-if="user">
+      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-5" v-if="user">
         <div class="flex items-center gap-4">
-          <Avatar :user="user ?? null" class="w-26" />
+          <Avatar :user="user ?? null" class="w-22 md:w-26" />
           <div class="flex flex-col items-start">
-            <h1 class="text-3xl font-bold tracking-tight leading-none">
+            <h1 class="text-4xl font-headers tracking-tight leading-none">
               {{ user?.username ?? 'Guest' }}
             </h1>
-            <p class="text-sm text-gray-400 leading-none mt-1">Member since {{ joinDate }}</p>
+            <p class="text-xs text-gray-400 leading-none mt-1">Member since {{ joinDate }} · {{ levelDisplay.title }}
+            </p>
             <NuxtLink v-if="isOwn" to="/account"
-              class="bg-primary-10/50 flex items-center justify-center animated-button px-2 py-1 gap-1 text-gray-500 mt-2"
+              class="bg-primary-5/70 flex items-center justify-center main-button animated-button px-2 py-1 gap-1 text-gray-500 mt-2"
               title="Settings">
               <IconSettings class="w-4 h-4" />
               <span class="text-xs">Account Settings</span>
@@ -20,30 +21,33 @@
           </div>
         </div>
         <div class="flex gap-2">
-          <div class="flex items-stretch bg-primary-10/50 rounded-3xl overflow-hidden self-start sm:self-auto">
+          <div class="flex items-stretch bg-primary-5/70 rounded-3xl overflow-hidden self-start sm:self-auto">
             <NuxtLink :to="'/profile/' + user?.id + '/recipes'"
-              class="flex flex-col items-center px-5 py-3 hover:bg-primary-10 transition-colors cursor-pointer">
-              <span class="text-2xl font-bold tracking-tighter leading-none">{{ counts.created }}</span>
-              <span class="text-[11px] text-gray-500 uppercase tracking-wide">Created</span>
+              class="flex flex-col items-center px-5 py-1 sm:py-3 hover:bg-primary-5 transition-colors cursor-pointer">
+              <span class="text-2xl tracking-tighter leading-none text-primary font-headers italic!">{{ counts.created
+              }}</span>
+              <span class="text-[11px] text-gray-600 uppercase font-mono">Created</span>
             </NuxtLink>
             <div class="w-px bg-black/8 my-2"></div>
             <NuxtLink :to="'/profile/' + user?.id + '/bookmarks'"
-              class="flex flex-col items-center px-5 py-3 hover:bg-primary-10 transition-colors cursor-pointer">
-              <span class="text-2xl font-bold tracking-tighter leading-none">{{ counts.saved }}</span>
-              <span class="text-[11px] text-gray-500 uppercase tracking-wide">Saved</span>
+              class="flex flex-col items-center px-5 py-1 sm:py-3 hover:bg-primary-5 transition-colors cursor-pointer">
+              <span class="text-2xl tracking-tighter leading-none text-primary font-headers italic!">{{ counts.saved
+              }}</span>
+              <span class="text-[11px] text-gray-600 uppercase font-mono">Saved</span>
             </NuxtLink>
             <div class="w-px bg-black/8 my-2"></div>
             <NuxtLink :to="'/profile/' + user?.id + '/activity'"
-              class="flex flex-col items-center px-5 py-3 hover:bg-primary-10 transition-colors cursor-pointer">
-              <span class="text-2xl font-bold tracking-tighter leading-none">{{ counts.rated }}</span>
-              <span class="text-[11px] text-gray-500 uppercase tracking-wide">Rated</span>
+              class="flex flex-col items-center px-5 py-1 sm:py-3 hover:bg-primary-5 transition-colors cursor-pointer">
+              <span class="text-2xl tracking-tighter leading-none text-primary font-headers italic!">{{ counts.rated
+              }}</span>
+              <span class="text-[11px] text-gray-600 uppercase font-mono">Rated</span>
             </NuxtLink>
           </div>
         </div>
       </div>
       <Skeleton class="h-26 w-full" v-else />
 
-      <div class="h-px bg-black/8"></div>
+      <div class="h-px bg-black/5"></div>
 
       <!-- ── MAIN GRID ──────────────────────────────────────────── -->
       <div class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
@@ -52,16 +56,16 @@
         <div class="flex flex-col gap-6" v-if="user && !metricsLoading">
 
           <!-- ── HERO BANNER: Archetype ───────────────── -->
-          <div class="main-card flex gap-6 overflow-hidden items-center py-6 relative">
-            <img class="w-30 -ml-10 rotate-160 scale-250 z-0" src="/blob.webp">
-            <img class="h-30 w-25 z-10 -ml-20" src="/temp/archetype-icon.png">
-            <div class="ml-16">
-              <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-0.5">Archetype</p>
-              <h2 v-if="metrics?.archetype" class="text-[54px] font-bold tracking-tighter leading-none">
+          <div class="main-card main-card-rounded flex gap-6 overflow-hidden items-center py-6 relative">
+            <img class="w-20 md:w-30 -ml-10 rotate-160 scale-250 z-0" src="/blob.webp">
+            <img class="h-20 md:h-30 z-10 -ml-12 md:-ml-18" src="/temp/archetype-icon.png">
+            <div class="ml-4 md:ml-16">
+              <p class="text-xs uppercase tracking-widest text-gray-400 font-mono mb-0.5">Archetype</p>
+              <h2 v-if="metrics?.archetype" class="text-3xl md:text-[54px] font-headers tracking-tighter leading-none">
                 {{ metrics.archetype.label }}
               </h2>
               <h2 v-else-if="metrics?.coldStart"
-                class="text-[40px] font-bold tracking-tighter leading-none text-gray-400">
+                class="text-[40px] font-headers tracking-tighter leading-none text-gray-400">
                 Not enough data
               </h2>
               <h2 v-else class="text-[40px] font-bold tracking-tighter leading-none text-gray-300">
@@ -94,25 +98,29 @@
           <div v-if="signatureRecipe || isOwn">
             <div class="mx-4 mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex items-center gap-2.5">
-                <h3 class="text-xl font-bold tracking-tighter">Signature Recipe</h3>
+                <h3 class="text-xl font-headers tracking-tighter">Signature Recipe</h3>
               </div>
               <div v-if="isOwn && signatureRecipe" class="flex flex-wrap gap-2">
                 <button type="button"
-                  class="animated-button rounded-full bg-primary-10/50 hover:bg-primary-10 transition-colors px-4 py-2 text-sm font-semibold text-gray-700"
+                  class="main-button animated-button rounded-full bg-primary-5/80 hover:bg-primary-5 transition-colors px-4 py-2 text-sm font-semibold text-gray-700"
                   @click="openSignatureModal(signatureRecipe)">
                   Re-sign
                 </button>
                 <NuxtLink :to="'/profile/' + user?.id + '/recipes?mode=signature'"
-                  class="animated-button rounded-full bg-primary-10/50 hover:bg-primary-10 transition-colors px-4 py-2 text-sm font-semibold text-gray-700">
+                  class="main-button animated-button rounded-full bg-primary-5/80 hover:bg-primary-5 transition-colors px-4 py-2 text-sm font-semibold text-gray-700">
                   Change recipe
                 </NuxtLink>
               </div>
             </div>
             <div v-if="signatureRecipe" class="relative">
-              <RecipeCardHighlight :recipe="signatureRecipe" uniqueId="profile-sig" :is-signature="true" />
+              <RecipeCardHighlight :recipe="signatureRecipe" uniqueId="profile-sig" :is-signature="true"
+                class="hidden md:flex" />
+              <RecipeCardHighlightMobile :recipe="signatureRecipe" uniqueId="profile-sig" :is-signature="true"
+                class="md:hidden" />
               <div class="pointer-events-none absolute top-10 right-10 z-20 flex flex-col items-end">
                 <span
-                  class="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                  class="rounded-full bg-primary px-2.5 text-[10px] font-headers font-semibold italic uppercase tracking-widest text-white flex items-center gap-1">
+                  <IconSparkle class="w-2" fill="currentColor" />
                   <p>Signature</p>
                 </span>
               </div>
@@ -123,13 +131,13 @@
               </div>
             </div>
             <button v-else type="button"
-              class="animated-button flex min-h-52 w-full flex-col items-center justify-center gap-3 rounded-4xl! border-2 border-dashed border-primary/60 bg-primary-10/40 px-6 py-10 text-center"
+              class="main-button animated-button flex min-h-52 w-full flex-col items-center justify-center gap-3 main-card-rounded! border-2 border-dashed border-primary/60 bg-primary-5/40 px-6 py-10 text-center"
               @click="goToSignatureSelection">
               <div class="rounded-full bg-primary p-3 text-white">
                 <IconPencil class="h-6 w-6" />
               </div>
               <div>
-                <p class="text-2xl font-bold tracking-tighter">Set your signature recipe</p>
+                <p class="text-2xl tracking-tight font-headers italic">Set your signature recipe</p>
                 <p class="mt-1 max-w-lg text-sm text-gray-500">
                   Choose one of your original recipes, sign it, and feature it here on your profile.
                 </p>
@@ -138,51 +146,51 @@
           </div>
 
           <!-- Trophy Case -->
-          <div class="xp-card bg-primary-10/50 rounded-4xl p-6 flex">
-            <div class="flex flex-col">
-              <h3 class="text-xl font-bold tracking-tighter">Cook Level</h3>
-              <div class="flex-1 flex flex-col justify-center gap-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-xl">🍳</span>
-                  <span class="hidden text-xl">{{ levelDisplay.icon }}</span>
-                  <span class="text-2xl font-bold tracking-tight">{{ levelDisplay.title }}</span>
-                </div>
-                <div class="w-full sm:w-52 h-2.5 rounded-full bg-black/10 overflow-hidden">
-                  <div class="h-full rounded-full primary-gradient transition-all"
-                    :style="{ width: levelDisplay.progressPct + '%' }"></div>
-                </div>
-                <span class="text-xs text-gray-400">
-                  Lv {{ levelDisplay.level }} · {{ levelDisplay.xp }} / {{ levelDisplay.nextFloor }} XP
-                  <template v-if="levelDisplay.nextTitle">
-                    · next: <span class="font-medium text-gray-500">{{ levelDisplay.nextTitle }}</span>
-                  </template>
-                </span>
+          <div class="bg-primary-5/50 main-card-rounded p-6 space-y-4">
+            <div class="flex items-baseline justify-between gap-3">
+              <h3 class="text-xl font-headers tracking-tighter">Achievements</h3>
+              <span class="text-[11px] text-gray-400 font-mono tracking-wider">{{ unlockedAchievementCount }}/{{
+                achievementCards.length }}
+                unlocked</span>
+            </div>
+            <div
+              class="grid gap-2 max-h-102 p-0.5 overflow-hidden grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
+              <div v-for="ach in achievementCards" :key="ach.key"
+                class="flex flex-col items-center gap-1.5 p-3 rounded-3xl text-center transition-all duration-200 relative"
+                :class="[
+                  ach.unlocked ? 'shadow-sm' : 'bg-black/4 opacity-55 grayscale',
+                  ach.unlocked && ach.tierColor === 'gold' ? 'bg-amber-50 border border-amber-200' : '',
+                  ach.unlocked && ach.tierColor === 'silver' ? 'bg-slate-50 border border-slate-200' : '',
+                  ach.unlocked && ach.tierColor === 'bronze' ? 'bg-orange-50 border border-orange-200' : '',
+                  ach.unlocked && ach.tierColor === 'special' ? 'bg-primary-50 border border-primary/20' : '',
+                ]">
+                <span class="text-3xl select-none leading-none mt-0.5">{{ ach.icon }}</span>
+                <span class="text-xs font-medium leading-none text-gray-700 mt-0.5">{{ ach.name }}</span>
+                <span v-if="ach.badge" class="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{{
+                  ach.badge }}</span>
+                <span class="text-[10px] leading-tight text-gray-400 font-mono">{{ ach.progressLabel }}</span>
               </div>
             </div>
-            <div class="w-px bg-gray-200 mx-10"></div>
-            <div class="flex-1 space-y-4">
-              <div class="flex items-baseline justify-between gap-3">
-                <h3 class="text-xl font-bold tracking-tighter">Achievements</h3>
-                <span class="text-xs text-gray-400">{{ unlockedAchievementCount }}/{{ achievementCards.length }}
-                  unlocked</span>
+          </div>
+
+          <!-- Cook Level -->
+          <div class="bg-primary-5/50 main-card-rounded p-6 space-y-4">
+            <h3 class="text-[10px] uppercase font-mono text-gray-500 tracking-wider">Cook Level</h3>
+            <div class="flex-1 flex flex-col justify-center gap-2">
+              <p>
+                <span class="text-4xl italic tracking-tight font-headers">{{ levelDisplay.title }}</span>
+                <span class="text-[10px] font-mono tracking-wider text-gray-500 ml-4">Lv {{ levelDisplay.level }} · {{
+                  levelDisplay.xp }} / {{ levelDisplay.nextFloor }} XP</span>
+              </p>
+              <div class="w-full h-2.5 rounded-full bg-black/10 overflow-hidden mt-2">
+                <div class="h-full rounded-full bg-primary transition-all"
+                  :style="{ width: levelDisplay.progressPct + '%' }"></div>
               </div>
-              <div class="grid gap-3" style="grid-template-columns: repeat(auto-fill, minmax(92px, 1fr))">
-                <div v-for="ach in achievementCards" :key="ach.key"
-                  class="flex flex-col items-center gap-1.5 p-3 rounded-3xl text-center transition-all duration-200 relative"
-                  :class="[
-                    ach.unlocked ? 'shadow-sm' : 'bg-black/4 opacity-55 grayscale',
-                    ach.unlocked && ach.tierColor === 'gold' ? 'bg-amber-50 ring-1 ring-amber-200' : '',
-                    ach.unlocked && ach.tierColor === 'silver' ? 'bg-slate-50 ring-1 ring-slate-200' : '',
-                    ach.unlocked && ach.tierColor === 'bronze' ? 'bg-orange-50 ring-1 ring-orange-200' : '',
-                    ach.unlocked && ach.tierColor === 'special' ? 'bg-primary-50 ring-1 ring-primary/20' : '',
-                  ]">
-                  <span class="text-3xl select-none leading-none mt-0.5">{{ ach.icon }}</span>
-                  <span class="text-xs font-medium leading-none text-gray-700 mt-0.5">{{ ach.name }}</span>
-                  <span v-if="ach.badge" class="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{{
-                    ach.badge }}</span>
-                  <span class="text-[10px] leading-tight text-gray-400 px-1">{{ ach.progressLabel }}</span>
-                </div>
-              </div>
+              <p class="uppercase text-[10px] font-mono tracking-wider">
+                <span class=" text-gray-500">{{ levelDisplay.nextFloor -
+                  levelDisplay.xp }} XP to <span class="text-primary">{{ levelDisplay.nextTitle
+                  }}</span></span>
+              </p>
             </div>
           </div>
         </div>
@@ -192,14 +200,14 @@
         <div class="flex flex-col gap-6" v-if="user && !metricsLoading">
 
           <!-- Taste Radar -->
-          <div class="bg-primary-10/50 rounded-4xl main-card-padding overflow-hidden">
-            <h3 class="text-xl font-bold tracking-tighter">Taste Radar</h3>
+          <div class="bg-primary-5/50 main-card-rounded main-card-padding overflow-hidden">
+            <h3 class="text-xl font-headers tracking-tighter">Taste Radar</h3>
             <p class="text-xs text-gray-400 mb-5 leading-none">Your cooking profile & taste neighbors</p>
 
             <div class="relative flex items-center justify-center" style="height: 290px">
               <ClientOnly>
-                <apexchart v-if="hasRadarData" type="radar" height="280" :options="radarChartOptions" class="-mt-20"
-                  :series="radarChartSeries" />
+                <apexchart v-if="hasRadarData" type="radar" height="280" :options="radarChartOptions"
+                  class="-mt-20 -mb-6" :series="radarChartSeries" />
                 <template #fallback>
                   <div class="text-xs text-gray-300">Loading chart…</div>
                 </template>
@@ -212,14 +220,14 @@
             </div>
 
             <div v-if="tasteNeighbors.length > 0" class="h-px bg-gray-200 mx-2 my-4 -mt-10"></div>
-            <div v-if="tasteNeighbors.length > 0" class="flex flex-col items-center -mb-2">
-              <div class="flex group">
+            <div v-if="tasteNeighbors.length > 0" class="flex flex-col -mb-2 lg:mx-2">
+              <div class="flex justify-between">
                 <NuxtLink v-for="(neighbor, index) in tasteNeighbors" :key="neighbor.id" :to="'/profile/' + neighbor.id"
-                  class="flex p-2 flex-col items-center rounded-2xl hover:bg-primary-10 transition-colors animated-button">
+                  class="flex p-2 flex-col items-center rounded-2xl hover:bg-primary-5 transition-colors animated-button">
                   <Avatar :user="neighbor" class="w-12" />
-                  <span class="font-semibold text-sm leading-none mt-1">{{ neighbor.username }}</span>
-                  <span class="text-xs whitespace-nowrap text-gray-400 flex items-center gap-0.5">
-                    <span class="text-xs" v-if="index === 0">⭐</span>
+                  <span class="text-sm leading-tight mt-1">{{ neighbor.username }}</span>
+                  <span class="text-[11px] font-mono whitespace-nowrap text-gray-500 flex items-center gap-0.5">
+                    <span class="" v-if="index === 0">⭐</span>
                     {{ neighbor.match }}% Match
                   </span>
                 </NuxtLink>
@@ -228,29 +236,28 @@
           </div>
 
           <!-- Recent Activity -->
-          <div class="bg-primary-10/50 rounded-4xl main-card-padding">
+          <div class="bg-primary-5/50 main-card-rounded main-card-padding">
             <div class="flex items-center justify-between">
-              <h3 class="text-xl font-bold tracking-tighter">Recent Activity</h3>
+              <h3 class="text-xl font-headers tracking-tighter">Recent Activity</h3>
               <NuxtLink :to="'/profile/' + user?.id + '/activity'"
-                class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-0.5 transition-colors">
-                View all
-                <IconChevronRight class="w-4 h-4" />
+                class="text-xs text-gray-600 flex items-center gap-0.5">
+                See all
+                <IconChevronRight class="w-4 h-4" :strokeWidth="1.5" />
               </NuxtLink>
             </div>
             <div v-if="recentActivity.length > 0" class="flex flex-col gap-3 mt-2">
               <component :is="item.href ? NuxtLink : 'div'" v-for="(item, i) in recentActivity" :key="item.id"
                 :to="item.href ?? undefined" class="flex items-start gap-3 pt-3"
                 :class="[{ 'border-t border-black/5': i > 0 }, item.href ? 'group cursor-pointer' : '']">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 mt-0.5"
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5"
                   :class="item.bgClass">
                   {{ item.emoji }}
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm leading-snug"
-                    :class="{ 'group-hover:underline decoration-primary underline-offset-2': item.href }"
-                    v-html="item.text">
+                  <p class="text-[13px] leading-snug">
+                    {{ item.text }}
                   </p>
-                  <p class="text-xs text-gray-400 mt-0.5">{{ item.time }}</p>
+                  <p class="text-[11px] font-mono text-gray-400 mt-0.5">{{ item.time }}</p>
                 </div>
               </component>
             </div>
@@ -263,9 +270,10 @@
       </div>
 
       <!-- ── DEV: Archetype Affinity Widget ──────────────────────── -->
-      <div v-if="metrics && metrics.all && metrics.all.length > 0 && isAdmin" class="main-card main-card-padding">
+      <div v-if="metrics && metrics.all && metrics.all.length > 0 && isAdmin"
+        class="main-card main-card-padding main-card-rounded">
         <div class="flex items-baseline justify-between mb-4">
-          <h3 class="text-xl font-bold tracking-tighter">Archetype Affinity <span
+          <h3 class="text-xl font-headers tracking-tighter">Archetype Affinity <span
               class="text-[10px] text-gray-400 uppercase tracking-wide ml-1">dev</span></h3>
           <span class="text-xs text-gray-400">|T| = {{ metrics.tSize }} · ranked by O = ½S + ½percentile</span>
         </div>
@@ -469,7 +477,7 @@ const radarChartSeries = computed(() => {
   }];
 });
 
-const RADAR_PRIMARY_COLOR = '#FFC340';
+const RADAR_PRIMARY_COLOR = 'var(--color-primary)';
 
 const radarChartOptions = computed(() => ({
   chart: {
@@ -481,7 +489,7 @@ const radarChartOptions = computed(() => ({
   },
   xaxis: {
     categories: RADAR_AXES.map((a) => a.label),
-    labels: { style: { colors: Array(RADAR_AXES.length).fill('#9ca3af'), fontSize: '10px' } },
+    labels: { style: { colors: Array(RADAR_AXES.length).fill('gray'), fontSize: '9px', fontFamily: 'var(--font-mono)' } },
   },
   yaxis: { min: 0, max: 10, tickAmount: 5, labels: { show: false } },
   stroke: { width: 2.5, colors: [RADAR_PRIMARY_COLOR] },
@@ -493,7 +501,7 @@ const radarChartOptions = computed(() => ({
       polygons: {
         strokeColors: '#e2e8f0',
         connectorColors: '#e2e8f0',
-        fill: { colors: ['#fafafa', '#fff7e6'] },
+        fill: { colors: ['#fafafa', 'var(--color-primary-20)'] },
       },
     },
   },
@@ -612,8 +620,8 @@ function activityToEntry(item: Activity): ActivityEntry {
       const title = htmlEscape(item.recipe?.title ?? 'a recipe');
       const verb = item.recipe?.source_type === 'PREPARSED' || item.recipe?.source_type === 'TEXT' ? 'Created' : 'Added';
       return {
-        id, emoji: '🍳', bgClass: 'bg-primary-10', time,
-        text: `${verb} <strong>${title}</strong>`,
+        id, emoji: '🍳', bgClass: 'bg-primary-5', time,
+        text: `${verb} ${title}`,
         href: item.recipe?.id ? getRecipeUrl(item.recipe.id, item.recipe.title ?? '') : null,
       };
     }
@@ -622,7 +630,7 @@ function activityToEntry(item: Activity): ActivityEntry {
       const stars = item.rating?.rating ?? 0;
       return {
         id, emoji: '⭐', bgClass: 'bg-amber-50', time,
-        text: `Rated <strong>${title}</strong> ${stars}/5`,
+        text: `Rated ${title} ${stars}/5`,
         href: item.rating?.recipe?.id ? getRecipeUrl(item.rating.recipe.id, item.rating.recipe.title ?? '') : null,
       };
     }
@@ -630,7 +638,7 @@ function activityToEntry(item: Activity): ActivityEntry {
       const title = htmlEscape(item.comment?.recipe?.title ?? 'a recipe');
       return {
         id, emoji: '💬', bgClass: 'bg-blue-50', time,
-        text: `Commented on <strong>${title}</strong>`,
+        text: `Commented on ${title}`,
         href: item.comment?.recipe?.id ? getRecipeUrl(item.comment.recipe.id, item.comment.recipe.title ?? '') : null,
       };
     }
@@ -640,7 +648,7 @@ function activityToEntry(item: Activity): ActivityEntry {
       const name = htmlEscape(item.food?.name ?? 'a food');
       return {
         id, emoji: '🌿', bgClass: 'bg-teal-50', time,
-        text: `Added <strong>${name}</strong> to the database`,
+        text: `Added ${name} to the database`,
         href: item.food_name_id ? getFoodUrl(item.food_name_id, item.food?.name ?? '') : null,
       };
     }

@@ -1,249 +1,31 @@
 <template>
-  <div class="flex flex-wrap gap-10" v-if="fullNutrition">
-    <!-- Vitamins Section -->
-    <div class="basis-full flex-1">
-      <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        <span>💊</span>
-        <span>Vitamins</span>
-      </h3>
-      <div class="flex flex-col gap-4">
-        <div v-for="nutrient in vitamins" :key="nutrient.key">
-          <div class="flex justify-between items-center gap-2 mb-1">
-            <span class="text-lg tracking-tight">{{ nutrient.label }}</span>
-            <div class="flex flex-col items-end">
-              <span class="font-semibold whitespace-nowrap leading-none">
-                {{ formatValue(scaledFullNutrition[nutrient.key]) }}
-                {{ nutrient.unit }}
-              </span>
-              <!-- RDA indicator bar under value -->
-
-              <span
-                class="text-xs text-gray-500 leading-none mt-2"
-                v-if="false"
-              >
-                {{
-                  getRdaBarPercentage(
-                    scaledFullNutrition[nutrient.key],
-                    rdaValues[nutrient.key]
-                  ).toFixed(0)
-                }}% RDA
-              </span>
-              <div
-                class="flex w-10 h-1 rounded-full overflow-hidden bg-gray-200 mt-1"
-              >
-                <div
-                  class="h-full rounded-full bg-gray-700 transition-all duration-300"
-                  :style="{
-                    width:
-                      getRdaBarPercentage(
-                        scaledFullNutrition[nutrient.key],
-                        rdaValues[nutrient.key]
-                      ) + '%',
-                  }"
-                ></div>
-              </div>
-            </div>
-          </div>
-          <!-- Main bar (relative to calories) -->
-          <div class="flex w-full h-2 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full rounded-full transition-all duration-300 bg-purple-200"
-              :style="{
-                width:
-                  getMainBarPercentage(
-                    scaledFullNutrition[nutrient.key],
-                    rdaValues[nutrient.key]
-                  ) + '%',
-              }"
-            ></div>
-          </div>
-        </div>
-      </div>
+  <div v-if="fullNutrition" class="flex flex-row flex-wrap gap-x-10 gap-y-9">
+    <div class="flex-1 min-w-0 space-y-9 basis-100">
+      <NutritionMicroGroup
+        v-for="s in rail1"
+        :key="s.title"
+        :title="s.title"
+        :subtitle="s.subtitle"
+        :accent-class="s.accentClass"
+        :bar-class="s.barClass"
+        :kind="s.kind"
+        :items="s.items"
+        :kcal="kcalForNorm"
+        
+      />
     </div>
-
-    <!-- Minerals Section -->
-    <div class="basis-full flex-1">
-      <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        <span>⚡</span>
-        <span>Minerals</span>
-      </h3>
-      <div class="flex flex-col gap-4">
-        <div v-for="nutrient in minerals" :key="nutrient.key">
-          <div class="flex justify-between items-baseline gap-2 mb-1">
-            <span class="text-lg tracking-tight">{{ nutrient.label }}</span>
-            <div class="flex flex-col items-end gap-0.5">
-              <span class="font-semibold whitespace-nowrap leading-none">
-                {{ formatValue(scaledFullNutrition[nutrient.key]) }}
-                {{ nutrient.unit }}
-              </span>
-              <!-- RDA indicator bar under value -->
-              <div
-                class="flex w-10 h-1 rounded-full overflow-hidden bg-gray-200 mt-1"
-              >
-                <div
-                  class="h-full rounded-full bg-gray-700 transition-all duration-300"
-                  :style="{
-                    width:
-                      getRdaBarPercentage(
-                        scaledFullNutrition[nutrient.key],
-                        rdaValues[nutrient.key]
-                      ) + '%',
-                  }"
-                ></div>
-              </div>
-            </div>
-          </div>
-          <!-- Main bar (relative to calories) -->
-          <div class="flex w-full h-2 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full rounded-full transition-all duration-300 bg-orange-200"
-              :style="{
-                width:
-                  getMainBarPercentage(
-                    scaledFullNutrition[nutrient.key],
-                    rdaValues[nutrient.key]
-                  ) + '%',
-              }"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Fatty Acids Section -->
-    <div class="flex-1">
-      <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        <span>🥑</span>
-        <span>Fatty Acids</span>
-      </h3>
-      <div class="flex flex-col gap-4">
-        <div v-for="nutrient in fattyAcids" :key="nutrient.key">
-          <div class="flex justify-between items-baseline gap-2 mb-1">
-            <span class="text-lg tracking-tight">{{ nutrient.label }}</span>
-            <div class="flex flex-col items-end gap-0.5">
-              <span class="font-semibold whitespace-nowrap leading-none">
-                {{ formatValue(scaledFullNutrition[nutrient.key]) }}
-                {{ nutrient.unit }}
-              </span>
-              <!-- RDA indicator bar under value -->
-              <div
-                class="flex w-10 h-1 rounded-full overflow-hidden bg-gray-200 mt-1"
-              >
-                <div
-                  class="h-full rounded-full bg-gray-700 transition-all duration-300"
-                  :style="{
-                    width:
-                      getRdaBarPercentage(
-                        scaledFullNutrition[nutrient.key],
-                        rdaValues[nutrient.key]
-                      ) + '%',
-                  }"
-                ></div>
-              </div>
-            </div>
-          </div>
-          <!-- Main bar (relative to calories) -->
-          <div class="flex w-full h-2 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full rounded-full transition-all duration-300 bg-green-200"
-              :style="{
-                width:
-                  getMainBarPercentage(
-                    scaledFullNutrition[nutrient.key],
-                    rdaValues[nutrient.key]
-                  ) + '%',
-              }"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Protective Compounds Section -->
-    <div class="flex-1">
-      <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        <span>🛡️</span>
-        <span>Protective Compounds</span>
-      </h3>
-      <div class="flex flex-col gap-4">
-        <div v-for="compound in protectiveCompounds" :key="compound.key">
-          <div class="flex justify-between items-baseline gap-2 mb-1">
-            <span class="text-lg tracking-tight">{{ compound.label }}</span>
-            <span
-              class="font-semibold leading-none"
-              :class="
-                getLevelColor(report.details?.protectiveCompounds?.[compound.key] as number)
-              "
-            >
-              {{
-                getLevelText(
-                  report.details?.protectiveCompounds?.[compound.key] as number
-                )
-              }}
-            </span>
-          </div>
-          <!-- Bar showing 0-10 scale -->
-          <div class="flex w-full h-2 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full rounded-full bg-teal-200 transition-all duration-300"
-              :style="{
-                width:
-                  ((report.details?.protectiveCompounds?.[compound.key] as number) / 50) *
-                    100 +
-                  '%',
-              }"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Amino Acids Section -->
-    <div class="flex-1">
-      <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
-        <span>🧬</span>
-        <span>Amino Acids</span>
-      </h3>
-      <div class="flex flex-col gap-4">
-        <div v-for="nutrient in aminoAcids" :key="nutrient.key">
-          <div class="flex justify-between items-baseline gap-2 mb-1">
-            <span class="text-lg tracking-tight">{{ nutrient.label }}</span>
-            <div class="flex flex-col items-end gap-0.5">
-              <span class="font-semibold whitespace-nowrap leading-none">
-                {{ formatValue(scaledFullNutrition[nutrient.key]) }}
-                {{ nutrient.unit }}
-              </span>
-              <!-- RDA indicator bar under value -->
-              <div
-                class="flex w-10 h-1 rounded-full overflow-hidden bg-gray-200 mt-1"
-              >
-                <div
-                  class="h-full rounded-full bg-gray-700 transition-all duration-300"
-                  :style="{
-                    width:
-                      getRdaBarPercentage(
-                        scaledFullNutrition[nutrient.key],
-                        rdaValues[nutrient.key]
-                      ) + '%',
-                  }"
-                ></div>
-              </div>
-            </div>
-          </div>
-          <!-- Main bar (relative to calories) -->
-          <div class="flex w-full h-2 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full rounded-full transition-all duration-300 bg-blue-200"
-              :style="{
-                width:
-                  getMainBarPercentage(
-                    scaledFullNutrition[nutrient.key],
-                    rdaValues[nutrient.key]
-                  ) + '%',
-              }"
-            ></div>
-          </div>
-        </div>
-      </div>
+    <div class="flex-1 min-w-0 space-y-9 basis-100">
+      <NutritionMicroGroup
+        v-for="s in rail2"
+        :key="s.title"
+        :title="s.title"
+        :subtitle="s.subtitle"
+        :accent-class="s.accentClass"
+        :bar-class="s.barClass"
+        :kind="s.kind"
+        :items="s.items"
+        :kcal="kcalForNorm"
+      />
     </div>
   </div>
 </template>
@@ -251,44 +33,49 @@
 <script setup lang="ts">
 import type { FullFoodRow } from '~/types/types';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   food?: FullFoodRow;
   recipe?: Recipe;
   portionMultiplier?: number;
-}>();
+  /** Include a Macros group (carbs, fat, protein, fiber, salt) at the top of rail 1 */
+  showMacros?: boolean;
+}>(), {
+  showMacros: false,
+});
 
 const fullNutrition = computed(() => {
-  if (props.food) {
-    return props.food;
-  } else if (props.recipe) {
-    return props.recipe.report?.cumulative ?? {};
-  }
+  if (props.food) return props.food;
+  if (props.recipe) return props.recipe.report?.cumulative ?? {};
   return {};
 });
 
 const report = computed(() => {
-  if (props.food) {
-    return props.food.report;
-  } else if (props.recipe) {
-    return props.recipe.report;
-  }
-  return {};
+  if (props.food) return props.food.report;
+  if (props.recipe) return props.recipe.report;
+  return {} as any;
 });
 
-// Scaled food values
-const scaledFullNutrition = computed(() => {
-  if (!fullNutrition.value) return {};
-  const scaled: Record<string, number> = {};
-  for (const key in fullNutrition.value) {
-    if (typeof fullNutrition.value[key] === 'number') {
-      scaled[key] =
-        (fullNutrition.value[key] as number) * (props.portionMultiplier ?? 1);
-    }
+const scaled = computed(() => {
+  const source = fullNutrition.value as Record<string, unknown>;
+  const mult = props.portionMultiplier ?? 1;
+  const out: Record<string, number> = {};
+  if (!source) return out;
+  for (const key in source) {
+    if (typeof source[key] === 'number') out[key] = (source[key] as number) * mult;
   }
-  return scaled;
+  return out;
 });
 
-// RDA values in the appropriate units
+/** Base kcal used to normalize the on-track badge. Prefer recipe-level kcal, else cumulative. */
+const kcalForNorm = computed(() => {
+  const recipeKcal = (props.recipe as any)?.kcal;
+  if (typeof recipeKcal === 'number' && recipeKcal > 0) {
+    return recipeKcal * (props.portionMultiplier ?? 1);
+  }
+  return scaled.value['kcal'] ?? 2200;
+});
+
+// ---------- RDA definitions ----------
 const rdaValues: Record<string, number> = {
   // Vitamins
   vitamin_a_ug_rae: 900,
@@ -303,7 +90,6 @@ const rdaValues: Record<string, number> = {
   niacin_b3_mg: 16,
   folate_ug_dfe: 400,
   choline_mg: 550,
-
   // Minerals
   calcium_mg: 1000,
   copper_mg: 0.9,
@@ -314,8 +100,7 @@ const rdaValues: Record<string, number> = {
   potassium_mg: 4700,
   selenium_ug: 55,
   zinc_mg: 11,
-
-  // Amino Acids (essential amino acids - rough estimates for adults)
+  // Amino Acids
   cysteine_mg: 700,
   histidine_mg: 700,
   isoleucine_mg: 1400,
@@ -327,16 +112,15 @@ const rdaValues: Record<string, number> = {
   tryptophan_mg: 280,
   tyrosine_mg: 1750,
   valine_mg: 1820,
-
-  // Fatty Acids (based on typical recommendations)
-  saturated_fat: 20, // g, upper limit
-  trans_fats_mg: 2000, // mg, upper limit (2g)
-  mufas_total_mg: 30000, // mg (30g)
-  omega3_total_mg: 1600, // mg (1.6g)
-  omega6_total_mg: 17000, // mg (17g)
+  // Fatty Acids (rough targets / upper limits)
+  saturated_fat: 20,
+  trans_fats_mg: 2000,
+  mufas_total_mg: 30000,
+  omega3_total_mg: 1600,
+  omega6_total_mg: 17000,
 };
 
-const vitamins = [
+const vitaminDefs = [
   { key: 'vitamin_a_ug_rae', label: 'Vitamin A', unit: 'μg RAE' },
   { key: 'vitamin_b6_mg', label: 'Vitamin B6', unit: 'mg' },
   { key: 'vitamin_b12_ug', label: 'Vitamin B12', unit: 'μg' },
@@ -351,7 +135,7 @@ const vitamins = [
   { key: 'choline_mg', label: 'Choline', unit: 'mg' },
 ];
 
-const minerals = [
+const mineralDefs = [
   { key: 'calcium_mg', label: 'Calcium', unit: 'mg' },
   { key: 'copper_mg', label: 'Copper', unit: 'mg' },
   { key: 'iodine_ug', label: 'Iodine', unit: 'μg' },
@@ -363,7 +147,7 @@ const minerals = [
   { key: 'zinc_mg', label: 'Zinc', unit: 'mg' },
 ];
 
-const aminoAcids = [
+const aminoDefs = [
   { key: 'cysteine_mg', label: 'Cysteine', unit: 'mg' },
   { key: 'histidine_mg', label: 'Histidine', unit: 'mg' },
   { key: 'isoleucine_mg', label: 'Isoleucine', unit: 'mg' },
@@ -377,7 +161,7 @@ const aminoAcids = [
   { key: 'valine_mg', label: 'Valine', unit: 'mg' },
 ];
 
-const fattyAcids = [
+const fattyAcidDefs = [
   { key: 'saturated_fat', label: 'Saturated Fat', unit: 'g' },
   { key: 'trans_fats_mg', label: 'Trans Fats', unit: 'mg' },
   { key: 'mufas_total_mg', label: 'Monounsaturated Fats', unit: 'mg' },
@@ -385,66 +169,154 @@ const fattyAcids = [
   { key: 'omega6_total_mg', label: 'Omega-6', unit: 'mg' },
 ];
 
-const protectiveCompounds = [
+const protectiveDefs = [
   { key: 'carotenoidsPer2000kcal', label: 'Carotenoids' },
   { key: 'polyphenolsPer2000kcal', label: 'Polyphenols' },
   { key: 'glucosinolatesPer2000kcal', label: 'Glucosinolates' },
 ];
 
-// Helper function to format value
-function formatValue(val: number | undefined): string {
-  if (val === 0 || val === null || val === undefined) return '0';
-  if (val < 0.01) return val.toFixed(4);
-  if (val < 1) return val.toFixed(2);
-  if (val < 10) return val.toFixed(1);
-  return val.toFixed(0);
+// ---------- Section row builders ----------
+function rdaRows(defs: { key: string; label: string; unit: string }[]) {
+  return defs.map((d) => ({
+    key: d.key,
+    label: d.label,
+    unit: d.unit,
+    value: scaled.value[d.key] ?? 0,
+    rda: rdaValues[d.key] ?? 0,
+  }));
 }
 
-// Helper function to calculate main bar percentage
-function getMainBarPercentage(
-  value: number | undefined,
-  rda: number | undefined
-): number {
-  if (!value || !rda) return 0;
-  const kcal = scaledFullNutrition.value['kcal'] ?? 2200;
-  return Math.min((value / rda) * (2200 / kcal) * 100, 100);
-}
+const levelRows = computed(() =>
+  protectiveDefs.map((d) => ({
+    key: d.key,
+    label: d.label,
+    levelValue: (report.value?.details?.protectiveCompounds?.[d.key] as number) ?? 0,
+  })),
+);
 
-// Helper function to calculate RDA bar percentage
-function getRdaBarPercentage(
-  value: number | undefined,
-  rda: number | undefined
-): number {
-  if (!value || !rda) return 0;
-  return Math.min((value / rda) * 100, 100);
-}
+const macroRows = computed(() => {
+  const s = scaled.value;
+  return [
+    {
+      key: 'carbohydrates',
+      label: 'Carbs',
+      unit: 'g',
+      value: s.carbohydrates ?? 0,
+      ref: 260,
+      barClass: 'bg-carbs',
+      subLabel: 'Sugar',
+      subValue: s.sugar ?? 0,
+      subBarClass: 'bg-sugar',
+    },
+    {
+      key: 'fat',
+      label: 'Fat',
+      unit: 'g',
+      value: s.fat ?? 0,
+      ref: 70,
+      barClass: 'bg-fat',
+      subLabel: 'Saturated Fat',
+      subValue: s.saturated_fat ?? 0,
+      subBarClass: 'bg-saturated-fat',
+    },
+    {
+      key: 'protein',
+      label: 'Protein',
+      unit: 'g',
+      value: s.protein ?? 0,
+      ref: 50,
+      barClass: 'bg-protein',
+    },
+    {
+      key: 'fiber',
+      label: 'Fiber',
+      unit: 'g',
+      value: s.fiber ?? 0,
+      ref: 25,
+      barClass: 'bg-fiber',
+    },
+    {
+      key: 'salt',
+      label: 'Salt',
+      unit: 'g',
+      value: s.salt ?? 0,
+      ref: 5,
+      barClass: 'bg-salt',
+    },
+  ];
+});
 
-// Helper function to get level text for protective compounds
-function getLevelText(value: number | undefined): string {
-  if (!value || value < 5) return 'None';
-  if (value < 20) return 'Trace';
-  if (value < 30) return 'Some';
-  if (value < 40) return 'Moderate';
-  if (value < 60) return 'High';
-  if (value < 100) return 'Very High';
-  if (value < 120) return 'Excellent';
-  if (value < 180) return 'Exceptional';
-  else return 'Superior';
-}
+// ---------- Section objects & rail layout ----------
+type Section = {
+  title: string;
+  subtitle?: string;
+  accentClass: string;
+  barClass: string;
+  kind: 'rda' | 'level' | 'macro';
+  items: any[];
+};
 
-// Helper function to get level color for protective compounds
-function getLevelColor(value: number | undefined): string {
-  if (!value || value < 1) return 'text-gray-400';
-  if (value < 5) return 'text-gray-500';
-  if (value < 20) return 'text-green-500';
-  if (value < 30) return 'text-green-600';
-  if (value < 40) return 'text-emerald-600';
-  if (value < 60) return 'text-blue-700';
-  if (value < 100) return 'text-blue-800';
-  if (value < 120) return 'text-purple-800';
-  if (value < 180) return 'text-purple-900';
-  else return 'text-purple-900';
-}
+const macroSection = computed<Section>(() => ({
+  title: 'Macros',
+  subtitle: 'per serving',
+  accentClass: 'bg-slate-500',
+  barClass: 'bg-slate-200',
+  kind: 'macro',
+  items: macroRows.value,
+}));
+
+const vitaminSection = computed<Section>(() => ({
+  title: 'Vitamins',
+  accentClass: 'bg-purple-400',
+  barClass: 'bg-purple-200',
+  kind: 'rda',
+  items: rdaRows(vitaminDefs),
+}));
+
+const mineralSection = computed<Section>(() => ({
+  title: 'Minerals',
+  accentClass: 'bg-orange-400',
+  barClass: 'bg-orange-200',
+  kind: 'rda',
+  items: rdaRows(mineralDefs),
+}));
+
+const fattyAcidSection = computed<Section>(() => ({
+  title: 'Fatty Acids',
+  accentClass: 'bg-green-400',
+  barClass: 'bg-green-200',
+  kind: 'rda',
+  items: rdaRows(fattyAcidDefs),
+}));
+
+const aminoSection = computed<Section>(() => ({
+  title: 'Amino Acids',
+  accentClass: 'bg-blue-400',
+  barClass: 'bg-blue-200',
+  kind: 'rda',
+  items: rdaRows(aminoDefs),
+}));
+
+const protectiveSection = computed<Section>(() => ({
+  title: 'Protective Compounds',
+  accentClass: 'bg-teal-400',
+  barClass: 'bg-teal-200',
+  kind: 'level',
+  items: levelRows.value,
+}));
+
+/**
+ * Balanced rails (~equal vertical height). Row counts:
+ *   With macros:    rail1 = 5+12+5 = 22,   rail2 = 9+11+3 = 23
+ *   Without macros: rail1 = 12+5+3 = 20,   rail2 = 9+11    = 20
+ */
+const rail1 = computed<Section[]>(() => {
+  if (props.showMacros) return [macroSection.value, vitaminSection.value, fattyAcidSection.value];
+  return [vitaminSection.value, fattyAcidSection.value, protectiveSection.value];
+});
+
+const rail2 = computed<Section[]>(() => {
+  if (props.showMacros) return [mineralSection.value, aminoSection.value, protectiveSection.value];
+  return [mineralSection.value, aminoSection.value];
+});
 </script>
-
-<style scoped></style>

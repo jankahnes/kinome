@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import * as LucideIcons from 'lucide-vue-next';
+import * as LucideIcons from '@lucide/vue';
 
 const props = defineProps<{
   name: string;
@@ -50,6 +50,20 @@ const iconMap: Record<string, any> = {
   'check-check': LucideIcons.CheckCheck,
   'shield-alert': LucideIcons.ShieldAlert,
   rss: LucideIcons.Rss,
+  'notebook-pen': LucideIcons.NotebookPen,
+  'chef-hat': LucideIcons.ChefHat,
+  zap: LucideIcons.Zap,
+  'shield-check': LucideIcons.ShieldCheck,
+  sparkles: LucideIcons.Sparkles,
+  'chart-bar': LucideIcons.ChartBar,
+  'list-checks': LucideIcons.ListChecks,
+  activity: LucideIcons.Activity,
+  'arrow-right': LucideIcons.ArrowRight,
+  'arrow-left': LucideIcons.ArrowLeft,
+  plus: LucideIcons.Plus,
+  'chart-bar': LucideIcons.ChartBar,
+  'list-checks': LucideIcons.ListChecks,
+  'activity': LucideIcons.Activity,
 };
 
 const icon = computed(() => iconMap[props.name]);

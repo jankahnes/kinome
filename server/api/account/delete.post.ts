@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  if (!user?.id || user.is_anonymous) {
+  if (!user?.sub || user.is_anonymous) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized',
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = serverSupabaseServiceRole<Database>(event);
-  const { error } = await client.auth.admin.deleteUser(user.id);
+  const { error } = await client.auth.admin.deleteUser(user.sub);
 
   if (error) {
     throw createError({

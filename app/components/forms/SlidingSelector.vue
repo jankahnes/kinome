@@ -1,27 +1,14 @@
 <template>
-  <div
-    class="relative w-full overflow-hidden touch-pan-x py-1 select-none"
-    @touchstart="onTouchStart"
-    @touchmove="onTouchMove"
-    @touchend="onTouchEnd"
-  >
-    <div
-      class="flex transition-transform duration-300 ease-out"
-      :style="{
-        transform: `translateX(calc(${translateX}% + ${dragOffset}px))`,
-        transition: dragging ? 'none' : 'transform 0.3s ease-out',
-      }"
-    >
-      <div
-        v-for="(choice, index) in choices"
-        :key="index"
-        class="flex-shrink-0 p-[2px]"
-        :style="itemStyle(index)"
-        @click="selectChoice(index)"
-      >
+  <div class="relative w-full overflow-hidden touch-pan-x py-1 select-none" @touchstart="onTouchStart"
+    @touchmove="onTouchMove" @touchend="onTouchEnd">
+    <div class="flex transition-transform duration-300 ease-out" :style="{
+      transform: `translateX(calc(${translateX}% + ${dragOffset}px))`,
+      transition: dragging ? 'none' : 'transform 0.3s ease-out',
+    }">
+      <div v-for="(choice, index) in choices" :key="index" class="flex-shrink-0 p-[2px]" :style="itemStyle(index)"
+        @click="selectChoice(index)">
         <div
-          class="text-center cursor-pointer text-xl font-bold px-1 py-0.5 bg-secondary rounded-lg transition-all duration-300 ease-out"
-        >
+          class="text-center cursor-pointer text-xl font-bold px-1 py-0.5 bg-primary/8 rounded-lg transition-all duration-300 ease-out">
           {{ choice }}
         </div>
       </div>
@@ -125,7 +112,7 @@ function onTouchEnd() {
 </script>
 
 <style scoped>
-.flex > div > div {
+.flex>div>div {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 </style>

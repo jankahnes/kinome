@@ -4,7 +4,7 @@ import { handleTrackingSaved } from '~~/server/utils/gamification/service';
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
-  if (!user?.id) {
+  if (!user?.sub) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const { count, error } = await client
     .from('tracked_meals')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+    .eq('user_id', user.sub)
     .eq('meal_date', logicalDate)
     .not('is_template', 'is', true);
 
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if ((count ?? 0) > 0) {
-    await handleTrackingSaved(client as any, user.id, logicalDate);
+    await handleTrackingSaved(client as any, user.sub, logicalDate);
   }
 
   return { success: true };

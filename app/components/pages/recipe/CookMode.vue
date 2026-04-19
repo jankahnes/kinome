@@ -7,7 +7,7 @@
 
     <!-- Panel: full-screen on mobile, side panel on md+ -->
     <Transition name="cook-panel">
-      <div v-if="isOpen" class="fixed inset-0 z-[300] bg-primary-10 flex flex-col overflow-hidden
+      <div v-if="isOpen" class="fixed inset-0 z-[300] bg-primary-5 flex flex-col overflow-hidden
                md:inset-auto md:top-0 md:right-0 md:bottom-0 md:w-[500px] md:rounded-l-3xl md:shadow-2xl">
 
         <!-- Header -->
@@ -124,7 +124,7 @@
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex flex-col gap-2 items-start">
                         <h2 v-if="currentStepData?.title"
-                          class="text-3xl font-bold tracking-tight text-gray-900 leading-none -mb-1">
+                          class="text-3xl font-headers tracking-tight leading-none -mb-1">
                           {{ currentStepData.title }}
                         </h2>
                         <div v-if="currentStepData?.step_time"
@@ -144,7 +144,7 @@
                       </p>
                       <div class="flex gap-3 flex-wrap">
                         <div v-for="ing in stepIngredients" :key="ing.id"
-                          class="flex items-center gap-1.5 bg-secondary rounded-4xl px-2 py-1 basis-auto">
+                          class="flex items-center gap-1.5 bg-primary/8 main-card-rounded px-2 py-1 basis-auto">
                           <img v-if="ing.visual_category" :src="`/foods/${ing.visual_category}.webp`" :alt="ing.name"
                             class="h-5 object-contain" />
                           <span v-else class="text-2xl leading-none">🥄</span>
@@ -157,7 +157,7 @@
                     <div class="h-px bg-gray-200/70 my-4" />
                     <!-- Instruction text -->
                     <div class="">
-                      <p class="text-lg leading-relaxed cook-instruction"
+                      <p class="text-lg cook-instruction"
                         v-html="renderInstruction(currentStepData?.formatted_text ?? '')" />
                     </div>
                   </div>
@@ -171,7 +171,7 @@
                     </div>
 
                     <!-- Timer -->
-                    <div v-if="timerTotal > 0" class="self-center bg-primary-10 rounded-3xl flex items-center gap-4">
+                    <div v-if="timerTotal > 0" class="self-center bg-primary-5 rounded-3xl flex items-center gap-4">
                       <div class="relative w-24 h-24 flex items-center justify-center">
                         <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
                           <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" class="text-gray-200"
@@ -190,13 +190,13 @@
                       </div>
                       <div class="flex gap-2">
                         <button @click="toggleTimer"
-                          class="animated-button bg-primary-500 text-gray-900 px-6 py-2.5 font-semibold flex items-center gap-2 text-sm">
+                          class="main-button animated-button bg-primary-500 text-gray-900 px-6 py-2.5 font-semibold flex items-center gap-2 text-sm">
                           <IconPlay v-if="!timerRunning" class="w-4 h-4" />
                           <IconPause v-else class="w-4 h-4" />
                           {{ timerRunning ? 'Pause' : timerSeconds === 0 ? "Time's up!" : 'Start timer' }}
                         </button>
                         <button @click="resetTimer"
-                          class="animated-button px-3 py-2.5 text-gray-600 bg-white border border-gray-200 flex items-center justify-center">
+                          class="main-button animated-button px-3 py-2.5 text-gray-600 bg-white border border-gray-200 flex items-center justify-center">
                           <IconRotateCcw class="w-4 h-4" />
                         </button>
                       </div>
@@ -231,7 +231,7 @@
                   Add it to today's meal log.
                 </p>
                 <button v-if="!trackingAdded" @click="trackMeal" :disabled="trackingLoading"
-                  class="animated-button w-full flex items-center justify-center gap-2 py-3 bg-primary-500 text-gray-900 font-semibold text-sm disabled:opacity-60">
+                  class="main-button animated-button w-full flex items-center justify-center gap-2 py-3 bg-primary text-white text-gray-900 font-semibold text-sm disabled:opacity-60">
                   <IconLoaderCircle v-if="trackingLoading" class="w-4 h-4 animate-spin" />
                   <IconPlus v-else class="w-4 h-4" />
                   {{ trackingLoading ? 'Saving...' : 'Add to today\'s tracking' }}
@@ -246,10 +246,12 @@
               <div class="rounded-3xl p-4" v-if="auth.user && props.recipeId">
                 <div class="flex items-center gap-2 mb-1">
                   <IconCamera class="w-4 h-4" :class="photoShared ? 'text-green-600' : 'text-gray-500'" />
-                  <h3 class="font-semibold text-sm" :class="photoShared ? 'text-green-800' : 'text-gray-700'">Snap a photo</h3>
+                  <h3 class="font-semibold text-sm" :class="photoShared ? 'text-green-800' : 'text-gray-700'">Snap a
+                    photo</h3>
                 </div>
                 <Transition name="phase-forward" mode="out-in">
-                  <div v-if="photoShared" key="done" class="flex items-center gap-2 py-2 text-green-700 text-sm font-medium">
+                  <div v-if="photoShared" key="done"
+                    class="flex items-center gap-2 py-2 text-green-700 text-sm font-medium">
                     <IconCheck class="w-4 h-4" />
                     Photo shared!
                   </div>
@@ -265,22 +267,21 @@
                     </div>
                     <div v-else class="flex gap-2">
                       <button
-                        class="animated-button flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-sm"
+                        class="main-button animated-button flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-sm"
                         @click="triggerPhotoFile">
                         <IconUpload class="w-4 h-4" />
                         Upload
                       </button>
                       <button
-                        class="animated-button flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-sm"
+                        class="main-button animated-button flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-sm"
                         @click="triggerPhotoCamera">
                         <IconCamera class="w-4 h-4" />
                         Camera
                       </button>
                     </div>
                     <button v-if="photoPreview"
-                      class="animated-button w-full flex items-center justify-center gap-2 py-2.5 bg-primary-500 text-gray-900 font-semibold text-sm disabled:opacity-60"
-                      @click="sharePhoto"
-                      :disabled="photoUploading">
+                      class="main-button animated-button w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-white text-gray-900 font-semibold text-sm disabled:opacity-60"
+                      @click="sharePhoto" :disabled="photoUploading">
                       <IconLoaderCircle v-if="photoUploading" class="w-4 h-4 animate-spin" />
                       <IconCheck v-else class="w-4 h-4" />
                       {{ photoUploading ? 'Sharing…' : 'Share photo' }}
@@ -321,7 +322,7 @@
                         <textarea v-model="reviewText" rows="2" placeholder="Any notes about this recipe? (optional)"
                           class="w-full p-3 rounded-xl border border-gray-200 bg-white text-sm resize-none focus:outline-none focus:border-primary-400" />
                         <button @click="submitReview" :disabled="reviewLoading"
-                          class="animated-button self-end flex items-center gap-1.5 px-4 py-2 bg-primary-500 text-gray-900 font-semibold text-sm disabled:opacity-60">
+                          class="main-button animated-button self-end flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-gray-900 font-semibold text-sm disabled:opacity-60">
                           <IconLoaderCircle v-if="reviewLoading" class="w-3.5 h-3.5 animate-spin" />
                           <IconCheck v-else class="w-3.5 h-3.5" />
                           Submit
@@ -343,7 +344,7 @@
           <!-- Intro footer -->
           <template v-if="phase === 'intro'">
             <button @click="startCooking" :disabled="!steps.length"
-              class="animated-button flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-500 text-white font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+              class="main-button animated-button flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-500 text-white font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed">
               <IconChefHat class="w-4 h-4" />
               Let's cook!
             </button>
@@ -352,17 +353,17 @@
           <!-- Cooking footer -->
           <template v-else-if="phase === 'cooking'">
             <button @click="prevStep"
-              class="animated-button flex-1 flex items-center justify-center gap-1.5 py-3.5 border border-gray-200 text-gray-700 font-semibold text-sm">
+              class="main-button animated-button flex-1 flex items-center justify-center gap-1.5 py-3.5 border border-gray-200 text-gray-700 font-semibold text-sm">
               <IconChevronLeft class="w-4 h-4" />
               {{ currentStep === 0 ? 'Back' : 'Previous' }}
             </button>
             <button v-if="currentStep < steps.length - 1" @click="nextStep"
-              class="animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-primary-500 text-gray-900 font-semibold text-sm">
+              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-primary text-white font-semibold text-sm">
               Next step
               <IconChevronRight class="w-4 h-4" />
             </button>
             <button v-else @click="finishCooking"
-              class="animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-green-500 text-white font-semibold text-sm">
+              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-green-500 text-white font-semibold text-sm">
               <IconCheck class="w-4 h-4" />
               Done cooking!
             </button>
@@ -371,7 +372,7 @@
           <!-- Outro footer -->
           <template v-else>
             <button @click="close"
-              class="animated-button flex-1 flex items-center justify-center gap-2 py-3.5 border border-gray-200 text-gray-700 font-semibold text-sm">
+              class="main-button animated-button flex-1 flex items-center justify-center gap-2 py-3.5 border border-gray-200 text-gray-700 font-semibold text-sm">
               <IconArrowLeft class="w-4 h-4" />
               Back to recipe
             </button>
@@ -383,7 +384,8 @@
   </Teleport>
 
   <input ref="photoFileInput" type="file" accept="image/*" class="hidden" @change="handlePhotoSelected" />
-  <input ref="photoCameraInput" type="file" accept="image/*" capture="environment" class="hidden" @change="handlePhotoSelected" />
+  <input ref="photoCameraInput" type="file" accept="image/*" capture="environment" class="hidden"
+    @change="handlePhotoSelected" />
 </template>
 
 <script setup lang="ts">

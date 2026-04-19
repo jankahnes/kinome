@@ -2,10 +2,10 @@
   <div class="relative ignore-swipe">
     <div class="relative">
       <div v-if="canScrollLeft"
-        class="absolute top-0 -left-[1px] h-full w-8 bg-gradient-to-r from-main to-transparent pointer-events-none z-20">
+        class="absolute top-0 -left-px h-full w-8 bg-linear-to-r from-[#fffefb] md:from-main to-transparent pointer-events-none z-20">
       </div>
       <div v-if="canScrollRight"
-        class="absolute top-0 -right-[1px] h-full w-8 bg-gradient-to-l from-main to-transparent pointer-events-none z-20">
+        class="absolute top-0 -right-px h-full w-8 bg-linear-to-l from-[#fffefb] md:from-main to-transparent pointer-events-none z-20">
       </div>
       <div ref="desktopContainer" class="overflow-x-hidden">
         <div ref="desktopSlider" class="flex select-none cursor-grab active:cursor-grabbing w-max" :class="[

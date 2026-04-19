@@ -295,7 +295,7 @@ export type EditableIngredient = {
 
 export type TrackedMeal = {
   id?: number;
-  name: string;
+  name: string | null;
   recipe_id?: number;
   uses_meal_id?: number;
   is_template?: boolean;

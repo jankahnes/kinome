@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="space-y-6 pt-8 pb-24 max-w-3xl">
     <div class="flex flex-col gap-2">
-      <h1 class="text-4xl font-bold tracking-tighter">Saved Meals</h1>
+      <h1 class="text-4xl font-headers tracking-tight">Saved Meals</h1>
       <p class="text-sm text-gray-500 ">
         Reusable meal templates for your breakfasts, shakes, and meal-prep staples. Edit them here, then add them from
         daily
@@ -10,7 +10,7 @@
     </div>
 
     <div v-if="isLoading" class="grid gap-4">
-      <Skeleton v-for="i in 3" :key="i" class="h-44 rounded-4xl" />
+      <Skeleton v-for="i in 3" :key="i" class="h-44 main-card-rounded" />
     </div>
 
     <div v-else-if="templates.length === 0" class="main-card main-card-padding text-center py-16">
@@ -22,31 +22,31 @@
       :show-remove-button="false" group-name-placeholder="Saved meal name">
       <template #group-header="{ group, groupIndex }">
         <header class="flex flex-wrap items-start justify-between gap-3 pr-1 pb-2"
-          :class="{ 'animated-button cursor-pointer': true }" @click="group.collapsed = !group.collapsed">
+          :class="{ 'main-button animated-button cursor-pointer': true }" @click="group.collapsed = !group.collapsed">
           <div class="min-w-0 flex-1 flex flex-wrap items-center  gap-2">
             <div class="relative mx-1 min-w-0">
-              <span class="text-xl font-bold invisible whitespace-pre px-4 py-0.5" aria-hidden="true">
+              <span class="text-xl font-headers invisible whitespace-pre px-4 py-0.5" aria-hidden="true">
                 {{ group.name || 'Saved meal name' }}
               </span>
               <input v-model="group.name"
-                class="text-xl font-bold focus:outline-none absolute inset-0 px-4 py-0.5 bg-main/30 rounded-xl cursor-text! min-w-0"
+                class="text-xl font-headers focus:outline-none absolute inset-0 px-4 py-0.5 bg-main/30 rounded-xl cursor-text! min-w-0"
                 placeholder="Saved meal name" @click.stop />
             </div>
             <span class="text-sm text-slate-400 mt-0.5">{{ `${Math.round(group.summary?.kcal ?? 0)}kcal` }}</span>
           </div>
           <div class="flex items-center gap-2 text-gray-600" @click.stop>
-            <button type="button" class="animated-button rounded-xl px-3 py-1.5 text-xs font-semibold"
+            <button type="button" class="main-button animated-button rounded-xl px-3 py-1.5 text-xs font-semibold"
               :class="group.dailySchedule?.active ? 'bg-emerald-50 text-emerald-800 ' : 'bg-slate-50 text-slate-700'"
               @click="toggleDailySchedule(group)">
               {{ getScheduleButtonLabel(group) }}
             </button>
             <button v-if="group.dailySchedule?.active && !group.dailySchedule?.schedule_until" type="button"
-              class="animated-button rounded-xl px-3 py-1.5 text-xs font-semibold bg-slate-50/70"
+              class="main-button animated-button rounded-xl px-3 py-1.5 text-xs font-semibold bg-slate-50/70"
               @click="openScheduleStopModal(group)">
               Set Stop
             </button>
             <button type="button"
-              class="animated-button rounded-xl bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-100"
+              class="main-button animated-button rounded-xl bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-100"
               @click="deleteTemplate(group.id, groupIndex)">
               Delete
             </button>
@@ -68,15 +68,16 @@
           <label class="flex flex-col gap-1 text-sm">
             <span class="font-medium">Number of days</span>
             <input v-model.number="scheduleDays" type="number" min="1" max="60"
-              class="rounded-2xl bg-primary-10 px-3 py-2 focus:outline-none" />
+              class="rounded-2xl bg-primary-5 px-3 py-2 focus:outline-none" />
           </label>
           <div class="flex justify-end gap-2">
             <button type="button"
-              class="animated-button rounded-2xl bg-slate-100 px-4 py-2 font-semibold text-slate-700"
+              class="main-button animated-button rounded-2xl bg-slate-100 px-4 py-2 font-semibold text-slate-700"
               @click="closeScheduleStopModal">
               Cancel
             </button>
-            <button type="button" class="animated-button rounded-2xl bg-primary px-4 py-2 text-white font-semibold"
+            <button type="button"
+              class="main-button animated-button rounded-2xl bg-primary px-4 py-2 text-white font-semibold"
               @click="scheduleForNextDays(scheduleTarget)">
               Save Stop
             </button>
@@ -87,9 +88,9 @@
 
     <div v-if="templates.length > 0" class="fixed bottom-16 lg:bottom-4 right-2 lg:right-10 z-50">
       <button @click="saveTemplateEdits" :disabled="isSaving || !hasUnsavedChanges"
-        class="animated-button flex items-center gap-2 px-4 py-2 shadow-lg transition-all" :class="{
-          'bg-primary-10': hasUnsavedChanges,
-          'bg-primary-10/20': !hasUnsavedChanges,
+        class="main-button animated-button flex items-center gap-2 px-4 py-2 shadow-lg transition-all" :class="{
+          'bg-primary-5': hasUnsavedChanges,
+          'bg-primary-5/20': !hasUnsavedChanges,
           'opacity-50 cursor-not-allowed': isSaving,
         }">
         <IconLoader class="w-4 animate-spin" v-if="isSaving" />

@@ -14,7 +14,7 @@ export type DailyQualityCard = {
   orderValue: number;
 };
 
-const NULL_PILL = 'bg-secondary';
+const NULL_PILL = 'bg-primary/8';
 
 function resolve(
   score: number | null | undefined,
@@ -473,8 +473,7 @@ export function getDailyQualityCards(
 
   // --- Protein (order 2, condition: notably high) ---
   const proteinScore: number | null = overall?.protein_score ?? null;
-  const totalProtein =
-    details?.protein?.proteinPerServing?.toFixed(0) ?? 0;
+  const totalProtein = details?.protein?.proteinPerServing?.toFixed(0) ?? 0;
   const proteinResolved = resolve(proteinScore, proteinTiers);
   const proteinConditionMet =
     proteinScore != null && proteinScore >= 68 && totalProtein > 5;

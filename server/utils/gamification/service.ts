@@ -178,6 +178,10 @@ export async function insertXpEvent(
   return { inserted: true, xpDelta };
 }
 
+function logicalDateAsRefId(logicalDate: string) {
+  return Number(normalizeDay(logicalDate).replace(/-/g, ''));
+}
+
 export async function awardActionXp(
   client: AnyClient,
   userId: string,
@@ -191,6 +195,15 @@ export async function awardActionXp(
 ) {
   const conf = XP_ACTIONS[eventType];
   const dailyCap = 'dailyCap' in conf ? conf.dailyCap : undefined;
+  const oncePerDay = options.oncePerDay ?? false;
+  // For recurring daily events without a natural ref_id, encode the logical
+  // date into ref_id so the (user, event_type, ref_type, ref_id, tier) unique
+  // constraint lets each day insert its own row.
+  const refId =
+    options.refId ??
+    (oncePerDay && options.logicalDate
+      ? logicalDateAsRefId(options.logicalDate)
+      : null);
   return insertXpEvent(client, {
     userId,
     eventType,
@@ -198,9 +211,9 @@ export async function awardActionXp(
     xpDelta: conf.xp,
     dailyCap,
     refType: options.refType ?? null,
-    refId: options.refId ?? null,
+    refId,
     logicalDate: options.logicalDate ?? null,
-    oncePerDay: options.oncePerDay ?? false,
+    oncePerDay,
   });
 }
 
@@ -291,6 +304,29 @@ async function trackedDatesByUser(client: AnyClient, userId: string) {
       (data ?? []).map((row) => String(row.meal_date)).filter(Boolean),
     ),
   ].sort();
+}
+
+function currentStreak(dates: string[], today: string) {
+  const set = new Set(dates.map(normalizeDay));
+  let count = 0;
+  const cursor = new Date(`${normalizeDay(today)}T00:00:00.000Z`);
+  while (set.has(cursor.toISOString().slice(0, 10))) {
+    count += 1;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+  return count;
+}
+
+export async function getVisitStreaks(
+  client: AnyClient,
+  userId: string,
+  today: string,
+) {
+  const dates = await visitDatesByUser(client, userId);
+  return {
+    current: currentStreak(dates, today),
+    longest: longestStreak(dates),
+  };
 }
 
 function longestStreak(dates: string[]) {

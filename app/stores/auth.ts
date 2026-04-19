@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const supabase = useSupabaseClient<Database>();
   const shoppingList = ref<ShoppingListItem[]>([]);
   const shoppingListOpen = ref(false);
+  const cookStreak = ref(0);
   const lastSyncTimestamp = ref(0);
   const SYNC_DEBOUNCE_MS = 2000;
 
@@ -22,13 +23,25 @@ export const useAuthStore = defineStore('auth', () => {
       }
     }
     profileFetched.value = true;
-    if (user.value?.username && user.value?.id) {
-      $fetch('/api/db/visit', {
+    registerDailyVisit();
+  }
+
+  async function registerDailyVisit() {
+    if (!user.value?.username || !user.value?.id) return;
+    try {
+      const res = await $fetch<{
+        success: boolean;
+        currentStreak: number;
+        longestStreak: number;
+      }>('/api/db/visit', {
         method: 'POST',
-        body: {
-          date: todayLogicalDate(),
-        },
+        body: { date: todayLogicalDate() },
       });
+      if (typeof res?.currentStreak === 'number') {
+        cookStreak.value = res.currentStreak;
+      }
+    } catch (e) {
+      console.warn('registerDailyVisit failed', e);
     }
   }
 
@@ -227,6 +240,8 @@ export const useAuthStore = defineStore('auth', () => {
     userFetched,
     shoppingList,
     profileFetched,
+    cookStreak,
+    registerDailyVisit,
     fetchProfile,
     fetchUser,
     signIn,

@@ -1,16 +1,17 @@
 <template>
     <Transition name="loaded-content">
-        <div class="max-w-screen-xl py-10" v-if="mounted">
+        <div class="max-w-7xl py-10" v-if="mounted">
             <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
                 <div class="space-y-2">
-                    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">Adjust your Metrics & Goals</h1>
+                    <h1 class="text-3xl sm:text-4xl font-headers tracking-tight">Adjust your Metrics & <span
+                            class="text-primary">Goals</span>.</h1>
                 </div>
 
                 <FormsTrackingBasicsSection :form="form" />
 
                 <FormsTrackingGoalSection :form="form" />
                 <button
-                    class="bg-primary text-white px-6 py-3 font-bold text-xl animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed self-end"
+                    class="bg-primary! text-white px-6 py-3 font-bold text-xl main-button animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed self-end"
                     @click.prevent="form.calculateTargets()" :disabled="!form.canContinueToStep3.value" type="button">
                     Recalculate Targets
                 </button>
@@ -19,7 +20,7 @@
 
                 <div class="flex justify-end">
                     <button
-                        class="bg-primary text-white px-6 py-3 font-bold text-xl animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-primary! text-white px-6 py-3 font-bold text-xl main-button animated-button rounded-full! disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="!form.canSubmit.value || saving" type="submit">
                         {{ saving ? 'Saving...' : 'Save Changes' }}
                     </button>
@@ -49,20 +50,20 @@ async function handleSubmit() {
 }
 
 onMounted(() => {
-  mounted.value = true;
+    mounted.value = true;
 });
 
 watch(
-  () => auth.user?.user_data,
-  (userData) => {
-  if (!auth.profileFetched) return;
-    const tracking = (userData as Record<string, any> | undefined)?.tracking ?? null;
-    const serialized = JSON.stringify(tracking);
-    if (serialized === lastLoadedTracking.value) return;
+    () => auth.user?.user_data,
+    (userData) => {
+        if (!auth.profileFetched) return;
+        const tracking = (userData as Record<string, any> | undefined)?.tracking ?? null;
+        const serialized = JSON.stringify(tracking);
+        if (serialized === lastLoadedTracking.value) return;
 
-    form.loadFromTrackingData(tracking);
-    lastLoadedTracking.value = serialized;
-  },
-  { immediate: true },
+        form.loadFromTrackingData(tracking);
+        lastLoadedTracking.value = serialized;
+    },
+    { immediate: true },
 );
 </script>

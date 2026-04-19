@@ -20,8 +20,8 @@
               :src="'/foods/' + modelValue.foodData.visual_category + '.webp'"
               class="w-12 h-12 object-contain shrink-0" />
             <div>
-              <div class="text-lg font-bold leading-tight">{{ modelValue.ingredientName }}</div>
-              <div class="text-sm text-slate-400 mt-0.5">per 100g</div>
+              <div class="text-xl font-headers leading-tight">{{ modelValue.ingredientName }}</div>
+              <div class="text-xs text-gray-400">per 100g</div>
             </div>
           </div>
           <NuxtLink :to="`/foods/${modelValue.foodNameId}`"
@@ -30,16 +30,16 @@
           </NuxtLink>
         </div>
         <div class="grid grid-cols-3 gap-2">
-          <div v-for="macro in foodInfoMacros" :key="macro.label" class="bg-secondary rounded-2xl p-3 text-center">
-            <div class="text-xl font-bold leading-none">{{ macro.value }}</div>
-            <div class="text-xs text-slate-400 mt-1">{{ macro.label }}</div>
+          <div v-for="macro in foodInfoMacros" :key="macro.label" class="bg-primary/8 rounded-2xl p-3 text-center">
+            <div class="text-xl leading-none">{{ macro.value }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ macro.label }}</div>
           </div>
         </div>
-        <div v-if="modelValue.foodData.description" class="text-sm text-slate-400 mt-1">{{
+        <div v-if="modelValue.foodData.description" class="text-sm text-gray-400 mt-1 line-clamp-12 ">{{
           formatDescription(modelValue.foodData.description, modelValue.foodData, modelValue.ingredientName ?? '') }}
         </div>
         <div v-if="modelValue.foodData.nova" class="flex items-center gap-2 text-sm">
-          <span class="font-semibold px-2 py-0.5 bg-secondary rounded-lg">NOVA {{ modelValue.foodData.nova }}</span>
+          <span class="font-semibold px-2 py-0.5 bg-primary/8 rounded-lg">NOVA {{ modelValue.foodData.nova }}</span>
           <span class="text-slate-500">{{ novaLabel }}</span>
         </div>
       </div>
@@ -51,7 +51,7 @@
         <div class="font-bold text-lg px-2 pb-2">Swap Ingredient</div>
         <button v-for="(variant, idx) in modelValue.foodVariants ?? []" :key="variant.id" type="button"
           class="flex items-center gap-3 p-3 rounded-2xl w-full text-left transition-colors"
-          :class="idx === currentVariantIndex ? 'bg-secondary' : 'hover:bg-secondary/50'" @click="selectVariant(idx)">
+          :class="idx === currentVariantIndex ? 'bg-primary/8' : 'hover:bg-primary/8'" @click="selectVariant(idx)">
           <img v-if="variant.food.visual_category" :src="'/foods/' + variant.food.visual_category + '.webp'"
             class="w-8 h-8 object-contain shrink-0" />
           <div v-else class="w-8 h-8 shrink-0" />
@@ -71,14 +71,13 @@
       <div class="relative flex-1 min-w-0">
         <!-- Ghost text layer (sits behind input) -->
         <div aria-hidden="true" class="absolute inset-0 flex items-center pointer-events-none overflow-hidden">
-          <span class="invisible whitespace-pre text-lg">{{ modelValue.rawText }}</span>
-          <span v-if="ghostSuffix"
-            class="text-gray-400 whitespace-pre text-lg pointer-events-auto cursor-text select-none"
+          <span class="invisible whitespace-pre">{{ modelValue.rawText }}</span>
+          <span v-if="ghostSuffix" class="text-gray-400 whitespace-pre pointer-events-auto cursor-text select-none"
             @mousedown.prevent="acceptGhost">{{ ghostSuffix }}</span>
         </div>
         <input ref="inputRef" v-model="modelValue.rawText" @blur="handleLeave()" @keydown.enter="handleEnter"
-          @keydown.tab.prevent="acceptGhost"
-          class="w-full focus:outline-none text-lg bg-transparent relative z-10 py-px" :placeholder="placeholder" />
+          @keydown.tab.prevent="acceptGhost" class="w-full focus:outline-none bg-transparent relative z-10 py-px"
+          :placeholder="placeholder" />
       </div>
       <button @mousedown.prevent @click="showScanner = true"
         class="text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center shrink-0"
@@ -92,9 +91,9 @@
         'cursor-pointer': !isLocked,
         'border-gray-300!': !modelValue.displayText,
       }" @click="isLocked ? null : handlePreviewClick()">
-      <div v-if="!modelValue.displayText" class="text-lg py-px">{{ modelValue.rawText }}</div>
+      <div v-if="!modelValue.displayText" class="py-px">{{ modelValue.rawText }}</div>
       <div class="flex gap-2 justify-between items-center" v-else>
-        <div class="flex items-center gap-1.5 flex-1 min-w-0 text-lg flex-wrap">
+        <div class="flex items-center gap-1.5 flex-1 min-w-0 flex-wrap">
           <!-- Branded food state indicators -->
           <span v-if="
             modelValue.brandedFoodState === 'needs_basic_info' ||
@@ -112,7 +111,7 @@
           <Transition name="input" appear>
             <!-- Food chip: tap to open food info -->
             <span v-if="modelValue.foodData && !isEditing"
-              class="font-bold pl-2 bg-secondary rounded-xl inline-flex gap-1 items-center cursor-pointer hover:bg-secondary/50 transition-colors"
+              class="font-semibold pl-2 bg-primary/8 rounded-xl inline-flex gap-1 items-center cursor-pointer hover:bg-primary/20 transition-colors"
               :class="{ 'px-2': (modelValue.foodVariants?.length ?? 0) <= 1 }" @click.stop="showFoodInfo = true">
               <img v-if="modelValue.foodData.visual_category"
                 :src="'/foods/' + modelValue.foodData.visual_category + '.webp'"
@@ -152,10 +151,12 @@
         </div>
 
         <!-- Right: measurement context + delete -->
-        <div class="flex items-center gap-2 shrink-0">
-          <span class="text-gray-500 text-sm hidden sm:block" v-if="modelValue.foodData">{{ measurementContext
-          }}</span>
-          <button @click.stop="emit('deleteIngredient')" class="text-gray-500 hover:text-gray-700 transition-colors"
+        <div class="flex items-center gap-2 shrink-0 font-mono tracking-normal">
+          <Icon v-if="parseWarning" name="alert-triangle"
+            class="w-3.5 text-amber-400 hidden sm:block"
+            :title="parseWarning" />
+          <span v-else-if="modelValue.foodData" class="text-gray-500 text-xs hidden sm:block">{{ measurementContext }}</span>
+          <button @click.stop="emit('deleteIngredient')" class="text-gray-400 hover:text-gray-700 transition-colors"
             :disabled="modelValue.brandedFoodState === 'matching'"
             :class="{ 'opacity-50 cursor-not-allowed': modelValue.brandedFoodState === 'matching' }">
             <IconX class="w-4" />
@@ -227,6 +228,13 @@ const showHoldHint = ref(false);
 const hasSeenHint = ref(false);
 
 // Computed fallbacks for items loaded from DB without parsing
+const parseWarning = computed(() => {
+  const v = props.modelValue;
+  if (!v.foodNameId) return null;
+  if (v.amount == null) return 'No amount detected — nutrition estimate may be inaccurate';
+  return null;
+});
+
 const displayContext = computed(() => {
   if (props.modelValue.displayTextContext !== undefined) return props.modelValue.displayTextContext;
   if (!props.modelValue.amount) return '';

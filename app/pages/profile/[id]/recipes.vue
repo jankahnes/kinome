@@ -10,7 +10,8 @@
     </div>
 
     <template v-else>
-      <div v-if="isSignatureSelectionMode && signatureEligibleRecipes.length !== 0" class="main-card mb-6 flex flex-col gap-4 px-5 py-5 sm:px-6">
+      <div v-if="isSignatureSelectionMode && signatureEligibleRecipes.length !== 0"
+        class="main-card main-card-rounded mb-6 flex flex-col gap-4 px-5 py-5 sm:px-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p class="text-xs font-semibold uppercase  text-gray-400">Signature recipe</p>
@@ -19,26 +20,23 @@
               Pick one of your original recipes and add your signature for display on your profile.
             </p>
           </div>
-          <NuxtLink
-            :to="'/profile/' + user?.id"
-            class="animated-button self-start rounded-full bg-primary-10 px-4 py-2 text-sm font-semibold text-gray-700"
-          >
+          <NuxtLink :to="'/profile/' + user?.id"
+            class="main-button animated-button self-start rounded-full bg-primary-5 px-4 py-2 text-sm font-semibold text-gray-700">
             Back to profile
           </NuxtLink>
         </div>
       </div>
 
-      <div v-if="isSignatureSelectionMode && signatureEligibleRecipes.length === 0" class="main-card flex flex-col items-start gap-4 px-5 py-6 sm:px-6">
+      <div v-if="isSignatureSelectionMode && signatureEligibleRecipes.length === 0"
+        class="main-card main-card-rounded flex flex-col items-start gap-4 px-5 py-6 sm:px-6">
         <div>
           <h3 class="text-2xl font-bold tracking-tighter">No qualifying recipes yet</h3>
           <p class="mt-1 text-sm text-gray-500">
             Create an original recipe directly in Kinome first, then come back here to sign it.
           </p>
         </div>
-        <NuxtLink
-          to="/recipe/new"
-          class="animated-button rounded-full bg-primary px-5 py-3 font-semibold text-white"
-        >
+        <NuxtLink to="/recipe/new"
+          class="main-button animated-button rounded-full bg-primary px-5 py-3 font-semibold text-white">
           Create a recipe
         </NuxtLink>
       </div>
@@ -46,60 +44,42 @@
       <!-- Desktop grid -->
       <div v-else class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch items-end">
         <!-- Add recipe CTA (own profile only) -->
-        <NuxtLink
-          v-if="isOwn && !isSignatureSelectionMode"
-          to="/recipe/new"
-          class="animated-button basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px] flex flex-col gap-3 justify-center items-center border-2 border-primary rounded-4xl! bg-primary-10/50 h-85"
-        >
+        <NuxtLink v-if="isOwn && !isSignatureSelectionMode" to="/recipe/new"
+          class="main-button animated-button basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px] flex flex-col gap-3 justify-center items-center border-2 border-primary main-card-rounded! bg-primary-5/50 h-85">
           <div class="rounded-full primary-gradient p-3 text-white flex items-center justify-center">
             <IconPlus class="w-6" strokeWidth="3" />
           </div>
           <p class="font-semibold text-lg">New Recipe</p>
         </NuxtLink>
         <template v-if="isSignatureSelectionMode">
-          <div
-            v-for="recipe in signatureEligibleRecipes"
-            :key="recipe.id"
-            class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex flex-1 flex-col gap-3"
-          >
+          <div v-for="recipe in signatureEligibleRecipes" :key="recipe.id"
+            class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex flex-1 flex-col gap-3">
             <div class="relative">
-              <RecipeCard
-                :recipe="recipe"
-                class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]"
-              />
-              <div
-                v-if="currentSignatureRecipeId === recipe.id"
-                class="pointer-events-none absolute left-4 top-4 rounded-full bg-primary-10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700 shadow z-40"
-              >
+              <RecipeCard :recipe="recipe"
+                class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]" />
+              <div v-if="currentSignatureRecipeId === recipe.id"
+                class="pointer-events-none absolute left-4 top-4 rounded-full bg-primary-5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700 shadow z-40">
                 Current signature
               </div>
             </div>
-            <button
-              type="button"
-              class="animated-button self-end rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
-              @click="openSignatureModal(recipe)"
-            >
+            <button type="button"
+              class="main-button animated-button self-end rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
+              @click="openSignatureModal(recipe)">
               {{ currentSignatureRecipeId === recipe.id ? 'Re-sign' : 'Choose' }}
             </button>
           </div>
         </template>
         <template v-else>
-          <RecipeCard
-            v-for="recipe in recipes"
-            :key="recipe.id"
-            :recipe="recipe"
-            class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]"
-          />
+          <RecipeCard v-for="recipe in recipes" :key="recipe.id" :recipe="recipe"
+            class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]" />
         </template>
       </div>
 
       <!-- Mobile list -->
-      <div v-if="!(isSignatureSelectionMode && signatureEligibleRecipes.length === 0)" class="flex flex-col gap-3 md:hidden">
-        <NuxtLink
-          v-if="isOwn && !isSignatureSelectionMode"
-          to="/recipe/new"
-          class="animated-button flex items-center gap-3 p-4 outline-2 outline-primary rounded-2xl! bg-primary-10/50"
-        >
+      <div v-if="!(isSignatureSelectionMode && signatureEligibleRecipes.length === 0)"
+        class="flex flex-col gap-3 md:hidden">
+        <NuxtLink v-if="isOwn && !isSignatureSelectionMode" to="/recipe/new"
+          class="main-button animated-button flex items-center gap-3 p-4 outline-2 outline-primary rounded-2xl! bg-primary-5/50">
           <div class="rounded-full primary-gradient p-2 text-white flex items-center justify-center">
             <IconPlus class="w-4" strokeWidth="3" />
           </div>
@@ -109,39 +89,27 @@
           <div v-for="recipe in signatureEligibleRecipes" :key="recipe.id" class="flex flex-col gap-2">
             <div class="relative">
               <RecipeCardHorizontal :recipe="recipe" />
-              <div
-                v-if="currentSignatureRecipeId === recipe.id"
-                class="pointer-events-none absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700 shadow"
-              >
+              <div v-if="currentSignatureRecipeId === recipe.id"
+                class="pointer-events-none absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700 shadow">
                 Current
               </div>
             </div>
-            <button
-              type="button"
-              class="animated-button self-end rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
-              @click="openSignatureModal(recipe)"
-            >
+            <button type="button"
+              class="main-button animated-button self-end rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
+              @click="openSignatureModal(recipe)">
               {{ currentSignatureRecipeId === recipe.id ? 'Re-sign' : 'Choose' }}
             </button>
           </div>
         </template>
         <template v-else>
-          <RecipeCardHorizontal
-            v-for="recipe in recipes"
-            :key="recipe.id"
-            :recipe="recipe"
-          />
+          <RecipeCardHorizontal v-for="recipe in recipes" :key="recipe.id" :recipe="recipe" />
         </template>
       </div>
 
     </template>
   </div>
 
-  <ProfileSignatureRecipeModal
-    v-model="signatureModalOpen"
-    :recipe="selectedRecipe"
-    @saved="handleSignatureSaved"
-  />
+  <ProfileSignatureRecipeModal v-model="signatureModalOpen" :recipe="selectedRecipe" @saved="handleSignatureSaved" />
 </template>
 
 <script setup lang="ts">

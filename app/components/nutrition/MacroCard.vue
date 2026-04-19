@@ -1,23 +1,23 @@
 <template>
-  <div class="flex gap-2 justify-between">
+  <div class="flex gap-2 justify-between items-center">
     <div class="flex flex-col flex-1 gap-1">
       <div class="flex justify-between">
-        <span class="text-8xl font-bold leading-14">
-          <RollingNumber :number="kcal" />
-          <span class="text-xl text-gray-500">kcal</span>
+        <span class="text-[74px] leading-14">
+          <RollingNumber :number="kcal" class="" />
+          <span class="text-xl font-headers text-gray-500">kcal</span>
         </span>
         <Ring class="block sm:hidden w-16 h-16" :segments="ringSegments" :strokeWidth="18" />
       </div>
-      <div class="flex items-center gap-2 text-center leading-tight">
-        <div class="bg-carbs px-2 py-1 rounded-4xl ">
+      <div class="flex items-center gap-2 text-center leading-tight text-xs">
+        <div class="bg-carbs px-2 py-1 main-card-rounded ">
           <RollingNumber :number="carbohydrates" />
           <span>g Carbs</span>
         </div>
-        <div class="bg-protein px-2 py-1 rounded-4xl ">
+        <div class="bg-protein px-2 py-1 main-card-rounded ">
           <RollingNumber :number="protein" />
           <span>g Protein</span>
         </div>
-        <div class="bg-fat px-2 py-1 rounded-4xl ">
+        <div class="bg-fat px-2 py-1 main-card-rounded ">
           <RollingNumber :number="fat" />
           <span>g Fat</span>
         </div>

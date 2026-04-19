@@ -1,73 +1,49 @@
 <template>
   <div class="flex flex-col gap-4">
-    <h3 class="text-2xl font-bold mt-4">Your Goal</h3>
+    <h3 class="text-2xl font-headers mt-4">Your Goal</h3>
     <div class="flex gap-4 flex-wrap">
       <div
-        class="p-4 bg-primary-10 rounded-4xl! border-2 border-gray-200 flex flex-col gap-2 items-center text-nowrap shrink-0 flex-1 animated-button"
-        v-for="(objective, index) in form.objectiveCards"
-        :key="objective.title"
+        class="p-4 bg-primary-5 main-card-rounded! border-2 border-gray-200 flex flex-col gap-2 items-center text-nowrap shrink-0 flex-1 main-button animated-button"
+        v-for="(objective, index) in form.objectiveCards" :key="objective.title"
         :class="{ 'border-green-300 bg-green-100/40!': form.selectedObjectiveCard.value === index }"
-        @click="form.selectedObjectiveCard.value = index"
-      >
+        @click="form.selectedObjectiveCard.value = index">
         <img :src="objective.illustration" :alt="objective.title" class="h-34" />
-        <h4 class="text-xl font-bold">{{ objective.title }}</h4>
+        <h4 class="text-xl font-semibold">{{ objective.title }}</h4>
         <p class="text-center -mt-2 leading-none">{{ objective.description }}</p>
       </div>
     </div>
 
-    <BlocksCollapsible
-      :modelValue="form.selectedObjectiveCard.value != null && form.selectedObjectiveCard.value !== 1"
-    >
-      <h3 class="text-2xl font-bold">Your Pace</h3>
+    <BlocksCollapsible :modelValue="form.selectedObjectiveCard.value != null && form.selectedObjectiveCard.value !== 1">
+      <h3 class="text-2xl font-headers">Your Pace</h3>
       <div class="py-14 px-4">
         <div class="relative w-full h-6">
-          <div
-            class="absolute top-1/2 -translate-y-1/2 w-full h-6 bg-[#e7e5e2] rounded-xl z-1"
-          ></div>
-          <div
-            class="slider-gradient-fill primary-gradient"
-            :style="{
-              width: `${
-                form.selectedPaceIndex.value === 0
-                  ? 5
-                  : form.selectedPaceIndex.value === 1
-                  ? 35
-                  : form.selectedPaceIndex.value === 2
+          <div class="absolute top-1/2 -translate-y-1/2 w-full h-6 bg-[#e7e5e2] rounded-xl z-1"></div>
+          <div class="slider-gradient-fill primary-gradient" :style="{
+            width: `${form.selectedPaceIndex.value === 0
+              ? 5
+              : form.selectedPaceIndex.value === 1
+                ? 35
+                : form.selectedPaceIndex.value === 2
                   ? 65
                   : 95
               }%`,
-            }"
-          ></div>
-          <input
-            type="range"
-            min="0"
-            max="3"
-            step="1"
-            v-model.number="form.selectedPaceIndex.value"
-            class="slider-input"
-          />
-          <div
-            v-for="(pace, index) in form.sliderValues"
-            :key="pace.title"
+          }"></div>
+          <input type="range" min="0" max="3" step="1" v-model.number="form.selectedPaceIndex.value"
+            class="slider-input" />
+          <div v-for="(pace, index) in form.sliderValues" :key="pace.title"
             class="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none transition-all duration-300 z-20"
             :class="{ active: form.selectedPaceIndex.value === index }"
-            :style="{ left: `${index === 0 ? 5 : index === 1 ? 35 : index === 2 ? 65 : 95}%` }"
-          >
+            :style="{ left: `${index === 0 ? 5 : index === 1 ? 35 : index === 2 ? 65 : 95}%` }">
             <Transition name="fade-up">
-              <img
-                v-if="form.selectedPaceIndex.value === index"
-                :src="pace.illustration"
-                :alt="pace.title"
-                class="absolute bottom-[calc(100%+10px)] h-[40px] w-[60px] object-contain max-w-none pointer-events-none"
-              />
+              <img v-if="form.selectedPaceIndex.value === index" :src="pace.illustration" :alt="pace.title"
+                class="absolute bottom-[calc(100%+10px)] h-[40px] w-[60px] object-contain max-w-none pointer-events-none" />
             </Transition>
             <div
-              class="w-9 h-9 bg-white border-3 border-[#e7e5e2] rounded-full shadow-md transition-all duration-300 opacity-60 [.active_&]:opacity-0"
-            ></div>
+              class="w-9 h-9 bg-white border-3 border-[#e7e5e2] rounded-full shadow-md transition-all duration-300 opacity-60 [.active_&]:opacity-0">
+            </div>
             <div
-              class="absolute top-[calc(100%+10px)] flex flex-col items-center whitespace-nowrap transition-all duration-300"
-            >
-              <span class="text-lg text-gray-500 transition-all duration-300 leading-none font-bold">
+              class="absolute top-[calc(100%+10px)] flex flex-col items-center whitespace-nowrap transition-all duration-300">
+              <span class="text-lg text-gray-500 transition-all duration-300 leading-none font-semibold">
                 {{ pace.title }}
               </span>
               <span class="text-sm text-gray-400 transition-all duration-300 leading-none">
@@ -79,17 +55,15 @@
       </div>
     </BlocksCollapsible>
 
-    <h3 class="text-2xl font-bold mt-6">Your Preference</h3>
+    <h3 class="text-2xl font-headers mt-6">Your Preference</h3>
     <div class="flex gap-4 flex-wrap">
       <div
-        class="px-4 py-2 bg-primary-10 rounded-4xl! flex flex-col gap-2 items-center text-nowrap shrink-0 flex-1 animated-button"
-        v-for="(item, index) in form.dietPills"
-        :key="item.title"
+        class="px-4 py-2 bg-primary-5 main-card-rounded! flex flex-col gap-2 items-center text-nowrap shrink-0 flex-1 main-button animated-button"
+        v-for="(item, index) in form.dietPills" :key="item.title"
         :class="{ 'bg-primary!': form.selectedPreference.value === index }"
-        @click="form.selectedPreference.value = index"
-      >
-        <h4 class="text-xl font-bold">{{ item.title }}</h4>
-        <p class="text-center -mt-2 leading-none">{{ item.description }}</p>
+        @click="form.selectedPreference.value = index">
+        <h4 class="text-xl font-semibold">{{ item.title }}</h4>
+        <p class="text-center -mt-1 leading-none font-mono text-gray-600 text-xs">{{ item.description }}</p>
       </div>
     </div>
   </div>

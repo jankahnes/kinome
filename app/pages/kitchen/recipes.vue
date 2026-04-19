@@ -2,47 +2,48 @@
   <div class="">
     <div class="py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl">
       <div class="flex justify-between items-end gap-6">
-        <div class="ai-ring rounded-2xl p-px flex items-center">
-          <div class="flex items-center rounded-[15px] px-2 bg-primary-10">
-            <IconSearch class="w-5 text-gray-400" />
-            <input type="text" :placeholder="'Describe what you\'re looking for…'" v-model="searchQuery"
+        <div class="ai-ring main-card-rounded p-px flex items-center">
+          <div class="flex items-center rounded-[31px] px-4 bg-primary-5">
+            <IconSearch class="w-4 " />
+            <input type="text" :placeholder="'Search recipes, ingredients, techniques...'" v-model="searchQuery"
               @keyup.enter="refresh(true)" @blur="handleSearchBlur"
-              class="flex-grow focus:outline-none min-w-0! p-2" />
+              class="text-xs grow focus:outline-none w-80 px-2 py-[9px]" />
           </div>
         </div>
-        <span class="text-gray-500 text-sm text-nowrap hidden sm:block">{{ totalCount }} Results</span>
+        <span class="font-mono text-xs text-gray-400 uppercase text-nowrap hidden sm:block">{{ totalCount }}
+          Results</span>
       </div>
 
       <div class="flex justify-between items-center flex-wrap gap-2 z-2">
         <div class="filters flex items-center gap-2">
           <button @click="onSelect('tags')" :class="{
-            '!bg-primary/80 !text-white': selectedFilter === 'tags',
-          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            'bg-white shadow-xs': selectedFilter === 'tags',
+          }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconTag class="w-4" />
             <span class="hidden lg:block">Tags</span>
           </button>
           <button @click="onSelect('health')" :class="{
-            '!bg-primary/80 !text-white': selectedFilter === 'health',
-          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            'bg-white shadow-xs': selectedFilter === 'health',
+          }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconShield class="w-4" />
             <span class="hidden lg:block">Health Score</span>
           </button>
           <button @click="onSelect('kcal')" :class="{
-            '!bg-primary/80 !text-white': selectedFilter === 'kcal',
-          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            'bg-white shadow-xs': selectedFilter === 'kcal',
+          }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconZap class="w-4" />
             <span class="hidden lg:block">Kcal</span>
           </button>
           <button @click="onSelect('cost')" :class="{
-            '!bg-primary/80 !text-white': selectedFilter === 'cost',
-          }" class="flex animated-button bg-primary-10 p-2 gap-2 items-center">
+            'bg-white shadow-xs': selectedFilter === 'cost',
+          }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconEuro class="w-4" />
             <span class="hidden lg:block">Cost</span>
           </button>
         </div>
         <div class="flex items-center gap-4 z-100">
           <div class="relative inline-block min-w-45 z-20">
-            <FormsDropdown v-model="selectedSorting" :choices="sorts" :style="'bg-primary-10'" />
+            <FormsDropdown v-model="selectedSorting" :choices="sorts" :style="'bg-primary-5'" />
           </div>
         </div>
       </div>
@@ -56,9 +57,9 @@
                   category.tag
                 ),
               }"
-                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 animated-button bg-primary-10 m-1">
-                <span class="text-2xl">{{ category.icon }}</span>
-                <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{ category.name }}</span>
+                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-0.5 transition-all duration-300 flex-shrink-0 main-button animated-button bg-primary-5 m-1">
+                <span class="text-lg">{{ category.icon }}</span>
+                <span class="text-sm text-nowrap">{{ category.name }}</span>
               </div>
             </BlocksCarousel>
           </div>
@@ -67,16 +68,16 @@
           <div class="py-1">
             <BlocksCarousel>
               <div v-for="cuisine in cuisines" :key="cuisine.tag" @click="toggleTag(cuisine)" :class="{
-                '!bg-primary !text-white': filteringTags.includes(
+                'bg-primary! text-white!': filteringTags.includes(
                   cuisine.tag
                 ),
               }"
-                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-1 transition-all duration-300 flex-shrink-0 animated-button bg-primary-10 m-1">
-                <span class="flex gap-0.5 rounded-4xl overflow-hidden">
+                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-0.5 transition-all duration-300 shrink-0 main-button animated-button bg-primary-5 m-1">
+                <span class="flex gap-0.5 rounded-md overflow-hidden">
                   <img v-for="flag in cuisine.flags" :key="flag" :src="`/flags/${flag}.svg`" :alt="flag"
-                    class="h-5 w-auto" />
+                    class="h-4 w-auto" />
                 </span>
-                <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{ cuisine.name }}</span>
+                <span class="text-sm text-nowrap">{{ cuisine.name }}</span>
               </div>
             </BlocksCarousel>
           </div>
@@ -96,7 +97,7 @@
       </div>
       <div v-if="visibleTags.length" class="flex gap-2 flex-wrap mt-4">
         <button v-for="(tag, index) in visibleTags"
-          class="px-3 animated-button bg-primary-10 flex items-center justify-center gap-2 group !shadow-none"
+          class="px-3 main-button animated-button bg-primary-5 flex items-center justify-center gap-2 group shadow-none!"
           @click="removeTag(index)">
           <IconX class="w-5" />
           <span>{{ tag }}</span>
@@ -105,8 +106,7 @@
     </div>
     <div class="my-4 z-2">
       <div class="flex-wrap gap-4 sm:gap-6 hidden md:flex justify-stretch">
-        <RecipeCard :recipe="recipe"
-          class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]"
+        <RecipeCard :recipe="recipe" class="basis-65 max-w-80 max-w-3xl:max-w-110 3xl:basis-85 flex-1 text-[30px]"
           v-for="recipe in results" :key="recipe.id" />
         <div ref="sentinelElement" v-if="isLoading || hasMoreRecipes"
           class="min-w-65 basis-65 max-w-80 3xl:max-w-110 3xl:basis-85 h-92 text-[32px] flex-1 rounded-xl">

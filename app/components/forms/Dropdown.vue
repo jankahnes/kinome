@@ -1,40 +1,24 @@
 <template>
   <div class="h-full z-99">
-    <button
-      ref="buttonRef"
-      @click.stop="toggle"
-      :aria-expanded="isOpen"
-      :class="style"
-      class="animated-button flex items-center justify-between z-10 relative w-full h-full gap-1 px-3 py-2"
-    >
+    <button ref="buttonRef" @click.stop="toggle" :aria-expanded="isOpen"
+      class="main-button animated-button flex items-center justify-between z-10 relative w-full h-full gap-1 px-3 py-1">
       <span class="">{{ modelValue.displayName }}</span>
-      <IconChevronDown
-        class="transition-transform duration-300 w-4"
-        :class="{ 'rotate-180': isOpen }"
-      />
+      <IconChevronDown class="transition-transform duration-300 w-4" :class="{ 'rotate-180': isOpen }" />
     </button>
 
     <Transition @before-enter="beforeEnter" @enter="enter" @leave="leave">
-      <div
-        v-if="isOpen"
-        ref="panelRef"
-        :class="style"
-        class="absolute top-[calc(100%+6px)] left-1/2 min-w-full w-max -translate-x-1/2 z-99 overflow-hidden shadow-sm rounded-3xl"
-      >
+      <div v-if="isOpen" ref="panelRef"
+        class="main-card absolute top-[calc(100%+6px)] left-1/2 min-w-full w-max -translate-x-1/2 z-99 overflow-hidden shadow-sm rounded-3xl">
         <ul class="">
           <li v-for="choice in choices" class="cursor-pointer">
             <button
-              class="w-full flex items-center justify-between py-2 px-3 animated-button hover:bg-secondary/60"
+              class="w-full flex items-center justify-between py-2 px-3 main-button animated-button hover:bg-primary-10"
               @click="
                 emit('update:modelValue', choice);
-                isOpen = false;
-              "
-            >
+              isOpen = false;
+              ">
               <span class="text-left">{{ choice.displayName }}</span>
-              <IconCheck
-                class="w-4"
-                v-if="modelValue.displayName == choice.displayName"
-              />
+              <IconCheck class="w-4" v-if="modelValue.displayName == choice.displayName" />
             </button>
           </li>
         </ul>
@@ -58,7 +42,6 @@ const props = defineProps({
     type: Object as PropType<{ value: any; displayName: string }>,
     required: true,
   },
-  style: String,
 });
 const emit = defineEmits(['update:modelValue']);
 

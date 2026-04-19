@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card  main-card-padding flex min-w-0 flex-col gap-2">
+    <div class="main-card main-card-padding main-card-rounded flex min-w-0 flex-col gap-2">
         <div>
             <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Gut Health Drivers</h2>
             <p class="text-sm text-gray-400">Health Markers, last 30 days</p>
@@ -13,12 +13,12 @@
                             gutHealth.overallScore }}</span>
                         <span class="text-xl font-semibold text-gray-400">/100</span>
                     </div>
-                    <div class="mt-1 h-2.5 rounded-full bg-secondary overflow-hidden">
+                    <div class="mt-1 h-2.5 rounded-full bg-primary/8 overflow-hidden">
                         <div class="h-full rounded-full transition-all duration-300" :class="scoreTone.bar"
                             :style="{ width: `${Math.min(100, Math.max(0, gutHealth.overallScore))}%` }" />
                     </div>
                 </div>
-                <div class="flex-shrink-0 flex justify-center sm:justify-end">
+                <div class="shrink-0 flex justify-center sm:justify-end">
                     <img src="/nutrition-highlights/gut-health.webp" alt="Gut health" class="w-20 object-contain" />
                 </div>
             </div>
@@ -26,13 +26,13 @@
             <div v-if="positiveFactors.length" class="space-y-2">
                 <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">What's helping</div>
                 <div v-for="row in positiveFactors" :key="row.key"
-                    class="flex justify-between items-center gap-3 rounded-2xl px-3 py-2.5 bg-secondary/60 border-secondary/80">
+                    class="flex justify-between items-center gap-3 rounded-2xl px-3 py-2.5 bg-primary/8 border-primary/20">
                     <div class="min-w-0">
                         <div class="font-semibold text-sm text-emerald-900">{{ row.title }}</div>
                         <div class="text-xs text-emerald-800/70">{{ row.subtitle }}</div>
                     </div>
                     <span v-if="row.badge != null"
-                        class="text-lg font-bold tabular-nums text-emerald-700 flex-shrink-0">{{ row.badge }}</span>
+                        class="text-lg font-bold tabular-nums text-emerald-700 shrink-0">{{ row.badge }}</span>
                 </div>
             </div>
 
@@ -48,23 +48,23 @@
                             row.subtitle }}
                         </div>
                     </div>
-                    <span class="text-lg font-bold tabular-nums flex-shrink-0"
+                    <span class="text-lg font-bold tabular-nums shrink-0"
                         :class="row.tone === 'red' ? 'text-red-700' : 'text-orange-700'">{{ row.badge }}</span>
                 </div>
             </div>
 
             <div v-if="trackedDays && trackedDays > 0"
-                class="pt-4 border-t border-secondary flex gap-3 -mb-3 justify-center">
-                <div class="rounded-2xl bg-secondary/15 px-3 text-center">
-                    <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide leading-tight">Avg.
+                class="pt-4 border-t border-primary/20 flex gap-3 -mb-3 justify-center">
+                <div class="px-3 text-center">
+                    <div class="text-[10px] text-gray-400 uppercase font-mono">Avg.
                         added sugar / day</div>
-                    <div class="text-2xl font-bold tabular-nums text-gray-800 mt-1 leading-tight">{{
+                    <div class="text-xl font-bold tabular-nums text-gray-800 mt-1 leading-tight">{{
                         avgAddedSugarDisplay }}</div>
                 </div>
-                <div class="rounded-2xl bg-secondary/15 px-3 text-center">
-                    <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide leading-tight">Avg.
+                <div class="px-3 text-center">
+                    <div class="text-[10px] text-gray-400 uppercase font-mono">Avg.
                         animal protein / day</div>
-                    <div class="text-2xl font-bold tabular-nums text-gray-800 mt-1 leading-tight">{{
+                    <div class="text-xl font-bold tabular-nums text-gray-800 mt-1 leading-tight">{{
                         avgAnimalProteinDisplay }}</div>
                 </div>
             </div>
@@ -206,7 +206,6 @@ const positiveFactors = computed((): FactorRow[] => {
 });
 
 const negativeFactors = computed((): FactorRow[] => {
-    console.log(props.gutHealth);
     const gh = props.gutHealth;
     if (!gh) return [];
 

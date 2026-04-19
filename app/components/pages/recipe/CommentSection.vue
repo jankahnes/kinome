@@ -1,11 +1,12 @@
 <template>
-  <div class="main-card main-card-padding flex flex-col gap-8">
+  <div class="main-card main-card-padding main-card-rounded flex flex-col gap-8">
 
     <!-- Creator photo (user-created recipes only) -->
     <div v-if="creatorPhoto" class="flex flex-col gap-2">
       <img :src="creatorPhoto" class="w-full rounded-2xl object-cover max-h-72" />
       <div class="flex items-center gap-1.5">
-        <span class="text-[10px] font-semibold uppercase tracking-wide bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">Creator</span>
+        <span
+          class="text-[10px] font-semibold uppercase tracking-wide bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full">Creator</span>
         <span class="text-xs text-gray-400">Original dish</span>
       </div>
     </div>
@@ -17,11 +18,11 @@
         <div class="flex-1 flex flex-col gap-2 items-end">
           <div class="flex gap-4 p-2 rounded-xl border border-slate-200 w-full flex-wrap">
             <textarea v-model="newComment" v-auto-resize placeholder="Add a comment"
-              class="flex-1 focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-28 shrink-0 min-w-40"
+              class="flex-1 focus:outline-none resize-none scrollbar-hide overflow-hidden wrap-break-word min-h-28 shrink-0 min-w-40"
               rows="5"></textarea>
             <div class="flex flex-col-reverse new-comment-wrap:flex-col items-start new-comment-wrap:items-end">
-              <FormsRatingField class="text-primary" v-model="userRating" @update:model-value="updateRating"
-                :select="true" :star-width="28" :star-height="28" :spacing="-2" :uniqueId="'950' + id">
+              <FormsRatingField class="" v-model="userRating" @update:model-value="updateRating" :select="true"
+                :star-width="28" :star-height="28" :spacing="-2" :uniqueId="'950' + id">
               </FormsRatingField>
               <span class="text-xs text-gray-500 mr-1">Click to rate</span>
             </div>
@@ -39,15 +40,13 @@
 
           <!-- Bottom row: photo button + submit -->
           <div class="flex gap-2 w-full items-center justify-between">
-            <button
-              class="button px-2 py-1 flex gap-1.5 items-center text-gray-500 outline-1 outline-gray-300 text-xs"
-              @click="triggerPhotoInput"
-              :disabled="photoUploading">
+            <button class="button px-2 py-1 flex gap-1.5 items-center text-gray-500 outline-1 outline-gray-300 text-xs"
+              @click="triggerPhotoInput" :disabled="photoUploading">
               <IconLoader class="w-3 animate-spin" v-if="photoUploading" />
               <IconCamera class="w-3" v-else />
               <span>{{ photoUploading ? 'Uploading…' : 'Photo' }}</span>
             </button>
-            <button class="animated-button bg-secondary-700 px-3 py-1" @click="submitComment"
+            <button class="main-button animated-button bg-primary/8-700 px-3 py-1" @click="submitComment"
               :disabled="photoUploading">
               Post
             </button>
@@ -87,7 +86,7 @@ const pendingPhotoPreview = ref<string | null>(null);
 
 const creatorPhoto = computed(() => {
   const recipe = recipeStore.recipe as any;
-  if (!recipe?.picture) return null;
+  if (!recipe?.picture || recipe.picture.includes('/public/recipe/')) return null;
   if (!USER_CREATED_SOURCE_TYPES.includes(recipe.source_type ?? '')) return null;
   return recipe.picture;
 });

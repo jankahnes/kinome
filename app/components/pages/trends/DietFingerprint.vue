@@ -1,5 +1,5 @@
 <template>
-    <div class="main-card main-card-padding flex flex-col">
+    <div class="main-card main-card-padding main-card-rounded flex flex-col">
         <div class="flex-1 flex flex-col justify-between">
             <div>
                 <h2 class="text-sm font-semibold text-gray-500 tracking-wide uppercase">Diet Fingerprint
@@ -7,12 +7,12 @@
                 <p class="text-sm text-gray-400">Nutrition quality, last 30 days</p>
             </div>
 
-            <div class="mt-8 px-4 h-[20rem] relative">
+            <div class="mt-8 px-4 h-80 relative">
                 <ClientOnly>
                     <apexchart v-if="hasRadarData" type="radar" height="290" :options="radarChartOptions"
                         :series="radarChartSeries" class="" />
                     <template #fallback>
-                        <div class="h-[26rem] flex items-center justify-center text-gray-400 text-sm">
+                        <div class="h-104 flex items-center justify-center text-gray-400 text-sm">
                             Loading chart…
                         </div>
                     </template>
@@ -24,10 +24,10 @@
                         class="absolute w-24 -translate-x-1/2 -translate-y-1/2 text-center"
                         :style="{ left: `${axis.left}%`, top: `${axis.top}%` }">
                         <div
-                            class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-secondary shadow-md">
+                            class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-primary/8 shadow-md">
                             <img :src="axis.illustration" :alt="axis.label" class="h-7 w-7 object-contain opacity-90" />
                         </div>
-                        <div class="mt-1 text-xs font-bold leading-none">
+                        <div class="mt-1 text-xs leading-none">
                             {{ axis.label }}
                         </div>
                     </div>
@@ -40,7 +40,7 @@
             </div>
         </div>
         <BlocksResponsiveInfo v-model="showFullReport">
-            <PagesReport id="tracking-trends-period-report" :isFood="false" :computedRecipe="recipeRow" />
+            <PagesReport id="tracking-trends-period-report" :isFood="false" :computedRecipe="recipeRow" :showTitle="true" />
         </BlocksResponsiveInfo>
     </div>
 </template>
@@ -55,10 +55,10 @@ const showFullReport = ref(false);
 const RADAR_SCORE_MAX = 100;
 const RADAR_SCALE_INPUTS = [0, 20, 40, 60, 100] as const;
 const RADAR_SCALE_OUTPUTS = [0, 25, 50, 75, 100] as const;
-const RADAR_LABEL_RADIUS = 48;
+const RADAR_LABEL_RADIUS = 50;
 const RADAR_LABEL_CENTER_X = 50;
 const RADAR_LABEL_CENTER_Y = 50;
-const RADAR_PRIMARY_COLOR = '#FFC340';
+const RADAR_PRIMARY_COLOR = 'var(--color-primary)';
 const RADAR_LABEL_PLACEHOLDER = '/nutrition-highlights/whole.webp';
 const RADAR_AXES = [
     { key: 'fat_profile_score', label: 'Fat Quality', illustration: '/nutrition-highlights/fat.webp' },
@@ -183,7 +183,7 @@ const radarChartOptions = computed(() => ({
                 strokeColors: '#e2e8f0',
                 connectorColors: '#e2e8f0',
                 fill: {
-                    colors: ['#fafafa', '#E6FDEC'],
+                    colors: ['#fafafa', 'var(--color-primary-20)'],
                 },
             },
         },

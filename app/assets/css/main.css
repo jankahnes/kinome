@@ -1,62 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 @import 'tailwindcss';
-
-@font-face {
-  font-family: 'Libertinus Sans';
-  src: url('/fonts/LibertinusSans-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Libertinus Sans';
-  src: url('/fonts/LibertinusSans-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/*
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/Fraunces_72pt-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/Fraunces_72pt-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/Fraunces_72pt-Black.woff2') format('woff2');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/Fraunces_72pt-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/Fraunces_72pt-Light.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-*/
 
 @theme {
   --breakpoint-new-comment-wrap: 485px;
@@ -66,9 +9,8 @@
   --breakpoint-xm: 860px;
   --breakpoint-xs: 500px;
   --breakpoint-2xs: 400px;
-  --font-main: 'Libertinus Sans', sans-serif;
-  --color-main: #f5eeee;
-  --color-primary: #FFC340;
+  --color-main: #fff6f2;
+  --color-primary: #CF6139;
   --color-primary-2: color-mix(in srgb, var(--color-primary) 1%, white);
   --color-primary-5: color-mix(in srgb, var(--color-primary) 2%, white);
   --color-primary-10: color-mix(in srgb, var(--color-primary) 4%, white);
@@ -100,6 +42,10 @@
   --color-tertiary: #f4d9d0;
   --rounded-main: 10px;
 
+  --font-main: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-headers: 'Fraunces', ui-serif, Georgia, serif;
+
   --text-scale: 1.08;
 
   --text-xs: calc(0.75rem * var(--text-scale));
@@ -126,8 +72,36 @@
   }
 }
 
+.canvas {
+  @apply bg-[#fffefb] md:bg-main;
+}
+
+.main-card {
+  @apply shadow-[0_0_12px_rgba(0,0,0,0.06)] bg-white md:shadow-none md:bg-primary-5;
+}
+
+a.main-card {
+  @apply hover:bg-white transition-all duration-200;
+}
+
+.main-button {
+  @apply shadow-[0_0_12px_rgba(0,0,0,0.06)] bg-white md:shadow-none md:bg-primary-5 hover:bg-white transition-all duration-200;
+}
+
+.animated-button {
+  @apply rounded-[1.1em] active:rounded-[1.3em] active:scale-98 active:bg-white cursor-pointer select-none will-change-transform;
+}
+
+.main-card-rounded {
+  @apply rounded-4xl;
+}
+
+.main-card-padding {
+  @apply p-4 md:p-6;
+}
+
 .icon-fill {
-  font-variation-settings: 'FILL' 1;
+  fill: currentColor;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -159,13 +133,7 @@
   opacity: 0.7;
 }
 
-.main-card {
-  @apply bg-primary-10 rounded-4xl;
-}
 
-.main-card-padding {
-  @apply p-4 md:p-6;
-}
 
 .tag {
   border-radius: 8px;
@@ -183,10 +151,8 @@
 .onboarding-gradient {
   background: linear-gradient(
     90deg,
-    var(--color-primary-10) 0%,
-    var(--color-primary-10) 2%,
-    var(--color-primary-50) 10%,
-    var(--color-primary-400) 100%
+    var(--color-primary-5) 0%,
+    var(--color-primary-100) 100%
   );
 }
 
@@ -200,7 +166,12 @@
 }
 
 .ai-ring {
-  background-image: linear-gradient(135deg, #fdd835, #ffc340, #eea72c);
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary-300),
+    var(--color-primary-400),
+    var(--color-primary-300)
+  );
   transition:
     box-shadow 0.3s ease,
     background-size 0.45s ease,
@@ -210,12 +181,12 @@
 .ai-ring:focus-within {
   background-image: linear-gradient(
     105deg,
-    #fdd835 0%,
-    #ffb347 18%,
-    #f472b6 40%,
-    #a78bfa 58%,
-    #ffc340 78%,
-    #eea72c 100%
+    var(--color-primary-100) 0%,
+    var(--color-primary-300) 18%,
+    var(--color-primary) 40%,
+    var(--color-primary-400) 58%,
+    var(--color-primary-200) 78%,
+    var(--color-primary-700) 100%
   );
   background-size: 280% 100%;
   background-position: 0% 50%;
@@ -239,7 +210,12 @@
   .ai-ring:focus-within {
     animation: none;
     background-size: 100% 100%;
-    background-image: linear-gradient(135deg, #fdd835, #ffc340, #eea72c);
+    background-image: linear-gradient(
+      135deg,
+      var(--color-primary-100),
+      var(--color-primary-300),
+      var(--color-primary-600)
+    );
     box-shadow: 0 8px 24px -12px color-mix(in srgb, black 18%, transparent);
   }
 }
@@ -315,11 +291,11 @@
 
 .cell {
   @apply rounded-full! select-none active:scale-98 transition-all duration-200 cursor-pointer will-change-transform;
-  @apply px-4 py-2 bg-white/10 hover:bg-primary-100 font-medium border border-gray-800/30 text-center;
+  @apply px-4 py-2 bg-white/10 hover:bg-white/50 font-medium border border-gray-800/30 text-center;
 }
 
 .cell.selected {
-  @apply bg-primary-50 hover:bg-primary-20;
+  @apply bg-white;
   animation: pulse-glow 0.4s ease-in-out;
 }
 
@@ -349,9 +325,7 @@
   animation: shimmer 2s linear infinite;
 }
 
-.animated-button {
-  @apply rounded-2xl! active:rounded-[17px]! active:scale-98 transition-all duration-200 cursor-pointer select-none will-change-transform;
-}
+
 
 .blurred-backdrop {
   @apply fixed inset-0 bg-black/30 backdrop-blur-xs z-150;
@@ -415,63 +389,6 @@
 .sidebar-leave-from {
   opacity: 1;
   transform: translateX(0);
-}
-
-/* Sticker grade badges with shine effect */
-.sticker-blue {
-  background: linear-gradient(
-    135deg,
-    rgba(219, 234, 254, 1) 0%,
-    rgba(191, 219, 254, 1) 25%,
-    rgba(147, 197, 253, 1) 55%,
-    rgb(180, 209, 245) 65%,
-    rgba(96, 165, 250, 1) 85%,
-    rgba(59, 130, 246, 1) 100%
-  );
-  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3),
-    0 2px 8px rgba(255, 255, 255, 0.4) inset;
-}
-
-.sticker-emerald {
-  background: linear-gradient(
-    135deg,
-    rgba(209, 250, 229, 1) 0%,
-    rgba(167, 243, 208, 1) 25%,
-    rgba(110, 231, 183, 1) 55%,
-    rgb(120, 235, 181) 65%,
-    rgba(52, 211, 153, 1) 85%,
-    rgba(16, 185, 129, 1) 100%
-  );
-  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3),
-    0 2px 8px rgba(255, 255, 255, 0.4) inset;
-}
-
-.sticker-green {
-  background: linear-gradient(
-    135deg,
-    rgba(220, 252, 231, 1) 0%,
-    rgba(187, 247, 208, 1) 25%,
-    rgba(134, 239, 172, 1) 55%,
-    rgb(150, 235, 179) 65%,
-    rgba(74, 222, 128, 1) 85%,
-    rgba(34, 197, 94, 1) 100%
-  );
-  box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.3),
-    0 2px 8px rgba(255, 255, 255, 0.4) inset;
-}
-
-.sticker-yellow {
-  background: linear-gradient(
-    135deg,
-    rgba(254, 252, 232, 1) 0%,
-    rgba(254, 249, 195, 1) 25%,
-    rgba(254, 240, 138, 1) 55%,
-    rgba(254, 249, 195, 1) 65%,
-    rgba(253, 224, 71, 1) 85%,
-    rgba(250, 204, 21, 1) 100%
-  );
-  box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.3),
-    0 2px 8px rgba(255, 255, 255, 0.4) inset;
 }
 
 .apexcharts-canvas *:focus {

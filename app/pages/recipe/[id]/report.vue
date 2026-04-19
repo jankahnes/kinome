@@ -1,6 +1,6 @@
 <template>
   <div class="my-6 mx-auto sm:ml-20 sm:mr-10">
-    <PagesReport :id="id" :isFood="false" />
+    <PagesReport :id="id" :isFood="false" :showTitle="true" />
   </div>
 </template>
 

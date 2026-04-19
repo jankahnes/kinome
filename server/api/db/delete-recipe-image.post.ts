@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const { recipeId } = await readBody(event);
   const config = useRuntimeConfig();
   const client = serverSupabaseServiceRole<Database>(event);
-  let user: { id: string } | null = null;
+  let user: { sub: string } | null = null;
   try {
     user = await serverSupabaseUser(event);
   } catch {
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Invalid recipe id' });
   }
 
-  if (user?.id === config.adminUuid) {
+  if (user?.sub === config.adminUuid) {
     console.log('Overriding owner check for admin (delete recipe image)');
   } else {
     const { data: existingRecipe, error: fetchError } = await client
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     if (fetchError || !existingRecipe) {
       throw createError({ statusCode: 404, statusMessage: 'Recipe not found' });
     }
-    if (existingRecipe.user_id !== user?.id) {
+    if (existingRecipe.user_id !== user?.sub) {
       throw createError({
         statusCode: 403,
         statusMessage: 'Not authorized to update this recipe image',

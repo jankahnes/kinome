@@ -1,11 +1,8 @@
 <template>
   <div>
     <Transition name="fade-slow" mode="out-in">
-      <div
-        v-if="show"
-        key="onboarding-container"
-        class="min-h-svh onboarding-gradient flex items-center justify-center pb-30 lg:pb-20 overflow-x-hidden"
-      >
+      <div v-if="show" key="onboarding-container"
+        class="min-h-svh onboarding-gradient flex items-center justify-center pb-30 lg:pb-20 overflow-x-hidden">
         <div class="p-8 max-w-2xl w-full">
           <NuxtLink to="/" class="text-gray-800 opacity-70 ml-2">
             <IconChevronLeft class="" />
@@ -17,8 +14,7 @@
                 class="bg-gradient-to-r from-primary-400 to-primary-600 h-2 rounded-full transition-all duration-500 ease-out"
                 :style="{
                   width: `${((currentStepIndex + 1) / steps.length) * 100}%`,
-                }"
-              ></div>
+                }"></div>
             </div>
           </div>
 
@@ -30,11 +26,8 @@
                 <p class="text-gray-800/80 text-lg">What diet do you currently follow?</p>
               </div>
               <div class="flex flex-wrap gap-3 justify-center sm:mx-10">
-                <div
-                  v-for="diet in dietOptions" :key="diet.id"
-                  @click="toggleTag(diet.id)"
-                  class="cell" :class="{ selected: selectedTagIds.has(diet.id) }"
-                >{{ diet.label }}</div>
+                <div v-for="diet in dietOptions" :key="diet.id" @click="toggleTag(diet.id)" class="cell"
+                  :class="{ selected: selectedTagIds.has(diet.id) }">{{ diet.label }}</div>
               </div>
             </div>
 
@@ -45,11 +38,8 @@
                 <p class="text-gray-800/80 text-lg">What is most important to you for recipes?</p>
               </div>
               <div class="flex flex-wrap gap-3 justify-center overflow-y-auto">
-                <div
-                  v-for="sorting in sortingOptions" :key="sorting.label"
-                  @click="selectSorting(sorting)"
-                  class="cell" :class="{ selected: selectedSortingLabel === sorting.label }"
-                >{{ sorting.label }}</div>
+                <div v-for="sorting in sortingOptions" :key="sorting.label" @click="selectSorting(sorting)" class="cell"
+                  :class="{ selected: selectedSortingLabel === sorting.label }">{{ sorting.label }}</div>
               </div>
             </div>
 
@@ -60,11 +50,8 @@
                 <p class="text-gray-800/80 text-lg">Which cuisines interest you?</p>
               </div>
               <div class="flex flex-wrap gap-3 justify-center md:mx-10">
-                <div
-                  v-for="cuisine in cuisineOptions" :key="cuisine.id"
-                  @click="toggleTag(cuisine.id)"
-                  class="cell" :class="{ selected: selectedTagIds.has(cuisine.id) }"
-                >{{ cuisine.label }}</div>
+                <div v-for="cuisine in cuisineOptions" :key="cuisine.id" @click="toggleTag(cuisine.id)" class="cell"
+                  :class="{ selected: selectedTagIds.has(cuisine.id) }">{{ cuisine.label }}</div>
               </div>
             </div>
 
@@ -75,11 +62,8 @@
                 <p class="text-gray-800/80 text-lg">Which specialty appliances do you own?</p>
               </div>
               <div class="flex flex-wrap gap-3 justify-center md:mx-6">
-                <div
-                  v-for="item in equipmentOptions" :key="item.id"
-                  @click="toggleTag(item.id)"
-                  class="cell" :class="{ selected: selectedTagIds.has(item.id) }"
-                >{{ item.label }}</div>
+                <div v-for="item in equipmentOptions" :key="item.id" @click="toggleTag(item.id)" class="cell"
+                  :class="{ selected: selectedTagIds.has(item.id) }">{{ item.label }}</div>
               </div>
             </div>
 
@@ -90,19 +74,13 @@
                 <p class="text-gray-800/80 text-lg">Select some foods that you like</p>
               </div>
               <div class="flex flex-wrap gap-3 justify-center">
-                <div
-                  v-for="food in foodOptions" :key="food.label"
-                  @click="toggleFood(food)"
-                  class="cell" :class="{ selected: selectedFoods.has(food.label) }"
-                >{{ food.label }}</div>
+                <div v-for="food in foodOptions" :key="food.label" @click="toggleFood(food)" class="cell"
+                  :class="{ selected: selectedFoods.has(food.label) }">{{ food.label }}</div>
               </div>
             </div>
 
             <!-- Username Step -->
-            <div
-              v-if="currentStep === 'username'"
-              class="space-y-6 animate-slide-in"
-            >
+            <div v-if="currentStep === 'username'" class="space-y-6 animate-slide-in">
               <div class="text-center">
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">
                   Choose your username
@@ -111,21 +89,14 @@
               </div>
               <div class="space-y-4 mx-2">
                 <div>
-                  <input
-                    v-model="username"
-                    type="text"
-                    placeholder="Enter your username"
-                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50 text-lg"
-                  />
+                  <input v-model="username" type="text" placeholder="Enter your username"
+                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50 text-lg" />
                 </div>
               </div>
             </div>
 
             <!-- Register Form Step -->
-            <div
-              v-if="currentStep === 'registerForm'"
-              class="space-y-6 animate-slide-in"
-            >
+            <div v-if="currentStep === 'registerForm'" class="space-y-6 animate-slide-in">
               <div class="text-center">
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">
                   Create your account
@@ -136,33 +107,20 @@
               </div>
               <div v-if="!error" class="mx-2 flex flex-col gap-4 items-center">
                 <div class="w-full">
-                  <input
-                    v-model="email"
-                    type="email"
-                    placeholder="Email address"
-                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50"
-                  />
+                  <input v-model="email" type="email" placeholder="Email address"
+                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50" />
                 </div>
                 <div class="w-full">
-                  <input
-                    v-model="password"
-                    type="password"
-                    placeholder="Password"
-                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50"
-                  />
+                  <input v-model="password" type="password" placeholder="Password"
+                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50" />
                 </div>
                 <div class="w-full">
-                  <input
-                    v-model="confirm_password"
-                    type="password"
-                    placeholder="Confirm password"
-                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50"
-                  />
+                  <input v-model="confirm_password" type="password" placeholder="Confirm password"
+                    class="w-full px-6 py-4 bg-white/10 border border-gray-800/30 rounded-2xl text-gray-800 placeholder-gray-800/60 focus:outline-none focus:ring-2 focus:ring-gray-800/50" />
                 </div>
                 <span class="text-gray-800/80 text-sm">OR</span>
                 <button
-                  class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/40 hover:bg-white/90 border border-gray-800/30 rounded-2xl text-gray-700 transition-all duration-200"
-                >
+                  class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/40 hover:bg-white/90 border border-gray-800/30 rounded-2xl text-gray-700 transition-all duration-200">
                   <img :src="'/google.webp'" class="w-5 h-5" alt="Google" />
                   <span class="font-medium">Sign up with Google</span>
                 </button>
@@ -175,10 +133,7 @@
             </div>
 
             <!-- Optional Step -->
-            <div
-              v-if="currentStep === 'optional'"
-              class="space-y-6 animate-slide-in"
-            >
+            <div v-if="currentStep === 'optional'" class="space-y-6 animate-slide-in">
               <div class="text-center">
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">
                   Complete your profile
@@ -187,46 +142,27 @@
                   Add a profile picture (Optional)
                 </p>
               </div>
-              <div
-                @click="triggerFileInput"
-                class="relative cursor-pointer w-full aspect-square rounded-xl overflow-hidden border-2 border-dashed border-gray-400 flex items-center justify-center bg-gray-100 group hover:border-gray-600"
-              >
-                <IconCamera
-                  class="w-12 text-gray-800 select-none pointer-events-none"
-                />
-                <input
-                  ref="imgUpload"
-                  type="file"
-                  accept="image/*"
-                  class="hidden"
-                  @change="uploadProfilePicture"
-                />
+              <div @click="triggerFileInput"
+                class="relative cursor-pointer w-full aspect-square rounded-xl overflow-hidden border-2 border-dashed border-gray-400 flex items-center justify-center bg-gray-100 group hover:border-gray-600">
+                <IconCamera class="w-12 text-gray-800 select-none pointer-events-none" />
+                <input ref="imgUpload" type="file" accept="image/*" class="hidden" @change="uploadProfilePicture" />
               </div>
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="flex justify-between items-center mt-8">
-            <button
-              @click="previousStep"
-              :disabled="currentStepIndex === 0"
-              class="animated-button px-6 py-3 bg-primary-30/50 hover:bg-primary-20/30 disabled:opacity-50 rounded-full! border border-gray-800/30"
-              :class="{ 'cursor-not-allowed': currentStepIndex === 0 }"
-            >
+            <button @click="previousStep" :disabled="currentStepIndex === 0"
+              class="main-button animated-button px-6 py-3 bg-primary-30/50 hover:bg-primary-20/30 disabled:opacity-50 rounded-full! border border-gray-800/30"
+              :class="{ 'cursor-not-allowed': currentStepIndex === 0 }">
               Previous
             </button>
-            <button
-              @click="skipToRegister"
-              class="px-4 py-2 text-gray-800 transition-all duration-200 underline"
-            >
+            <button @click="skipToRegister" class="px-4 py-2 text-gray-800 transition-all duration-200 underline">
               Skip ahead
             </button>
-            <button
-              @click="nextStep"
-              :disabled="!canProceed"
-              class="animated-button px-8 py-3 bg-primary-50/50 hover:bg-primary-20/50 disabled:opacity-50 rounded-full! border border-gray-800/30"
-              :class="{ 'cursor-not-allowed': !canProceed }"
-            >
+            <button @click="nextStep" :disabled="!canProceed"
+              class="main-button animated-button px-8 py-3 bg-primary-50/50 hover:bg-primary-20/50 disabled:opacity-50 rounded-full! border border-gray-800/30"
+              :class="{ 'cursor-not-allowed': !canProceed }">
               {{ getButtonText() }}
             </button>
           </div>
@@ -504,6 +440,7 @@ const skipToRegister = () => {
     transform: translateX(30%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;

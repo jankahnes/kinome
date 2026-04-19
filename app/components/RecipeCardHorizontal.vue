@@ -3,36 +3,38 @@
     <div class="flex flex-row items-center transition-all duration-300 group z-0">
       <!-- circular -->
       <NuxtImg v-if="recipe?.picture"
-        class="z-10 h-26 xs:h-32 object-cover bg-transparent shadow-gray-200 [filter:drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]"
+        class="z-10 h-26 xs:h-32 object-cover bg-transparent shadow-gray-100 filter-[drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))] will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]"
         :src="recipe?.picture || ''" fetchpriority="high" :alt="recipe?.title" />
 
       <div v-else-if="recipe?.social_picture"
-        class="w-26 xs:w-32 flex justify-center relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01] shadow-gray-200 [filter:drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))]">
+        class="w-26 xs:w-32 flex justify-center relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01] shadow-gray-100 filter-[drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))]">
         <NuxtImg class="w-16 xs:w-22 aspect-9/16 rounded-3xl object-cover z-10"
           :alt="recipe?.title + ' video thumbnail'" :src="recipe?.social_picture!" />
-        <div class="w-16 xs:w-22 aspect-9/16 pointer-events-none absolute left-1/2 -translate-x-1/2 inset-0 rounded-3xl white-fade-overlay z-20">
+        <div
+          class="w-16 xs:w-22 aspect-9/16 pointer-events-none absolute left-1/2 -translate-x-1/2 inset-0 rounded-3xl white-fade-overlay z-20">
         </div>
 
       </div>
-      <div class="z-0 flex-1 main-card px-4 py-3 rounded-4xl flex flex-col gap-2 justify-center h-29 xs:h-35" :class="recipe?.picture || recipe?.social_picture
-        ? '-ml-22 !pl-25 xs:-ml-28 xs:!pl-31'
+    <div class="z-0 flex-1 main-card main-card-rounded px-4 py-3 flex flex-col gap-2 justify-center h-29 xs:h-35" :class="recipe?.picture || recipe?.social_picture
+        ? '-ml-22 pl-25! xs:-ml-28 xs:pl-31!'
         : ''
         ">
         <p v-if="recipe?.variation_name && recipe?.variation_display_name"
-          class="text-[10px] uppercase tracking-widest text-gray-400 leading-none -mb-1">
+          class="text-[10px] uppercase tracking-widest text-gray-400 leading-none font-mono -mb-1">
           {{ recipe?.variation_name }}
         </p>
-        <h2 class="font-semibold leading-6 text-xl sm:text-2xl tracking-tight line-clamp-2 text-balance">
+        <h2 class="font-headers font-semibold leading-6 text-xl sm:text-xl tracking-tight line-clamp-2 text-balance">
           {{ recipe?.title }}
         </h2>
-        <div class="flex gap-1.5 flex-wrap text-xs max-h-[1.7rem] xs:max-h-[3.4rem] overflow-hidden items-start py-0.5">
-          <div v-if="recipe?.rating && recipe?.rating >= 4" class="tag flex items-center gap-1 bg-secondary">
+        <div
+          class="flex gap-1.5 flex-wrap text-xs max-h-[1.7rem] xs:max-h-[3.4rem] overflow-hidden items-start py-0.5 text-gray-700">
+          <div v-if="recipe?.rating && recipe?.rating >= 4" class="tag flex items-center gap-1 bg-primary/8">
             <FormsRatingField :model-value="recipe?.rating" :star-width="13" :star-height="13" :select="false"
               :uniqueId="`card-new-horizontal-${recipe?.id}-${uniqueId}`" />
             <span>{{ recipe?.rating.toFixed(1) }}</span>
           </div>
 
-          <div class="tag flex items-center justify-center text-nowrap bg-secondary" v-for="(tag, index) in top3Tags"
+          <div class="tag flex items-center justify-center text-nowrap bg-primary/8" v-for="(tag, index) in top3Tags"
             :key="index">
             {{ tag?.name }}
           </div>
@@ -40,7 +42,7 @@
       </div>
     </div>
     <div
-      class="px-3 py-1.5 rounded-xl bg-primary-10/70 text-xs text-gray-500 font-medium -mt-4 shadow-[0_0_8px_rgba(0,0,0,0.1)] z-10 text-center truncate max-w-[70%] mx-4 self-end"
+      class="px-3 py-1.5 rounded-xl bg-primary-5/70 text-xs text-gray-500 font-medium -mt-4 shadow-[0_0_8px_rgba(0,0,0,0.1)] z-10 text-center truncate max-w-[70%] mx-4 self-end"
       v-if="reasonText">
       {{ reasonText }}
     </div>

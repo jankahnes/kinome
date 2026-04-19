@@ -1,25 +1,30 @@
 <template>
-  <div class="mb-20 space-y-4 sm:space-y-10 m-4 sm:mx-10 sm:mt-10 md:mb-10 lg:ml-22 lg:mr-18">
+  <div class="mb-20 space-y-4 sm:space-y-10 m-4 lg:my-10 lg:mx-16">
     <div class="md:hidden flex justify-between items-center">
       <Logo class="" />
-      <Avatar :user="auth.user" class="rounded-full w-10 h-10" v-if="auth.isUser()" />
-      <NuxtLink to="/login" class="animated-button mt-1" v-else>
+      <NuxtLink :to="'/profile/' + auth.user?.id" v-if="auth.isUser()">
+        <Avatar :user="auth.user" class="rounded-full w-10 h-10" />
+      </NuxtLink>
+      <NuxtLink to="/login" class="mt-1" v-else>
         <IconLogIn :size="26" />
       </NuxtLink>
     </div>
     <div class="justify-between items-center gap-6 hidden md:flex">
-      <div class="flex gap-2 flex-1 items-center">
-        <div class="ai-ring rounded-2xl p-px flex items-center">
-          <div class="flex items-center rounded-[15px] px-2 bg-primary-10">
-            <IconSearch class="w-5 text-gray-400" />
-            <input type="text" :placeholder="'Describe what you\'re looking for…'" v-model="searchQuery"
-              @keyup.enter="handleSearch" @blur="handleSearch" class="flex-grow focus:outline-none min-w-0! p-2" />
+      <div class="flex gap-2 flex-1">
+        <div class="ai-ring main-card-rounded p-px flex items-center">
+          <div class="flex items-center rounded-[31px] px-4 main-button">
+            <IconSearch class="w-4 " />
+            <input type="text" :placeholder="'Search recipes, ingredients, techniques...'" v-model="searchQuery"
+              @keyup.enter="handleSearch" @blur="handleSearch"
+              class="text-xs grow focus:outline-none w-80 px-2 py-[9px]" />
           </div>
         </div>
-        <NuxtLink to="/kitchen/recipes" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0"
+        <NuxtLink to="/kitchen/recipes"
+          class="main-button animated-button main-card px-3 py-2.5 shrink-0 text-xs text-gray-600"
           active-class="bg-primary/80">
           All Recipes</NuxtLink>
-        <NuxtLink to="/foods" class="animated-button bg-primary-10/60 px-3 py-2 shrink-0" active-class="bg-primary/80">
+        <NuxtLink to="/foods" class="main-button animated-button main-card px-3 py-2.5 shrink-0 text-xs text-gray-600"
+          active-class="bg-primary/80">
           All Foods
         </NuxtLink>
       </div>
@@ -30,17 +35,20 @@
       </div>
     </div>
     <div class="items-center gap-2 justify-between hidden md:flex">
-      <h1 class="text-5xl font-semibold pt-4">
-        🌟<span class="ml-0.5">Discover</span>
-      </h1>
+      <div>
+        <span class="font-mono text-[10px] text-gray-400 uppercase">TODAY / {{ getTodayString() }}</span>
+        <h1 class="text-5xl font-headers">
+          Discover<span class="text-primary">.</span>
+        </h1>
+      </div>
       <div class="items-center gap-4 hidden sm:flex">
-        <div class="flex flex-col items-center">
-          <RollingNumber :number="recipeCount" class="text-3xl font-bold text-primary leading-none" />
-          <p class="text-xs text-gray-600 leading-none">Recipes</p>
+        <div class="flex flex-col items-end">
+          <RollingNumber :number="recipeCount" class="text-3xl text-primary leading-none font-headers" />
+          <p class="text-[10px] text-gray-400 font-mono uppercase mr-0.5">Recipes</p>
         </div>
-        <div class="flex flex-col items-center">
-          <p class="text-3xl font-bold text-primary leading-none">8890</p>
-          <p class="text-xs text-gray-600 leading-none">Foods</p>
+        <div class="flex flex-col items-end">
+          <p class="text-3xl text-primary leading-none font-headers">8890</p>
+          <p class="text-[10px] text-gray-400 font-mono uppercase mr-0.5">Foods</p>
         </div>
       </div>
     </div>
@@ -48,16 +56,16 @@
     <!-- Categories -->
     <BlocksCarousel>
       <div
-        class="flex items-center gap-x-1 pl-1 md:px-3 p-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
+        class="flex items-center gap-x-1 pl-1 md:px-3 px-1 py-[3px] text-xs text-gray-600 transition-all duration-300 shrink-0 main-button animated-button rounded-2xl! my-2 mr-2 sm:mr-4"
         @click="navigateTo('/kitchen/social')">
-        <span class="text-2xl">🔥</span>
-        <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">Trending</span>
+        <span class="text-lg">🔥</span>
+        <span class="text-sm text-nowrap">Trending</span>
       </div>
       <div v-for="category in categories" :key="category.tag"
-        class="flex items-center gap-x-1 pl-1 md:px-3 p-1 transition-all duration-300 flex-shrink-0 animated-button rounded-2xl! my-2 mr-2 sm:mr-4 text-gray-600 bg-primary-10"
+        class="flex items-center gap-x-1 pl-1 md:px-3 px-1 py-[3px] text-xs text-gray-600 transition-all duration-300 shrink-0 main-button animated-button rounded-2xl! my-2 mr-2 sm:mr-4"
         @click="onClickCategory(category.tag)">
-        <span class="text-2xl">{{ category.icon }}</span>
-        <span class="text-sm sm:text-base sm:tracking-wider text-nowrap">{{
+        <span class="text-lg">{{ category.icon }}</span>
+        <span class="text-sm text-nowrap">{{
           category.name
         }}</span>
       </div>
@@ -92,7 +100,7 @@
     </div>
 
     <!-- Recommendations: Desktop -->
-    <div class="hidden 2lg:block transition-all duration-150" :class="rowMaxHeight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-x-2'
+    <div class="hidden 2lg:block transition-all duration-150" :class="rowMaxHeight ? 'opacity-100 translate-y-0' : '-translate-x-2'
       ">
       <div class="flex gap-8 py-1 overflow-hidden" :class="rowMaxHeight ? 'flex-wrap' : 'flex-nowrap'" :style="{
         maxHeight: rowMaxHeight ? rowMaxHeight + 'px' : undefined,
@@ -123,16 +131,21 @@
     <!-- Social Media Cards -->
     <Transition name="loaded-content">
       <div class="flex flex-wrap pt-4">
-        <div class="flex flex-col gap-6 items-start">
-          <h2 class="text-2xl font-bold">
-            <NuxtLink to="/kitchen/social">
-              <span class="text-2xl">🚀</span>
-              <span> Trending on Social Media</span>
+        <div class="flex flex-col gap-6">
+          <div class="flex gap-2 justify-between items-baseline">
+            <h2 class="text-2xl font-headers tracking-tight">
+              <NuxtLink to="/kitchen/social">
+                <span> Trending - around the web</span>
+              </NuxtLink>
+            </h2>
+            <NuxtLink to="/kitchen/social" class="text-xs text-gray-600 flex items-center gap-0.5">
+              See all
+              <IconChevronRight class="w-4 h-4" :strokeWidth="1.5" />
             </NuxtLink>
-          </h2>
+          </div>
           <div class="flex flex-wrap gap-4">
             <RecipeCardSocialMedia v-for="recipe in recipeStore.socialIndexRecipes" :key="recipe.id" :recipe="recipe"
-              :uniqueId="'social-' + recipe.id" class="max-h-60 max-w-240 basis-140" />
+              :uniqueId="'social-' + recipe.id" class="max-w-240 basis-140" />
           </div>
         </div>
       </div>
@@ -148,6 +161,17 @@ const searchQuery = ref('');
 const auth = useAuthStore();
 
 const recipeCount = ref(1000);
+
+const getTodayString = () => {
+  const today = new Date();
+  return today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+defineOgImage('Default.takumi', {
+  eyebrow: 'Kinome',
+  title: 'Recipes worth eating.',
+  subtitle: '2000+ recipes with deep nutrition analysis, imported from any site or video.',
+})
 
 useHead({
   title: 'Kinome - Smart Recipe Platform with Nutrition Analysis',

@@ -1,40 +1,26 @@
 <template>
-  <div
-    class="flex flex-col shadow-lg bg-white text-primary sm:rounded-2xl h-full"
-  >
+  <div class="flex flex-col shadow-lg bg-white text-primary sm:rounded-2xl h-full">
     <div class="px-6 py-3 flex justify-between items-center">
       <h2 class="text-xl font-bold">Shopping List</h2>
-      <button
-        @click="$emit('close')"
-        class="p-2 hover:bg-gray-100 rounded-full transition-colors"
-      >
+      <button @click="$emit('close')" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
         <IconX class="w-5 h-5" />
       </button>
     </div>
 
     <div class="h-full overflow-hidden flex flex-col">
       <div class="flex flex-col gap-8 p-4 overflow-y-auto">
-        <div
-          v-for="(items, aisle) in groupedByAisle"
-          :key="aisle"
-          class="space-y-4"
-        >
+        <div v-for="(items, aisle) in groupedByAisle" :key="aisle" class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xl">{{ getAisleEmoji(aisle) }}</span>
             <h3 class="text-lg font-bold">{{ aisle }}</h3>
           </div>
-          <div class="h-[1px] bg-primary-100"></div>
+          <div class="h-[1px] bg-primary-50"></div>
 
           <ul class="flex flex-col gap-2">
-            <li
-              v-for="item in items"
-              :key="item.ingredientId"
-              class="flex items-center gap-2 p-2 bg-primary-50/20 rounded-lg transition-colors hover:bg-primary-20"
-            >
-              <button
-                @click="removeItem(item.ingredientId)"
-                class="hover:bg-primary-50 rounded-full transition-colors w-6 h-6 flex items-center justify-center flex-shrink-0"
-              >
+            <li v-for="item in items" :key="item.ingredientId"
+              class="flex items-center gap-2 p-2 bg-primary-50/20 rounded-lg transition-colors hover:bg-primary-20">
+              <button @click="removeItem(item.ingredientId)"
+                class="hover:bg-primary-50 rounded-full transition-colors w-6 h-6 flex items-center justify-center flex-shrink-0">
                 <IconX class="w-5 h-5 text-primary" />
               </button>
               <div class="flex items-center gap-2">
@@ -51,39 +37,24 @@
       <div class="space-y-2 py-2 px-6" v-if="contributingRecipes.length > 0">
         <p class="text-xs text-gray-500 mb-2">From recipes:</p>
         <div class="flex gap-2">
-          <NuxtLink
-            v-for="recipe in contributingRecipes"
-            :key="recipe.id"
-            :to="getRecipeUrl(recipe.id, recipe.title)"
-            class="w-12 h-12 rounded-lg overflow-hidden hover:scale-107 transition-all duration-400"
-          >
-            <img
-              v-if="recipe.picture"
-              :src="recipe.picture"
-              :alt="recipe.title"
-              class="w-12 h-12 object-cover rounded-lg"
-            />
-            <div
-              v-else
-              class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center"
-            >
+          <NuxtLink v-for="recipe in contributingRecipes" :key="recipe.id" :to="getRecipeUrl(recipe.id, recipe.title)"
+            class="w-12 h-12 rounded-lg overflow-hidden hover:scale-107 transition-all duration-400">
+            <img v-if="recipe.picture" :src="recipe.picture" :alt="recipe.title"
+              class="w-12 h-12 object-cover rounded-lg" />
+            <div v-else class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center">
               <IconUtensilsCrossed class="w-5 h-5 text-primary" />
             </div>
           </NuxtLink>
         </div>
       </div>
 
-      <div
-        class="space-y-2 mt-2 py-4 px-6 border-t border-primary-100 border-dashed"
-      >
+      <div class="space-y-2 mt-2 py-4 px-6 border-t border-primary-100 border-dashed">
         <div class="flex justify-between items-center">
           <span class="text-sm text-gray-500">Estimated Total:</span>
           <span class="text-lg">{{ formatMoney(estimatedTotal ?? 0) }}</span>
         </div>
-        <button
-          @click="clearList"
-          class="w-full py-2 bg-primary-50/20 rounded-lg text-primary hover:bg-primary-50 transition-all duration-200"
-        >
+        <button @click="clearList"
+          class="w-full py-2 bg-primary-50/20 rounded-lg text-primary hover:bg-primary-50 transition-all duration-200">
           Clear All
         </button>
       </div>

@@ -168,7 +168,7 @@ export function useMealTracking() {
           )
         `,
         )
-        .eq('user_id', user.value.id)
+        .eq('user_id', user.value.sub)
         .eq('meal_date', formatDate(date))
         .not('is_template', 'is', true)
         .order('meal_order', { ascending: true });
@@ -208,7 +208,7 @@ export function useMealTracking() {
               )
             `,
             )
-            .eq('user_id', user.value.id)
+            .eq('user_id', user.value.sub)
             .eq('meal_date', formatDate(date))
             .not('is_template', 'is', true)
             .order('meal_order', { ascending: true });
@@ -259,7 +259,7 @@ export function useMealTracking() {
       const { error: deleteError } = await supabase
         .from('tracked_meals')
         .delete()
-        .eq('user_id', user.value.id)
+        .eq('user_id', user.value.sub)
         .eq('meal_date', formatDate(selectedDate.value))
         .not('is_template', 'is', true);
 
@@ -286,7 +286,7 @@ export function useMealTracking() {
         const { data: insertedMeal, error: mealError } = await supabase
           .from('tracked_meals')
           .insert({
-            user_id: user.value.id,
+            user_id: user.value.sub,
             meal_name: meal.name || 'Untitled Meal',
             meal_date: formatDate(selectedDate.value),
             collapsed: meal.collapsed,

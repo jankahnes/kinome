@@ -2,14 +2,14 @@
   <div class="flex gap-4">
     <div class="flex flex-col items-center gap-2">
       <Avatar :user="comment.user" class="w-12 h-12" :class="isReply ? 'w-10! h-10!' : ''" />
-      <div class="w-px h-full bg-secondary" v-if="comment.replies?.length"></div>
+      <div class="w-px h-full bg-primary/8" v-if="comment.replies?.length"></div>
     </div>
     <div class="flex-1">
       <div class="flex items-center gap-4 justify-between">
         <span class="font-bold leading-none text-base">{{
           comment.user.username ?? 'Guest'
         }}</span>
-        <FormsRatingField v-if="comment.rating" class="-mt-1 text-primary" :model-value="comment.rating" :select="false"
+        <FormsRatingField v-if="comment.rating" class="-mt-1 " :model-value="comment.rating" :select="false"
           :starWidth="22" :starHeight="22" :uniqueId="comment.id?.toString() ?? '' + id" />
       </div>
       <span class="text-xs text-gray-500 leading-none">{{
@@ -27,25 +27,25 @@
       <div class="mt-2 flex flex-wrap gap-2 text-sm">
 
         <div class="flex gap-2 flex-wrap" v-if="canModify && !isEditing && !replying">
-          <button class="animated-button bg-red-100 opacity-80 px-3 rounded-xl py-0.5" @click="deleteThis">
+          <button class="main-button animated-button bg-red-100 opacity-80 px-3 rounded-xl py-0.5" @click="deleteThis">
             Delete
           </button>
-          <button class="animated-button bg-secondary px-3 rounded-xl py-0.5" @click="startEdit">
+          <button class="main-button animated-button bg-primary/8 px-3 rounded-xl py-0.5" @click="startEdit">
             Edit
           </button>
         </div>
 
         <template v-if="isEditing">
-          <button class="animated-button bg-secondary px-3 rounded-xl py-0.5 ml-auto" @click="cancelEdit">
+          <button class="main-button animated-button bg-primary/8 px-3 rounded-xl py-0.5 ml-auto" @click="cancelEdit">
             Cancel
           </button>
-          <button class="animated-button bg-secondary-700 px-3 rounded-xl py-0.5" @click="saveEdit">
+          <button class="main-button animated-button bg-primary/8-700 px-3 rounded-xl py-0.5" @click="saveEdit">
             Save
           </button>
         </template>
 
         <button v-if="!isReply && !isEditing && !replying"
-          class="animated-button bg-secondary px-3 rounded-xl py-0.5 ml-auto" @click="startReply">
+          class="main-button animated-button bg-primary/8 px-3 rounded-xl py-0.5 ml-auto" @click="startReply">
           Reply
         </button>
       </div>
@@ -55,10 +55,10 @@
           class="w-full p-2 rounded-xl border border-slate-200 focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-16"
           rows="2"></textarea>
         <div class="flex gap-2 justify-end">
-          <button class="animated-button bg-secondary px-3 rounded-xl py-0.5" @click="cancelReply">
+          <button class="main-button animated-button bg-primary/8 px-3 rounded-xl py-0.5" @click="cancelReply">
             Cancel
           </button>
-          <button class="animated-button bg-secondary-700 px-3 rounded-xl py-0.5" @click="submitReply">
+          <button class="main-button animated-button bg-primary/8-700 px-3 rounded-xl py-0.5" @click="submitReply">
             Post reply
           </button>
         </div>

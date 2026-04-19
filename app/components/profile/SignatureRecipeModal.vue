@@ -9,8 +9,8 @@
             {{ recipe?.title ?? 'Choose a recipe first.' }}
           </p>
         </div>
-        <button type="button" class="animated-button rounded-full bg-white/80 p-2 text-gray-500" :disabled="saving"
-          @click="close" aria-label="Close signature modal">
+        <button type="button" class="main-button animated-button rounded-full bg-white/80 p-2 text-gray-500"
+          :disabled="saving" @click="close" aria-label="Close signature modal">
           <IconX class="h-5 w-5" />
         </button>
       </div>
@@ -24,7 +24,7 @@
       <div class="mt-3 flex flex-col gap-3 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
         <p>Use your finger or mouse to draw.</p>
         <button type="button"
-          class="animated-button self-start rounded-full bg-white px-4 py-2 font-semibold text-gray-700"
+          class="main-button animated-button self-start rounded-full bg-white px-4 py-2 font-semibold text-gray-700"
           :disabled="saving" @click="clearPad">
           Clear
         </button>
@@ -35,12 +35,13 @@
       </p>
 
       <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <button type="button" class="animated-button rounded-full bg-black/5 px-5 py-2 font-semibold text-gray-700"
+        <button type="button"
+          class="main-button animated-button rounded-full bg-black/5 px-5 py-2 font-semibold text-gray-700"
           :disabled="saving" @click="close">
           Cancel
         </button>
         <button type="button"
-          class="animated-button rounded-full bg-primary px-5 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          class="main-button animated-button rounded-full bg-primary px-5 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="saving || !recipe" @click="saveSignature">
           {{ saving ? 'Saving...' : 'Save signature' }}
         </button>

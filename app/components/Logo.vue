@@ -1,14 +1,8 @@
 <template>
   <NuxtLink to="/" class="">
-    <div class="flex items-center">
-      <NuxtImg
-        src="/leaves.png"
-        class="w-10 h-10 object-contain"
-        alt="Kinome Leaves"
-      />
-      <span
-        class="text-5xl font-semibold text-primary-500 tracking-tighter z-10 -ml-1"
-      >
+    <div class="flex items-center gap-2">
+      <NuxtImg src="/leaves_matched.png" class="h-7 object-contain" alt="Kinome Leaves" />
+      <span class="text-3xl font-semibold tracking-tight z-10 -ml-1 font-headers ">
         kinome
       </span>
     </div>

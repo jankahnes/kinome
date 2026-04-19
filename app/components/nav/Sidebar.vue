@@ -1,98 +1,45 @@
 <template>
-  <aside class="sidebar h-full bg-primary-10 rounded-r-2xl overflow-hidden transition-all duration-300 notch"
-    id="sidebar">
-    <svg width="0" height="0" style="position: absolute">
-      <defs>
-        <clipPath id="sidebar-blob-cutout" clipPathUnits="objectBoundingBox">
-          <path d="M 0,0 L 1,0 L 1,0.065 C 0.993,0.08 0.97,0.09 0.952,0.105 S 0.993,0.13 1,0.145 L 1,1 L 0,1 Z" />
-        </clipPath>
-      </defs>
-    </svg>
-    <div class="flex flex-col h-full justify-between">
-      <div class="flex flex-col gap-16 pb-20">
-        <div class="my-8 mx-auto pr-4">
-          <Logo />
-        </div>
-
-        <div class="mx-5 self-start min-w-30 bg-secondary/70 rounded-3xl  mr-6">
-          <NuxtLink :to="`/profile/${auth.user?.id}`"
-            class="flex gap-3 items-center animated-button overflow-hidden group pr-3 -ml-1" v-if="auth.isUser()">
-            <Avatar :user="auth.user" class="w-14" :placeholder="!auth.profileFetched"
-              :ring="focusedIndex === 0 && sidebarNavigationActive" @click="onClickLink(accountLink)" />
-            <span
-              class="flex-1 text-center mr-1 text-lg text-wrap tracking-tight text-gray-800 group-hover:text-black transition-all duration-300">{{
-                auth.user?.username }}</span>
-          </NuxtLink>
-          <div class="flex gap-3 transition-all duration-300 pr-2" v-else>
-            <Avatar :user="auth.user" class="rounded-full w-18" :placeholder="!auth.profileFetched"
-              :ring="focusedIndex === 0 && sidebarNavigationActive" @click="onClickLink(accountLink)" />
-            <Transition name="fade" mode="out-in">
-              <Skeleton v-if="!auth.profileFetched" class="rounded-3xl w-26 h-8 self-center" />
-              <span class="text-xl font-bold text-wrap tracking-normal leading-none transition-all duration-300"
-                :class="{ 'text-3xl!': expanded }" v-else-if="auth.isUser()">{{ auth.user!.username }}</span>
-              <div class="flex flex-col rounded-2xl overflow-hidden -mr-2" v-else>
-                <NuxtLink to="/login" @click="onClickLink('/login')"
-                  class="animated-button rounded-none! bg-primary-100/70 text-gray-800 font-bold tracking-tight flex items-center justify-center px-5 flex-1">
-                  Login</NuxtLink>
-                <NuxtLink to="/onboarding" @click="onClickLink('/onboarding')"
-                  class="animated-button rounded-none! bg-primary-300/70 text-gray-800  font-bold tracking-tight flex items-center justify-center px-5 flex-1">
-                  Register</NuxtLink>
-              </div>
-            </Transition>
+  <aside class="h-full main-card overflow-hidden transition-all duration-300">
+    <div class="flex flex-col h-full justify-between p-4 gap-4">
+      <div class="flex flex-col gap-10 ">
+        <Logo class="mt-1 ml-1" />
+        <NuxtLink :to="'/profile/' + auth.user?.id" class="shadow-sm bg-white rounded-3xl p-2 flex items-center gap-4">
+          <Avatar :user="auth.user" class="w-12" :placeholder="!auth.profileFetched" />
+          <div class="flex flex-col my-1" v-if="auth.isUser() && auth.profileFetched">
+            <span class="text-[13px]">{{ auth.user?.username }}</span>
+            <span class="text-[11px] text-gray-500">Sous Chef · Lv 13</span>
           </div>
-        </div>
-        <div class="flex flex-col gap-4 p-6 transition-all duration-300" :class="{ 'mt-4': expanded }">
-          <NuxtLink to="/" class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all"
-            :class="{
-              'ring-2 ring-primary-500 ring-offset-2':
-                focusedIndex === 1 && sidebarNavigationActive,
-            }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/')">
-            <IconCompass class="w-6 h-6" />
-            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Discover</span>
-          </NuxtLink>
-          <NuxtLink to="/kitchen/home"
-            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all" :class="{
-              'ring-2 ring-primary-500 ring-offset-2':
-                focusedIndex === 2 && sidebarNavigationActive,
-              'primary-gradient text-gray-800 px-3 py-2':
-                route.path.startsWith('/kitchen'),
-            }" @click="onClickLink('/kitchen/home')">
-            <IconChefHat class="w-6 h-6" />
-            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Kitchen</span>
-          </NuxtLink>
-          <NuxtLink to="/recipe/new"
-            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all" :class="{
-              'ring-2 ring-primary-500 ring-offset-2':
-                focusedIndex === 3 && sidebarNavigationActive,
-            }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/recipe/new')">
-            <IconPlus class="w-6 h-6" />
-            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Create</span>
-          </NuxtLink>
-
-          <NuxtLink to="/tracking"
-            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all" :class="{
-              'ring-2 ring-primary-500 ring-offset-2':
-                focusedIndex === 4 && sidebarNavigationActive,
-            }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/tracking')">
-            <IconNotebookPen class="w-6 h-6" />
-            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Meal
-              tracking</span>
-          </NuxtLink>
-
-          <NuxtLink to="/feed"
-            class="animated-button text-gray-600 items-center flex gap-2 py-1 rounded transition-all" :class="{
-              'ring-2 ring-primary-500 ring-offset-2':
-                focusedIndex === 5 && sidebarNavigationActive,
-            }" active-class="primary-gradient text-gray-800 px-3 py-2" @click="onClickLink('/feed')">
-            <IconRss class="w-6 h-6" />
-            <span class="text-lg font-bold! tracking-tight leading-none transition-all duration-300">Feed</span>
+          <div class="flex flex-col flex-1 -my-2 -mr-2" v-else-if="auth.profileFetched">
+            <NuxtLink to="/login"
+              class="main-button animated-button rounded-b-none! rounded-t-2xl! bg-primary-100/30! font-headers tracking-tight text-center text-sm py-1.5">
+              Login</NuxtLink>
+            <NuxtLink to="/onboarding"
+              class="main-button animated-button rounded-t-none! rounded-b-2xl! bg-primary-100/60! font-headers italic! font-semibold tracking-tight text-sm py-1.5 text-center">
+              Register</NuxtLink>
+          </div>
+        </NuxtLink>
+        <div class="flex flex-col gap-1  transition-all duration-300">
+          <NuxtLink v-for="item in navLinks" :key="item.to" :to="item.to"
+            class="animated-button text-gray-600 items-center flex gap-2 p-2 rounded-2xl! transition-all"
+            :active-class="'px-3 py-2.5 bg-[#201914] text-white'">
+            <Icon :name="item.icon" class="w-5" :strokeWidth="2" />
+            <span class="text-sm transition-all duration-300">{{ item.label
+            }}</span>
           </NuxtLink>
         </div>
       </div>
-
-      <!-- Illustration -->
-      <div class="flex-shrink-0 flex items-end justify-center w-full max-w-62 self-center">
-        <NuxtImg src="/ill.webp" class="w-full" alt="Illustration of a home chef" />
+      <div class="flex flex-col gap-2">
+        <div class="rounded-3xl bg-primary-50 p-4 space-y-1">
+          <p class="text-[11px] font-mono uppercase font-light">COOK STREAK</p>
+          <p class="text-2xl font-headers">{{ auth.cookStreak }}
+            <span class="text-[11px] italic">{{ auth.cookStreak === 1 ? 'day' : 'days' }}</span>
+          </p>
+          <div class="flex items-center gap-1">
+            <div v-for="i in 7" :key="i" class="flex-1 h-1 rounded-full"
+              :class="i <= Math.min(auth.cookStreak, 7) ? 'bg-primary' : 'bg-gray-300'"></div>
+          </div>
+        </div>
+        <span class="text-[10px] text-gray-600 font-mono ml-3 mb-2">kinome / v0.8</span>
       </div>
     </div>
   </aside>
@@ -100,89 +47,21 @@
 
 <script setup lang="ts">
 const auth = useAuthStore();
-const route = useRoute();
 defineProps<{
   toggleSidebar: () => void;
-  onClickLink: (link: string) => void;
-  expanded: boolean;
-  sidebarNavigationActive: boolean;
 }>();
 
-const accountLink = computed(() => {
-  if (!auth.user?.username) return '/onboarding';
-  else {
-    return '/profile/' + auth.user?.id;
-  }
-});
-
-const linkPaths = computed(() => [
-  {
-    linkPath: auth.isUser() ? accountLink.value : '/onboarding',
-    focusPath: auth.isUser() ? accountLink.value : '/onboarding',
-  },
-  {
-    linkPath: '/',
-  },
-  {
-    linkPath: '/kitchen/home',
-    focusPath: '/kitchen',
-  },
-  {
-    linkPath: '/recipe/new',
-    focusPath: '/recipe/new',
-  },
-  {
-    linkPath: '/tracking',
-    focusPath: '/tracking',
-  },
-  {
-    linkPath: '/feed',
-    focusPath: '/feed',
-  },
-]);
-
-const focusedIndex = ref(-1);
-
-const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'ArrowDown') {
-    focusedIndex.value = Math.min(
-      focusedIndex.value + 1,
-      linkPaths.value.length - 1
-    );
-    e.preventDefault();
-    const linkPath = linkPaths.value[focusedIndex.value];
-    navigateTo(linkPath.linkPath);
-  } else if (e.key === 'ArrowUp') {
-    focusedIndex.value = Math.max(focusedIndex.value - 1, 0);
-    e.preventDefault();
-    const linkPath = linkPaths.value[focusedIndex.value];
-    navigateTo(linkPath.linkPath);
-  }
+type NavLinkItem = {
+  to: string;
+  label: string;
+  icon: string;
 };
 
-const focusActiveLink = () => {
-  const index = linkPaths.value.findIndex(
-    (path) =>
-      path.linkPath === route.path || route.path.startsWith(path.focusPath)
-  );
-  if (index == -1) {
-    focusedIndex.value = 1;
-  } else {
-    focusedIndex.value = index;
-  }
-};
-
-watch(() => route.path, focusActiveLink, { immediate: true });
-
-defineExpose({
-  handleKeydown,
-});
+const navLinks: NavLinkItem[] = [
+  { to: '/', label: 'Discover', icon: 'compass' },
+  { to: '/kitchen/home', label: 'Kitchen', icon: 'chef-hat' },
+  { to: '/recipe/new', label: 'Create', icon: 'add' },
+  { to: '/tracking', label: 'Meal tracking', icon: 'notebook-pen' },
+  { to: '/feed', label: 'Feed', icon: 'rss' },
+];
 </script>
-
-<style scoped>
-@media (min-width: 1024px) {
-  .notch {
-    clip-path: url(#sidebar-blob-cutout);
-  }
-}
-</style>

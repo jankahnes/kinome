@@ -1,30 +1,30 @@
 <template>
-  <div class="flex flex-col bg-primary-10/40 rounded-4xl p-4">
+  <div class="flex flex-col">
     <div class="flex justify-between items-center mb-3 mx-2 gap-4 gap-y-0 flex-wrap">
-      <h3 class="text-4xl font-bold tracking-tighter shrink-0">Nutrition Overview</h3>
-      <div class="flex items-center gap-2 justify-between sm:justify-end flex-1 ">
+      <h3 class="text-4xl font-headers tracking-tighter shrink-0">Nutrition Overview</h3>
+      <div class="flex gap-2 justify-between sm:justify-end flex-1 ">
         <div v-if="mode === 'info' && dropdownChoices?.length" class="relative min-w-36">
           <FormsDropdown :choices="dropdownChoices" :model-value="selectedUnit ?? dropdownChoices[0]"
-            @update:model-value="emit('update:selectedUnit', $event)" :style="'bg-primary-10'" />
+            @update:model-value="emit('update:selectedUnit', $event)" />
         </div>
         <button @click="mode === 'info' ? emit('viewFullNutrition') : emit('viewOverallReport')"
-          class="flex items-center gap-0.5 animated-button text-sm p-2"
-          :class="mode === 'info' ? 'bg-primary-10' : 'text-slate-400'">
-          <span v-if="mode === 'info'" class="hidden sm:inline">View Full</span>
-          <IconChevronRight class="w-5" />
+          class="flex items-center gap-0.5 text-sm p-2 "
+          :class="mode === 'info' ? 'main-button animated-button' : 'text-gray-400'">
+          <span v-if="mode === 'info'" class="hidden sm:inline">Full Nutrition</span>
+          <IconChevronRight class="w-6" />
         </button>
       </div>
     </div>
 
     <div class="flex flex-wrap 2xl:grid grid-cols-4 gap-2">
       <!-- Kcal card (col-span-2) -->
-      <div class="flex flex-col justify-between p-4 basis-70 bg-primary-10 rounded-3xl col-span-2 gap-6 flex-2">
+      <div class="flex flex-col justify-between p-4 basis-70 main-card rounded-3xl col-span-2 flex-2">
         <div>
-          <div class="text-2xl font-bold leading-none">Kcal</div>
-          <div class="text-[58px] leading-none font-bold">
+          <div class="text-2xl leading-none">Kcal</div>
+          <div class="text-[58px] leading-none font-semibold mt-1">
             {{ kcalValue
-            }}<span v-if="mode === 'tracking'" class="text-xl text-nowrap">/{{ kcalGoal }} kcal</span><span v-else
-              class="text-xl text-slate-400"> kcal</span>
+            }}<span v-if="mode === 'tracking'" class="text-xl text-nowrap font-normal">/{{ kcalGoal }} kcal</span><span
+              v-else class="text-xl text-slate-400"> kcal</span>
           </div>
         </div>
         <div class="flex w-full h-3 rounded-full overflow-hidden bg-slate-200">
@@ -35,12 +35,12 @@
 
       <!-- Fiber, Salt, Protein, Fat -->
       <div v-for="item in overviewItems.slice(0, 4)" :key="item.title"
-        class="flex flex-col items-center justify-between p-4 bg-primary-10 rounded-3xl gap-1 flex-1 basis-30">
+        class="flex flex-col items-center justify-between p-4 main-card rounded-3xl gap-1 flex-1 basis-30">
         <div class="w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
           <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
         </div>
         <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
-        <div class="font-bold text-xl leading-none">
+        <div class="font-semibold text-xl leading-none">
           {{ item.total }}{{ item.unit
           }}<span v-if="mode === 'tracking'" class="text-sm font-normal">/{{ item.goal }}{{ item.unit }}</span>
         </div>
@@ -57,14 +57,14 @@
       </div>
 
       <!-- Carbs + Sugar paired card -->
-      <div class="col-span-2 flex gap-2 rounded-3xl bg-primary-10/50 p-1 flex-2 basis-60">
+      <div class="col-span-2 flex gap-2 rounded-3xl bg-primary-5/50 p-1 flex-2 basis-60">
         <div v-for="item in overviewItems.slice(4)" :key="item.title"
-          class="flex flex-col items-center justify-between p-3 bg-primary-10 rounded-[1.25rem] gap-1 flex-1" ">
+          class="flex flex-col items-center justify-between p-3 main-card rounded-[1.25rem] gap-1 flex-1" ">
           <div class=" w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
           <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
         </div>
         <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
-        <div class="font-bold text-xl leading-none">
+        <div class="font-semibold text-xl leading-none">
           {{ item.total }}{{ item.unit
           }}<span v-if="mode === 'tracking'" class="text-sm font-normal">/{{ item.goal }}{{ item.unit }}</span>
         </div>
