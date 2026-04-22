@@ -20,7 +20,7 @@
               Pick one of your original recipes and add your signature for display on your profile.
             </p>
           </div>
-          <NuxtLink :to="'/profile/' + user?.id"
+          <NuxtLink :to="getProfileUrl(user)"
             class="main-button animated-button self-start rounded-full bg-primary-5 px-4 py-2 text-sm font-semibold text-gray-700">
             Back to profile
           </NuxtLink>
@@ -154,7 +154,7 @@ async function handleSignatureSaved(payload: { recipeId: number }) {
     auth.user.signature_recipe = payload.recipeId;
   }
 
-  await navigateTo('/profile/' + user?.value?.id);
+  await navigateTo(getProfileUrl(user?.value));
 }
 </script>
 

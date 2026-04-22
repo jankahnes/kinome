@@ -37,7 +37,7 @@
             <span>From {{ originDisplay.website + " " }}</span>
           </span>
           <span v-else-if="originDisplay.type === 'user'" class="leading-none align-middle">
-            <span>By <NuxtLink :to="`/profile/${recipeStore.recipe?.user?.id}`" class="cursor-pointer">{{
+            <span>By <NuxtLink :to="getProfileUrl(recipeStore.recipe?.user)" class="cursor-pointer">{{
               recipeStore.recipe?.user?.username + " " }}</NuxtLink></span>
           </span>
           <span v-if="recipeStore.recipe?.based_on" class="leading-none align-middle">
@@ -98,19 +98,19 @@
         <div v-if="top7Tags.length > 0"
           class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-sm mt-2 justify-center">
           <div v-if="recipeStore.recipe?.rating && recipeStore.recipe?.rating >= 4"
-            class="flex items-center justify-center text-nowrap bg-primary/8 px-2 py-1 main-card-rounded leading-none gap-1">
+            class="flex items-center justify-center text-nowrap bg-primary/6 px-2 py-1 main-card-rounded leading-none gap-1">
             <FormsRatingField :model-value="recipeStore.recipe?.rating" :star-width="16" :star-height="16" :spacing="-1"
               :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`" class="" />
             <span class="text-sm leading-none font-bold">{{ recipeStore.recipe?.rating?.toFixed(1) }}</span>
           </div>
           <div
-            class="flex items-center justify-center text-nowrap bg-primary/8 px-2 py-1 main-card-rounded leading-none">
+            class="flex items-center justify-center text-nowrap bg-primary/6 px-2 py-1 main-card-rounded leading-none">
             <IconClock class="h-4" />
             <span class="text-sm leading-none">{{ getTotalTime(recipeStore.recipe?.total_time_mins,
               recipeStore.recipe?.effort) }}</span>
           </div>
           <div
-            class="flex items-center justify-center text-nowrap bg-primary/8 px-2 py-1 main-card-rounded gap-2 leading-none"
+            class="flex items-center justify-center text-nowrap bg-primary/6 px-2 py-1 main-card-rounded gap-2 leading-none"
             :class="specialTags.includes(tag?.id ?? 0) || tag?.id === 4
               ? 'bg-primary/8!'
               : ''
@@ -184,30 +184,32 @@
                 </button>
               </div>
             </div>
-            <div class="flex flex-col xs:flex-row gap-3">
-              <NutritionMacroCard :kcal="liveMacros.kcal" :carbohydrates="liveMacros.carbohydrates"
-                :protein="liveMacros.protein" :fat="liveMacros.fat"
-                class="main-card main-card-padding main-card-rounded flex-1" />
-              <div v-if="liveHidx && liveHidx >= 41"
-                class="main-card main-card-padding main-card-rounded items-center justify-center flex-col gap-2 hidden xs:flex">
-                <GradeContainer :score="liveHidx" :type="'ovr'" class="text-4xl" />
-                <span class="text-sm text-slate-600">Health Grade</span>
+            <div class="main-card-glass">
+              <div class="flex flex-col xs:flex-row gap-3">
+                <NutritionMacroCard :kcal="liveMacros.kcal" :carbohydrates="liveMacros.carbohydrates"
+                  :protein="liveMacros.protein" :fat="liveMacros.fat"
+                  class="main-card main-card-padding main-card-rounded flex-1" />
+                <div v-if="liveHidx && liveHidx >= 41"
+                  class="main-card main-card-padding main-card-rounded items-center justify-center flex-col gap-2 hidden xs:flex">
+                  <GradeContainer :score="liveHidx" :type="'ovr'" class="text-4xl" />
+                  <span class="text-sm text-slate-600">Health Grade</span>
+                </div>
+                <div v-if="liveHidx && liveHidx >= 41" class="flex xs:hidden justify-between main-card items-center ">
+                  <span class="font-semibold text-lg mx-5">Health Grade</span>
+                  <GradeContainer :score="liveHidx" :type="'ovr'" class="text-2xl" />
+                </div>
               </div>
-              <div v-if="liveHidx && liveHidx >= 41" class="flex xs:hidden justify-between main-card items-center ">
-                <span class="font-semibold text-lg mx-5">Health Grade</span>
-                <GradeContainer :score="liveHidx" :type="'ovr'" class="text-2xl" />
+              <div class="relative mt-3" :class="{ 'overflow-hidden main-card-rounded': quickEditRecomputing }">
+                <NutritionQualityCards :cards="getDailyQualityCards(liveReport, {
+                  totalFat: liveMacros.fat,
+                  protectiveScore: liveProtectiveScore,
+                })" :gut-health="liveReport?.details?.gutHealth" :fat-profile="liveReport?.details?.fatProfile"
+                  :fat-profile-readable="liveReport?.humanReadable?.fatProfile ?? []"
+                  :micronutrients="liveReport?.details?.micronutrients" :kcal-progress="liveMacros.kcal / 2000"
+                  mode="full" />
+                <div v-if="quickEditRecomputing"
+                  class="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/70 to-transparent pointer-events-none" />
               </div>
-            </div>
-            <div class="relative mt-3" :class="{ 'overflow-hidden main-card-rounded': quickEditRecomputing }">
-              <NutritionQualityCards :cards="getDailyQualityCards(liveReport, {
-                totalFat: liveMacros.fat,
-                protectiveScore: liveProtectiveScore,
-              })" :gut-health="liveReport?.details?.gutHealth" :fat-profile="liveReport?.details?.fatProfile"
-                :fat-profile-readable="liveReport?.humanReadable?.fatProfile ?? []"
-                :micronutrients="liveReport?.details?.micronutrients" :kcal-progress="liveMacros.kcal / 2000"
-                mode="full" />
-              <div v-if="quickEditRecomputing"
-                class="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/70 to-transparent pointer-events-none" />
             </div>
           </div>
           <div class="space-y-2 order-4 xl:order-0" v-if="auth.isAdmin()">
@@ -261,8 +263,8 @@
                       src="/neutral-avatar1.webp" alt="Guest avatar" />
                     <div class="flex items-center gap-2 bg-primary-5 px-3 rounded-3xl ">
                       <img :src="`/${getWebsiteName(effectiveSource)}.webp`" :alt="getWebsiteName(effectiveSource)"
-                        class="h-5" />
-                      <h3 class="text-lg sm:text-xl font-semibold tracking-tight truncate max-w-48">
+                        class="h-4" />
+                      <h3 class="text-lg font-headers tracking-tight truncate max-w-48">
                         {{ recipeStore.recipe?.video_metadata?.channel }}
                       </h3>
                     </div>
@@ -332,8 +334,8 @@
         :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`">
         <div v-if="contextMode === 'nutrition'" class="m-4">
           <h2 class="text-3xl font-headers tracking-tight mb-8">Full Nutrition</h2>
-          <FoodNutritionFacts :computable="recipeStore.recipe" />
-          <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" />
+          <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" single-column show-macros
+            subtitle='per serving' />
         </div>
         <PagesReport v-if="contextMode === 'health'" :id="recipeStore.recipe?.id?.toString() ?? ''" :isFood="false"
           :showTitle="true" class="m-3" />
@@ -609,7 +611,7 @@ const measureHeights = () => {
             railEl.offsetHeight || railEl.getBoundingClientRect().height;
         }
 
-        // Use instruction element for containerTop — the right rail may be
+        // Use instruction element for containerTop - the right rail may be
         // in sticky position, which skews getBoundingClientRect
         const instructionRect = instructionEl.getBoundingClientRect();
         containerTop.value = instructionRect.top + window.scrollY;
@@ -812,8 +814,8 @@ watch(
 
 // Watch for redirect signal from detect-variation: when an import turns out
 // to be a duplicate, the server deletes this recipe and sets
-// jobs.redirect_recipe_id to the canonical id. We navigate there and clean
-// up the job.
+// jobs.redirect_recipe_id to the kept recipe id. We navigate there and clean
+// up the job. The kept recipe can be either a canonical recipe or variation.
 watch(
   () => (job.value as any)?.redirect_recipe_id as number | null | undefined,
   async (canonical) => {
@@ -953,22 +955,32 @@ const jsonLd = computed(() => {
 
   if (recipe.ingredients?.length) {
     schema.recipeIngredient = recipe.ingredients.map((ing) =>
-      `${ing.amount} ${ing.unit} ${ing.name}`.trim(),
+      `
+                        ${getStringFromIngredient(ing, recipe.batch_size ?? 1)}
+                      `.trim(),
     );
   }
+  const stripIngredientLinks = (instruction: string): string => {
+    if (!instruction) return '';
 
+    return instruction.replace(
+      /\[([^\]]+)\]\(\d+\)/g,
+      (_, ingredient) => ingredient
+    ).replace(/\*([^*]+)\*/g, '$1');
+  }
   if (recipe.full_instructions?.length) {
+
     schema.recipeInstructions = recipe.full_instructions.map(
       (step: CookStep) => ({
         '@type': 'HowToStep',
-        text: step.formatted_text,
+        text: stripIngredientLinks(step.formatted_text),
         ...(step.title ? { name: step.title } : {}),
       }),
     );
   } else if (recipe.instructions?.length) {
     schema.recipeInstructions = recipe.instructions.map((step: string) => ({
       '@type': 'HowToStep',
-      text: step,
+      text: stripIngredientLinks(step),
     }));
   }
 
@@ -1127,7 +1139,7 @@ const scrollToWatchSection = () => {
     // On xl+: the Watch section is in the sticky right rail below the ingredient list.
     // The sticky behaviour makes getBoundingClientRect().top on the watch section stay
     // constant as the page scrolls, so a plain scrollIntoView undershoots. We correct
-    // by adding the "overhang" — how much further the cook-steps column extends past
+    // by adding the "overhang" - how much further the cook-steps column extends past
     // the bottom of the ingredient list (b2 - b1). If the ingredient list is already
     // longer (b1 >= b2) the stickiness isn't causing a problem, so we fall through to
     // the normal path.
@@ -1296,7 +1308,7 @@ const deleteRecipe = async () => {
 
 
 
-// Quick-edit (drag amounts) — lazy-hydrated food data + live nutrition
+// Quick-edit (drag amounts) - lazy-hydrated food data + live nutrition
 type FoodMacros = {
   kcal: number; protein: number; fat: number; carbohydrates: number;
   fiber: number; sugar: number; saturated_fat: number; salt: number;
@@ -1424,7 +1436,7 @@ let tweakPillHideTimer: ReturnType<typeof setTimeout> | null = null;
 async function onQuickEditChange(active: boolean) {
   // Once tweaks are enabled, keep showing tweaked values even after the user
   // exits drag mode. Baseline is captured only once per recipe so the
-  // normFactor stays stable across multiple Tweak/Done toggles — otherwise
+  // normFactor stays stable across multiple Tweak/Done toggles - otherwise
   // re-entering after a tweak would recapture the new state as baseline and
   // break the relative math.
   if (active) {
@@ -1473,7 +1485,7 @@ watch(
 );
 
 function onAmountsChanged() {
-  // Triggers reactivity — live macros recompute via computeds.
+  // Triggers reactivity - live macros recompute via computeds.
 }
 
 function onTweakDragEnd() {

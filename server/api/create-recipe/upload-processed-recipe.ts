@@ -152,40 +152,43 @@ async function updateExistingRecipe(
   recipeTagsRows: any[],
   body: any,
   userId: string | null,
-  event: any
+  event: any,
+  skipOwnerCheck = false,
 ): Promise<number> {
   const recipeId = (recipeRow as any).id;
 
-  // Check ownership before allowing update
-  const { data: existingRecipe, error: fetchError } = await client
-    .from('recipes')
-    .select('user_id')
-    .eq('id', recipeId)
-    .single();
+  if (!skipOwnerCheck) {
+    // Check ownership before allowing update
+    const { data: existingRecipe, error: fetchError } = await client
+      .from('recipes')
+      .select('user_id')
+      .eq('id', recipeId)
+      .single();
 
-  if (fetchError || !existingRecipe) {
-    console.error('🔍 Recipe not found:', fetchError);
-    throw createError({ statusCode: 404, statusMessage: 'Recipe not found' });
-  }
+    if (fetchError || !existingRecipe) {
+      console.error('🔍 Recipe not found:', fetchError);
+      throw createError({ statusCode: 404, statusMessage: 'Recipe not found' });
+    }
 
-  if (existingRecipe.user_id !== userId) {
-    console.log(
-      `🔍 User is not recipe owner. Creating new version of recipe ${recipeId} with based_on field.`
-    );
-    // Create a new recipe version instead of updating
-    const newRecipeRow = { ...recipeRow };
-    delete (newRecipeRow as any).id; // Remove the id so a new one is generated
-    (newRecipeRow as any).based_on = recipeId; // Set based_on to the original recipe ID
+    if (existingRecipe.user_id !== userId) {
+      console.log(
+        `🔍 User is not recipe owner. Creating new version of recipe ${recipeId} with based_on field.`
+      );
+      // Create a new recipe version instead of updating
+      const newRecipeRow = { ...recipeRow };
+      delete (newRecipeRow as any).id; // Remove the id so a new one is generated
+      (newRecipeRow as any).based_on = recipeId; // Set based_on to the original recipe ID
 
-    return await insertNewRecipe(
-      client,
-      newRecipeRow,
-      recipeFoodsRows,
-      recipeTagsRows,
-      body,
-      userId,
-      event
-    );
+      return await insertNewRecipe(
+        client,
+        newRecipeRow,
+        recipeFoodsRows,
+        recipeTagsRows,
+        body,
+        userId,
+        event
+      );
+    }
   }
 
   // Preserve variation fields written by detect-variation (which runs between
@@ -290,7 +293,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = serverSupabaseServiceRole<Database>(event);
-  const body: ComputableRecipe & { full: Boolean } = await readBody(event);
+  const body: ComputableRecipe & { full: Boolean; mode?: 'new' | 'update' } = await readBody(event);
 
   const nutritionEngineArgs = {
     recipe: body,
@@ -349,7 +352,8 @@ export default defineEventHandler(async (event) => {
       response.recipeTagRows,
       body,
       userId,
-      event
+      event,
+      body.mode === 'update',
     );
   } else {
     console.log('🔍 Creating new recipe');

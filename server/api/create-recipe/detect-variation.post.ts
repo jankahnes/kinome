@@ -2,14 +2,14 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 import { Database } from '~/types/supabase';
 import canonicalUrl from '~/utils/canonicalUrl';
 
-// Thresholds — purely for narrowing candidates before the AI call.
+// Thresholds - purely for narrowing candidates before the AI call.
 // Classification itself is always done by the AI.
 const MIN_SIMILARITY = 0.6; // embedding cosine similarity floor for candidates
 const MIN_OVERLAP = 0.25; // food-id Jaccard-ish overlap floor
-const CANDIDATE_LIMIT = 10;
+const CANDIDATE_LIMIT = 20;
 
 type VariationOutcome =
-  | { outcome: 'duplicate'; canonicalId: number }
+  | { outcome: 'duplicate'; canonicalId: number; targetRecipeId: number }
   | { outcome: 'variation'; canonicalId: number }
   | { outcome: 'unrelated' };
 
@@ -95,7 +95,7 @@ async function loadIngredientDescriptors(
 }
 
 function formatIngredientLine(i: IngredientDescriptor): string {
-  // e.g. "chicken breast — 500 g (Protein)  [prep: diced]"
+  // e.g. "chicken breast - 500 g (Protein)  [prep: diced]"
   const qty =
     i.amount != null && i.unit
       ? `${i.amount} ${i.unit}`
@@ -104,22 +104,26 @@ function formatIngredientLine(i: IngredientDescriptor): string {
         : (i.unit ?? '');
   const cat = i.category ? ` (${i.category})` : '';
   const prep = i.prep ? `  [prep: ${i.prep}]` : '';
-  return `- ${i.name} — ${qty}${cat}${prep}`;
+  return `- ${i.name} - ${qty}${cat}${prep}`;
 }
 
 function buildClassificationSystemPrompt(): string {
-  return `You are classifying whether a NEW recipe is a duplicate, a variation, or unrelated to an EXISTING CANONICAL recipe in our database.
+  return `You are classifying whether a NEW recipe is a duplicate, a variation, or unrelated to an EXISTING reference recipe in our database.
+
+The existing reference may be either a canonical recipe or one of its stored variations.
 
 Return one of:
-- "duplicate" — same dish, same approach; any differences are superficial (brand/specificity of ingredient, minor amount tweaks, optional garnishes, measurement precision). The new recipe adds no meaningful cooking signal beyond the canonical. We will HIDE the new recipe and keep only the canonical.
-- "variation" — clearly the SAME dish concept, but with ONE or MORE meaningful changes along a recognizable axis. The variation is worth keeping as its own page because a user searching for that axis would want this version. We will link it to the canonical via \`based_on\`.
-- "unrelated" — a different dish. Don't be fooled by ingredient overlap (many dishes share chicken/onion/garlic/oil). If the titles describe different end products, it's unrelated.
+- "duplicate" - same dish, same approach; any differences are superficial (brand/specificity of ingredient, minor amount tweaks, optional garnishes, measurement precision). The new recipe adds no meaningful cooking signal beyond the existing reference. We will HIDE the new recipe and keep only the existing reference.
+- "variation" - clearly the SAME dish concept, but with ONE or MORE meaningful changes along a recognizable axis. The variation is worth keeping as its own page because a user searching for that axis would want this version. We will link it to the canonical root via \`based_on\`.
+- "unrelated" - a different dish. Don't be fooled by ingredient overlap (many dishes share chicken/onion/garlic/oil). If the titles describe different end products, it's unrelated.
 
 ## Identity test (first gate)
-Ask: "If someone asked for the dish in the canonical title, would this new recipe satisfy that request?"
+Ask: "If someone asked for the dish in the existing reference title, would this new recipe satisfy that request?"
 - Yes, and nothing substantially different → duplicate.
 - Yes, but with a recognizable twist that a searcher might specifically want or avoid → variation.
 - No → unrelated.
+
+If the existing reference is itself already a variation of a canonical recipe, judge duplicate vs. variation against that exact existing variation. Two recipes are not duplicates merely because both are variations of the same canonical recipe.
 
 ## Differences that DO NOT make a variation (treat as duplicate)
 - Amount tweaks of the same ingredients (2 vs 3 cloves of garlic, 400g vs 500g pasta).
@@ -171,81 +175,81 @@ Rules:
 
 ## variation_display_name rules
 Boolean. Only relevant when classification is "variation". Ask: does the \`variation_name\` add meaningful context that is NOT already communicated by the recipe title?
-- **true** — the title does NOT imply the variation axis; showing the variation name as a subtitle adds real signal for the user. E.g., title "Spaghetti Bolognese", variation_name "Vegan Variation" → true.
-- **false** — the title already communicates the variation axis (the label would be redundant). E.g., title "Vegan Bolognese", variation_name "Vegan Variation" → false.
+- **true** - the title does NOT imply the variation axis; showing the variation name as a subtitle adds real signal for the user. E.g., title "Spaghetti Bolognese", variation_name "Vegan Variation" → true.
+- **false** - the title already communicates the variation axis (the label would be redundant). E.g., title "Vegan Bolognese", variation_name "Vegan Variation" → false.
 - Also false for "duplicate" and "unrelated".
 
 ## Worked examples
 
-Example A — duplicate
+Example A - duplicate
 Canonical: "Chicken Parmesan" (chicken breast, breadcrumbs, marinara, mozzarella, parmesan, olive oil, egg, salt, pepper, basil)
 New:       "Chicken Parmesan"  (chicken breast, panko, tomato sauce, mozzarella, parmesan, olive oil, egg, salt, pepper, oregano)
 → {"classification":"duplicate","variation_name":null,"variation_summary":null,"variation_display_name":false}
 (panko is still breadcrumbs; marinara ~ tomato sauce; basil vs oregano = minor)
 
-Example B — variation (dietary, title does NOT imply it)
+Example B - variation (dietary, title does NOT imply it)
 Canonical: "Chicken Parmesan"
 New:       "Vegan Chicken Parmesan"  (seitan, panko, marinara, vegan mozzarella, nutritional yeast, olive oil, flax egg)
 → {"classification":"variation","variation_name":"Vegan Variation","variation_summary":"Plant-based version using seitan and vegan cheeses.","variation_display_name":false}
 (title "Vegan Chicken Parmesan" already communicates the vegan axis → false)
 
-Example B2 — variation (dietary, title does NOT imply it)
+Example B2 - variation (dietary, title does NOT imply it)
 Canonical: "Chicken Parmesan"
 New:       "Chicken Parmesan" (seitan, panko, marinara, vegan mozzarella, nutritional yeast, olive oil, flax egg)
 → {"classification":"variation","variation_name":"Vegan Variation","variation_summary":"Plant-based version using seitan and vegan cheeses.","variation_display_name":true}
 (title gives no hint it's vegan → true)
 
-Example C — variation (protein swap, title implies it)
+Example C - variation (protein swap, title implies it)
 Canonical: "Beef Chili"
-New:       "Turkey Chili" — same spice profile, same beans, ground turkey instead of beef
+New:       "Turkey Chili" - same spice profile, same beans, ground turkey instead of beef
 → {"classification":"variation","variation_name":"Turkey Variation","variation_summary":"Uses ground turkey instead of beef for a leaner chili.","variation_display_name":false}
 (title "Turkey Chili" already names the protein swap → false)
 
-Example D — variation (technique, title implies it)
+Example D - variation (technique, title implies it)
 Canonical: "Crispy Chicken Wings" (oven-baked)
-New:       "Air Fryer Chicken Wings" — same seasoning, air-fried
+New:       "Air Fryer Chicken Wings" - same seasoning, air-fried
 → {"classification":"variation","variation_name":"Air Fryer Variation","variation_summary":"Cooked in an air fryer instead of the oven.","variation_display_name":false}
 (title already says "Air Fryer" → false)
 
-Example E — variation (base swap, title implies it)
+Example E - variation (base swap, title implies it)
 Canonical: "Wonton Soup"
-New:       "Gyoza Soup" — gyoza wrappers, same broth and filling idea
+New:       "Gyoza Soup" - gyoza wrappers, same broth and filling idea
 → {"classification":"variation","variation_name":"Gyoza Variation","variation_summary":"Uses gyoza skins instead of wonton wrappers.","variation_display_name":false}
 (title says "Gyoza" → false)
 
-Example F — unrelated (shared ingredients, different dish)
+Example F - unrelated (shared ingredients, different dish)
 Canonical: "Chicken Noodle Soup"
 New:       "Chicken Alfredo Pasta"
 → {"classification":"unrelated","variation_name":null,"variation_summary":null,"variation_display_name":false}
 (both have chicken + pasta/noodles but end products are entirely different)
 
-Example G — duplicate (superficial adds)
+Example G - duplicate (superficial adds)
 Canonical: "Aglio e Olio" (spaghetti, garlic, olive oil, chili flakes, parsley, salt)
 New:       "Aglio e Olio with Parmesan" (same + grated parmesan on top)
 → {"classification":"duplicate","variation_name":null,"variation_summary":null,"variation_display_name":false}
 (parmesan on top is a common optional garnish, not a re-identified dish)
 
-Example H — variation (flavor re-identification, title implies it)
+Example H - variation (flavor re-identification, title implies it)
 Canonical: "Carbonara" (spaghetti, guanciale, egg, pecorino, black pepper)
 New:       "Gochujang Carbonara" (spaghetti, bacon, egg, parmesan, black pepper, gochujang)
 → {"classification":"variation","variation_name":"Gochujang Variation","variation_summary":"Korean fusion twist using gochujang for heat and umami.","variation_display_name":false}
 (title "Gochujang Carbonara" already names the flavor twist → false)
 
-Example I — duplicate (amount-only differences)
+Example I - duplicate (amount-only differences)
 Canonical: "Chocolate Chip Cookies" (flour 250g, butter 200g, sugar 150g, brown sugar 100g, eggs 2, vanilla, baking soda, salt, chocolate chips 200g)
 New:       "Chocolate Chip Cookies" (flour 240g, butter 220g, sugar 120g, brown sugar 130g, eggs 2, vanilla, baking powder, salt, chocolate chips 250g)
 → {"classification":"duplicate","variation_name":null,"variation_summary":null,"variation_display_name":false}
 (baking powder vs soda is a minor leavener swap; ratios are within noise)
 
-Example J — variation (additive re-identifies, title implies it)
+Example J - variation (additive re-identifies, title implies it)
 Canonical: "Chocolate Chip Cookies"
 New:       "Oatmeal Chocolate Chip Cookies" (adds rolled oats as a substantial ingredient)
 → {"classification":"variation","variation_name":"Oatmeal Variation","variation_summary":"Adds rolled oats for a chewier oatmeal cookie base.","variation_display_name":false}
 (title "Oatmeal Chocolate Chip Cookies" already signals the oat addition → false)
 
-Example K — variation (technique, title does NOT imply it)
+Example K - variation (technique, title does NOT imply it)
 Canonical: "Chicken Wings"
-New:       "Chicken Wings" — same seasoning but cooked in air fryer
+New:       "Chicken Wings" - same seasoning but cooked in air fryer
 → {"classification":"variation","variation_name":"Air Fryer Variation","variation_summary":"Cooked in an air fryer instead of the oven.","variation_display_name":true}
 (generic title gives no hint about technique → true)
 
@@ -259,20 +263,28 @@ function buildClassificationUserMessage(input: {
     collection: string | null;
     ingredients: IngredientDescriptor[];
   };
-  canonicalRecipe: {
+  existingRecipe: {
     title: string;
     collection: string | null;
     ingredients: IngredientDescriptor[];
+    variationName: string | null;
+    canonicalTitle: string | null;
   };
 }): string {
-  const { newRecipe, canonicalRecipe } = input;
+  const { newRecipe, existingRecipe } = input;
   const lines: string[] = [];
-  lines.push('### CANONICAL (existing reference recipe)');
-  lines.push(`Title: ${canonicalRecipe.title}`);
-  if (canonicalRecipe.collection)
-    lines.push(`Collection: ${canonicalRecipe.collection}`);
+  lines.push('### EXISTING REFERENCE recipe');
+  lines.push(`Title: ${existingRecipe.title}`);
+  if (existingRecipe.collection)
+    lines.push(`Collection: ${existingRecipe.collection}`);
+  if (existingRecipe.canonicalTitle) {
+    lines.push(`Stored as variation of: ${existingRecipe.canonicalTitle}`);
+  }
+  if (existingRecipe.variationName) {
+    lines.push(`Existing variation label: ${existingRecipe.variationName}`);
+  }
   lines.push('Ingredients:');
-  for (const i of canonicalRecipe.ingredients)
+  for (const i of existingRecipe.ingredients)
     lines.push(formatIngredientLine(i));
   lines.push('');
   lines.push('### NEW (recipe to classify)');
@@ -356,45 +368,62 @@ export default defineEventHandler(async (event) => {
 
   // 4. Score each candidate by food-id overlap + embedding similarity
   type Scored = {
+    candidateId: number;
     canonicalId: number;
     similarity: number;
     overlap: number;
     candidateIngredients: IngredientDescriptor[];
     candidateTitle: string;
     candidateCollection: string | null;
+    candidateVariationName: string | null;
+    canonicalTitle: string | null;
   };
 
   const scored: Scored[] = [];
   for (const cand of candidates) {
-    if (cand.similarity < MIN_SIMILARITY) continue;
-    // Resolve to the canonical root of this candidate
+    // Resolve to the canonical root for based_on assignment, but compare
+    // against the actual candidate row so existing variations can absorb
+    // duplicates of themselves.
     const canonicalId = await resolveCanonical(supabase, cand.id);
     if (canonicalId === recipeId) continue;
 
-    const canonFoodIds = await loadFoodIdSet(supabase, canonicalId);
-    const overlap = overlapRatio(ownFoodIds, canonFoodIds);
+    const candidateFoodIds = await loadFoodIdSet(supabase, cand.id);
+    const overlap = overlapRatio(ownFoodIds, candidateFoodIds);
     // Require either decent embedding similarity OR ingredient overlap
     if (cand.similarity < MIN_SIMILARITY && overlap < MIN_OVERLAP) continue;
 
-    const { data: canonRow } = await supabase
+    const { data: candidateRow } = await supabase
       .from('recipes')
-      .select('title, collection')
-      .eq('id', canonicalId)
+      .select('title, collection, variation_name, based_on')
+      .eq('id', cand.id)
       .single();
-    if (!canonRow) continue;
+    if (!candidateRow) continue;
 
     const candidateIngredients = await loadIngredientDescriptors(
       supabase,
-      canonicalId,
+      cand.id,
     );
 
+    let canonicalTitle: string | null = null;
+    if ((candidateRow as any).based_on) {
+      const { data: canonicalRow } = await supabase
+        .from('recipes')
+        .select('title')
+        .eq('id', canonicalId)
+        .single();
+      canonicalTitle = (canonicalRow as any)?.title ?? null;
+    }
+
     scored.push({
+      candidateId: cand.id,
       canonicalId,
       similarity: cand.similarity,
       overlap,
       candidateIngredients,
-      candidateTitle: (canonRow as any).title,
-      candidateCollection: (canonRow as any).collection ?? null,
+      candidateTitle: (candidateRow as any).title,
+      candidateCollection: (candidateRow as any).collection ?? null,
+      candidateVariationName: (candidateRow as any).variation_name ?? null,
+      canonicalTitle,
     });
   }
 
@@ -409,7 +438,7 @@ export default defineEventHandler(async (event) => {
   });
   const best = scored[0];
 
-  // 5. Classify — always use the AI. Heuristics are only for candidate narrowing.
+  // 5. Classify - always use the AI. Heuristics are only for candidate narrowing.
   let classification: 'duplicate' | 'variation' | 'unrelated';
   let variation_name: string | null = null;
   let variation_summary: string | null = null;
@@ -423,10 +452,12 @@ export default defineEventHandler(async (event) => {
         collection: recipe.collection ?? null,
         ingredients: ownIngredients,
       },
-      canonicalRecipe: {
+      existingRecipe: {
         title: best.candidateTitle,
         collection: best.candidateCollection,
         ingredients: best.candidateIngredients,
+        variationName: best.candidateVariationName,
+        canonicalTitle: best.canonicalTitle,
       },
     });
 
@@ -461,7 +492,7 @@ export default defineEventHandler(async (event) => {
     const vm = (recipe.video_metadata ?? {}) as Record<string, any>;
     const sourceUrl = canonicalUrl(recipe.source ?? vm.url ?? null);
     await supabase.from('recipe_sources' as any).insert({
-      recipe_id: best.canonicalId,
+      recipe_id: best.candidateId,
       source_url: sourceUrl,
       platform: platformFromUrl(sourceUrl),
       channel_name:
@@ -471,11 +502,12 @@ export default defineEventHandler(async (event) => {
     } as any);
 
     // Signal the in-flight client (which is polling the job) to navigate to
-    // the canonical recipe. The client will delete the job after redirecting.
+    // the existing recipe that absorbed this duplicate. That may be either
+    // the root canonical recipe or an existing variation.
     if (jobId) {
       await supabase
         .from('jobs')
-        .update({ redirect_recipe_id: best.canonicalId } as any)
+        .update({ redirect_recipe_id: best.candidateId } as any)
         .eq('id', jobId);
     }
 
@@ -486,11 +518,12 @@ export default defineEventHandler(async (event) => {
     await supabase.from('recipes').delete().eq('id', recipeId);
 
     console.log(
-      `🔍 [detect-variation] Recipe ${recipeId} absorbed into canonical ${best.canonicalId} (deleted)`,
+      `🔍 [detect-variation] Recipe ${recipeId} absorbed into existing recipe ${best.candidateId} (canonical root ${best.canonicalId}) and deleted`,
     );
     return {
       outcome: 'duplicate',
       canonicalId: best.canonicalId,
+      targetRecipeId: best.candidateId,
     } as VariationOutcome;
   }
 
@@ -512,7 +545,7 @@ export default defineEventHandler(async (event) => {
       );
     } else {
       console.log(
-        `🔍 [detect-variation] Recipe ${recipeId} — based_on set to ${best.canonicalId}`,
+        `🔍 [detect-variation] Recipe ${recipeId} - based_on set to ${best.canonicalId}`,
       );
     }
 

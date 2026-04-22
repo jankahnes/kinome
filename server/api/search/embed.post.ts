@@ -9,7 +9,6 @@ export default defineEventHandler(async (event): Promise<number[]> => {
   const embeddingResponse = await openai.embeddings.create({
     model: 'text-embedding-3-small',
     input: query,
-    dimensions: 256,
   });
 
   return embeddingResponse.data[0].embedding;

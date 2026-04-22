@@ -10,9 +10,15 @@ export default async function addProfile(
     [key: string]: any;
   }
 ): Promise<void> {
-  const { error } = await client
+  const { data, error } = await client
     .from('profiles')
     .update(profileRow)
-    .eq('id', profileRow.id);
+    .eq('id', profileRow.id)
+    .select('id')
+    .maybeSingle();
   if (error) throw error;
+  if (data) return;
+
+  const { error: insertError } = await client.from('profiles').insert(profileRow);
+  if (insertError) throw insertError;
 }

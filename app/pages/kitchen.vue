@@ -13,7 +13,6 @@
 
 <script setup lang="ts">
 const auth = useAuthStore();
-const route = useRoute();
 
 const views = computed(() => [
   {
@@ -39,7 +38,41 @@ const views = computed(() => [
 ]);
 
 useHead({
-  title: 'Your Collection | Kinome',
+  title: 'Kitchen | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Find healthy recipes, personalized picks, nutrition tools, and trending cooking ideas in your Kinome kitchen.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Kitchen | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Find healthy recipes, personalized picks, nutrition tools, and trending cooking ideas in your Kinome kitchen.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/kitchen',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/kitchen',
+    },
+  ],
 });
 </script>
 

@@ -48,10 +48,11 @@
 
 <script setup lang="ts">
 const route = useRoute();
+const slug = String(route.params.slug);
 
 const { data: article } = await useAsyncData(
   `article-${route.params.slug}`,
-  () => queryCollection('articles').path(`/articles/${route.params.slug}`).first(),
+  () => queryCollection('articles').path(`/articles/${slug}`).first(),
 );
 
 if (!article.value) {
@@ -61,7 +62,18 @@ if (!article.value) {
 useHead({
   title: `${article.value?.title} - Kinome`,
   meta: [
-    { name: 'description', content: article.value?.excerpt },
+    {
+      key: 'description',
+      name: 'description',
+      content: article.value?.excerpt,
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: `https://kinome.app/articles/${slug}`,
+    },
   ],
 });
 

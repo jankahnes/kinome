@@ -43,31 +43,42 @@ export function getMacroSummary(macros: MacroInput): string {
   const carbTier = tier(pctC, [20, 38, 58, 68]);
   const fatTier = tier(pctF, [15, 22, 38, 50]);
 
-  // Archetype detection first — more specific than the tiered breakdown
+  // Archetype detection first - more specific than the tiered breakdown
   if (pctC < 15 && pctF > 55) {
-    return 'Very high in fat, very low in carbs — typical of keto or low-carb meals.';
+    return 'Very high in fat, very low in carbs - typical of keto or low-carb meals.';
   }
   if (pctC < 25 && pctF > 50 && pctP > 20) {
-    return 'High-fat, low-carb, protein-forward — fits a low-carb or ketogenic style.';
+    return 'High-fat, low-carb, protein-forward - fits a low-carb or ketogenic style.';
   }
   if (pctP > 40) {
-    return 'Protein-dominant — a classic lean, high-protein plate.';
+    return 'Protein-dominant - a classic lean, high-protein plate.';
   }
   if (pctC > 68 && pctF < 18) {
-    return 'Carb-heavy and low in fat — reads like a high-carb grain or fruit-based meal.';
+    return 'Carb-heavy and low in fat - reads like a high-carb grain or fruit-based meal.';
   }
   if (pctF > 55 && pctP < 15) {
-    return 'Mostly fat, with very little protein — heavily oil- or dairy-leaning.';
+    return 'Mostly fat, with very little protein - heavily oil- or dairy-leaning.';
   }
   if (pctC >= 40 && pctC <= 60 && pctP >= 25 && pctF < 30) {
-    return 'Balanced carbs and protein with modest fat — a solid athletic or everyday plate.';
+    return 'Balanced carbs and protein with modest fat - a solid athletic or everyday plate.';
   }
   // All three within the moderate / AMDR band → fully balanced
-  if (proteinTier === 'moderate' && carbTier === 'moderate' && fatTier === 'moderate') {
-    return 'Well-balanced macros — carbs, protein, and fat all fall within standard dietary ranges.';
+  if (
+    proteinTier === 'moderate' &&
+    carbTier === 'moderate' &&
+    fatTier === 'moderate'
+  ) {
+    return 'Well-balanced macros - carbs, protein, and fat all fall within standard dietary ranges.';
   }
-  if (pctC > 38 && pctC < 60 && pctF > 22 && pctF < 40 && pctP > 12 && pctP < 28) {
-    return 'Broadly balanced macros — a Mediterranean-style distribution of carbs, protein, and fat.';
+  if (
+    pctC > 38 &&
+    pctC < 60 &&
+    pctF > 22 &&
+    pctF < 40 &&
+    pctP > 12 &&
+    pctP < 28
+  ) {
+    return 'Broadly balanced macros - a Mediterranean-style distribution of carbs, protein, and fat.';
   }
 
   // Fallback: describe each macro by tier

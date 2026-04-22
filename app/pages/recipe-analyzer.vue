@@ -10,7 +10,7 @@
                 </h1>
                 <p class="text-gray-600 mt-5 max-w-[580px] mx-auto leading-snug">
                     Paste any recipe and get a full nutrition breakdown, health grade, and ingredient-by-ingredient
-                    analysis —
+                    analysis -
                     instantly.
                 </p>
             </div>
@@ -140,7 +140,7 @@
                 <NutritionQualityCards :cards="qualityCards" :gut-health="report?.details?.gutHealth"
                     :fat-profile="report?.details?.fatProfile"
                     :fat-profile-readable="report?.humanReadable?.fatProfile ?? []"
-                    :micronutrients="report?.details?.micronutrients" :kcal-progress="macros.kcal / 2000" mode="full" />
+                    :micronutrients="report?.details?.micronutrients" :kcal-progress="macros.kcal / 2000" mode="full" class="main-card-glass" />
             </div>
 
             <!-- Signup CTA -->
@@ -157,7 +157,7 @@
                         <p class="text-slate-700 mt-3 leading-snug text-sm md:text-base">
                             Create a free account to save recipes, track your meals, and see how they fit into your
                             long-term
-                            nutrition — micronutrient trends, diet patterns, and more.
+                            nutrition - micronutrient trends, diet patterns, and more.
                         </p>
                     </div>
                     <div class="flex gap-2 shrink-0">
@@ -250,7 +250,7 @@ definePageMeta({
 
 const SEO_TITLE = 'Free Recipe Nutrition Analyzer · Instant Health Score, Macros & Micros';
 const SEO_DESCRIPTION =
-    'Paste any recipe and get a free instant nutrition breakdown — calories, macros, and detailed quality markers. Powered by USDA food data. No signup required.';
+    'Paste any recipe and get a free instant nutrition breakdown - calories, macros, and detailed quality markers. Powered by USDA food data. No signup required.';
 const SEO_URL = 'https://kinome.app/recipe-analyzer';
 const SEO_IMAGE = 'https://kinome.app/og/recipe-analyzer.png';
 
@@ -276,7 +276,7 @@ useHead({
         { property: 'og:image', content: SEO_IMAGE },
         { property: 'og:image:width', content: '1200' },
         { property: 'og:image:height', content: '630' },
-        { property: 'og:image:alt', content: 'Kinome Recipe Analyzer — instant nutrition breakdown' },
+        { property: 'og:image:alt', content: 'Kinome Recipe Analyzer - instant nutrition breakdown' },
 
         // Twitter / X
         { name: 'twitter:card', content: 'summary_large_image' },
@@ -314,7 +314,7 @@ useHead({
                                 name: 'Is the Recipe Analyzer really free?',
                                 acceptedAnswer: {
                                     '@type': 'Answer',
-                                    text: 'Yes — no signup, no paywall. Paste a list of ingredients and get a full nutrition breakdown instantly.',
+                                    text: 'Yes. No signup, no paywall. Paste a list of ingredients and get a full nutrition breakdown instantly.',
                                 },
                             },
                             {
@@ -322,7 +322,7 @@ useHead({
                                 name: 'Where does the nutrition data come from?',
                                 acceptedAnswer: {
                                     '@type': 'Answer',
-                                    text: 'Every ingredient is matched against our food database, which is built on USDA-aligned per-100g nutrition values. There is no AI guessing — only direct lookups.',
+                                    text: 'Every ingredient is matched against our food database, which is built on USDA-aligned per-100g nutrition values. There is no AI guessing - only direct lookups.',
                                 },
                             },
                             {
@@ -377,7 +377,7 @@ const features = [
     {
         icon: 'zap',
         title: 'Instant results',
-        body: 'Full nutrition facts, macros, and a health score — in seconds. No account needed.',
+        body: 'Full nutrition facts, macros, and a health score - in seconds. No account needed.',
     },
     {
         icon: 'shield-check',
@@ -387,7 +387,7 @@ const features = [
     {
         icon: 'sparkles',
         title: 'Beyond just macros',
-        body: 'Fat quality, gut health, micronutrient coverage, processing level — a complete picture.',
+        body: 'Fat quality, gut health, micronutrient coverage, processing level - a complete picture.',
     },
 ];
 
@@ -435,7 +435,7 @@ const parsingRecipe = computed<ComputableRecipe>(
         }) as unknown as ComputableRecipe,
 );
 
-// Stable key for what actually changes the nutrition result —
+// Stable key for what actually changes the nutrition result -
 // changes only when a line is resolved (foodNameId/amount/unit) or serves changes.
 const computeKey = computed(() => {
     const parts = fullIngredients.value.map(

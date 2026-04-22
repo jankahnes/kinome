@@ -27,10 +27,10 @@
             <h2 class="text-2xl font-headers tracking-tight">Nutrition Autopilot</h2>
           </div>
 
-          <div class="flex gap-4 sm:items-end flex-col sm:flex-row">
+          <div class="flex gap-4 sm:items-end flex-col sm:flex-row flex-wrap">
             <!-- Progress card -->
             <div
-              class="main-card main-card-rounded main-card-padding shrink-0 flex-1 basis-80 flex flex-col gap-5 md:mb-4">
+              class="main-card main-card-rounded main-card-padding shrink-0 flex-1 basis-full md:basis-80 flex flex-col gap-5 md:mb-4 mt-4">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] text-gray-500 font-mono uppercase tracking-widest">Today's progress</span>
 
@@ -133,7 +133,6 @@
 
 
             </div>
-            <div class="flex flex-wrap gap-4">
               <!-- Macro-fit recipe suggestions -->
               <template v-if="isFamiliarLoading">
                 <Skeleton v-for="i in 4" :key="i" class="basis-44 max-w-80 flex-1 h-86 rounded-xl" />
@@ -143,12 +142,11 @@
                   :reason-text="getMacroBadgeText(recipe)" class="basis-50 text-[28px] max-w-80 hidden sm:flex flex-1"
                   @mouseenter="hoveredRecipe = recipe" @mouseleave="hoveredRecipe = null" />
                 <RecipeCardHorizontal v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
-                  :reason-text="getMacroBadgeText(recipe)" class="text-[24px] basis-80 sm:hidden flex-1" />
+                  :reason-text="getMacroBadgeText(recipe)" class="text-[24px] sm:hidden flex-1" />
               </template>
               <p v-else class="text-sm text-gray-400 self-center">
                 Save some recipes to get personalised meal suggestions.
               </p>
-            </div>
           </div>
         </section>
 
@@ -185,7 +183,7 @@
 
               <!-- Input state -->
               <template v-if="fridgeResults === null">
-                <p class="text-sm text-gray-500 leading-snug">Enter ingredients — we'll find recipes that use them all.
+                <p class="text-sm text-gray-500 leading-snug">Enter ingredients - we'll find recipes that use them all.
                 </p>
                 <div v-if="fridgeIngredients.length" class="flex flex-wrap gap-2">
                   <div v-for="(ing, i) in fridgeIngredients" :key="i"
@@ -273,6 +271,44 @@ type RecommendationRow = RecipeOverview & {
 
 const supabase = useSupabaseClient<Database>();
 const auth = useAuthStore();
+
+useHead({
+  title: 'Healthy Recipe Dashboard | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Get personalized recipe picks, nutrition autopilot ideas, quick meals, and fridge-based inspiration for healthier cooking.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Healthy Recipe Dashboard | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Get personalized recipe picks, nutrition autopilot ideas, quick meals, and fridge-based inspiration for healthier cooking.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/kitchen/home',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/kitchen/home',
+    },
+  ],
+});
 
 
 // ─── Tracking config ─────────────────────────────────────────────────────────
@@ -387,7 +423,7 @@ async function fetchFamiliarRecipes() {
   try {
     const { data, error } = await (supabase as any).rpc('get_recommendations', {
       p_user_id: auth.user.id,
-      max: 40,
+      max: 24,
       explore: false,
     });
     if (!error) {
@@ -444,6 +480,7 @@ async function fetchRecommendations() {
       p_user_id: auth.user?.id,
       max: 24,
       explore: true,
+      anchor_boost: 6,
     });
     if (!error) {
       allResults.value = (data ?? []).map((row: any) => ({

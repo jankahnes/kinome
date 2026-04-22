@@ -16,9 +16,9 @@
       </div>
     </div>
 
-    <div class="flex flex-wrap 2xl:grid grid-cols-4 gap-2">
+    <div class="flex flex-wrap 2xl:grid grid-cols-4 gap-2 main-card-glass">
       <!-- Kcal card (col-span-2) -->
-      <div class="flex flex-col justify-between p-4 basis-70 main-card rounded-3xl col-span-2 flex-2">
+      <div class="flex flex-col justify-between p-4 basis-70 main-card main-card-rounded col-span-2 flex-2">
         <div>
           <div class="text-2xl leading-none">Kcal</div>
           <div class="text-[58px] leading-none font-semibold mt-1">
@@ -46,10 +46,12 @@
         </div>
         <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
           <template v-if="item.saturatedFatPct !== undefined">
-            <div class="h-full rounded-full transition-all duration-300 bg-saturated-fat z-10"
-              :style="{ width: item.saturatedFatPct + '%' }" />
-            <div class="h-full rounded-full transition-all duration-300 -ml-2 z-0" :class="item.bgClass"
-              :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
+            <!-- Fat fill width = progress toward goal; saturated segment is % of that fat bar only -->
+            <div class="flex h-full min-w-0 rounded-full overflow-hidden transition-all duration-300"
+              :class="item.bgClass" :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }">
+              <div class="h-full rounded-full transition-all duration-300 bg-saturated-fat shrink-0"
+                :style="{ width: item.saturatedFatPct + '%' }" />
+            </div>
           </template>
           <div v-else class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
             :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
@@ -59,22 +61,22 @@
       <!-- Carbs + Sugar paired card -->
       <div class="col-span-2 flex gap-2 rounded-3xl bg-primary-5/50 p-1 flex-2 basis-60">
         <div v-for="item in overviewItems.slice(4)" :key="item.title"
-          class="flex flex-col items-center justify-between p-3 main-card rounded-[1.25rem] gap-1 flex-1" ">
+          class="flex flex-col items-center justify-between p-3 main-card rounded-[1.25rem] gap-1 flex-1">
           <div class=" w-14 h-14 p-2 rounded-full" :class="item.bgLightClass">
-          <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
-        </div>
-        <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
-        <div class="font-semibold text-xl leading-none">
-          {{ item.total }}{{ item.unit
-          }}<span v-if="mode === 'tracking'" class="text-sm font-normal">/{{ item.goal }}{{ item.unit }}</span>
-        </div>
-        <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
-          <div class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
-            :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
+            <img class="w-full h-full object-contain" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
+          </div>
+          <div class="text-lg mt-1 leading-none">{{ item.title }}</div>
+          <div class="font-semibold text-xl leading-none">
+            {{ item.total }}{{ item.unit
+            }}<span v-if="mode === 'tracking'" class="text-sm font-normal">/{{ item.goal }}{{ item.unit }}</span>
+          </div>
+          <div class="flex w-full h-2 rounded-full overflow-hidden" :class="item.bgLightClass">
+            <div class="h-full rounded-full transition-all duration-300" :class="item.bgClass"
+              :style="{ width: Math.min(100, (item.total / item.goal) * 100) + '%' }" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -128,6 +130,8 @@ const kcalGoal = computed(() => props.trackingGoals?.kcal ?? 2000);
 const overviewItems = computed(() => {
   const n = props.nutrition;
   const g = props.trackingGoals ?? {};
+  const fatAmount = val('fat');
+  const satFatAmount = val('saturated_fat');
 
   return [
     {
@@ -148,9 +152,8 @@ const overviewItems = computed(() => {
       total: Math.round(val('fat')),
       goal: g.fat ?? 70,
       unit: 'g',
-      saturatedFatPct: n
-        ? Math.min(100, ((n.saturated_fat ?? 0) / (n.fat ?? 1)) * 100)
-        : (undefined as number | undefined),
+      saturatedFatPct:
+        n && fatAmount > 0 ? Math.min(100, (satFatAmount / fatAmount) * 100) : undefined,
     },
     {
       title: 'Fiber',

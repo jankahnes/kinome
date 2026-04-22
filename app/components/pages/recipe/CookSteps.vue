@@ -91,7 +91,7 @@ defineExpose({
 
 const emit = defineEmits(['update:markedIngredients']);
 
-/** IDs from `[label](id)` links in formatted_text — same convention as CookMode. */
+/** IDs from `[label](id)` links in formatted_text - same convention as CookMode. */
 function ingredientIdsInStep(step: CookStep): number[] {
   const text = step.formatted_text ?? '';
   const ids = [...text.matchAll(/\[[^\]]+\]\((\d+)\)/g)].map((m) =>

@@ -87,6 +87,44 @@
 const submitFromLink = inject<(link: string) => void>('submitFromLink')!;
 const link = ref('');
 
+useHead({
+  title: 'Import a Recipe | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Paste a recipe website or social video link and let Kinome extract ingredients, method steps, nutrition, and source attribution.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Import a Recipe | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Paste a recipe website or social video link and let Kinome extract ingredients, method steps, nutrition, and source attribution.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/recipe/new/import',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/recipe/new/import',
+    },
+  ],
+});
+
 const submit = () => {
   if (link.value) {
     submitFromLink(link.value);

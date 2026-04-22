@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="">
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <div v-for="item in sortedCards" :key="item.title"
-        class="relative flex flex-col items-center p-4 main-card rounded-3xl transition-all gap-1"
+        class="relative flex flex-col items-center p-4 main-card main-card-rounded transition-all gap-1"
         :class="{ 'main-button animated-button': item.clickable, 'opacity-40': item.orderValue < 0 }"
         @click="item.clickable && handleCardClick(item.title)">
         <IconChevronRight v-if="item.clickable" class="absolute top-3 right-3 w-5 text-slate-400" />

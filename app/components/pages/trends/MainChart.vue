@@ -125,7 +125,7 @@ const trackedValues = computed(() =>
 
 const avgValue = computed(() => {
     const vals = trackedValues.value;
-    if (!vals.length) return '—';
+    if (!vals.length) return '-';
     return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
 });
 

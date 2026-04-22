@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event);
     userId = user?.sub || null;
   } catch {
-    // No auth session — userId stays null unless bypass below
+    // No auth session - userId stays null unless bypass below
   }
 
   if (authBypassed) {
@@ -187,7 +187,7 @@ export default defineEventHandler(async (event) => {
       if (userId && userId === adminUuid) {
         console.log('Overriding user check for admin');
       } else if (authBypassed) {
-        // internal caller — same as admin for ownership
+        // internal caller - same as admin for ownership
       } else if (existingRecipe.user_id !== userId) {
         console.error(
           `Unauthorized image upsert attempt: recipe ${recipeId} belongs to ${existingRecipe.user_id}, user is ${userId}`,

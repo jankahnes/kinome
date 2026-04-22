@@ -1,19 +1,17 @@
+import groupIngredients from './groupIngredients';
+import { getStringFromIngredient } from './getStringFromIngredient';
+
 export default function getStringFromIngredients(
   ingredients: any,
   serves?: number
 ) {
+  const servesN = serves || 1;
   const groupedIngredients = groupIngredients(ingredients);
 
   const getIngredientsString = (ingredients: any[]) => {
     return (
       ingredients
-        ?.map(
-          (ingredient) =>
-            `${getStringFromAmountInfo(
-              ingredient.amountInfo[ingredient.currentUnit],
-              serves || 1
-            )} ${ingredient.name} `
-        )
+        ?.map((ingredient) => getStringFromIngredient(ingredient, servesN))
         .join('\n') ?? ''
     );
   };

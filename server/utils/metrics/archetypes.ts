@@ -26,13 +26,14 @@ const isVegetarian = (r: WeightedRecipe['recipe']) =>
 // Minimum total grams (per recipe) before a recipe counts as "containing"
 // the given category. Stops the algorithm from flagging a Caesar salad as a
 // fish dish because it has 5g of anchovy paste.
-const PASTA_GRAMS_MIN   = 50;  // includes uncooked
-const RICE_GRAMS_MIN    = 50;  // includes uncooked
-const FISH_GRAMS_MIN    = 100;
+const PASTA_GRAMS_MIN = 50; // includes uncooked
+const RICE_GRAMS_MIN = 50; // includes uncooked
+const FISH_GRAMS_MIN = 100;
 const POULTRY_GRAMS_MIN = 100;
 
 const isPasta = (r: WeightedRecipe['recipe']) =>
-  r.tag_ids.includes(TAG_PASTA_NOODLES) || r.category_grams.pasta >= PASTA_GRAMS_MIN;
+  r.tag_ids.includes(TAG_PASTA_NOODLES) ||
+  r.category_grams.pasta >= PASTA_GRAMS_MIN;
 const isRice = (r: WeightedRecipe['recipe']) =>
   r.category_grams.rice >= RICE_GRAMS_MIN;
 const isFish = (r: WeightedRecipe['recipe']) =>
@@ -196,7 +197,7 @@ export const ARCHETYPES: ArchetypeDef[] = [
       return a == null ? null : interp(a, 20, 0, 180, 100);
     },
     subtitle: (T) =>
-      `Patient cooking — avg ~${Math.round(wAvg(T, (r) => r.total_time_mins) ?? 0)} min.`,
+      `Patient cooking - avg ~${Math.round(wAvg(T, (r) => r.total_time_mins) ?? 0)} min.`,
   },
   {
     key: 'minimalist',
@@ -262,7 +263,7 @@ export const ARCHETYPES: ArchetypeDef[] = [
     label: 'The Critic',
     threshold: 25,
     gate: (_T, ctx) => ctx.userRatingCount >= 10,
-    // We can't compute "avg user rating" from T alone — the cron/endpoint
+    // We can't compute "avg user rating" from T alone - the cron/endpoint
     // injects a synthetic recipe with `complexity` field reused as a carrier
     // for the avg rating. Cleaner: pass via ctx. We'll piggy-back on ctx by
     // extending it inline below (see scores.ts where this is filled in).

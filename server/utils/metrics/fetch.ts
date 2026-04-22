@@ -1,8 +1,8 @@
 // Server-side data fetching for the metrics pipeline.
 //
 // Two entry points:
-//   - fetchAllRecipesProjection() — used by the cron, pulls every recipe once
-//   - fetchRecipesByIds()        — used by the on-visit endpoint, pulls only T
+//   - fetchAllRecipesProjection() - used by the cron, pulls every recipe once
+//   - fetchRecipesByIds()        - used by the on-visit endpoint, pulls only T
 //
 // Both return the same MetricsRecipe shape so the downstream pipeline doesn't
 // care which path the data came from.
@@ -208,7 +208,11 @@ export async function fetchUserEdges(
       .eq('user_id', userId)
       .neq('visibility', 'HIDDEN'),
     client.from('ratings').select('recipe_id, rating').eq('user_id', userId),
-    client.from('bookmarks').select('recipe_id').eq('user_id', userId),
+    client
+      .from('bookmarks')
+      .select('recipe_id, recipes!inner(visibility)')
+      .eq('user_id', userId)
+      .neq('recipes.visibility', 'HIDDEN'),
   ]);
   if (owned.error) throw owned.error;
   if (rated.error) throw rated.error;

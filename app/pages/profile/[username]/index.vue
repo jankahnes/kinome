@@ -1,7 +1,6 @@
 <template>
   <div class="flex justify-center">
     <div class="max-w-[1300px] w-full flex flex-col gap-6 sm:gap-8">
-
       <!-- ── HEADER ──────────────────────────────────────────────── -->
       <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-5" v-if="user">
         <div class="flex items-center gap-4">
@@ -22,21 +21,21 @@
         </div>
         <div class="flex gap-2">
           <div class="flex items-stretch bg-primary-5/70 rounded-3xl overflow-hidden self-start sm:self-auto">
-            <NuxtLink :to="'/profile/' + user?.id + '/recipes'"
+            <NuxtLink :to="getProfileUrl(user) + '/recipes'"
               class="flex flex-col items-center px-5 py-1 sm:py-3 hover:bg-primary-5 transition-colors cursor-pointer">
               <span class="text-2xl tracking-tighter leading-none text-primary font-headers italic!">{{ counts.created
               }}</span>
               <span class="text-[11px] text-gray-600 uppercase font-mono">Created</span>
             </NuxtLink>
             <div class="w-px bg-black/8 my-2"></div>
-            <NuxtLink :to="'/profile/' + user?.id + '/bookmarks'"
+            <NuxtLink :to="getProfileUrl(user) + '/bookmarks'"
               class="flex flex-col items-center px-5 py-1 sm:py-3 hover:bg-primary-5 transition-colors cursor-pointer">
               <span class="text-2xl tracking-tighter leading-none text-primary font-headers italic!">{{ counts.saved
               }}</span>
               <span class="text-[11px] text-gray-600 uppercase font-mono">Saved</span>
             </NuxtLink>
             <div class="w-px bg-black/8 my-2"></div>
-            <NuxtLink :to="'/profile/' + user?.id + '/activity'"
+            <NuxtLink :to="getProfileUrl(user) + '/activity'"
               class="flex flex-col items-center px-5 py-1 sm:py-3 hover:bg-primary-5 transition-colors cursor-pointer">
               <span class="text-2xl tracking-tighter leading-none text-primary font-headers italic!">{{ counts.rated
               }}</span>
@@ -106,7 +105,7 @@
                   @click="openSignatureModal(signatureRecipe)">
                   Re-sign
                 </button>
-                <NuxtLink :to="'/profile/' + user?.id + '/recipes?mode=signature'"
+                <NuxtLink :to="getProfileUrl(user) + '/recipes?mode=signature'"
                   class="main-button animated-button rounded-full bg-primary-5/80 hover:bg-primary-5 transition-colors px-4 py-2 text-sm font-semibold text-gray-700">
                   Change recipe
                 </NuxtLink>
@@ -131,7 +130,7 @@
               </div>
             </div>
             <button v-else type="button"
-              class="main-button animated-button flex min-h-52 w-full flex-col items-center justify-center gap-3 main-card-rounded! border-2 border-dashed border-primary/60 bg-primary-5/40 px-6 py-10 text-center"
+              class="main-button animated-button flex min-h-52 w-full flex-col items-center justify-center gap-3 main-card-rounded! border-2 border-dashed border-primary/10 bg-primary-5/60! px-6 py-10 text-center"
               @click="goToSignatureSelection">
               <div class="rounded-full bg-primary p-3 text-white">
                 <IconPencil class="h-6 w-6" />
@@ -222,7 +221,7 @@
             <div v-if="tasteNeighbors.length > 0" class="h-px bg-gray-200 mx-2 my-4 -mt-10"></div>
             <div v-if="tasteNeighbors.length > 0" class="flex flex-col -mb-2 lg:mx-2">
               <div class="flex justify-between">
-                <NuxtLink v-for="(neighbor, index) in tasteNeighbors" :key="neighbor.id" :to="'/profile/' + neighbor.id"
+                <NuxtLink v-for="(neighbor, index) in tasteNeighbors" :key="neighbor.id" :to="getProfileUrl(neighbor)"
                   class="flex p-2 flex-col items-center rounded-2xl hover:bg-primary-5 transition-colors animated-button">
                   <Avatar :user="neighbor" class="w-12" />
                   <span class="text-sm leading-tight mt-1">{{ neighbor.username }}</span>
@@ -239,15 +238,14 @@
           <div class="bg-primary-5/50 main-card-rounded main-card-padding">
             <div class="flex items-center justify-between">
               <h3 class="text-xl font-headers tracking-tighter">Recent Activity</h3>
-              <NuxtLink :to="'/profile/' + user?.id + '/activity'"
-                class="text-xs text-gray-600 flex items-center gap-0.5">
+              <NuxtLink :to="getProfileUrl(user) + '/activity'" class="text-xs text-gray-600 flex items-center gap-0.5">
                 See all
                 <IconChevronRight class="w-4 h-4" :strokeWidth="1.5" />
               </NuxtLink>
             </div>
             <div v-if="recentActivity.length > 0" class="flex flex-col gap-3 mt-2">
               <component :is="item.href ? NuxtLink : 'div'" v-for="(item, i) in recentActivity" :key="item.id"
-                :to="item.href ?? undefined" class="flex items-start gap-3 pt-3"
+                v-bind="item.href ? { to: item.href } : {}" class="flex items-start gap-3 pt-3"
                 :class="[{ 'border-t border-black/5': i > 0 }, item.href ? 'group cursor-pointer' : '']">
                 <div class="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5"
                   :class="item.bgClass">
@@ -296,9 +294,9 @@
                 </div>
               </div>
               <span class="w-40 text-right text-xs text-gray-500 font-mono">
-                S {{ r.S != null ? r.S.toFixed(0) : '—' }} ·
-                p{{ r.percentile != null ? r.percentile.toFixed(0) : '—' }} ·
-                O {{ r.O != null ? r.O.toFixed(0) : '—' }}
+                S {{ r.S != null ? r.S.toFixed(0) : '-' }} ·
+                p{{ r.percentile != null ? r.percentile.toFixed(0) : '-' }} ·
+                O {{ r.O != null ? r.O.toFixed(0) : '-' }}
               </span>
           </div>
         </div>
@@ -350,7 +348,7 @@ function openSignatureModal(recipe: RecipeOverview) {
 }
 
 function goToSignatureSelection() {
-  navigateTo('/profile/' + user?.value?.id + '/recipes?mode=signature');
+  navigateTo(getProfileUrl(user?.value) + '/recipes?mode=signature');
 }
 
 function handleSignatureSaved(payload: { recipeId: number; publicUrl: string }) {

@@ -23,16 +23,42 @@
       </div>
     </div>
 
-    <!-- Processing state -->
-    <div v-else-if="recipe.visibility === 'PUBLISH_PENDING'" class="w-full space-y-1.5">
-      <div class="flex gap-2 items-center">
-        <IconLoader class="w-5 animate-spin text-primary" />
-        <span class="text-lg font-medium">Processing your recipe…</span>
+    <!-- Enrichment grid: PUBLISH_PENDING stuck (> 5 min) or UNLISTED non-user-created -->
+    <div v-else-if="showEnrichmentGrid" class="w-full flex flex-col gap-3">
+      <div>
+        <p class="text-lg leading-none font-medium">This recipe is unlisted.</p>
+        <p class="text-xs text-gray-500 mt-1">Full processing needed to set public</p>
       </div>
-      <p class="text-sm text-gray-500">It will be public in a few minutes.</p>
+      <div class="grid grid-cols-3 gap-2">
+        <div v-for="step in enrichmentSteps" :key="step.key"
+          class="rounded-xl border p-3 flex flex-col gap-1.5 transition-all"
+          :class="step.done ? 'border-green-200 bg-green-50/40' : 'border-dashed border-gray-200'">
+          <div class="flex items-center gap-1.5">
+            <IconCheck class="w-3.5 text-green-500 shrink-0" v-if="step.done" />
+            <IconClock class="w-3.5 text-gray-300 shrink-0" v-else />
+            <span class="text-xs font-medium truncate">{{ step.label }}</span>
+          </div>
+          <p class="text-[10px] text-gray-400 leading-snug">{{ step.description }}</p>
+        </div>
+      </div>
+      <button
+        class="button px-2 py-1 flex gap-1.5 items-center text-gray-500 outline-1 outline-gray-200 text-xs self-start"
+        @click="rerunEnrichment" :disabled="rerunLoading">
+        <IconLoader class="w-3 animate-spin" v-if="rerunLoading" />
+        <IconRefreshCcw class="w-3" v-else />
+        <span>{{ rerunLoading ? 'Queuing…' : 'Process & set public' }}</span>
+      </button>
     </div>
 
-    <!-- Unlisted / checklist state -->
+    <!-- Generic loading: PUBLISH_PENDING not yet stuck -->
+    <div v-else-if="(recipe as any).visibility === 'PUBLISH_PENDING'" class="w-full space-y-1.5">
+      <div class="flex gap-2 items-center">
+        <span class="text-lg font-medium">{{ pendingLoadingTitle }}</span>
+      </div>
+      <p class="text-sm text-gray-500">{{ pendingLoadingSubtext }}</p>
+    </div>
+
+    <!-- Unlisted / checklist state: user-created only -->
     <div v-else class="flex flex-col gap-3 w-full">
       <div>
         <p class="text-lg leading-none">Your recipe is unlisted.</p>
@@ -178,6 +204,93 @@ const isUserCreated = computed(() =>
   ['PREPARSED', 'TEXT', 'PICTURE', 'TITLE'].includes(props.recipe.source_type ?? '')
 );
 
+const enrichmentSteps = computed(() => {
+  const r = props.recipe as any;
+  return [
+    {
+      key: 'steps',
+      label: 'Rich steps',
+      description: 'Step-by-step cook instructions',
+      done: Array.isArray(r.full_instructions) && r.full_instructions.length > 0,
+    },
+    {
+      key: 'nutrition',
+      label: 'Deep nutrition',
+      description: 'Full ingredient analysis',
+      done: r.full_nutritional_processing === true,
+    },
+    {
+      key: 'embedding',
+      label: 'Search index',
+      description: 'Similarity embedding',
+      done: r.embedding != null,
+    },
+  ];
+});
+
+const showEnrichmentGrid = computed(() => {
+  const r = props.recipe as any;
+  if (r.visibility === 'UNLISTED' && !isUserCreated.value) return true;
+  if (r.visibility !== 'PUBLISH_PENDING') return false;
+  if (!r.publish_start) return false;
+  return Date.now() - new Date(r.publish_start).getTime() > 5 * 60 * 1000;
+});
+
+const pendingLoadingTitle = computed(() => {
+  if (isUserCreated.value) return 'Fully processing your recipe';
+  const r = props.recipe as any;
+  return r.publish_start ? 'Finalizing recipe' : 'Importing recipe';
+});
+
+const pendingLoadingSubtext = computed(() => {
+  if (isUserCreated.value) return 'It will be public in a few minutes.';
+  const r = props.recipe as any;
+  return r.publish_start ? 'This may take a few minutes' : 'Analyzing recipe data';
+});
+
+const rerunLoading = ref(false);
+let enrichmentPollTimer: ReturnType<typeof setInterval> | null = null;
+
+function stopPolling() {
+  if (enrichmentPollTimer !== null) {
+    clearInterval(enrichmentPollTimer);
+    enrichmentPollTimer = null;
+  }
+}
+
+function startPolling() {
+  stopPolling();
+  let attempts = 0;
+  const MAX = 24; // 24 × 5 s = 2 min ceiling
+  enrichmentPollTimer = setInterval(async () => {
+    attempts++;
+    await props.refresh(props.recipe.id, true);
+    if (props.recipe.visibility === 'PUBLIC' || attempts >= MAX) stopPolling();
+  }, 5000);
+}
+
+onUnmounted(stopPolling);
+
+const rerunEnrichment = async () => {
+  rerunLoading.value = true;
+  // Optimistic: hide the stuck grid immediately and show the spinner
+  if (recipeStore.recipe) {
+    (recipeStore.recipe as any).visibility = 'PUBLISH_PENDING';
+    (recipeStore.recipe as any).publish_start = null; // server just reset it; don't show grid again
+  }
+  try {
+    await $fetch('/api/create-recipe/rerun-enrichment', {
+      method: 'POST',
+      body: { recipeId: props.recipe.id },
+    });
+    startPolling();
+  } catch (e) {
+    console.error('Failed to queue enrichment:', e);
+  } finally {
+    rerunLoading.value = false;
+  }
+};
+
 const goToEditInstructions = () => {
   recipeStore.setRecipe(props.recipe);
   router.push('/recipe/new?editCurrent=true');
@@ -269,7 +382,7 @@ const publishRecipe = async () => {
         body: { recipeId: props.recipe.id },
       });
       props.recipe.visibility = 'PUBLISH_PENDING' as any;
-      loadingStore.displayTransientToast('Recipe submitted — will be public in a few minutes ✨');
+      loadingStore.displayTransientToast('Recipe submitted - will be public in a few minutes ✨');
     } else {
       await supabase.from('recipes').update({ visibility: 'PUBLIC' }).eq('id', props.recipe.id);
       loadingStore.displayTransientToast('Recipe published! ✨');

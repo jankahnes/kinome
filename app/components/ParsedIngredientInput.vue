@@ -231,7 +231,7 @@ const hasSeenHint = ref(false);
 const parseWarning = computed(() => {
   const v = props.modelValue;
   if (!v.foodNameId) return null;
-  if (v.amount == null) return 'No amount detected — nutrition estimate may be inaccurate';
+  if (v.amount == null) return 'No amount detected - nutrition estimate may be inaccurate';
   return null;
 });
 

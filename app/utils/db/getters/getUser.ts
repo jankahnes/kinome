@@ -33,6 +33,7 @@ export async function getUser(
   if (bookmarkRecipeIds.length > 0) {
     bookmarkRecipes = await getRecipeOverviews(client, {
       in: { id: bookmarkRecipeIds },
+      neq: { visibility: 'HIDDEN' },
     });
   }
   const stats = {
@@ -50,6 +51,24 @@ export async function getUser(
   };
 
   return processedUser as FullUser;
+}
+
+export async function getUserByUsername(
+  client: SupabaseClient,
+  username: string | undefined | null,
+): Promise<FullUser | null> {
+  if (!username) {
+    return null;
+  }
+
+  const { data, error } = await client
+    .from('profiles')
+    .select('id')
+    .eq('normalized_username', normalizeUsername(username))
+    .maybeSingle();
+
+  if (error) throw error;
+  return getUser(client, data?.id);
 }
 
 export async function getUsersPartial(

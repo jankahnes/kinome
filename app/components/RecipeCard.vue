@@ -4,18 +4,20 @@
     <NuxtImg
       class="-mt-16 w-[85%] aspect-square will-change-transform object-contain relative z-10 shadow-gray-100 filter-[drop-shadow(0_0_8px_var(--tw-shadow-color))_drop-shadow(0_0_4px_var(--tw-shadow-color))] transition-transform duration-500 group-hover:-translate-y-px group-hover:scale-[1.01]"
       v-if="recipe?.picture" :src="recipe?.picture" :alt="recipe?.title" />
-    <div v-else
+    <div v-else-if="recipe?.source_type === 'MEDIA'"
       class="-mt-16 w-[85%] aspect-square relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]">
       <div
         class=" bg-white main-card-rounded overflow-hidden relative z-10 aspect-9/16 shadow-gray-100 filter-[drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))] w-[55%] mx-auto">
         <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 w-full aspect-9/17">
-          <NuxtImg class="w-full h-full object-cover relative z-10 white-fade-mask"
-            :alt="recipe?.title + ' video thumbnail'" :src="recipe?.social_picture!" />
+          <NuxtImg v-if="recipe?.social_picture" class="w-full h-full object-cover relative z-10 white-fade-mask"
+            :alt="recipe?.title + ' video thumbnail'" :src="recipe.social_picture" />
+          <Skeleton v-else class="w-full h-full" />
         </div>
         <div class="pointer-events-none absolute inset-0 main-card-rounded white-fade-overlay z-20"></div>
       </div>
       <div />
     </div>
+    <div v-else class="-mt-16 w-[85%] aspect-square" />
 
     <div
       class="flex-1 flex flex-col justify-between gap-2 sm:gap-3 items-center p-4 pt-2 will-change-transform transition-transform duration-300 group-hover:translate-y-px ">

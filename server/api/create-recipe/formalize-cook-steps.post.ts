@@ -13,7 +13,7 @@ interface CookStepRequestBody {
 }
 
 const BASE_INSTRUCTIONS_BLOCK = `
-Phase A instructions — use these as a guide for step order and technique, but write the rich formatted steps in your own detailed style:
+Phase A instructions - use these as a guide for step order and technique, but write the rich formatted steps in your own detailed style:
 
 {instructions}
 `;
@@ -38,12 +38,12 @@ export default defineEventHandler(async (event) => {
   const baseInstructionsBlock = hasInstructions
     ? BASE_INSTRUCTIONS_BLOCK.replace(
         '{instructions}',
-        body.instructions!.join('\n')
+        body.instructions!.join('\n'),
       )
     : '';
 
   const prompt = (await assets.getItem(
-    'recipe-create/desc-and-formatted-instructions-from-ingredients.txt'
+    'recipe-create/desc-and-formatted-instructions-from-ingredients.txt',
   )) as string;
 
   const message = prompt

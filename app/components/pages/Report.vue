@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
     <!-- Loading skeleton -->
-    <div v-if="loading" class="space-y-4 mx-4">
-      <Skeleton class="w-full h-142 shadow-sm rounded-2xl" />
+    <div v-if="loading" class="space-y-4 ">
+      <Skeleton class="w-full h-80 shadow-sm rounded-2xl" />
       <div class="flex flex-wrap gap-10 items-start w-full">
         <Skeleton v-for="i in 9" :key="i" class="min-w-80 max-w-120 h-80 shadow-sm rounded-2xl flex-1" />
       </div>
@@ -15,13 +15,13 @@
           {{ title }}
         </h2>
       </div>
-      <div class="flex flex-wrap gap-6 mt-6" :class="{ 'gap-12': showTitle }">
+      <div class="flex flex-wrap gap-6 " :class="{ 'gap-12 mt-6': showTitle }">
         <!-- Hero Card -->
         <div class="basis-100 flex-1" :class="{ 'rounded-3xl bg-white shadow-xs p-4 ': !showTitle }">
 
           <div class="flex items-center justify-between mb-4">
             <div class="flex flex-col">
-              <h3 class="text-xl font-semibold mb-1">🔎 Overview</h3>
+              <h3 class="text-2xl font-headers mb-1">Overview</h3>
               <div class="percentile-badge py-1! px-1" :class="report.percentiles?.hidx?.color"
                 v-if="report.percentiles?.hidx">
                 <Icon :name="report.percentiles.hidx.icon" :size="20" />
@@ -51,7 +51,7 @@
           v-for="card in readableSummaryCards" :key="card.title">
           <div class="flex items-center justify-between mb-4">
             <div class="flex flex-col items-start">
-              <h3 class="text-xl font-semibold mb-1">
+              <h3 class="text-2xl font-headers mb-1">
                 {{ card.title }}
               </h3>
               <div class="percentile-badge" :class="card.percentile?.color" v-if="card.percentile">
@@ -108,55 +108,55 @@ const supabase = useSupabaseClient();
 const report = computed(() => recipeComputed.value?.report);
 const readableSummaryCards = ref<any[]>([
   {
-    title: '🧪 Micronutrients',
+    title: 'Micronutrients',
     baseRelevancy: 9,
     col: 'mnidx',
     name: 'micronutrients',
   },
   {
-    title: '🥑 Fat Profile',
+    title: 'Fat Profile',
     baseRelevancy: 8,
     col: 'fat_profile_score',
     name: 'fatProfile',
   },
   {
-    title: '🏭 Processing Level',
+    title: 'Processing Level',
     baseRelevancy: 8,
     col: props.isFood ? 'nova' : 'processing_level_score',
     name: 'processingLevel',
   },
   {
-    title: '💪 Protein',
+    title: 'Protein',
     baseRelevancy: 6,
     col: 'protein_score',
     name: 'protein',
   },
   {
-    title: '🍬 Sugar',
+    title: 'Sugar',
     baseRelevancy: 6,
     col: 'sugar_score',
     name: 'sugar',
   },
   {
-    title: '🧂 Sodium',
+    title: 'Sodium',
     baseRelevancy: 6,
     col: 'salt_score',
     name: 'salt',
   },
   {
-    title: '🌾 Fiber',
+    title: 'Fiber',
     baseRelevancy: 4,
     col: 'fiber_score',
     name: 'fiber',
   },
   {
-    title: '😋 Satiety',
+    title: 'Satiety',
     baseRelevancy: 4,
     col: 'sidx',
     name: 'satiety',
   },
   {
-    title: '🛡️ Protective Compounds',
+    title: 'Protective Compounds',
     baseRelevancy: 0,
     col: 'protective_score',
     name: 'protectiveCompounds',

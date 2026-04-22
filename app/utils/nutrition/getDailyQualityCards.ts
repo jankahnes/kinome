@@ -167,7 +167,7 @@ const proteinTiers: Threshold[] = [
   { minScore: 88, rating: 'Excellent', pillClass: 'bg-blue-100 text-blue-700' },
 ];
 
-// More forgiving scale — only "very" high scores get the top ratings
+// More forgiving scale - only "very" high scores get the top ratings
 // Most foods have low antioxidant content, so this is specialty territory
 const antioxidantTiers: Threshold[] = [
   { minScore: -Infinity, rating: 'None', pillClass: NULL_PILL },

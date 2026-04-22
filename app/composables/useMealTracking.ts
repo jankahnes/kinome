@@ -112,7 +112,7 @@ export function useMealTracking() {
       ? `${processedBrandedFood.brand ?? ''} ${processedBrandedFood.product_name}`.trim()
       : food.food_name?.name || '';
 
-    // Reconstruct context from stored amount+unit using the fraction formatter —
+    // Reconstruct context from stored amount+unit using the fraction formatter -
     // no parsing needed, and matches how addMealFromRecipe formats it.
     const displayTextContext =
       food.amount != null
@@ -133,7 +133,7 @@ export function useMealTracking() {
       foodNameId: processedBrandedFood?.food_name?.id || food.food_name?.id,
       ingredientName,
       foodData: stripReport(rawFoodData),
-      // foodVariants intentionally omitted — populated on first edit+blur
+      // foodVariants intentionally omitted - populated on first edit+blur
       brandedFood: processedBrandedFood ?? undefined,
       brandedFoodState: processedBrandedFood ? 'complete' : undefined,
     };

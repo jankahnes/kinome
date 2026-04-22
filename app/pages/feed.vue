@@ -3,7 +3,9 @@
     <!-- Header -->
     <div class="md:hidden flex justify-between items-center">
       <Logo />
-      <Avatar :user="auth.user" class="rounded-full w-10 h-10" v-if="auth.isUser()" />
+      <NuxtLink :to="getProfileUrl(auth.user)" v-if="auth.isUser()">
+        <Avatar :user="auth.user" class="rounded-full w-10 h-10" />
+      </NuxtLink>
       <NuxtLink to="/login" class="main-button animated-button mt-1" v-else>
         <IconLogIn :size="26" />
       </NuxtLink>

@@ -41,7 +41,7 @@
           </div>
 
           <!-- Content -->
-          <component :is="linkTarget(item) ? NuxtLink : 'div'" :to="linkTarget(item) ?? undefined"
+          <component :is="linkTarget(item) ? NuxtLink : 'div'" v-bind="linkTarget(item) ? { to: linkTarget(item) } : {}"
             class="pb-6 pl-4 flex-1 flex gap-3 items-start group" :class="{ 'cursor-pointer': !!linkTarget(item) }">
             <!-- Icon bubble -->
             <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"

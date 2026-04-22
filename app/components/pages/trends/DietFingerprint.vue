@@ -39,8 +39,8 @@
                 <IconChevronRight class="w-4" />
             </div>
         </div>
-        <BlocksResponsiveInfo v-model="showFullReport">
-            <PagesReport id="tracking-trends-period-report" :isFood="false" :computedRecipe="recipeRow" :showTitle="true" />
+        <BlocksResponsiveInfo v-model="showFullReport" sidePanelClass="w-120">
+            <PagesReport id="tracking-trends-period-report" :isFood="false" :computedRecipe="recipeRow" :showTitle="true" class="m-4" />
         </BlocksResponsiveInfo>
     </div>
 </template>

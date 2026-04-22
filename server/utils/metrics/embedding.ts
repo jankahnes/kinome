@@ -2,7 +2,7 @@
 // "Taste Neighbors" feature. Recipe embeddings are 256-dim pgvectors;
 // supabase-js returns them as strings like "[0.1,0.2,...]".
 
-export const EMBEDDING_DIMS = 256;
+export const EMBEDDING_DIMS = 1536;
 
 export function parseVector(raw: unknown): number[] | null {
   if (raw == null) return null;

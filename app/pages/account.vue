@@ -136,7 +136,10 @@ const previewUser = computed(() => ({
   picture: selectedAvatar.value || auth.user?.picture || '',
 }));
 
-const isUsernameValid = computed(() => username.value.trim().length > 0);
+const usernamePattern = /^[a-zA-Z0-9_]{3,32}$/;
+const isUsernameValid = computed(() =>
+  usernamePattern.test(username.value.trim()),
+);
 
 const hasProfileChanges = computed(() => {
   return (
@@ -151,12 +154,35 @@ async function saveProfile() {
   savingProfile.value = true;
   const trimmedUsername = username.value.trim();
 
+  try {
+    const lookup = await $fetch<{ usernameTaken: boolean }>('/api/auth/lookup', {
+      method: 'POST',
+      body: {
+        username: trimmedUsername,
+        excludeProfileId: auth.user.id,
+      },
+    });
+
+    if (lookup.usernameTaken) {
+      loadingStore.displayTransientToast('Username is already taken');
+      return;
+    }
+  } catch (error) {
+    console.error('Failed to check username availability:', error);
+    loadingStore.displayTransientToast('Failed to check username availability');
+    return;
+  } finally {
+    savingProfile.value = false;
+  }
+
+  savingProfile.value = true;
   const { error } = await supabase
     .from('profiles')
     .update({
       username: trimmedUsername,
+      normalized_username: normalizeUsername(trimmedUsername),
       picture: selectedAvatar.value,
-    })
+    } as any)
     .eq('id', auth.user.id);
 
   savingProfile.value = false;

@@ -66,6 +66,44 @@
 <script setup lang="ts">
 const submitFromPicture = inject<(file: File) => void>('submitFromPicture')!;
 
+useHead({
+  title: 'Scan a Recipe | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Create a recipe from a photo of a cookbook page, handwritten note, or finished dish with AI-assisted ingredient parsing.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Scan a Recipe | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Create a recipe from a photo of a cookbook page, handwritten note, or finished dish with AI-assisted ingredient parsing.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/recipe/new/scan',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/recipe/new/scan',
+    },
+  ],
+});
+
 const cameraInput = ref<HTMLInputElement>();
 const fileInput = ref<HTMLInputElement>();
 const selectedFile = ref<File | null>(null);

@@ -541,34 +541,39 @@ function toggleTag(item: {
 }
 
 useHead({
-  title:
-    'Browse All Recipes - Search & Filter by Health Score, Cuisine & More | Kinome',
+  title: 'Browse Healthy Recipes | Kinome',
   meta: [
     {
+      key: 'description',
       name: 'description',
       content:
-        'Browse over 1000 recipes with advanced filtering by health score, calories, cuisine, and dietary preferences. Each recipe includes complete nutrition analysis and health ratings.',
+        'Search and filter 1,000+ recipes by health score, calories, cuisine, cost, and diet tags, with full nutrition analysis.',
     },
     {
+      key: 'og:title',
       property: 'og:title',
-      content: 'Browse All Recipes | Kinome',
+      content: 'Browse Healthy Recipes | Kinome',
     },
     {
+      key: 'og:description',
       property: 'og:description',
       content:
-        'Browse over 1000 recipes with advanced filtering by health score, calories, cuisine, and dietary preferences.',
+        'Search and filter 1,000+ recipes by health score, calories, cuisine, cost, and diet tags, with full nutrition analysis.',
     },
     {
+      key: 'og:type',
       property: 'og:type',
       content: 'website',
     },
     {
+      key: 'og:url',
       property: 'og:url',
       content: 'https://kinome.app/kitchen/recipes',
     },
   ],
   link: [
     {
+      key: 'canonical',
       rel: 'canonical',
       href: 'https://kinome.app/kitchen/recipes',
     },

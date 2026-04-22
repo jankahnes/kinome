@@ -63,7 +63,7 @@
               </h3>
             </div>
 
-            <ul class="flex flex-col gap-3.5 items-start" role="list">
+            <ul class="flex flex-col gap-3.5 items-start -mx-1.5" role="list">
               <li v-for="ingredient in group" :key="ingredient.name"
                 class="relative overflow-hidden flex items-center rounded-2xl px-2 py-1 transition-colors duration-200 gap-2"
                 :class="[backgroundClass(ingredient), { 'select-none touch-pan-y cursor-ew-resize': quickEditMode && !isFreeUnit(ingredient) }]"
@@ -102,12 +102,13 @@
                   <span>
                     <span>{{ ' ' }}</span>
                     <span class="" v-if="quickEditMode">{{
-                      getIngredientName(ingredient)
+                      getIngredientDisplayName(ingredient, servingSize ?? 1)
                     }}</span>
-                    <NuxtLink v-else :to="getFoodUrl(ingredient.id, getIngredientName(ingredient))"
+                    <NuxtLink v-else
+                      :to="getFoodUrl(ingredient.id, getIngredientDisplayName(ingredient, servingSize ?? 1))"
                       class="hover:underline">
                       <span class="">{{
-                        getIngredientName(ingredient)
+                        getIngredientDisplayName(ingredient, servingSize ?? 1)
                       }}</span>
                     </NuxtLink>
                     <span v-if="ingredient.preparation_description"
@@ -122,21 +123,20 @@
               </li>
             </ul>
           </template>
-          <div class="flex gap-4 items-center flex-wrap pt-2" v-if="
+          <div class="flex gap-4 items-center flex-wrap pt-2 -mb-1 ml-1" v-if="
             (addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1) ||
             (addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75)
           ">
             <div class="flex items-center rounded-xl" v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1">
-              <span class="text-sm">🧈</span>
-              <span class="text-xs font-medium">Plus ~{{ getAdded(addedInfo?.addedFat) }}g of
+              <span class="text-[10px] uppercase font-mono text-gray-400 tracking-wider">
+                🧈 Plus ~{{ getAdded(addedInfo?.addedFat) }}g of
                 fat</span>
             </div>
             <div class="flex items-center rounded-xl" v-if="
               addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
             ">
-              <span class="text-sm">🧂</span>
-              <span class="text-xs font-medium">
-                Plus ~{{ getAdded(addedInfo?.addedSalt) }}g of
+              <span class="text-[10px] uppercase font-mono text-gray-400 tracking-wider">
+                🧂 Plus ~{{ getAdded(addedInfo?.addedSalt) }}g of
                 salt</span>
             </div>
           </div>
@@ -173,6 +173,7 @@
 </template>
 
 <script setup lang="ts">
+import { getIngredientDisplayName } from '~/utils/format/getStringFromIngredient';
 import { computeDraggedAmount } from '~/utils/format/quickEditSnap';
 
 type AddedInfo = {
@@ -251,21 +252,6 @@ const notOnDefaultUnits = computed(() => {
     (ingredient: any) => ingredient.currentUnit !== 0
   );
 });
-
-function getIngredientName(ingredient: any) {
-  if (!ingredient?.amountInfo || !ingredient?.amountInfo.length) {
-    return ingredient.name;
-  }
-  const amountInfo = ingredient?.amountInfo?.[ingredient?.currentUnit];
-  if (
-    isCountable(amountInfo[1]) &&
-    amountInfo[0] * (servingSize.value ?? 1) > 1 &&
-    !unitIsNoun(amountInfo[1])
-  ) {
-    return pluralizeWord(ingredient.name);
-  }
-  return ingredient.name;
-}
 
 function onClickIngredient(ingredient: any) {
   if (ingredient.currentUnit == ingredient.amountInfo.length - 1) {
@@ -365,7 +351,7 @@ function onTweakPointerMove(ev: PointerEvent, ingredient: any) {
     const absY = Math.abs(dy);
     if (absX < 4 && absY < 4) return;
     if (absX <= absY) {
-      // Vertical scroll — abandon drag
+      // Vertical scroll - abandon drag
       dragState.value = null;
       draggingIngredientId.value = null;
       return;

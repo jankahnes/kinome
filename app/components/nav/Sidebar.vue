@@ -3,7 +3,8 @@
     <div class="flex flex-col h-full justify-between p-4 gap-4">
       <div class="flex flex-col gap-10 ">
         <Logo class="mt-1 ml-1" />
-        <NuxtLink :to="'/profile/' + auth.user?.id" class="shadow-sm bg-white rounded-3xl p-2 flex items-center gap-4">
+        <NuxtLink :to="auth.isUser() ? getProfileUrl(auth.user) : '/onboarding'"
+          class="shadow-sm bg-white rounded-3xl p-2 flex items-center gap-4">
           <Avatar :user="auth.user" class="w-12" :placeholder="!auth.profileFetched" />
           <div class="flex flex-col my-1" v-if="auth.isUser() && auth.profileFetched">
             <span class="text-[13px]">{{ auth.user?.username }}</span>
@@ -59,7 +60,7 @@ type NavLinkItem = {
 
 const navLinks: NavLinkItem[] = [
   { to: '/', label: 'Discover', icon: 'compass' },
-  { to: '/kitchen/home', label: 'Kitchen', icon: 'chef-hat' },
+  { to: '/kitchen/', label: 'Kitchen', icon: 'chef-hat' },
   { to: '/recipe/new', label: 'Create', icon: 'add' },
   { to: '/tracking', label: 'Meal tracking', icon: 'notebook-pen' },
   { to: '/feed', label: 'Feed', icon: 'rss' },

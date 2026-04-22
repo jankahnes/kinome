@@ -51,7 +51,6 @@ const iconMap: Record<string, any> = {
   'shield-alert': LucideIcons.ShieldAlert,
   rss: LucideIcons.Rss,
   'notebook-pen': LucideIcons.NotebookPen,
-  'chef-hat': LucideIcons.ChefHat,
   zap: LucideIcons.Zap,
   'shield-check': LucideIcons.ShieldCheck,
   sparkles: LucideIcons.Sparkles,
@@ -61,9 +60,6 @@ const iconMap: Record<string, any> = {
   'arrow-right': LucideIcons.ArrowRight,
   'arrow-left': LucideIcons.ArrowLeft,
   plus: LucideIcons.Plus,
-  'chart-bar': LucideIcons.ChartBar,
-  'list-checks': LucideIcons.ListChecks,
-  'activity': LucideIcons.Activity,
 };
 
 const icon = computed(() => iconMap[props.name]);

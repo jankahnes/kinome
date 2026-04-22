@@ -8,7 +8,7 @@
           {{ view.displayName }}
         </NuxtLink>
       </div>
-      <!-- Date navigator — only on /tracking/daily -->
+      <!-- Date navigator - only on /tracking/daily -->
       <div v-if="isDaily" class="flex items-center  main-card-rounded bg-primary-5/40">
         <button class="main-button animated-button py-1 px-3" @click="navigateDate(-1)">
           <IconChevronLeft class="w-4 h-4" />

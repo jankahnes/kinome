@@ -40,6 +40,44 @@ const route = useRoute();
 const supabase = useSupabaseClient<Database>();
 const foodResultsStore = useFoodResultsStore();
 
+useHead({
+  title: 'Food Nutrition Database | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Search foods by name to compare nutrition data, health scores, calories, macros, and ingredient matches for recipes.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Food Nutrition Database | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Search foods by name to compare nutrition data, health scores, calories, macros, and ingredient matches for recipes.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/foods',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/foods',
+    },
+  ],
+});
+
 const urlSearch = route.query.search as string;
 if (urlSearch) {
   foodResultsStore.searchQuery = urlSearch;

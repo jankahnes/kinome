@@ -266,7 +266,7 @@ const negativeFactors = computed((): FactorRow[] => {
 const avgAddedSugarDisplay = computed(() => {
     const gh = props.gutHealth;
     const days = trackedDays.value;
-    if (!gh || days <= 0) return '—';
+    if (!gh || days <= 0) return '-';
     const v = Math.round(gh.addedSugarG / days);
     return `${v}g`;
 });
@@ -274,7 +274,7 @@ const avgAddedSugarDisplay = computed(() => {
 const avgAnimalProteinDisplay = computed(() => {
     const gh = props.gutHealth;
     const days = trackedDays.value;
-    if (!gh || days <= 0) return '—';
+    if (!gh || days <= 0) return '-';
     const v = Math.round(gh.animalProteinG / days);
     return `${v}g`;
 });

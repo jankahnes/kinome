@@ -11,37 +11,41 @@
         <p class="text-sm text-gray-600">Sign in to your account</p>
       </div>
 
-      <!-- Main Content Slot -->
-      <div class="space-y-4">
-        <div class="space-y-1">
-          <label for="username" class="block text-sm text-gray-700">Username</label>
+      <form class="space-y-4" @submit.prevent="signIn">
+        <div class="space-y-4">
+          <div class="space-y-1">
+          <label for="username" class="block text-sm text-gray-700">Email or username</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <IconUser class="w-5 h-5 text-gray-400" />
             </div>
-            <input id="username" v-model="username" type="text"
+            <input id="username" v-model="username" type="text" autocomplete="username"
               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-              placeholder="Enter your username" required />
+              placeholder="Enter your email or username" required />
           </div>
         </div>
 
-        <div class="space-y-1">
+          <div class="space-y-1">
           <label for="password" class="block text-sm text-gray-700">Password</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <IconLock class="w-5 h-5 text-gray-400" />
             </div>
-            <input id="password" v-model="password" type="password"
+            <input id="password" v-model="password" type="password" autocomplete="current-password"
               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
               placeholder="Enter your password" required />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="space-y-2">
-        <button @click="signIn" :disabled="!username || !password"
+        <div class="space-y-2">
+        <p v-if="error" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          {{ error }}
+        </p>
+
+        <button type="submit" :disabled="!username || !password || loading"
           class="w-full button py-2 px-4 !bg-primary hover:!bg-primary/90 !text-white font-headers italic! text-lg rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300">
-          Sign In
+          {{ loading ? 'Signing in...' : 'Sign In' }}
         </button>
         <!-- Divider -->
         <div class="relative">
@@ -54,12 +58,13 @@
         </div>
 
         <!-- Google Sign In -->
-        <button
+        <button type="button" @click="handleGoogleAuth"
           class="w-full button flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 hover:bg-gray-50 transition-colors">
           <img :src="'/google.webp'" class="w-5 h-5" alt="Google" />
           <span class="font-medium">Sign in with Google</span>
         </button>
-      </div>
+        </div>
+      </form>
 
       <!-- Footer Section -->
       <div class="text-center pt-4">
@@ -86,17 +91,32 @@ useHead({
 
 const username = ref('');
 const password = ref('');
+const error = ref('');
+const loading = ref(false);
 const auth = useAuthStore();
 
-function signIn() {
-  if (!username.value || !password.value) return;
+async function signIn() {
+  if (!username.value || !password.value || loading.value) return;
 
-  auth.signIn(username.value, password.value);
-  navigateTo('/');
+  error.value = '';
+  loading.value = true;
+
+  try {
+    const { error: signInError } = await auth.signIn(username.value, password.value);
+    if (signInError) {
+      error.value = signInError.message;
+      return;
+    }
+    await navigateTo('/');
+  } catch (err: any) {
+    error.value = err?.message ?? 'Could not sign in';
+  } finally {
+    loading.value = false;
+  }
 }
 
 function handleGoogleAuth() {
-  console.log('Google authentication clicked');
+  auth.signInWithGoogle('/');
 }
 </script>
 

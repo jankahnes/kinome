@@ -311,7 +311,41 @@ onMounted(async () => {
 });
 
 useHead({
-  title: 'Create a new recipe | Kinome',
+  title: 'Create Recipes | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Create, import, or scan recipes with AI-assisted ingredient parsing, nutrition analysis, and health scoring from Kinome.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Create Recipes | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Create, import, or scan recipes with AI-assisted ingredient parsing, nutrition analysis, and health scoring from Kinome.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/recipe/new',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/recipe/new',
+    },
+  ],
 });
 </script>
 

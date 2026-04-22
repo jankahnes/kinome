@@ -159,13 +159,13 @@ function fmtValue(val: number | undefined | null): string {
   return val.toFixed(0);
 }
 
-/** Uncapped raw percentage — used for display text. */
+/** Uncapped raw percentage - used for display text. */
 function rawPct(value: number | undefined, ref: number | undefined): number {
   if (!value || !ref) return 0;
   return (value / ref) * 100;
 }
 
-/** Clamped to 100 — used for bar widths so they never overflow. */
+/** Clamped to 100 - used for bar widths so they never overflow. */
 function barPct(value: number | undefined, ref: number | undefined): number {
   return Math.min(rawPct(value, ref), 100);
 }

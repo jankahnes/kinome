@@ -68,6 +68,8 @@ export const unitToDBMap: Record<string, string> = {
   free: 'FREE',
 };
 
+
+
 function parseNumeric(word: string): number | null {
   const cleanWord = word.trim();
 

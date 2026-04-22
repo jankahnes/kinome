@@ -75,9 +75,9 @@ export default function processingLevelToReadable(
     description:
       report.processingLevel.upfCount +
       ' ' +
-      (report.processingLevel.upfCount > 1
-        ? 'ultra-processed ingredients'
-        : 'ultra-processed ingredient'),
+      (report.processingLevel.upfCount == 1
+        ? 'ultra-processed ingredient'
+        : 'ultra-processed ingredients'),
     subtitle: report.processingLevel.upfIngredients.join(', ') || null,
   });
   items.push({

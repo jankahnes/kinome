@@ -2,7 +2,7 @@
   <div class="mb-20 space-y-4 sm:space-y-10 m-4 lg:my-10 lg:mx-16">
     <div class="md:hidden flex justify-between items-center">
       <Logo class="" />
-      <NuxtLink :to="'/profile/' + auth.user?.id" v-if="auth.isUser()">
+      <NuxtLink :to="getProfileUrl(auth.user)" v-if="auth.isUser()">
         <Avatar :user="auth.user" class="rounded-full w-10 h-10" />
       </NuxtLink>
       <NuxtLink to="/login" class="mt-1" v-else>

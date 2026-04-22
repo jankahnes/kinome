@@ -112,9 +112,9 @@ const limiting = computed(() => {
     return segs.reduce((a, b) => (a.min <= b.min ? a : b));
 });
 
-const limitingLabel = computed(() => limiting.value?.label ?? '—');
+const limitingLabel = computed(() => limiting.value?.label ?? '-');
 const limitingMinFormatted = computed(() =>
-    limiting.value != null ? limiting.value.min.toFixed(2) : '—',
+    limiting.value != null ? limiting.value.min.toFixed(2) : '-',
 );
 
 // `proteinQuality[AA].min` represents the *worst day* within the selected range.

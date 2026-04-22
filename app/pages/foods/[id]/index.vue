@@ -6,8 +6,8 @@
         <NuxtLink to="/foods" class="text-gray-500">Foods</NuxtLink> ›
         <span class="text-primary font-headers">{{ foodName }}</span>
       </p>
-      <div class="flex flex-col 2xl:flex-row gap-10">
-        <div class="contents xl:flex flex-col gap-6 lg:flex-1">
+      <div class="flex flex-col 2xl:flex-row gap-12">
+        <div class="contents xl:flex flex-col gap-8 lg:flex-1">
           <div
             class="bg-primary-5 main-card-rounded main-card-padding flex gap-6 flex-col xl:flex-row order-1 xl:order-0 xl:items-start">
             <div class="relative xl:basis-1/5 h-40">
@@ -36,19 +36,8 @@
               </div>
 
               <p v-if="food?.description" class="text-sm text-gray-700">
-                <span class="hidden lg:inline">
-                  {{
-                    descExpanded
-                      ? food.description
-                      : food.description.slice(0, 300) + '...'
-                  }}
-                </span>
-                <span class="inline lg:hidden">
-                  {{
-                    descExpanded
-                      ? food.description
-                      : food.description.slice(0, 160) + '...'
-                  }}
+                <span class="block" :class="descExpanded ? '' : 'line-clamp-3 lg:line-clamp-5'">
+                  {{ food.description }}
                 </span>
                 <span class="text-gray-500 text-sm cursor-pointer" @click="descExpanded = !descExpanded">
                   {{ descExpanded ? ' Show less' : ' Show more' }}
@@ -79,7 +68,7 @@
                 :fat-profile="food?.report?.details?.fatProfile"
                 :fat-profile-readable="food?.report?.humanReadable?.fatProfile ?? []"
                 :micronutrients="food?.report?.details?.micronutrients" :kcal-progress="food?.kcal / 2000"
-                mode="info" />
+                mode="info" class="main-card-glass" />
             </div>
             <div class="flex flex-col sm:flex-row gap-2 gap-y-0 mt-2 px-6 justify-between">
               <div class="flex flex-wrap gap-3 gap-y-0">
@@ -103,7 +92,7 @@
             </div>
           </div>
         </div>
-        <div class="contents xl:flex xl:flex-col gap-6 lg:basis-1/3">
+        <div class="contents xl:flex xl:flex-col gap-8 lg:basis-1/3">
           <!-- Healthy Swaps Card -->
           <div class="space-y-2 order-5 xl:order-0"
             v-if="(food as any)?.suggested_swaps && (food as any).suggested_swaps.length > 0">
@@ -142,7 +131,7 @@
             </div>
           </div>
           <!-- FAQ Card -->
-          <div class="space-y-2 order-7 xl:order-0" v-if="faqItems.length">
+          <div class="space-y-2 order-7 xl:order-0 border-t border-gray-200 pt-8 mt-2" v-if="faqItems.length">
             <h2 class="text-4xl font-headers tracking-tighter ml-2 mb-3">FAQ</h2>
             <div class="space-y-2 ml-2">
               <details v-for="item in faqItems" :key="item.question" class="group">
@@ -160,8 +149,8 @@
       <BlocksResponsiveInfo v-model="contextModalOpen" sidePanelClass="w-120">
         <div v-if="contextMode === 'nutrition'" class="m-4">
           <h2 class="text-3xl font-headers tracking-tighter mb-8">Full Nutrition</h2>
-          <FoodNutritionFacts :computable="food" :portion-multiplier="portionMultiplier" subtitle="per 100g" />
-          <FoodFullNutritionFacts :food="food" :portion-multiplier="portionMultiplier" class="mt-10" />
+          <FoodFullNutritionFacts :food="food" :portion-multiplier="portionMultiplier" class="mt-10" single-column
+            show-macros :subtitle="`per ${selectedUnit.displayName}`" />
         </div>
         <PagesReport v-if="contextMode === 'health' && id" :id="id" :isFood="true" class="m-4" :showTitle="true" />
       </BlocksResponsiveInfo>
@@ -170,10 +159,6 @@
 </template>
 
 <script setup lang="ts">
-import { getGrade } from '~/utils/constants/grades';
-import capitalize from '~/utils/format/capitalize';
-import type { Food } from '~/types/types';
-import { getDailyQualityCards } from '~/utils/nutrition/getDailyQualityCards';
 import pluralize from 'pluralize';
 
 const route = useRoute();
@@ -371,7 +356,7 @@ function getFoodHealthHighlight(f: FullFoodRow, isPlural: boolean): string {
           { key: 'mufaScore', label: 'rich in healthy unsaturated fats' },
           { key: 'satFatScore', label: 'low in saturated fat' },
         ].reduce((a, b) => (fp[b.key] ?? 0) > (fp[a.key] ?? 0) ? b : a);
-        return `${isPlural ? 'They have' : 'It has'} an excellent fat profile — ${best.label}.`;
+        return `${isPlural ? 'They have' : 'It has'} an excellent fat profile - ${best.label}.`;
       }
       return `${isPlural ? 'They have' : 'It has'} an excellent fat quality profile.`;
     }
@@ -455,7 +440,7 @@ const faqItems = computed<{ question: string; answer: string }[]>(() => {
     const highlight = getFoodHealthHighlight(f, isPlural);
     let answer: string;
     if (grade.startsWith('S')) {
-      answer = `Yes, ${name} ${isOrAre} exceptionally healthy, earning an S Health Grade — among the highest possible. ${highlight}`;
+      answer = `Yes, ${name} ${isOrAre} exceptionally healthy, earning an S Health Grade - among the highest possible. ${highlight}`;
     } else if (grade.startsWith('A')) {
       answer = `Yes, ${name} ${isOrAre} very healthy with a Health Grade of ${grade}. ${highlight}`;
     } else if (grade.startsWith('B')) {

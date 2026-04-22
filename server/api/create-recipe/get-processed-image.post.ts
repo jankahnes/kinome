@@ -4,11 +4,13 @@ export default defineEventHandler(async (event) => {
   const base_recipe_information = await readBody(event);
   if (base_recipe_information.original_image_base64) {
     // Route user-uploaded photo through the same flux-editing pipeline as video stills:
-    // enhance plating/garnish, place on white background, remove bg — matches app's visual style.
+    // enhance plating/garnish, place on white background, remove bg - matches app's visual style.
     try {
       const imageGenerationData = {
         title: base_recipe_information.title,
-        instructions: removeInstructionFormatting(base_recipe_information.instructions || []),
+        instructions: removeInstructionFormatting(
+          base_recipe_information.instructions || [],
+        ),
         collection: base_recipe_information?.collection || 'user-generated',
         video_url: null,
         user_image_base64: base_recipe_information.original_image_base64,
@@ -40,8 +42,10 @@ export default defineEventHandler(async (event) => {
           : null;
       const imageGenerationData = {
         title: base_recipe_information.title,
-        instructions: removeInstructionFormatting(base_recipe_information.instructions || []),
-        collection: base_recipe_information?.collection || "user-generated",
+        instructions: removeInstructionFormatting(
+          base_recipe_information.instructions || [],
+        ),
+        collection: base_recipe_information?.collection || 'user-generated',
         video_url: videoUrl,
       };
       const response = await fetch(
@@ -52,16 +56,15 @@ export default defineEventHandler(async (event) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(imageGenerationData),
-        }
+        },
       );
       if (response.ok) {
         const generatedImageBuffer = await response.arrayBuffer();
         const generatedImageBase64 = `data:image/png;base64,${Buffer.from(
-          generatedImageBuffer
+          generatedImageBuffer,
         ).toString('base64')}`;
         base_recipe_information.image_base64 = generatedImageBase64;
-      }
-      else {
+      } else {
         console.error('Failed to generate image:', response.statusText);
       }
     } catch (error) {

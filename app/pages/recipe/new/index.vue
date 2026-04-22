@@ -81,6 +81,44 @@ const supabase = useSupabaseClient();
 const route = useRoute();
 const recipeStore = useRecipeStore();
 
+useHead({
+  title: 'Create a Recipe | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Build a recipe from structured ingredients or natural language and preview nutrition before publishing it on Kinome.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Create a Recipe | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Build a recipe from structured ingredients or natural language and preview nutrition before publishing it on Kinome.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/recipe/new',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/recipe/new',
+    },
+  ],
+});
+
 // Flat state replacing the old `ingredientListEditableInformation` blob
 const serves = ref(4);
 const categories = ref<TrackedMeal[]>([

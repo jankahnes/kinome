@@ -1,31 +1,18 @@
 <template>
-  <div v-if="fullNutrition" class="flex flex-row flex-wrap gap-x-10 gap-y-9">
-    <div class="flex-1 min-w-0 space-y-9 basis-100">
-      <NutritionMicroGroup
-        v-for="s in rail1"
-        :key="s.title"
-        :title="s.title"
-        :subtitle="s.subtitle"
-        :accent-class="s.accentClass"
-        :bar-class="s.barClass"
-        :kind="s.kind"
-        :items="s.items"
-        :kcal="kcalForNorm"
-        
-      />
+  <div v-if="fullNutrition">
+    <div class="flex-row flex-wrap gap-x-10 gap-y-9 hidden md:flex" :class="{ 'hidden!': singleColumn }">
+      <div class="flex-1 min-w-0 space-y-9 basis-80">
+        <NutritionMicroGroup v-for="s in rail1" :key="s.title" :title="s.title" :subtitle="s.subtitle"
+          :accent-class="s.accentClass" :bar-class="s.barClass" :kind="s.kind" :items="s.items" :kcal="kcalForNorm" />
+      </div>
+      <div class="flex-1 min-w-0 space-y-9 basis-80">
+        <NutritionMicroGroup v-for="s in rail2" :key="s.title" :title="s.title" :subtitle="s.subtitle"
+          :accent-class="s.accentClass" :bar-class="s.barClass" :kind="s.kind" :items="s.items" :kcal="kcalForNorm" />
+      </div>
     </div>
-    <div class="flex-1 min-w-0 space-y-9 basis-100">
-      <NutritionMicroGroup
-        v-for="s in rail2"
-        :key="s.title"
-        :title="s.title"
-        :subtitle="s.subtitle"
-        :accent-class="s.accentClass"
-        :bar-class="s.barClass"
-        :kind="s.kind"
-        :items="s.items"
-        :kcal="kcalForNorm"
-      />
+    <div class="flex flex-col gap-6 md:hidden" :class="{ 'flex!': singleColumn }">
+      <NutritionMicroGroup v-for="s in fullColumn" :key="s.title" :title="s.title" :subtitle="s.subtitle"
+        :accent-class="s.accentClass" :bar-class="s.barClass" :kind="s.kind" :items="s.items" :kcal="kcalForNorm" />
     </div>
   </div>
 </template>
@@ -39,8 +26,12 @@ const props = withDefaults(defineProps<{
   portionMultiplier?: number;
   /** Include a Macros group (carbs, fat, protein, fiber, salt) at the top of rail 1 */
   showMacros?: boolean;
+  singleColumn?: boolean;
+  subtitle?: string;
 }>(), {
   showMacros: false,
+  singleColumn: false,
+  subtitle: null,
 });
 
 const fullNutrition = computed(() => {
@@ -198,6 +189,14 @@ const macroRows = computed(() => {
   const s = scaled.value;
   return [
     {
+      key: 'kcal',
+      label: 'Calories',
+      unit: 'kcal',
+      value: s.kcal,
+      ref: 2000,
+      barClass: 'bg-primary-200',
+    },
+    {
       key: 'carbohydrates',
       label: 'Carbs',
       unit: 'g',
@@ -258,7 +257,7 @@ type Section = {
 
 const macroSection = computed<Section>(() => ({
   title: 'Macros',
-  subtitle: 'per serving',
+  subtitle: props.subtitle ?? 'per serving',
   accentClass: 'bg-slate-500',
   barClass: 'bg-slate-200',
   kind: 'macro',
@@ -318,5 +317,9 @@ const rail1 = computed<Section[]>(() => {
 const rail2 = computed<Section[]>(() => {
   if (props.showMacros) return [mineralSection.value, aminoSection.value, protectiveSection.value];
   return [mineralSection.value, aminoSection.value];
+});
+
+const fullColumn = computed<Section[]>(() => {
+  return [macroSection.value, vitaminSection.value, mineralSection.value, fattyAcidSection.value, protectiveSection.value, aminoSection.value,];
 });
 </script>

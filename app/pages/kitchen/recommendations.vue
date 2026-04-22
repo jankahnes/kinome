@@ -20,6 +20,44 @@ const auth = useAuthStore();
 const results = ref<RecommendationRow[]>([]);
 const isLoading = ref(true);
 
+useHead({
+  title: 'Personalized Recipe Recommendations | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Discover recipes ranked for your tastes, saved meals, diet goals, and cooking habits with nutrition-aware recommendations from Kinome.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Personalized Recipe Recommendations | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Discover recipes ranked for your tastes, saved meals, diet goals, and cooking habits with nutrition-aware recommendations from Kinome.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/kitchen/recommendations',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/kitchen/recommendations',
+    },
+  ],
+});
+
 async function load() {
   if (!auth.user?.id) return;
   isLoading.value = true;

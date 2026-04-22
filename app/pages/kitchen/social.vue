@@ -24,6 +24,44 @@ const sentinelElement = ref<HTMLElement | null>(null);
 
 const results = ref<RecipeOverview[]>([]);
 
+useHead({
+  title: 'Trending Social Recipes | Kinome',
+  meta: [
+    {
+      key: 'description',
+      name: 'description',
+      content: 'Explore recipes imported from TikTok, Instagram, YouTube, and other social videos, with nutrition analysis and health scores.',
+    },
+    {
+      key: 'og:title',
+      property: 'og:title',
+      content: 'Trending Social Recipes | Kinome',
+    },
+    {
+      key: 'og:description',
+      property: 'og:description',
+      content: 'Explore recipes imported from TikTok, Instagram, YouTube, and other social videos, with nutrition analysis and health scores.',
+    },
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'website',
+    },
+    {
+      key: 'og:url',
+      property: 'og:url',
+      content: 'https://kinome.app/kitchen/social',
+    },
+  ],
+  link: [
+    {
+      key: 'canonical',
+      rel: 'canonical',
+      href: 'https://kinome.app/kitchen/social',
+    },
+  ],
+});
+
 async function loadMoreRecipes() {
   if (isLoading.value || !hasMoreRecipes.value) return;
   isLoading.value = true;

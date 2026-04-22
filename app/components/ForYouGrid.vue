@@ -32,7 +32,7 @@
 
   <!-- Empty -->
   <div v-else class="text-gray-400 text-lg">
-    No recommendations yet — save some recipes to get started.
+    No recommendations yet - save some recipes to get started.
   </div>
 </template>
 

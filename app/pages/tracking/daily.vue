@@ -32,8 +32,7 @@
               group-name-placeholder="Meal name" :show-kcal="true">
               <template #header-actions="{ group }">
                 <button v-if="group.editableIngredients?.some((ingredient) => ingredient.rawText?.trim())" type="button"
-                  class="p-1.5"
-                  :title="savedMealActionState[groupKey(group)] === 'saved' ? 'Meal saved' : 'Save meal'"
+                  class="p-1.5" :title="savedMealActionState[groupKey(group)] === 'saved' ? 'Meal saved' : 'Save meal'"
                   @click.stop="saveMealAsTemplate(group)">
                   <IconCheck v-if="savedMealActionState[groupKey(group)] === 'saved'" class="w-5 text-emerald-600" />
                   <IconBookmark v-else class="w-5" />
@@ -45,7 +44,7 @@
 
         <div class="flex-1 flex flex-col gap-6 2xl:min-w-140">
           <NutritionOverviewCard mode="tracking" :nutrition="computedDailyNutrition"
-            :tracking-goals="userTrackingGoals?.targets" @view-overall-report="showOverallReportPanel = true" />
+            :tracking-goals="userTrackingGoals?.targets" @view-overall-report="showNutritionReportPanel = true" />
           <div class="flex flex-col">
             <div class="flex justify-between items-center mb-3 mx-2">
               <h3 class="text-4xl font-headers tracking-tighter">Nutrition Quality</h3>
@@ -57,7 +56,7 @@
             <NutritionQualityCards mode="full" :cards="qualityItems" :gut-health="gutHealth" :fat-profile="fatProfile"
               :fat-profile-readable="fatProfileReadable"
               :micronutrients="computedDailyNutrition?.report?.details?.micronutrients" :kcal-progress="kcalProgress"
-              @view-overall-report="showOverallReportPanel = true" />
+              @view-overall-report="showOverallReportPanel = true" class="main-card-glass" />
           </div>
         </div>
       </div>
@@ -82,8 +81,16 @@
         </button>
       </div>
 
-      <BlocksResponsiveInfo v-model="showOverallReportPanel" sidePanelClass="w-96">
-        <PagesReport id="tracking-day" :is-food="false" :computedRecipe="computedDailyNutrition as any" :showTitle="true" />
+      <BlocksResponsiveInfo v-model="showOverallReportPanel" sidePanelClass="w-120">
+        <PagesReport id="tracking-day" :is-food="false" :computedRecipe="computedDailyNutrition as any"
+          :showTitle="true" class="m-4" />
+      </BlocksResponsiveInfo>
+
+      <BlocksResponsiveInfo v-model="showNutritionReportPanel" sidePanelClass="w-120">
+        <div class="m-4">
+          <h2 class="text-3xl font-headers tracking-tight mb-8">Full Nutrition</h2>
+          <FoodFullNutritionFacts :recipe="computedDailyNutrition" class="mt-10" single-column show-macros />
+        </div>
       </BlocksResponsiveInfo>
 
       <BlocksResponsiveModal v-model="showRecipeSearchModal">
@@ -109,9 +116,6 @@
 </template>
 
 <script setup lang="ts">
-import type { TrackedMeal } from '~/types/types';
-import { parseLogicalDate } from '~/utils/format/logicalDate';
-
 const route = useRoute();
 const supabase = useSupabaseClient<Database>();
 const auth = useAuthStore();
@@ -127,6 +131,9 @@ const mounted = ref(false);
 
 const computedDailyNutrition = ref<InsertableRecipe | null>(null);
 const showRecipeSearchModal = ref(false);
+const showNutritionReportPanel = ref(false);
+const showOverallReportPanel = ref(false);
+
 
 const recipeSearchQuery = ref('');
 const recipeSearchResults = ref<RecipeOverview[]>([]);
@@ -261,7 +268,6 @@ const qualityItems = computed(() =>
   }),
 );
 
-const showOverallReportPanel = ref(false);
 
 const kcalProgress = computed(() => {
   const goal = userTrackingGoals.value?.targets?.kcal ?? 2000;

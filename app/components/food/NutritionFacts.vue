@@ -40,7 +40,7 @@ const macroRows = computed(() => {
   return [
     {
       key: 'kcal',
-      label: 'Kcal',
+      label: 'Calories',
       unit: 'kcal',
       value: s.kcal,
       ref: 2000,

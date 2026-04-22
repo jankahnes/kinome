@@ -5,25 +5,37 @@ export const useAuthStore = defineStore('auth', () => {
   const authListenerSet = ref(false);
   const userFetched = ref(false);
   const profileFetched = ref(false);
+  const suppressAnonymousAuth = ref(false);
   const supabase = useSupabaseClient<Database>();
   const shoppingList = ref<ShoppingListItem[]>([]);
   const shoppingListOpen = ref(false);
   const cookStreak = ref(0);
-  const lastSyncTimestamp = ref(0);
-  const SYNC_DEBOUNCE_MS = 2000;
 
   async function fetchProfile() {
-    if (!user.value || !user.value.id) return;
-    const profile = await getUser(supabase, user.value.id);
-    if (profile) {
-      Object.assign(user.value, profile);
-      // Load shopping list from profile
-      if (profile.shopping_list) {
-        shoppingList.value = profile.shopping_list as ShoppingListItem[];
+    const userId = user.value?.id;
+    if (!userId) {
+      profileFetched.value = true;
+      return;
+    }
+
+    profileFetched.value = false;
+    try {
+      const profile = await getUser(supabase, userId);
+      if (profile && user.value?.id === userId) {
+        Object.assign(user.value, profile);
+        // Load shopping list from profile
+        if (profile.shopping_list) {
+          shoppingList.value = profile.shopping_list as ShoppingListItem[];
+        }
+        registerDailyVisit();
+      }
+    } catch (error) {
+      console.error('fetchProfile failed', error);
+    } finally {
+      if (!user.value || user.value.id === userId) {
+        profileFetched.value = true;
       }
     }
-    profileFetched.value = true;
-    registerDailyVisit();
   }
 
   async function registerDailyVisit() {
@@ -45,105 +57,159 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function fetchUser() {
-    if (userFetched.value) {
-      return;
+  async function signInAnonymously() {
+    if (suppressAnonymousAuth.value) return;
+    const { data: anonData, error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      console.error('Failed to sign in anonymously:', error);
     }
+    if (anonData.user) {
+      user.value = anonData.user;
+      await fetchProfile();
+    }
+  }
 
+  async function fetchUser() {
+    if (userFetched.value) return;
+    console.log('fetchUser');
     const { data } = await supabase.auth.getUser();
 
     if (data.user) {
-      user.value = data.user;
+      const shouldFetchProfile =
+        user.value?.id !== data.user.id || !profileFetched.value || !user.value?.username;
+
+      if (user.value?.id === data.user.id && user.value) {
+        Object.assign(user.value, data.user);
+      } else {
+        user.value = data.user;
+      }
+      console.log('fetchUser: user', user.value);
+      if (shouldFetchProfile) {
+        await fetchProfile();
+      }
     } else {
-      const { data: anonData, error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        console.error('Failed to sign in anonymously:', error);
-      }
-      if (anonData.user) {
-        user.value = anonData.user;
-      }
+      console.log('fetchUser: signInAnonymously');
+      await signInAnonymously();
     }
 
     userFetched.value = true;
-  }
-
-  function listenToProfileChanges() {
-    if (!user.value?.id) return;
-
-    supabase
-      .channel('profile-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.value.id}`,
-        },
-        (payload) => {
-          // Ignore updates shortly after we synced (likely our own echo)
-          const timeSinceSync = Date.now() - lastSyncTimestamp.value;
-          if (timeSinceSync < SYNC_DEBOUNCE_MS) {
-            return; // Skip this update
-          }
-
-          // Apply external changes
-          Object.assign(user.value, payload.new);
-          if (payload.new.shopping_list) {
-            shoppingList.value = payload.new.shopping_list;
-          }
-        },
-      )
-      .subscribe();
   }
 
   function listenToAuthChanges() {
     if (authListenerSet.value) return;
     supabase.auth.onAuthStateChange(async (_event, session) => {
       const newUser = session?.user ?? null;
-      if (user.value?.id !== newUser?.id) {
-        if (newUser) {
-          user.value = newUser;
-          fetchProfile();
-          listenToProfileChanges();
+      const shouldResolveProfile =
+        !!newUser &&
+        (user.value?.id !== newUser.id || !profileFetched.value || !user.value?.username);
+
+      if (newUser) {
+        if (user.value?.id === newUser.id && user.value) {
+          Object.assign(user.value, newUser);
         } else {
-          const { data: anonData, error } =
-            await supabase.auth.signInAnonymously();
-          if (error) {
-            console.error('Failed to sign in anonymously:', error);
-          }
-          if (anonData.user) {
-            user.value = anonData.user;
-            fetchProfile();
-            listenToProfileChanges();
-          }
+          user.value = newUser;
         }
+        console.log('listenToAuthChanges: user', user.value);
+        if (shouldResolveProfile) {
+          await fetchProfile();
+        }
+      } else if (user.value?.id && !suppressAnonymousAuth.value) {
+        await signInAnonymously();
+        console.log('listenToAuthChanges: signInAnonymously');
+      } else if (!newUser && suppressAnonymousAuth.value) {
+        user.value = null;
+        profileFetched.value = true;
       }
     });
 
     authListenerSet.value = true;
   }
 
-  async function signIn(email: string, password: string) {
+  async function resolveEmail(identifier: string) {
+    const trimmedIdentifier = identifier.trim();
+    if (trimmedIdentifier.includes('@')) return trimmedIdentifier;
+
+    const lookup = await $fetch<{ emailForUsername: string | null }>(
+      '/api/auth/lookup',
+      {
+        method: 'POST',
+        body: { username: trimmedIdentifier },
+      },
+    );
+
+    if (!lookup.emailForUsername) {
+      throw new Error('No account found for that username');
+    }
+
+    return lookup.emailForUsername;
+  }
+
+  async function signIn(identifier: string, password: string) {
+    const email = await resolveEmail(identifier);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (data?.user) user.value = data.user;
+    if (data?.user) {
+      user.value = data.user;
+      await fetchProfile();
+    }
     return { data, error };
   }
 
   async function signUp(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+    suppressAnonymousAuth.value = true;
+
+    try {
+      if (user.value?.is_anonymous) {
+        await supabase.auth.signOut();
+        user.value = null;
+        profileFetched.value = true;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (data?.user) {
+        user.value = data.user;
+        profileFetched.value = false;
+      }
+
+      return { data, error };
+    } finally {
+      suppressAnonymousAuth.value = false;
+      if (!user.value) {
+        await signInAnonymously();
+      }
+    }
+  }
+
+  async function signInWithGoogle(redirectTo = '/') {
+    const origin = import.meta.client ? window.location.origin : '';
+    const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: callbackUrl,
+      },
     });
-    if (data?.user) user.value = data.user;
     return { data, error };
   }
 
   async function signOut() {
+    suppressAnonymousAuth.value = true;
     await supabase.auth.signOut();
+
+    user.value = null;
+    shoppingList.value = [];
+    shoppingListOpen.value = false;
+    cookStreak.value = 0;
+    profileFetched.value = false;
+
+    suppressAnonymousAuth.value = false;
+    await signInAnonymously();
   }
 
   function isUser() {
@@ -152,7 +218,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function syncShoppingList() {
     if (!user.value?.id) return;
-    lastSyncTimestamp.value = Date.now();
     const { error } = await supabase
       .from('profiles')
       .update({ shopping_list: shoppingList.value })
@@ -246,6 +311,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUser,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     listenToAuthChanges,
     isUser,
