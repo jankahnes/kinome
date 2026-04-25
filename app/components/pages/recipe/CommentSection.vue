@@ -40,13 +40,13 @@
 
           <!-- Bottom row: photo button + submit -->
           <div class="flex gap-2 w-full items-center justify-between">
-            <button class="button px-2 py-1 flex gap-1.5 items-center text-gray-500 outline-1 outline-gray-300 text-xs"
+            <button class="main-button animated-button bg-gray-100/70! px-2 py-1 flex gap-1.5 items-center text-gray-600 outline-1 outline-gray-200 text-xs rounded-xl!"
               @click="triggerPhotoInput" :disabled="photoUploading">
               <IconLoader class="w-3 animate-spin" v-if="photoUploading" />
               <IconCamera class="w-3" v-else />
               <span>{{ photoUploading ? 'Uploading…' : 'Photo' }}</span>
             </button>
-            <button class="main-button animated-button bg-primary/8-700 px-3 py-1" @click="submitComment"
+            <button class="main-button animated-button bg-primary! text-white font-headers italic px-3 py-1 rounded-xl! font-medium" @click="submitComment"
               :disabled="photoUploading">
               Post
             </button>

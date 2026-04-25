@@ -1,18 +1,20 @@
 <template>
   <div>
     <div class="flex flex-col items-center lg:ml-1 mb-20" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
-      <NuxtImg class="w-full h-40 sm:h-64 object-cover  object-top opacity-90"
+      <NuxtImg class="w-full h-50 sm:h-64 object-cover  object-top opacity-90"
         :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.png" alt="Light wooden background" />
       <NuxtImg v-if="recipeStore.recipe?.picture"
-        class="-mt-36 h-50 sm:h-82 sm:-mt-60 shadow-[#00000038] filter-[drop-shadow(10px_10px_20px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
+        class="-mt-47 h-44 sm:h-82 sm:-mt-60 shadow-[#00000038] filter-[drop-shadow(10px_10px_20px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
         :src="recipeStore.recipe?.picture" :alt="recipeStore.recipe?.title ?? 'Recipe picture'" />
       <!-- Central overview -->
-      <div class="max-w-[850px] flex flex-col items-center text-center mx-2 lg:mx-8 mt-2"
+      <div
+        class="max-w-[850px] flex flex-col items-start md:items-center text-left md:text-center mx-5 lg:mx-8 mt-8 sm:mt-2"
         :class="{ 'mt-8!': !recipeStore.recipe?.picture }">
-        <h1 class="leading-none text-4xl xl:text-6xl font-headers tracking-tight text-balance">
+
+        <h1 class="leading-none text-3xl xl:text-6xl font-headers tracking-tight text-balance">
           {{ recipeStore.recipe?.title }}
         </h1>
-        <p class="text-gray-600 mt-2 hidden xl:block">
+        <p class="text-gray-600 mt-1 hidden xl:block">
           {{ recipeStore.recipe?.description }}
         </p>
         <p class="text-gray-600 mt-2 leading-snug block xl:hidden" v-if="mobileDescriptionExpanded"
@@ -21,10 +23,10 @@
         </p>
         <p class="text-gray-600 mt-2 leading-snug block xl:hidden" v-else @click="mobileDescriptionExpanded = true">
           {{ mobileDescription }}...
-          <span class="text-gray-600 text-sm cursor-pointer font-bold">Show more
+          <span class="text-xs text-gray-400 cursor-pointer">Show more
           </span>
         </p>
-        <p class="text-sm text-gray-400 mt-2 text-balance" v-if="originDisplay">
+        <p class="text-sm text-gray-400 mt-1 text-balance" v-if="originDisplay">
           <span v-if="originDisplay.type === 'traditional'" class="inline-flex items-center gap-1.5 align-middle">
             <span class="rounded-sm overflow-hidden flex items-center" v-for="flag in originDisplay.flags" :key="flag">
               <img :src="`/flags/${flag}.svg`" :alt="flag" class="h-4" />
@@ -57,17 +59,17 @@
           </span>
         </p>
 
-        <p class="flex gap-2 mt-4">
+        <p class="flex gap-2 mt-2">
           <button
-            class="main-button animated-button bg-primary! text-white flex-1 flex justify-center items-center gap-2 py-0.5 font-semibold px-4"
+            class="main-button animated-button bg-primary! text-white font-headers text-lg flex-1 flex justify-center items-center gap-2 px-4 italic"
             @click="cookModeOpen = true">
-            <IconRocket class="w-6" :size="24" />
+            <IconRocket class="w-5" :size="24" />
             Start Cooking
           </button>
-          <button class="main-button animated-button flex justify-center items-center gap-1 px-2"
+          <button class="main-button animated-button flex justify-center items-center px-2"
             v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'" @click="scrollToWatchSection()">
-            <IconChevronDown class="h-5" />
-            <span class="leading-none font-semibold">Video</span>
+            <IconChevronDown class="h-4" />
+            <span class="leading-none">Video</span>
           </button>
           <button v-if="!trackingAdded" class="flex justify-center items-center gap-2 p-1 text-slate-600"
             :class="{ 'opacity-60 cursor-not-allowed': trackingLoading }" :disabled="trackingLoading"
@@ -94,34 +96,71 @@
           </button>
         </p>
 
+        <div class="flex items-start gap-6 sm:gap-7 flex-wrap border-t border-gray-200/70 pt-4 sm:pt-3 mt-4 sm:mt-3">
+          <div class="flex flex-col items-start gap-0.5">
+            <p class="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-gray-500">
+              Health Grade
+            </p>
+            <div>
+              <span class="text-xl sm:text-[22px] font-medium font-headers leading-none"
+                :class="gradeTextColors[getGrade(liveReport?.overall?.hidx, 'ovr')] ?? ''"> {{
+                  getGrade(liveReport?.overall?.hidx, 'ovr') }} </span>
+              <span class="text-[11px] text-gray-500 font-headers italic">{{ " " + healthLabel }}</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-start gap-0.5"
+            v-if="recipeStore.recipe?.rating && recipeStore.recipe?.rating >= 4">
+            <p class="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-gray-500">
+              Rating
+            </p>
+            <div class="flex items-center gap-1">
+              <span class="text-xl sm:text-[22px] font-medium font-headers leading-none">{{
+                recipeStore.recipe?.rating?.toFixed(1) }}</span>
+              <IconStar class="w-3 h-3 mt-[5px]" fill="currentColor" />
+            </div>
+          </div>
+          <div class="flex flex-col items-start gap-0.5">
+            <p class="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-gray-500">
+              Time
+            </p>
+            <div class="flex items-end gap-1.5">
+              <span v-for="item in getTotalTime(recipeStore.recipe?.total_time_mins,
+                recipeStore.recipe?.effort)" :key="item.label">
+                <span class="text-xl sm:text-[22px] font-medium font-headers leading-none">{{ item.value }}</span>
+                <span class="text-[11px] text-gray-500 font-headers italic">{{ " " + item.label }}</span>
+              </span>
+            </div>
+          </div>
+          <div class="flex flex-col items-start gap-0.5" v-if="recipeStore.recipe?.price">
+            <p class="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-gray-500">
+              Price
+            </p>
+            <div class="">
+              <span class="text-xl sm:text-[22px] font-medium font-headers leading-none">{{ formatMoney(0.7 *
+                (recipeStore.recipe?.price ?? 0)).replace('€', '') }}</span><span
+                class="text-[11px] text-gray-500 font-headers italic">{{ " €"
+                }}</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-start gap-0.5" v-if="recipeStore.recipe?.kcal">
+            <p class="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-gray-500">
+              Calories
+            </p>
+            <div class="">
+              <span class="text-xl sm:text-[22px] font-medium font-headers leading-none">{{ recipeStore.recipe?.kcal
+                }}</span><span class="text-[11px] text-gray-500 font-headers italic"> kcal
+              </span>
+            </div>
+          </div>
 
-        <div v-if="top7Tags.length > 0"
-          class="flex gap-1.5 flex-wrap overflow-hidden py-0.5 text-sm mt-2 justify-center">
-          <div v-if="recipeStore.recipe?.rating && recipeStore.recipe?.rating >= 4"
-            class="flex items-center justify-center text-nowrap bg-primary/6 px-2 py-1 main-card-rounded leading-none gap-1">
-            <FormsRatingField :model-value="recipeStore.recipe?.rating" :star-width="16" :star-height="16" :spacing="-1"
-              :select="false" :uniqueId="`card-highlight-${recipeStore.recipe?.id}`" class="" />
-            <span class="text-sm leading-none font-bold">{{ recipeStore.recipe?.rating?.toFixed(1) }}</span>
-          </div>
-          <div
-            class="flex items-center justify-center text-nowrap bg-primary/6 px-2 py-1 main-card-rounded leading-none">
-            <IconClock class="h-4" />
-            <span class="text-sm leading-none">{{ getTotalTime(recipeStore.recipe?.total_time_mins,
-              recipeStore.recipe?.effort) }}</span>
-          </div>
-          <div
-            class="flex items-center justify-center text-nowrap bg-primary/6 px-2 py-1 main-card-rounded gap-2 leading-none"
-            :class="specialTags.includes(tag?.id ?? 0) || tag?.id === 4
-              ? 'bg-primary/8!'
-              : ''
-              " v-for="(tag, index) in top7Tags" :key="index">
-            <img :src="`/${tag?.name}.webp`" :alt="tag?.name" class="h-4" v-if="specialTags.includes(tag?.id ?? 0)" />
-            <IconDollarSign class="h-4 -mx-2" v-else-if="tag?.id === 4" />
-            {{ tag?.name }}
+        </div>
+        <div class="flex items-center gap-1 mt-2 opacity-94">
+          <div v-for="tag in top3Tags" :key="tag.id" class="main-card px-2 py-1 main-card-rounded leading-none text-xs">
+            {{ tag.name }}
           </div>
         </div>
       </div>
-      <div class="max-w-[1200px] flex-col xl:flex-row flex gap-10 md:mt-14 mx-2 lg:mx-8 xl:items-start">
+      <div class="max-w-[1200px] flex-col xl:flex-row flex gap-10 -mt-4 md:mt-14 mx-2 lg:mx-8 xl:items-start">
         <div class="contents xl:flex flex-col gap-8 flex-3">
           <PagesRecipeCookSteps :fullInstructions="recipeStore.recipe?.full_instructions ??
             recipeStore.recipe?.instructions?.map((i) => ({
@@ -135,13 +174,13 @@
             <div class="w-0 h-0" ref="mobileTabTarget"></div>
             <div
               class="flex gap-4 justify-between sticky top-0 bg-[#fffefb] md:bg-main p-4 rounded-b-4xl z-10 select-none cursor-pointer">
-              <h2 class="text-3xl 2xs:text-4xl font-headers tracking-tight flex-1" @click="
+              <h2 class="text-3xl font-headers tracking-tight flex-1" @click="
                 mobileTab = 'ingredients';
               scrollIntoView(mobileTabTarget);
               " :class="mobileTab === 'ingredients' ? '' : 'text-gray-300'">
                 Ingredients
               </h2>
-              <h2 class="text-3xl 2xs:text-4xl font-headers tracking-tight" @click="
+              <h2 class="text-3xl font-headers tracking-tight" @click="
                 mobileTab = 'method';
               scrollIntoView(mobileTabTarget);
               " :class="mobileTab === 'method' ? '' : 'text-gray-300'">
@@ -168,56 +207,55 @@
               @quick-edit-change="onQuickEditChange" @amounts-changed="onAmountsChanged"
               @tweak-drag-end="onTweakDragEnd" />
           </div>
+
           <div class="space-y-2 order-3 xl:order-0" v-if="recipeStore.recipe?.kcal">
-            <div class="flex items-center gap-2 gap-y-1 justify-between flex-wrap">
-              <h2 class="text-4xl font-headers tracking-tight leading-none ml-2">Nutrition</h2>
-              <div class="flex gap-2">
-                <button @click="contextMode = 'nutrition'; contextModalOpen = true"
-                  class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
-                  <span class="">Full Nutrition</span>
-                  <IconChevronRight class="w-5" />
-                </button>
-                <button @click="contextMode = 'health'; contextModalOpen = true"
-                  class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
-                  <span class="">Full Analysis</span>
-                  <IconChevronRight class="w-5" />
-                </button>
+            <div class="flex gap-8 justify-between items-end mx-2">
+              <div>
+                <h2 class="font-headers text-3xl leading-none tracking-tight">
+                  Nutrition
+                </h2>
+                <p class="mt-1 text-xs text-gray-500">
+                  Per Serving.
+                </p>
               </div>
+              <button
+                class="shrink-0 flex items-center gap-1 rounded-full bg-dark px-4 py-1.5 text-xs text-white transition"
+                @click="contextMode = 'nutrition'; contextModalOpen = true">
+                <span class="">Full nutrition label</span>
+                <IconChevronRight class="h-4 w-4" />
+              </button>
             </div>
-            <div class="main-card-glass">
-              <div class="flex flex-col xs:flex-row gap-3">
-                <NutritionMacroCard :kcal="liveMacros.kcal" :carbohydrates="liveMacros.carbohydrates"
-                  :protein="liveMacros.protein" :fat="liveMacros.fat"
-                  class="main-card main-card-padding main-card-rounded flex-1" />
-                <div v-if="liveHidx && liveHidx >= 41"
-                  class="main-card main-card-padding main-card-rounded items-center justify-center flex-col gap-2 hidden xs:flex">
-                  <GradeContainer :score="liveHidx" :type="'ovr'" class="text-4xl" />
-                  <span class="text-sm text-slate-600">Health Grade</span>
-                </div>
-                <div v-if="liveHidx && liveHidx >= 41" class="flex xs:hidden justify-between main-card items-center ">
-                  <span class="font-semibold text-lg mx-5">Health Grade</span>
-                  <GradeContainer :score="liveHidx" :type="'ovr'" class="text-2xl" />
-                </div>
-              </div>
-              <div class="relative mt-3" :class="{ 'overflow-hidden main-card-rounded': quickEditRecomputing }">
-                <NutritionQualityCards :cards="getDailyQualityCards(liveReport, {
-                  totalFat: liveMacros.fat,
-                  protectiveScore: liveProtectiveScore,
-                })" :gut-health="liveReport?.details?.gutHealth" :fat-profile="liveReport?.details?.fatProfile"
-                  :fat-profile-readable="liveReport?.humanReadable?.fatProfile ?? []"
-                  :micronutrients="liveReport?.details?.micronutrients" :kcal-progress="liveMacros.kcal / 2000"
-                  mode="full" />
-                <div v-if="quickEditRecomputing"
-                  class="absolute inset-0 -translate-x-full animate-shimmer bg-linear-to-r from-transparent via-white/70 to-transparent pointer-events-none" />
-              </div>
-            </div>
+            <NutritionLabel :nutrition-source="liveMacros" :portion-multiplier="1" />
           </div>
-          <div class="space-y-2 order-4 xl:order-0" v-if="auth.isAdmin()">
-            <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2">Publish</h2>
+          <div class="space-y-2 order-3 xl:order-0" v-if="recipeStore.recipe?.kcal">
+            <div class="flex gap-8 justify-between items-end mx-2">
+              <div>
+                <h2 class="font-headers text-3xl leading-none tracking-tight">
+                  Quality Profile
+                </h2>
+                <p class="mt-1 text-xs text-gray-500">
+                  Scored against dietary guidelines. <br class="sm:hidden" />Tap rows for a deeper breakdown.
+                </p>
+              </div>
+              <button
+                class="shrink-0 flex items-center gap-1 rounded-full bg-dark px-4 py-1.5 text-xs text-white transition"
+                @click="contextMode = 'health'; contextModalOpen = true">
+                <span class="">Full analysis</span>
+                <IconChevronRight class="h-4 w-4" />
+              </button>
+            </div>
+            <NutritionQualityList :quality-cards="getDailyQualityCards(liveReport, {
+              totalFat: liveMacros.fat,
+              protectiveScore: liveProtectiveScore,
+            })" :food-row="recipeStore.recipe" @open-full-analysis="contextMode = 'health'; contextModalOpen = true" />
+          </div>
+          <div class="space-y-2 order-4 xl:order-0"
+            v-if="auth.isAdmin() || auth.user?.id === recipeStore.recipe?.user_id">
+            <h2 class="text-3xl font-headers tracking-tight ml-2 mb-2">Publish</h2>
             <PagesRecipePublishChecklist :recipe="recipeStore.recipe!" :refresh="async (r, f) => { }" />
           </div>
           <div class="space-y-2 order-5 xl:order-0">
-            <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2">
+            <h2 class="text-3xl font-headers tracking-tight ml-2 mb-2">
               {{
                 recipeStore.recipe?.comments?.length
                   ? 'What others say'
@@ -248,17 +286,18 @@
             </div>
             <div class="space-y-2 order-2 xl:order-0 main-card-rounded" :class="{ 'watch-flash': watchSectionFlashing }"
               v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'">
-              <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2" ref="watchSectionTarget">Watch</h2>
+              <h2 class="text-3xl font-headers tracking-tight ml-2 mb-2" ref="watchSectionTarget">Watch</h2>
               <div class="flex main-card main-card-padding main-card-rounded sm:gap-6">
                 <div class="flex flex-col flex-1 justify-between ">
                   <div>
-                    <a class="text-sm uppercase text-slate-400 tracking-tight" :href="effectiveSource ?? ''"
+                    <a class="text-xs uppercase text-gray-600 font-mono tracking-widest" :href="effectiveSource ?? ''"
                       target="_blank">
                       Original video
                     </a>
-                    <p class="text-xs text-slate-400 tracking-tight -mt-1">Uploaded {{ uploadDate }}</p>
+                    <p class="text-[10px] text-gray-400 font-mono tracking-widest uppercase -mt-0.5">Uploaded {{
+                      uploadDate }}</p>
                   </div>
-                  <div class="flex flex-col gap-2 items-center p-4 -mx-6 bg-primary/8">
+                  <div class="flex flex-col gap-2 items-center p-4 -mx-4 md:-mx-6 bg-primary/8">
                     <img class="w-20 h-20 object-cover rounded-full opacity-80 shadow-[0_0_10px_#00000020]"
                       src="/neutral-avatar1.webp" alt="Guest avatar" />
                     <div class="flex items-center gap-2 bg-primary-5 px-3 rounded-3xl ">
@@ -311,7 +350,7 @@
               </div>
             </div>
             <div class="space-y-2 order-6 xl:order-0">
-              <h2 class="text-4xl font-headers tracking-tight ml-2 mb-2">
+              <h2 class="text-3xl font-headers tracking-tight ml-2 mb-2">
                 You might also like
               </h2>
               <div class="flex flex-col gap-3 ml-2">
@@ -346,27 +385,27 @@
         <div v-if="tweakPillVisible"
           class="fixed left-1/2 -translate-x-1/2 bottom-[64px] sm:bottom-[24px] z-40 pointer-events-none">
           <div
-            class="flex items-center gap-2 bg-[#fffefb]/85 backdrop-blur-md border border-slate-200/70 shadow-[0_4px_20px_#00000012] rounded-full px-3.5 py-1.5 font-mono text-[11px] tracking-tight text-slate-500">
+            class="flex items-center gap-2 bg-gray-100 backdrop-blur-md border border-primary shadow-[0_4px_20px_#00000012] rounded-full px-3.5 py-1.5 font-mono text-[11px] tracking-tight">
             <span class="flex items-baseline gap-0.5">
               <RollingNumber :number="liveMacros.kcal" />
-              <span class="opacity-60">kcal</span>
+              <span class="opacity-80">kcal</span>
             </span>
             <span class="opacity-30">·</span>
             <span class="flex items-baseline gap-0.5">
-              <RollingNumber :number="liveMacros.protein" /><span class="opacity-60">P</span>
+              <RollingNumber :number="liveMacros.protein" /><span class="opacity-80">P</span>
             </span>
             <span class="opacity-30">·</span>
             <span class="flex items-baseline gap-0.5">
-              <RollingNumber :number="liveMacros.carbohydrates" /><span class="opacity-60">C</span>
+              <RollingNumber :number="liveMacros.carbohydrates" /><span class="opacity-80">C</span>
             </span>
             <span class="opacity-30">·</span>
             <span class="flex items-baseline gap-0.5">
-              <RollingNumber :number="liveMacros.fat" /><span class="opacity-60">F</span>
+              <RollingNumber :number="liveMacros.fat" /><span class="opacity-80">F</span>
             </span>
             <template v-if="liveHidx">
               <span class="opacity-30">·</span>
               <span class="flex items-baseline gap-1">
-                <span class="opacity-60">Health </span>
+                <span class="opacity-80">Health </span>
                 <span :class="gradeTextColors[getGrade(liveHidx, 'ovr')] ?? ''" class="font-semibold">
                   {{ getGrade(liveHidx, 'ovr') }}
                 </span>
@@ -379,7 +418,7 @@
     <div v-else-if="recipeError" class="flex items-center justify-center h-screen">
       <div class="flex flex-col items-center justify-center gap-2">
         <IconAlertCircle class="w-10 h-10 text-red-500" />
-        <h2 class="text-4xl font-bold tracking-tighter">Recipe not found</h2>
+        <h2 class="text-3xl font-bold tracking-tighter">Recipe not found</h2>
         <p class="text-lg text-gray-600">The recipe you are looking for does not exist.</p>
         <NuxtLink to="/" class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
           <span>Go to homepage</span>
@@ -405,7 +444,7 @@ const isMobile = computed(() => width.value < 1280);
 const mobileTab = ref<'method' | 'ingredients'>('ingredients');
 const mobileDescriptionExpanded = ref(false);
 const mobileDescription = computed(() => {
-  return recipeStore.recipe?.description?.slice(0, 150);
+  return recipeStore.recipe?.description?.slice(0, 130);
 });
 
 const mobileTabTarget = ref<HTMLElement | null>(null);
@@ -640,21 +679,17 @@ const getBudgetDescription = (price: number): string => {
 const servingSize = ref(2); // Default to 2 servings
 
 const specialTags = [102, 103, 107, 112];
-const top7Tags = computed(() => {
+const top3Tags = computed(() => {
   if (!recipeStore.recipe?.tags) return [];
   const tags = recipeStore.recipe.tags
     .map((tag) => { return { ...getTagByID(tag) } })
     .filter((tag) => tag?.id !== 112);
   tags?.sort((a, b) => (b?.value ?? 0) - (a?.value ?? 0));
-  const budgetTag = tags.find((tag) => tag?.id === 4);
-  if (budgetTag) {
-    budgetTag.name = getBudgetDescription(recipeStore.recipe?.price ?? 0);
-  }
   //extract special tags: vegan, vegetarian, gluten free, lactose free
   if (tags.some((tag) => tag?.id === 102)) {
     return tags.filter((tag) => tag?.id !== 103).slice(0, 6);
   }
-  return tags.slice(0, 5);
+  return tags.filter((tag) => tag?.id !== 4).slice(0, 4);
 });
 
 const cuisines = ref([
@@ -750,17 +785,6 @@ const originDisplay = computed(() => {
   return null;
 });
 
-const iconStyles = {
-  youtube: 'w-4 h-3 my-1',
-  tiktok: 'w-5 h-5',
-  instagram: 'w-4 h-4 my-0.5',
-};
-const bgStyles = {
-  youtube: 'bg-red-200/90',
-  instagram: 'bg-yellow-100/90',
-  tiktok: 'bg-gray-200/90',
-};
-
 const getCuisineDescription = (collection: string) => {
   if (displayType.value !== 'cuisine') return null;
   const cuisineName = collection.split('-')[1];
@@ -770,12 +794,37 @@ const getCuisineDescription = (collection: string) => {
   return cuisine ?? null;
 };
 
+
+
 // Job polling
 const jobId = ref(Number(route.query.poll as string) || null);
 const { job, isPolling, error, start, stop, restart, fetchJob } = useJobPolling(
   jobId,
   supabase,
 );
+
+
+const healthLabel = computed(() => {
+  const grade = getGrade(liveReport.value?.overall?.hidx, 'ovr')?.[0] ?? '';
+  if (!grade) return '';
+  switch (grade) {
+    case 'S':
+      return ' · Outstanding'
+    case 'A':
+      return ' · Excellent'
+    case 'B':
+      return ' · Healthy'
+    case 'C':
+      return ' · Balanced'
+    case 'D':
+      return ' · Occasional'
+    case 'E':
+      return ' · Indulgent'
+    case 'F':
+      return ' · Indulgent'
+  }
+
+})
 
 const loadingStore = useLoadingStore();
 
@@ -850,7 +899,7 @@ const {
   refresh: refreshRecipe,
 } = await useAsyncData(
   `recipe-details-${id}`,
-  () => getRecipe(supabase, { eq: { id } }),
+  () => getRecipe(supabase, { eq: { id } }, true),
   {
     lazy: import.meta.client,
   },
@@ -1047,7 +1096,7 @@ defineOgImage('Recipe.takumi', {
     if (r.rating && r.rating >= 4) out.push(`Rated ${r.rating.toFixed(1)}/5`)
     const time = getTotalTime(r.total_time_mins, r.effort)
     if (time) out.push(time)
-    for (const t of top7Tags.value.slice(0, 3)) {
+    for (const t of top3Tags.value) {
       if (t?.name) out.push(t.name)
     }
     return out.slice(0, 4)
@@ -1294,20 +1343,6 @@ onUnmounted(() => {
   resizeObserver?.disconnect();
 });
 
-const deleteRecipe = async () => {
-  await $fetch('/api/db/delete-recipe', {
-    method: 'POST',
-    body: {
-      recipeId: id,
-    },
-  });
-  recipeStore.deleteRecipe(id);
-  recipeStore.setRecipe({} as Recipe);
-  router.push('/');
-};
-
-
-
 // Quick-edit (drag amounts) - lazy-hydrated food data + live nutrition
 type FoodMacros = {
   kcal: number; protein: number; fat: number; carbohydrates: number;
@@ -1368,6 +1403,11 @@ const liveMacros = computed(() => {
     carbohydrates: recipe?.carbohydrates ?? 0,
     protein: recipe?.protein ?? 0,
     fat: recipe?.fat ?? 0,
+    saturated_fat: recipe?.saturated_fat ?? 0,
+    salt: recipe?.salt ?? 0,
+    sugar: recipe?.sugar ?? 0,
+    fiber: recipe?.fiber ?? 0,
+    title: '-'
   };
   if (!quickEditActive.value) return fallback;
   const live = liveAbsolute.value;
@@ -1376,7 +1416,7 @@ const liveMacros = computed(() => {
   const size = servingSize.value ?? 1;
   if (size <= 0) return fallback;
 
-  const scale = (key: 'kcal' | 'carbohydrates' | 'protein' | 'fat') => {
+  const scale = (key: 'kcal' | 'carbohydrates' | 'protein' | 'fat' | 'saturated_fat' | 'salt' | 'sugar' | 'fiber') => {
     const recipeValue = Number((recipe as any)?.[key] ?? 0);
     const baselinePerServing = b[key] / size;
     const livePerServing = live.totals[key] / size;
@@ -1390,6 +1430,11 @@ const liveMacros = computed(() => {
     carbohydrates: scale('carbohydrates'),
     protein: scale('protein'),
     fat: scale('fat'),
+    saturated_fat: scale('saturated_fat'),
+    salt: scale('salt'),
+    sugar: scale('sugar'),
+    fiber: scale('fiber'),
+    title: '-'
   };
 });
 

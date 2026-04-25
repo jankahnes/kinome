@@ -1,6 +1,6 @@
 <template>
-  <div class="lg:mx-12 space-y-4 max-w-screen-lg m-4 my-10">
-    <h1 class="text-5xl font-headers">Foods Database</h1>
+  <div class="max-w-3xl m-4 my-10 mx-auto flex flex-col gap-4 items-center">
+    <h1 class="text-5xl font-headers">The Pantry</h1>
     <div class="flex gap-2 w-full">
       <div class="ai-ring main-card-rounded p-px flex items-center flex-1">
         <div class="flex items-center rounded-[31px] px-4 bg-primary-5 flex-1">
@@ -9,15 +9,15 @@
             @keyup.enter="search" @blur="search" class="text-xs focus:outline-none flex-1 px-2 py-[9px]" />
         </div>
       </div>
-      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center flex-shrink-0"
+      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center shrink-0"
         @click="search">
         <IconSearch class="w-5" />
       </button>
-      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center flex-shrink-0"
+      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center shrink-0"
         @click="navigateTo('/foods/new')">
         <IconPlus class="w-5" />
       </button>
-      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center flex-shrink-0"
+      <button class="main-button animated-button bg-primary-5 px-3 flex items-center justify-center shrink-0"
         @click="navigateTo('/foods/scan')">
         <IconFlipHorizontal class="w-5" />
       </button>

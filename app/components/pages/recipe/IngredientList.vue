@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-2" ref="root">
-    <h2 class="text-4xl font-headers tracking-tighter ml-2" v-if="!hideHeader">
+    <h2 class="text-3xl font-headers tracking-tight ml-2" v-if="!hideHeader">
       Ingredients
     </h2>
 
@@ -74,8 +74,8 @@
                 <div v-if="quickEditMode && !isFreeUnit(ingredient)"
                   class="absolute inset-y-0 left-0 bg-primary/5 pointer-events-none transition-all duration-200 ease-out"
                   :style="{ width: fillPct(ingredient) + '%', opacity: draggingIngredientId === ingredient.id ? 1 : 0 }" />
-                <img class="relative h-5 min-w-7 object-contain object-center"
-                  :src="`/foods/${ingredient.visual_category}.webp`" v-if="ingredient.visual_category" />
+                <img class="relative h-4.5 min-w-6 object-contain object-center"
+                  :src="`/foods/${ingredient.visual_category}.webp`" v-if="ingredient.visual_category" :alt="ALTS[`/foods/${ingredient.visual_category}.webp`]" />
                 <span class="relative leading-none">
                   <Transition :name="quickEditMode ? '' : 'fade-slide'" mode="out-in">
                     <span :key="`${servingSize}-${ingredient?.currentUnit}${quickEditMode ? '-edit' : ''}`"
@@ -128,14 +128,14 @@
             (addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75)
           ">
             <div class="flex items-center rounded-xl" v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1">
-              <span class="text-[10px] uppercase font-mono text-gray-400 tracking-wider">
+              <span class="text-[10px] text-gray-400 tracking-widest">
                 🧈 Plus ~{{ getAdded(addedInfo?.addedFat) }}g of
                 fat</span>
             </div>
             <div class="flex items-center rounded-xl" v-if="
               addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
             ">
-              <span class="text-[10px] uppercase font-mono text-gray-400 tracking-wider">
+              <span class="text-[10px] text-gray-400 tracking-widest">
                 🧂 Plus ~{{ getAdded(addedInfo?.addedSalt) }}g of
                 salt</span>
             </div>

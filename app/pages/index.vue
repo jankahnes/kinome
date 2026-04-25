@@ -10,21 +10,17 @@
       </NuxtLink>
     </div>
     <div class="justify-between items-center gap-6 hidden md:flex">
-      <div class="flex gap-2 flex-1">
+      <div class="flex gap-2 flex-1 items-center">
         <div class="ai-ring main-card-rounded p-px flex items-center">
           <div class="flex items-center rounded-[31px] px-4 main-button">
             <IconSearch class="w-4 " />
             <input type="text" :placeholder="'Search recipes, ingredients, techniques...'" v-model="searchQuery"
-              @keyup.enter="handleSearch" @blur="handleSearch"
-              class="text-xs grow focus:outline-none w-80 px-2 py-[9px]" />
+              @keyup.enter="handleSearch" @blur="handleSearch" class="text-xs grow focus:outline-none w-80 px-2 py-2" />
           </div>
         </div>
-        <NuxtLink to="/kitchen/recipes"
-          class="main-button animated-button main-card px-3 py-2.5 shrink-0 text-xs text-gray-600"
-          active-class="bg-primary/80">
+        <NuxtLink to="/kitchen/recipes" class="subnav-pill" active-class="active">
           All Recipes</NuxtLink>
-        <NuxtLink to="/foods" class="main-button animated-button main-card px-3 py-2.5 shrink-0 text-xs text-gray-600"
-          active-class="bg-primary/80">
+        <NuxtLink to="/foods" class="subnav-pill" active-class="active">
           All Foods
         </NuxtLink>
       </div>
@@ -34,14 +30,14 @@
         </NuxtLink>
       </div>
     </div>
-    <div class="items-center gap-2 justify-between hidden md:flex">
+    <div class="items-center gap-2 justify-between flex">
       <div>
         <span class="font-mono text-[10px] text-gray-400 uppercase">TODAY / {{ getTodayString() }}</span>
         <h1 class="text-5xl font-headers">
           Discover<span class="text-primary">.</span>
         </h1>
       </div>
-      <div class="items-center gap-4 hidden sm:flex">
+      <div class="items-center gap-5 hidden sm:flex">
         <div class="flex flex-col items-end">
           <RollingNumber :number="recipeCount" class="text-3xl text-primary leading-none font-headers" />
           <p class="text-[10px] text-gray-400 font-mono uppercase mr-0.5">Recipes</p>
@@ -54,15 +50,14 @@
     </div>
 
     <!-- Categories -->
-    <BlocksCarousel>
-      <div
-        class="flex items-center gap-x-1 pl-1 md:px-3 px-1 py-[3px] text-xs text-gray-600 transition-all duration-300 shrink-0 main-button animated-button rounded-2xl! my-2 mr-2 sm:mr-4"
+    <BlocksCarousel show-progress show-arrows>
+      <div class="flex items-center gap-x-1 px-3 py-0.5 text-gray-700 main-button animated-button my-2 mr-2 sm:mr-3"
         @click="navigateTo('/kitchen/social')">
         <span class="text-lg">🔥</span>
         <span class="text-sm text-nowrap">Trending</span>
       </div>
       <div v-for="category in categories" :key="category.tag"
-        class="flex items-center gap-x-1 pl-1 md:px-3 px-1 py-[3px] text-xs text-gray-600 transition-all duration-300 shrink-0 main-button animated-button rounded-2xl! my-2 mr-2 sm:mr-4"
+        class="flex items-center gap-x-1 px-3 py-0.5 text-gray-700 main-button animated-button my-2 mr-2 sm:mr-3"
         @click="onClickCategory(category.tag)">
         <span class="text-lg">{{ category.icon }}</span>
         <span class="text-sm text-nowrap">{{
@@ -72,35 +67,22 @@
     </BlocksCarousel>
 
     <!-- Recommendations: Mobile -->
-    <div class="2lg:hidden space-y-2" v-if="recipeStore.indexRecipes.length > 0 && false">
-      <BlocksCarousel class="" :flexClass="'!items-stretch'">
-        <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(1)" :key="recipe.id + 'mobile'"
-          :id="'mobile'" :recipe="recipe"
-          class="w-50 min-h-60 text-[20px] sm:w-70 sm:min-h-95 sm:text-[30px] flex-shrink-0 mb-2 mr-4" />
-      </BlocksCarousel>
-      <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
-        :uniqueId="'mobile-0-0'" />
-      <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)" :key="recipe.id + 'mobile'"
-        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
-        class="text-[20px] basis-95 flex-1" />
-    </div>
-
     <div class="flex flex-wrap gap-x-2 gap-y-4 2lg:hidden justify-center">
-      <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(1, 3)" :key="recipe.id + 'mobile'"
+      <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(2, 4)" :key="recipe.id + 'mobile'"
         :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
         class="text-[20px] basis-40 flex-1" />
       <RecipeCardHighlight :key="recipeStore.indexRecipes[0]?.id + 'mobile'" :recipe="recipeStore.indexRecipes[0]!"
-        :id="'mdh-0-0'" :uniqueId="'mdh-0-0'" class="text-[20px] basis-full hidden xs:flex" />
-      <RecipeCardHighlightMobile :key="recipeStore.indexRecipes[0]?.id + 'mobile'"
-        :recipe="recipeStore.indexRecipes[0]!" :id="'mobile-0-0'" :uniqueId="'mobile-0-0'"
-        class="text-[20px] basis-full xs:hidden" />
-      <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(5, 7)" :key="recipe.id + 'mobile'"
-        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
-        class="text-[20px] basis-95 flex-1" />
+        :id="'mdh-0-0'" :uniqueId="'mdh-0-0'" class="basis-full" />
+      <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(4, 8)" :key="recipe.id + 'mobile'"
+        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + (index + 3) + '-' + recipe.id"
+        class="text-[20px] basis-40 flex-1" />
+      <RecipeCardHighlight :key="recipeStore.indexRecipes[1]?.id + 'mobile'" :recipe="recipeStore.indexRecipes[1]!"
+        :id="'mdh-0-1'" :uniqueId="'mdh-0-1'" class="basis-full" />
+
     </div>
 
     <!-- Recommendations: Desktop -->
-    <div class="hidden 2lg:block transition-all duration-150" :class="rowMaxHeight ? 'opacity-100 translate-y-0' : '-translate-x-2'
+    <div class="hidden 2lg:block transition-all duration-150" :class="rowMaxHeight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-x-2'
       ">
       <div class="flex gap-8 py-1 overflow-hidden" :class="rowMaxHeight ? 'flex-wrap' : 'flex-nowrap'" :style="{
         maxHeight: rowMaxHeight ? rowMaxHeight + 'px' : undefined,

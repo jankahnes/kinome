@@ -112,16 +112,7 @@
             </div>
 
             <!-- Macro + Grade -->
-            <div class="flex flex-col sm:flex-row gap-3 mt-6">
-                <NutritionMacroCard class="main-card main-card-padding main-card-rounded sm:basis-1/2"
-                    :kcal="macros.kcal" :carbohydrates="macros.carbohydrates" :protein="macros.protein"
-                    :fat="macros.fat" />
-                <div v-if="hidx && hidx >= 30"
-                    class="main-card main-card-padding main-card-rounded flex-row sm:flex-col items-center justify-center gap-2 sm:min-w-[190px] flex">
-                    <GradeContainer :score="hidx" type="ovr" class="text-4xl sm:text-5xl" />
-                    <span class="text-sm text-slate-600">Health Grade</span>
-                </div>
-            </div>
+            <NutritionLabel :nutrition-source="computedRecipe" :portion-multiplier="1" class="mt-4" />
 
             <!-- Written summary -->
             <div v-if="macroSummary"
@@ -134,13 +125,11 @@
             <!-- Quality cards -->
             <div v-if="qualityCards.length" class="space-y-3 mt-10">
                 <div class="flex items-end justify-between flex-wrap gap-2 px-1">
-                    <h3 class="text-2xl md:text-3xl font-headers tracking-tight leading-none">Quality highlights</h3>
+                    <h3 class="text-2xl md:text-3xl font-headers tracking-tight leading-none">Nutrition Quality</h3>
                     <div class="font-mono text-[10px] uppercase text-gray-400 tracking-wider">Tap cards for detail</div>
                 </div>
-                <NutritionQualityCards :cards="qualityCards" :gut-health="report?.details?.gutHealth"
-                    :fat-profile="report?.details?.fatProfile"
-                    :fat-profile-readable="report?.humanReadable?.fatProfile ?? []"
-                    :micronutrients="report?.details?.micronutrients" :kcal-progress="macros.kcal / 2000" mode="full" class="main-card-glass" />
+                <NutritionQualityList :quality-cards="qualityCards"
+                    :food-row="(computedRecipe as any)" />
             </div>
 
             <!-- Signup CTA -->
@@ -248,7 +237,7 @@ definePageMeta({
     layout: 'default',
 });
 
-const SEO_TITLE = 'Free Recipe Nutrition Analyzer · Instant Health Score, Macros & Micros';
+const SEO_TITLE = 'Free Recipe Nutrition Calculator · Instant Health Score, Macros & Micros';
 const SEO_DESCRIPTION =
     'Paste any recipe and get a free instant nutrition breakdown - calories, macros, and detailed quality markers. Powered by USDA food data. No signup required.';
 const SEO_URL = 'https://kinome.app/recipe-analyzer';
@@ -271,12 +260,12 @@ useHead({
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'Kinome' },
         { property: 'og:url', content: SEO_URL },
-        { property: 'og:title', content: 'Free Recipe Nutrition Analyzer' },
+        { property: 'og:title', content: 'Free Recipe Nutrition Calculator' },
         { property: 'og:description', content: SEO_DESCRIPTION },
         { property: 'og:image', content: SEO_IMAGE },
         { property: 'og:image:width', content: '1200' },
         { property: 'og:image:height', content: '630' },
-        { property: 'og:image:alt', content: 'Kinome Recipe Analyzer - instant nutrition breakdown' },
+        { property: 'og:image:alt', content: 'Kinome Recipe Nutrition Calculator - instant nutrition breakdown' },
 
         // Twitter / X
         { name: 'twitter:card', content: 'summary_large_image' },

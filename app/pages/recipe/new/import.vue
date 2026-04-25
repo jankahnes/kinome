@@ -22,7 +22,7 @@
       <button
         @click="submit"
         :disabled="!link"
-        class="px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center text-white bg-primary rounded-2xl font-bold"
+        class="px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center text-white bg-primary font-headers italic rounded-2xl"
       >
         Import
       </button>

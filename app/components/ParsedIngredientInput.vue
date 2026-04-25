@@ -18,7 +18,7 @@
           <div class="flex items-center gap-3">
             <img v-if="modelValue.foodData.visual_category"
               :src="'/foods/' + modelValue.foodData.visual_category + '.webp'"
-              class="w-12 h-12 object-contain shrink-0" />
+              class="w-12 h-12 object-contain shrink-0" :alt="ALTS[`/foods/${modelValue.foodData.visual_category}.webp`]" />
             <div>
               <div class="text-xl font-headers leading-tight">{{ modelValue.ingredientName }}</div>
               <div class="text-xs text-gray-400">per 100g</div>
@@ -48,7 +48,7 @@
     <!-- Variants Picker Modal -->
     <BlocksResponsiveModal v-model="showVariants">
       <div class="p-4 flex flex-col gap-1 min-w-[280px]">
-        <div class="font-bold text-lg px-2 pb-2">Swap Ingredient</div>
+        <div class="font-headers font-semibold text-xl px-2 pb-2">Swap Ingredient</div>
         <button v-for="(variant, idx) in modelValue.foodVariants ?? []" :key="variant.id" type="button"
           class="flex items-center gap-3 p-3 rounded-2xl w-full text-left transition-colors"
           :class="idx === currentVariantIndex ? 'bg-primary/8' : 'hover:bg-primary/8'" @click="selectVariant(idx)">
@@ -153,7 +153,7 @@
         <!-- Right: measurement context + delete -->
         <div class="flex items-center gap-2 shrink-0 font-mono tracking-normal">
           <Icon v-if="parseWarning" name="alert-triangle"
-            class="w-3.5 text-amber-400 hidden sm:block"
+            class="w-3.5 text-amber-700/70 hidden sm:block"
             :title="parseWarning" />
           <span v-else-if="modelValue.foodData" class="text-gray-500 text-xs hidden sm:block">{{ measurementContext }}</span>
           <button @click.stop="emit('deleteIngredient')" class="text-gray-400 hover:text-gray-700 transition-colors"
@@ -231,7 +231,7 @@ const hasSeenHint = ref(false);
 const parseWarning = computed(() => {
   const v = props.modelValue;
   if (!v.foodNameId) return null;
-  if (v.amount == null) return 'No amount detected - nutrition estimate may be inaccurate';
+  if (v.amount == null /*&& v.unit !== 'FREE'*/) return 'No amount detected - nutrition estimate may be inaccurate';
   return null;
 });
 

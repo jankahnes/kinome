@@ -10,7 +10,9 @@ import type { Database } from '~/types/supabase';
 const PROCESSING_PICTURE_PREFIX = 'PROCESSING:';
 const LEGACY_PROCESSING_PICTURE = 'PROCESSING';
 
-function sanitizeRecipePicture<T extends { picture: string | null }>(recipe: T): T {
+function sanitizeRecipePicture<T extends { picture: string | null }>(
+  recipe: T,
+): T {
   if (
     recipe.picture &&
     (recipe.picture === LEGACY_PROCESSING_PICTURE ||
@@ -75,6 +77,7 @@ async function getRecipeIdsByTags(
 export async function getRecipes(
   client: SupabaseClient<Database>,
   opts: GetterOpts = {},
+  includePercentiles: boolean = false,
 ): Promise<Recipe[]> {
   let query = client
     .from('recipes')
@@ -141,6 +144,18 @@ export async function getRecipes(
   }
 
   for (const recipe of recipes) {
+    if (includePercentiles && false) {
+      const { data: percentileData, error: percentileError } = await client.rpc(
+        'get_percentile',
+        {
+          p_table_name: 'recipes',
+          p_column_name: 'hidx',
+          p_value: recipe.hidx ?? 0,
+        },
+      );
+      if (percentileError) throw percentileError;
+      recipe.percentile = percentileData;
+    }
     if (recipe.based_on) {
       const { data } = await client
         .from('recipes')
@@ -203,8 +218,9 @@ export async function getRecipes(
 export async function getRecipe(
   client: SupabaseClient<Database>,
   opts: GetterOpts = {},
+  includePercentiles: boolean = false,
 ): Promise<Recipe> {
-  return expectSingle(await getRecipes(client, opts));
+  return expectSingle(await getRecipes(client, opts, includePercentiles));
 }
 
 export async function getRecipeOverviews(

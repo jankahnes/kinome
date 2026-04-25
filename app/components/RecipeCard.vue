@@ -1,11 +1,11 @@
 <template>
   <NuxtLink :to="getRecipeUrl(recipe?.id, recipe?.title)" v-if="recipe?.id"
-    class="flex flex-col items-center group main-card main-card-rounded mt-16" :class="{ 'mb-4': reasonText }">
+    class="flex flex-col items-center group main-card main-card-rounded mt-8 md:mt-16" :class="{ 'mb-4': reasonText }">
     <NuxtImg
-      class="-mt-16 w-[85%] aspect-square will-change-transform object-contain relative z-10 shadow-gray-100 filter-[drop-shadow(0_0_8px_var(--tw-shadow-color))_drop-shadow(0_0_4px_var(--tw-shadow-color))] transition-transform duration-500 group-hover:-translate-y-px group-hover:scale-[1.01]"
+      class="-mt-8 md:-mt-16 w-[75%] sm:w-[85%] aspect-square will-change-transform object-contain relative z-10 shadow-gray-100 filter-[drop-shadow(0_0_8px_var(--tw-shadow-color))_drop-shadow(0_0_4px_var(--tw-shadow-color))] transition-transform duration-500 group-hover:-translate-y-px group-hover:scale-[1.01]"
       v-if="recipe?.picture" :src="recipe?.picture" :alt="recipe?.title" />
     <div v-else-if="recipe?.source_type === 'MEDIA'"
-      class="-mt-16 w-[85%] aspect-square relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]">
+      class="-mt-8 md:-mt-16 w-[75%] sm:w-[85%] aspect-square relative z-10 will-change-transform transition-transform duration-500 group-hover:translate-y-[-2px] group-hover:scale-[1.01]">
       <div
         class=" bg-white main-card-rounded overflow-hidden relative z-10 aspect-9/16 shadow-gray-100 filter-[drop-shadow(0_0_6px_var(--tw-shadow-color))_drop-shadow(0_0_2px_var(--tw-shadow-color))] w-[55%] mx-auto">
         <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 w-full aspect-9/17">
@@ -17,7 +17,7 @@
       </div>
       <div />
     </div>
-    <div v-else class="-mt-16 w-[85%] aspect-square" />
+    <div v-else class="-mt-8 md:-mt-16 w-[75%] sm:w-[85%] aspect-square" />
 
     <div
       class="flex-1 flex flex-col justify-between gap-2 sm:gap-3 items-center p-4 pt-2 will-change-transform transition-transform duration-300 group-hover:translate-y-px ">
@@ -31,10 +31,11 @@
         </p>
       </div>
       <div
-        class="flex gap-1.5 flex-wrap text-xs h-7 sm:h-14 overflow-y-hidden items-center justify-center py-0.5 px-2 text-gray-700">
+        class="flex gap-1.5 flex-wrap text-xs h-6.5 sm:h-14 overflow-y-hidden items-center justify-center py-0.5 px-2 text-gray-700">
         <div class="tag flex items-center gap-1 bg-primary/8" v-if="recipe?.rating && recipe?.rating >= 4">
           <FormsRatingField :model-value="recipe?.rating" :star-width="13" :star-height="13" :select="false"
-            :uniqueId="'card-new-' + recipe?.id + id" />
+            :uniqueId="'card-new-' + recipe?.id + id" class="hidden md:inline-block" />
+          <IconStar class="w-3 h-3 md:hidden" fill="currentColor" />
           <span>{{ recipe?.rating.toFixed(1) }}</span>
         </div>
 

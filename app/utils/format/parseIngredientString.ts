@@ -3,12 +3,6 @@ import type { BrandedFoodState, FullFoodRow, FoodVariant } from '~/types/types';
 import singularizeWord from './singularizeWord';
 import pluralizeWord from './pluralizeWord';
 
-function stripReport(food: any): FullFoodRow {
-  if (!food) return food;
-  const { report: _report, ...rest } = food;
-  return rest as FullFoodRow;
-}
-
 const ignoreWords = ['a', 'an', 'the', 'of'];
 
 const numeric: Record<string, number> = {
@@ -66,6 +60,9 @@ export const unitToDBMap: Record<string, string> = {
   kilogram: 'KG',
   kilograms: 'KG',
   free: 'FREE',
+  some: 'FREE',
+  few: 'FREE',
+  "to taste": 'FREE',
 };
 
 

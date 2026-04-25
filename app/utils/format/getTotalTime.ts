@@ -19,22 +19,25 @@ export default function getTotalTime(
     const minutes = rounded % 60;
 
     if (hours > 0 && minutes > 0) {
-      return `${hours}h ${minutes}min`;
+      return [
+        { label: hours > 1 ? 'hrs' : 'hr', value: hours },
+        { label: 'min', value: minutes },
+      ];
     }
     if (hours > 0) {
-      return `${hours}h`;
+      return [{ label: hours > 1 ? 'hrs' : 'hr', value: hours }];
     }
-    return `${minutes}min`;
+    return [{ label: 'min', value: minutes }];
   }
 
   if (effort === 'LIGHT') {
-    return '<20min';
+    return [{ label: 'min', value: '<20' }];
   }
   if (effort === 'MODERATE') {
-    return '35min';
+    return [{ label: 'min', value: '35' }];
   }
   if (effort === 'HEAVY') {
-    return '>60min';
+    return [{ label: 'min', value: '>60' }];
   }
 
   return null;

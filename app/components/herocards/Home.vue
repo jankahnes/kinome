@@ -13,24 +13,24 @@
         <div
           class="flex flex-col items-center text-center gap-2 p-6 main-card main-card-rounded shadow-sm! flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card1" @click="scrollTo(card1)">
-          <img src="/blob.webp" alt="Blob" class="h-50 z-0 rotate-160 opacity-20" />
+          <img src="/blob.webp" alt="Blob" class="h-50 z-0 rotate-160 opacity-10" />
           <img src="/universal_cookbook.webp" alt="Universal Cookbook" class="h-30 -mt-44 z-10" />
           <h2 class="text-2xl font-headers tracking-tight mt-12">
             Universal Cookbook
           </h2>
-          <p class="text-lg tracking-tight text-center leading-tight -mt-2">
+          <p class="tracking-tight text-center leading-tight -mt-2 text-gray-700">
             Save recipes from any website, TikTok or Youtube in seconds.
           </p>
         </div>
         <div
           class="flex flex-col items-center text-center gap-2 p-6 main-card main-card-rounded shadow-sm! flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card2" @click="scrollTo(card2)">
-          <img src="/blob.webp" alt="Blob" class="h-50 rotate-340 z-0 opacity-20" />
+          <img src="/blob.webp" alt="Blob" class="h-50 rotate-340 z-0 opacity-10" />
           <img src="/tailored_discovery.webp" alt="Tailored Discovery" class="h-38 -mt-44 z-10" />
           <h2 class="text-2xl font-headers tracking-tight mt-4">
             Tailored Discovery
           </h2>
-          <p class="text-lg tracking-tight text-center leading-tight -mt-2">
+          <p class="tracking-tight text-center leading-tight -mt-2 text-gray-700">
             Get recipe suggestions based on your taste preferences and health
             goals.
           </p>
@@ -38,10 +38,10 @@
         <div
           class="flex flex-col items-center text-center gap-2 p-6 main-card main-card-rounded shadow-sm! flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card3" @click="scrollTo(card3)">
-          <img src="/blob.webp" alt="Blob" class="h-50 z-0 opacity-20" />
+          <img src="/blob.webp" alt="Blob" class="h-50 z-0 opacity-10" />
           <img src="/smart_tracking.webp" alt="Smart Tracking" class="h-30 -mt-40 z-10" />
           <h2 class="text-2xl font-headers tracking-tight mt-8">Smart Tracking</h2>
-          <p class="text-lg tracking-tight text-center leading-tight -mt-2">
+          <p class="tracking-tight text-center leading-tight -mt-2 text-gray-700">
             Track macros & nutrients automatically using our smart ingredient
             parser.
           </p>

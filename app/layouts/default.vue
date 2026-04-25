@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-svh canvas text-[#201914] tracking-normal" ref="swipeContainer">
+  <div class="min-h-svh canvas text-dark tracking-normal" ref="swipeContainer">
     <div class="relative">
       <Transition name="sidebar">
         <div v-if="sidebarOpen" ref="sidebarRef" class="fixed top-0 left-0 z-99 h-full" @click.stop>

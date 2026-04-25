@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-2" ref="root" @click="closeTooltip">
-    <h2 class="text-4xl font-headers tracking-tight ml-2" v-if="!hideHeader">
+    <h2 class="text-3xl font-headers tracking-tight ml-2" v-if="!hideHeader">
       Method
     </h2>
     <div class="main-card main-card-rounded flex flex-col relative overflow-hidden"

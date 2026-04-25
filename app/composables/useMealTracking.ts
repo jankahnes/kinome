@@ -93,13 +93,6 @@ export function useMealTracking() {
     return 'today';
   }
 
-  // Helpers for load reconstruction
-  function stripReport(food: any): any {
-    if (!food) return food;
-    const { report: _r, ...rest } = food;
-    return rest;
-  }
-
   function dbFoodToEditableItem(food: any): EditableIngredient {
     const processedBrandedFood = food.branded_food
       ? postprocessBrandedFood(food.branded_food)

@@ -195,9 +195,9 @@ function micronutrientSubtitle(
 ): string {
   if (!microDetails.length) return '';
   if (negative) {
-    const sorted = [...microDetails].sort(
-      (a, b) => (a.rdaPerServing ?? 0) - (b.rdaPerServing ?? 0),
-    );
+    const sorted = [...microDetails]
+      .sort((a, b) => (a.rdaPerServing ?? 0) - (b.rdaPerServing ?? 0))
+      .filter((d) => d.displayName !== 'Vitamin D');
     return `Low in ${sorted[0]!.displayName}`;
   }
   return [...microDetails]
@@ -393,7 +393,7 @@ export function getDailyQualityCards(
   const totalFat =
     context?.totalFat ?? details?.fatProfile?.totalFatPer100g ?? 0;
   const fatConditionMet = totalFat > 5;
-  let fatResolved = resolve(overall?.fat_profile_score, qualityTiers);
+  let fatResolved = resolve(overall?.fat_profile_score - 8, qualityTiers);
   let fatOrder = 9;
   let fatSubtitle = fatQualitySubtitle(
     details?.fatProfile,
@@ -485,7 +485,7 @@ export function getDailyQualityCards(
   const allCards: DailyQualityCard[] = [
     {
       title: 'Micronutrients',
-      img: 'micronutrients.webp',
+      img: '/nutrition-highlights/micronutrients.webp',
       ...mnResolved,
       subtitle: microSubtitle,
       clickable: true,
@@ -493,7 +493,7 @@ export function getDailyQualityCards(
     },
     {
       title: 'Gut Health',
-      img: 'gut-health.webp',
+      img: '/nutrition-highlights/gut-health.webp',
       ...gutResolved,
       subtitle: gutSubtitle,
       clickable: true,
@@ -501,7 +501,7 @@ export function getDailyQualityCards(
     },
     {
       title: 'Satiety',
-      img: 'satiety.webp',
+      img: '/nutrition-highlights/satiety.webp',
       ...satietyResolved,
       subtitle: satietySub,
       clickable: false,
@@ -509,7 +509,7 @@ export function getDailyQualityCards(
     },
     {
       title: 'Whole Food %',
-      img: 'whole.webp',
+      img: '/nutrition-highlights/whole.webp',
       ...wholeResolved,
       subtitle: wholeFoodSubtitle,
       clickable: false,
@@ -517,7 +517,7 @@ export function getDailyQualityCards(
     },
     {
       title: 'Fat Quality',
-      img: 'fat.webp',
+      img: '/nutrition-highlights/fat.webp',
       ...fatResolved,
       subtitle: fatSubtitle,
       clickable: true,
@@ -525,15 +525,15 @@ export function getDailyQualityCards(
     },
     {
       title: 'Electrolytes',
-      img: 'balance.webp',
+      img: '/nutrition-highlights/balance.webp',
       ...electrolyteResolved,
       subtitle: electrolyteSubtitle,
       clickable: false,
       orderValue: electrolyteOrder,
     },
     {
-      title: 'Antioxidants',
-      img: 'protective.webp',
+      title: 'Phytonutrients',
+      img: '/nutrition-highlights/protective.webp',
       ...antioxidantResolved,
       subtitle: antioxidantSubtitle,
       clickable: false,
@@ -541,7 +541,7 @@ export function getDailyQualityCards(
     },
     {
       title: 'Fiber',
-      img: 'fiber.webp',
+      img: '/nutrition-highlights/fiber.webp',
       ...fiberResolved,
       subtitle: fiberSubtitle,
       clickable: false,
@@ -549,7 +549,7 @@ export function getDailyQualityCards(
     },
     {
       title: 'Protein',
-      img: 'protein.webp',
+      img: '/nutrition-highlights/protein.webp',
       ...proteinResolved,
       subtitle: proteinSubtitle,
       clickable: false,

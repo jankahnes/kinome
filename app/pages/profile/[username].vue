@@ -1,14 +1,25 @@
 <template>
   <div class="mt-8 mb-20 lg:pb-0 m-4 lg:mx-12">
-    <div class="flex items-center gap-2 flex-wrap" v-if="!isOverviewPage">
+    <div class="flex items-center gap-2 flex-wrap" v-if="!profileNotFound && !isOverviewPage">
       <NuxtLink v-for="view in views" :key="view.path" :to="view.path"
-        class="main-button animated-button flex items-center gap-1 bg-primary-5 px-3 py-2.5 shrink-0 text-xs text-gray-600"
-        exact-active-class="bg-white shadow-xs">
+        class="subnav-pill"
+        exact-active-class="active">
         <IconChevronLeft v-if="view.path === profilePath" class="w-4 h-4" />
         {{ view.displayName }}
       </NuxtLink>
     </div>
-    <NuxtPage :transition="false" />
+    <NuxtPage v-if="!profileNotFound" :transition="false" />
+    <div v-else class="flex min-h-[70vh] items-center justify-center">
+      <div class="flex flex-col items-center justify-center gap-2 text-center">
+        <IconAlertCircle class="w-10 h-10 text-red-500" />
+        <h2 class="text-3xl font-bold tracking-tighter">Profile not found</h2>
+        <p class="text-lg text-gray-600">The profile you are looking for does not exist.</p>
+        <NuxtLink to="/" class="bg-primary-5/80 flex items-center gap-0.5 main-button animated-button text-sm p-2">
+          <span>Go to homepage</span>
+          <IconChevronRight class="w-5" />
+        </NuxtLink>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -19,8 +30,10 @@ const auth = useAuthStore();
 const supabase = useSupabaseClient<Database>();
 const user = ref<FullUser | null>(null);
 const loading = ref(true);
+const profileNotFound = ref(false);
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+let profileLoadId = 0;
 
 const isOwn = computed(() =>
   Boolean(
@@ -47,24 +60,34 @@ const views = computed(() => [
 
 watchEffect(async () => {
   if (!auth.profileFetched) return;
+  const loadId = ++profileLoadId;
   loading.value = true;
+  user.value = null;
+  profileNotFound.value = false;
+
+  let resolvedUser: FullUser | null = null;
 
   if (auth.user?.username === profileKey.value || auth.user?.id === profileKey.value) {
-    user.value = auth.user;
+    resolvedUser = auth.user;
   } else {
-    user.value = await getUserByUsername(supabase, profileKey.value);
+    resolvedUser = await getUserByUsername(supabase, profileKey.value);
 
-    if (!user.value && UUID_PATTERN.test(profileKey.value)) {
+    if (!resolvedUser && UUID_PATTERN.test(profileKey.value)) {
       const legacyUser = await getUser(supabase, profileKey.value);
       if (legacyUser?.username) {
         await navigateTo(getProfileUrl(legacyUser), { replace: true });
-        user.value = legacyUser;
+        resolvedUser = legacyUser;
       }
     }
   }
 
-  if (user.value?.username && route.path.startsWith(`/profile/${user.value.id}`)) {
-    await navigateTo(getProfileUrl(user.value), { replace: true });
+  if (loadId !== profileLoadId) return;
+
+  user.value = resolvedUser;
+  profileNotFound.value = !resolvedUser;
+
+  if (resolvedUser?.username && route.path.startsWith(`/profile/${resolvedUser.id}`)) {
+    await navigateTo(getProfileUrl(resolvedUser), { replace: true });
   }
 
   loading.value = false;
@@ -72,7 +95,11 @@ watchEffect(async () => {
 
 useHead({
   title: computed(() =>
-    user.value?.username ? `${user.value.username} | Kinome` : 'User | Kinome',
+    user.value?.username
+      ? `${user.value.username} | Kinome`
+      : profileNotFound.value
+        ? 'Profile Not Found | Kinome'
+        : 'User | Kinome',
   ),
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 });

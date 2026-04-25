@@ -112,10 +112,7 @@
               </div>
             </div>
             <div v-if="signatureRecipe" class="relative">
-              <RecipeCardHighlight :recipe="signatureRecipe" uniqueId="profile-sig" :is-signature="true"
-                class="hidden md:flex" />
-              <RecipeCardHighlightMobile :recipe="signatureRecipe" uniqueId="profile-sig" :is-signature="true"
-                class="md:hidden" />
+              <RecipeCardHighlight :recipe="signatureRecipe" uniqueId="profile-sig" :is-signature="true" />
               <div class="pointer-events-none absolute top-10 right-10 z-20 flex flex-col items-end">
                 <span
                   class="rounded-full bg-primary px-2.5 text-[10px] font-headers font-semibold italic uppercase tracking-widest text-white flex items-center gap-1">

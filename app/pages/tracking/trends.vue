@@ -105,17 +105,6 @@ async function fetchInitialData() {
     ]);
 }
 
-function stripReport(food: any) {
-    if (!food) return food;
-    const {
-        report: _report,
-        fullReport: _fullReport,
-        full_report: _full_report,
-        ...rest
-    } = food;
-    return rest;
-}
-
 function parseTrackedDay(value?: string | Date | null): Date | null {
     if (!value) return null;
     if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;

@@ -151,15 +151,14 @@
 
           <!-- Navigation Buttons -->
           <div class="flex justify-between items-center mt-8">
-            <button v-if="!accountCreated" @click="previousStep" :disabled="currentStepIndex === 0"
+            <button @click="previousStep" :disabled="isPreviousDisabled"
               class="main-button animated-button px-6 py-3 bg-primary-30/50 hover:bg-primary-20/30 disabled:opacity-50 rounded-full! border border-gray-800/30"
-              :class="{ 'cursor-not-allowed': currentStepIndex === 0 }">
+              :class="{ 'cursor-not-allowed': isPreviousDisabled }">
               Previous
             </button>
-            <span v-else></span>
-            <button v-if="showSkipAhead" @click="skipToRegister"
+            <button v-if="showSkipAhead" @click="skipQuestions"
               class="px-4 py-2 text-gray-800 transition-all duration-200 underline">
-              Skip ahead
+              Skip
             </button>
             <span v-else></span>
             <button @click="nextStep" :disabled="!canProceed || registrationLoading"
@@ -291,14 +290,16 @@ const equipmentOptions = [
 ];
 
 const steps = [
+  'registerForm',
   'diet',
   'sorting',
   'cuisines',
   'equipment',
   'foods',
-  'registerForm',
   'optional',
 ];
+
+const QUESTION_STEPS = ['diet', 'sorting', 'cuisines', 'equipment', 'foods'];
 
 const getButtonText = () => {
   switch (currentStep.value) {
@@ -317,10 +318,14 @@ const usernamePattern = /^[a-zA-Z0-9_]{3,32}$/;
 const isUsernameValid = computed(() =>
   usernamePattern.test(username.value.trim()),
 );
-const showSkipAhead = computed(() => {
-  const foodsIndex = steps.findIndex((step) => step === 'foods');
-  return currentStepIndex.value <= foodsIndex;
-});
+const showSkipAhead = computed(() =>
+  QUESTION_STEPS.includes(currentStep.value),
+);
+const isPreviousDisabled = computed(
+  () =>
+    currentStepIndex.value === 0 ||
+    steps[currentStepIndex.value - 1] === 'registerForm',
+);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
@@ -336,25 +341,6 @@ const canProceed = computed(() => {
   }
 });
 
-function getProfilePayload(userId: string) {
-  const liked_tags = [
-    ...[...selectedTagIds.value].filter((id) => !FILTER_TAG_IDS.has(id)),
-    ...selectedSortingTags.value,
-  ];
-  const filter_tags = [...selectedTagIds.value].filter((id) =>
-    FILTER_TAG_IDS.has(id)
-  );
-
-  return {
-    id: userId,
-    username: username.value.trim(),
-    normalized_username: normalizeUsername(username.value),
-    picture: selectedAvatar.value ?? ACCOUNT_AVATARS[0]?.path ?? null,
-    liked_tags,
-    filter_tags,
-  };
-}
-
 function getFoodBookmarks(userId: string) {
   const foodBookmarks = foodOptions
     .filter((f) => selectedFoods.value.has(f.label))
@@ -368,10 +354,23 @@ function getFoodBookmarks(userId: string) {
 }
 
 function formatAuthError(err: any) {
+  console.error('[onboarding] error', err);
   if (!err) return 'Something went wrong.';
   if (typeof err === 'string') return err;
   if (err.code && err.message) return `${err.code}: ${err.message}`;
   return err.message ?? JSON.stringify(err);
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${label} timed out after ${ms}ms`)),
+        ms,
+      ),
+    ),
+  ]);
 }
 
 async function assertAccountAvailable() {
@@ -395,15 +394,34 @@ async function assertAccountAvailable() {
   }
 }
 
-async function saveOnboardingProfile(userId: string) {
-  const foodBookmarks = getFoodBookmarks(userId);
+async function saveUsername(userId: string) {
+  await updateProfile(supabase, {
+    id: userId,
+    username: username.value.trim(),
+    normalized_username: normalizeUsername(username.value),
+  });
+}
 
-  await Promise.all([
-    addProfile(supabase, getProfilePayload(userId)),
-    foodBookmarks.length > 0
-      ? supabase.from('bookmarks').insert(foodBookmarks)
-      : Promise.resolve(),
-  ]);
+async function saveQuestionAnswers(userId: string) {
+  const liked_tags = [
+    ...[...selectedTagIds.value].filter((id) => !FILTER_TAG_IDS.has(id)),
+    ...selectedSortingTags.value,
+  ];
+  const filter_tags = [...selectedTagIds.value].filter((id) =>
+    FILTER_TAG_IDS.has(id),
+  );
+
+  await updateProfile(supabase, {
+    id: userId,
+    ...(selectedAvatar.value ? { picture: selectedAvatar.value } : {}),
+    liked_tags,
+    filter_tags,
+  });
+
+  const foodBookmarks = getFoodBookmarks(userId);
+  if (foodBookmarks.length > 0) {
+    await supabase.from('bookmarks').insert(foodBookmarks);
+  }
 }
 
 function usernameFromEmail(email?: string | null) {
@@ -445,19 +463,27 @@ async function register() {
   error.value = null;
 
   try {
-    await assertAccountAvailable();
+    console.info('[onboarding] register: lookup');
+    await withTimeout(assertAccountAvailable(), 10000, 'Account lookup');
 
-    const { data, error: signUpError } = await auth.signUp(
-      email.value.trim(),
-      password.value,
+    console.info('[onboarding] register: signUp');
+    const { data, error: signUpError } = await withTimeout(
+      auth.signUp(email.value.trim(), password.value),
+      15000,
+      'Sign-up',
     );
 
     if (signUpError) throw signUpError;
-    if (!data.user?.id) throw new Error('Sign-up did not return a user.');
+    if (!data?.user?.id) throw new Error('Sign-up did not return a user.');
 
-    await saveOnboardingProfile(data.user.id);
-    await auth.fetchProfile();
+    console.info('[onboarding] register: saveUsername', data.user.id);
+    await withTimeout(saveUsername(data.user.id), 10000, 'Save username');
+
+    console.info('[onboarding] register: fetchProfile');
+    await withTimeout(auth.fetchProfile(), 10000, 'Fetch profile');
+
     accountCreated.value = true;
+    console.info('[onboarding] register: done');
   } catch (err: any) {
     error.value = formatAuthError(err);
     throw err;
@@ -544,11 +570,11 @@ async function completePendingOAuthProfile() {
       username.value = await generateAvailableUsername(auth.user.email);
     }
 
-    await saveOnboardingProfile(auth.user.id);
+    await saveUsername(auth.user.id);
     localStorage.removeItem('kinome:onboarding:pendingProfile');
     await auth.fetchProfile();
     accountCreated.value = true;
-    currentStepIndex.value = steps.findIndex((step) => step === 'optional');
+    currentStepIndex.value = steps.findIndex((step) => step === 'diet');
   } catch (err: any) {
     error.value = formatAuthError(err);
   } finally {
@@ -587,11 +613,8 @@ const nextStep = async () => {
       return;
     }
   } else if (currentStep.value === 'optional') {
-    if (auth.user?.id && selectedAvatar.value) {
-      await updateProfile(supabase, {
-        id: auth.user.id,
-        picture: selectedAvatar.value,
-      });
+    if (auth.user?.id) {
+      await saveQuestionAnswers(auth.user.id);
       await auth.fetchProfile();
     }
     await navigateTo('/kitchen');
@@ -612,10 +635,10 @@ const previousStep = () => {
   }
 };
 
-const skipToRegister = () => {
-  const registerIndex = steps.findIndex((step) => step === 'registerForm');
-  if (registerIndex > -1) {
-    currentStepIndex.value = registerIndex;
+const skipQuestions = () => {
+  const optionalIndex = steps.findIndex((step) => step === 'optional');
+  if (optionalIndex > -1) {
+    currentStepIndex.value = optionalIndex;
   }
 };
 </script>

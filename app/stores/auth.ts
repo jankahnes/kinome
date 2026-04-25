@@ -9,7 +9,17 @@ export const useAuthStore = defineStore('auth', () => {
   const supabase = useSupabaseClient<Database>();
   const shoppingList = ref<ShoppingListItem[]>([]);
   const shoppingListOpen = ref(false);
-  const cookStreak = ref(0);
+  const cookStreak = ref(1);
+
+  function shouldResolveProfile(candidateUser: User | FullUser | null) {
+    if (!candidateUser || candidateUser.is_anonymous) return false;
+
+    return (
+      user.value?.id !== candidateUser.id ||
+      !profileFetched.value ||
+      !user.value?.username
+    );
+  }
 
   async function fetchProfile() {
     const userId = user.value?.id;
@@ -50,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
         body: { date: todayLogicalDate() },
       });
       if (typeof res?.currentStreak === 'number') {
-        cookStreak.value = res.currentStreak;
+        cookStreak.value = Math.max(1, res.currentStreak);
       }
     } catch (e) {
       console.warn('registerDailyVisit failed', e);
@@ -71,24 +81,22 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchUser() {
     if (userFetched.value) return;
-    console.log('fetchUser');
     const { data } = await supabase.auth.getUser();
 
     if (data.user) {
-      const shouldFetchProfile =
-        user.value?.id !== data.user.id || !profileFetched.value || !user.value?.username;
+      const shouldFetchProfile = shouldResolveProfile(data.user);
 
       if (user.value?.id === data.user.id && user.value) {
         Object.assign(user.value, data.user);
       } else {
         user.value = data.user;
       }
-      console.log('fetchUser: user', user.value);
       if (shouldFetchProfile) {
         await fetchProfile();
+      } else if (data.user.is_anonymous) {
+        profileFetched.value = true;
       }
     } else {
-      console.log('fetchUser: signInAnonymously');
       await signInAnonymously();
     }
 
@@ -97,26 +105,22 @@ export const useAuthStore = defineStore('auth', () => {
 
   function listenToAuthChanges() {
     if (authListenerSet.value) return;
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Strictly synchronous: do NOT await or call any other supabase.auth.*
+    // method here. Doing so re-enters the auth lock and deadlocks updateUser /
+    // refreshSession. Every code path that mutates auth state (signIn, signUp,
+    // signInAnonymously, fetchUser, OAuth callback) already calls fetchProfile
+    // itself — this listener only mirrors the session into the store.
+    supabase.auth.onAuthStateChange((_event, session) => {
       const newUser = session?.user ?? null;
-      const shouldResolveProfile =
-        !!newUser &&
-        (user.value?.id !== newUser.id || !profileFetched.value || !user.value?.username);
 
       if (newUser) {
         if (user.value?.id === newUser.id && user.value) {
           Object.assign(user.value, newUser);
         } else {
           user.value = newUser;
+          profileFetched.value = false;
         }
-        console.log('listenToAuthChanges: user', user.value);
-        if (shouldResolveProfile) {
-          await fetchProfile();
-        }
-      } else if (user.value?.id && !suppressAnonymousAuth.value) {
-        await signInAnonymously();
-        console.log('listenToAuthChanges: signInAnonymously');
-      } else if (!newUser && suppressAnonymousAuth.value) {
+      } else {
         user.value = null;
         profileFetched.value = true;
       }
@@ -158,19 +162,27 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function signUp(email: string, password: string) {
-    suppressAnonymousAuth.value = true;
-
-    try {
-      if (user.value?.is_anonymous) {
-        await supabase.auth.signOut();
-        user.value = null;
-        profileFetched.value = true;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
+    if (user.value?.is_anonymous) {
+      const { data, error } = await supabase.auth.updateUser({
         email,
         password,
       });
+
+      if (data?.user) {
+        if (user.value?.id === data.user.id && user.value) {
+          Object.assign(user.value, data.user);
+        } else {
+          user.value = data.user;
+        }
+        profileFetched.value = false;
+      }
+
+      return { data, error };
+    }
+
+    suppressAnonymousAuth.value = true;
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
 
       if (data?.user) {
         user.value = data.user;
@@ -189,11 +201,18 @@ export const useAuthStore = defineStore('auth', () => {
   async function signInWithGoogle(redirectTo = '/') {
     const origin = import.meta.client ? window.location.origin : '';
     const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+
+    if (user.value?.is_anonymous) {
+      const { data, error } = await supabase.auth.linkIdentity({
+        provider: 'google',
+        options: { redirectTo: callbackUrl },
+      });
+      return { data, error };
+    }
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: callbackUrl,
-      },
+      options: { redirectTo: callbackUrl },
     });
     return { data, error };
   }
@@ -205,7 +224,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null;
     shoppingList.value = [];
     shoppingListOpen.value = false;
-    cookStreak.value = 0;
+    cookStreak.value = 1;
     profileFetched.value = false;
 
     suppressAnonymousAuth.value = false;
@@ -296,7 +315,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function isAdmin() {
-    return user.value?.id == '4771c2f9-d8e8-44e7-967b-74d1f4468e23';
+    return user.value?.id === '4771c2f9-d8e8-44e7-967b-74d1f4468e23';
   }
 
   return {

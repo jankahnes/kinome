@@ -11,6 +11,8 @@
   --breakpoint-2xs: 400px;
   --color-main: #fff6f2;
   --color-primary: #CF6139;
+  --color-dark: #201914;
+  --color-faint: #f1ede9b7;
   --color-primary-2: color-mix(in srgb, var(--color-primary) 1%, white);
   --color-primary-5: color-mix(in srgb, var(--color-primary) 2%, white);
   --color-primary-10: color-mix(in srgb, var(--color-primary) 4%, white);
@@ -46,7 +48,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-headers: 'Fraunces', ui-serif, Georgia, serif;
 
-  --text-scale: 1.08;
+  --text-scale: 1;
 
   --text-xs: calc(0.75rem * var(--text-scale));
   --text-sm: calc(0.875rem * var(--text-scale));
@@ -77,7 +79,7 @@
 }
 
 .main-card {
-  @apply shadow-[0_0_12px_rgba(0,0,0,0.06)] bg-white md:shadow-none md:bg-primary-5;
+  @apply shadow-[0_0_10px_rgba(0,0,0,0.03)] bg-white md:shadow-none md:bg-primary-5 border border-faint;
 }
 
 a.main-card {
@@ -85,11 +87,11 @@ a.main-card {
 }
 
 .main-button {
-  @apply shadow-[0_0_12px_rgba(0,0,0,0.06)] bg-white md:shadow-none md:bg-primary-5 hover:bg-white transition-all duration-200;
+  @apply shadow-[0_0_12px_rgba(0,0,0,0.06)] bg-white md:shadow-none md:bg-primary-5 hover:bg-white transition-all duration-200 active:bg-white;
 }
 
 .animated-button {
-  @apply rounded-[1.1em] active:rounded-[1.3em] active:scale-98 active:bg-white cursor-pointer select-none will-change-transform;
+  @apply rounded-[1.1em] active:rounded-[1.3em] active:scale-98  cursor-pointer select-none will-change-transform;
 }
 
 .main-card-rounded {
@@ -102,6 +104,16 @@ a.main-card {
 
 .icon-fill {
   fill: currentColor;
+}
+
+.subnav-pill {
+  @apply shadow-[0_0_12px_rgba(0,0,0,0.06)] bg-white md:shadow-none md:bg-primary-5 hover:bg-white transition-all duration-200;
+  @apply rounded-[1.1em] active:rounded-[1.3em] active:scale-98 active:bg-white cursor-pointer select-none will-change-transform;
+  @apply flex items-center gap-1 px-3 py-2 shrink-0 text-xs text-gray-600;
+}
+
+.subnav-pill.active {
+  @apply bg-dark text-white;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

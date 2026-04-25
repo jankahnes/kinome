@@ -3,8 +3,8 @@
     <div class="flex gap-4 flex-wrap justify-between" v-if="hasTracking">
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink v-for="view in views" :key="view.path" :to="`/tracking${view.path}`"
-          class="main-button animated-button main-card px-3 py-2.5 shrink-0 text-xs text-gray-600"
-          active-class="bg-white! shadow-xs">
+          class="subnav-pill"
+          active-class="active">
           {{ view.displayName }}
         </NuxtLink>
       </div>

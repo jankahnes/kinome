@@ -1,11 +1,11 @@
 <template>
   <div v-if="fullNutrition">
     <div class="flex-row flex-wrap gap-x-10 gap-y-9 hidden md:flex" :class="{ 'hidden!': singleColumn }">
-      <div class="flex-1 min-w-0 space-y-9 basis-80">
+      <div class="flex-1 min-w-0 flex flex-col gap-6 basis-80">
         <NutritionMicroGroup v-for="s in rail1" :key="s.title" :title="s.title" :subtitle="s.subtitle"
           :accent-class="s.accentClass" :bar-class="s.barClass" :kind="s.kind" :items="s.items" :kcal="kcalForNorm" />
       </div>
-      <div class="flex-1 min-w-0 space-y-9 basis-80">
+      <div class="flex-1 min-w-0 flex flex-col gap-6 basis-80">
         <NutritionMicroGroup v-for="s in rail2" :key="s.title" :title="s.title" :subtitle="s.subtitle"
           :accent-class="s.accentClass" :bar-class="s.barClass" :kind="s.kind" :items="s.items" :kcal="kcalForNorm" />
       </div>

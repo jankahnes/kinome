@@ -1,11 +1,5 @@
 import type { EditableIngredient } from '~/types/types';
 
-function stripReport(food: any): any {
-  if (!food) return food;
-  const { report: _r, ...rest } = food;
-  return rest;
-}
-
 export function dbFoodToEditableItem(food: any): EditableIngredient {
   const processedBrandedFood = food.branded_food
     ? postprocessBrandedFood(food.branded_food)

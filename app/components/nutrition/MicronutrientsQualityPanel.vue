@@ -1,6 +1,6 @@
 <template>
   <BlocksResponsiveInfo v-model="open" sidePanelClass="w-100">
-    <div class="p-5 flex flex-col gap-6">
+    <div class="p-4 md:p-2 flex flex-col gap-6">
       <div>
         <div class="text-[11px] text-gray-400 uppercase font-mono tracking-wider">Nutrition Quality</div>
         <h2 class="text-3xl font-headers tracking-tight">Micronutrients</h2>

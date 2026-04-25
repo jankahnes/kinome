@@ -12,7 +12,7 @@
         <ul class="">
           <li v-for="choice in choices" class="cursor-pointer">
             <button
-              class="w-full flex items-center justify-between py-2 px-3 main-button animated-button hover:bg-primary-10"
+              class="w-full flex items-center justify-between py-2 px-3 animated-button hover:bg-primary-10"
               @click="
                 emit('update:modelValue', choice);
               isOpen = false;

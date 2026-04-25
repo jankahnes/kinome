@@ -1,41 +1,42 @@
 <template>
   <div class="">
-    <div class="py-8 space-y-6 z-99 sticky top-0 bg-main rounded-b-4xl">
+    <div class="-mx-4 px-4 pt-6 pb-4 space-y-6 z-99 sticky top-0 canvas rounded-b-4xl">
       <div class="flex justify-between items-end gap-6">
         <div class="ai-ring main-card-rounded p-px flex items-center">
           <div class="flex items-center rounded-[31px] px-4 bg-primary-5">
             <IconSearch class="w-4 " />
             <input type="text" :placeholder="'Search recipes, ingredients, techniques...'" v-model="searchQuery"
               @keyup.enter="refresh(true)" @blur="handleSearchBlur"
-              class="text-xs grow focus:outline-none w-80 px-2 py-[9px]" />
+              class="text-xs grow focus:outline-none w-80 px-2 py-2" />
           </div>
         </div>
-        <span class="font-mono text-xs text-gray-400 uppercase text-nowrap hidden sm:block">{{ totalCount }}
+        <span class="font-mono text-xs text-gray-400 uppercase tracking-wider text-nowrap hidden sm:block">{{ totalCount }}
           Results</span>
       </div>
 
       <div class="flex justify-between items-center flex-wrap gap-2 z-2">
-        <div class="filters flex items-center gap-2">
+        <div class="filters flex items-center gap-1">
           <button @click="onSelect('tags')" :class="{
-            'bg-white shadow-xs': selectedFilter === 'tags',
-          }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
+            'bg-dark! text-white': selectedFilter === 'tags',
+          }" class="flex main-button animated-button px-3 py-1 text-sm gap-2 items-center
+          ">
             <IconTag class="w-4" />
             <span class="hidden lg:block">Tags</span>
           </button>
           <button @click="onSelect('health')" :class="{
-            'bg-white shadow-xs': selectedFilter === 'health',
+            'bg-dark! text-white': selectedFilter === 'health',
           }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconShield class="w-4" />
             <span class="hidden lg:block">Health Score</span>
           </button>
           <button @click="onSelect('kcal')" :class="{
-            'bg-white shadow-xs': selectedFilter === 'kcal',
+            'bg-dark! text-white': selectedFilter === 'kcal',
           }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconZap class="w-4" />
             <span class="hidden lg:block">Kcal</span>
           </button>
           <button @click="onSelect('cost')" :class="{
-            'bg-white shadow-xs': selectedFilter === 'cost',
+            'bg-dark! text-white': selectedFilter === 'cost',
           }" class="flex main-button animated-button bg-primary-5 px-3 py-1 text-sm gap-2 items-center">
             <IconEuro class="w-4" />
             <span class="hidden lg:block">Cost</span>
@@ -53,11 +54,11 @@
           <div class="py-1">
             <BlocksCarousel>
               <div v-for="category in categories" :key="category.tag" @click="toggleTag(category)" :class="{
-                '!bg-primary !text-white': filteringTags.includes(
+                'bg-primary! text-white!': filteringTags.includes(
                   category.tag
                 ),
               }"
-                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-0.5 transition-all duration-300 flex-shrink-0 main-button animated-button bg-primary-5 m-1">
+                class="flex flex-col sm:flex-row items-center gap-x-1 px-2 py-0.5 transition-all duration-300 shrink-0 main-button animated-button bg-primary-5 m-1">
                 <span class="text-lg">{{ category.icon }}</span>
                 <span class="text-sm text-nowrap">{{ category.name }}</span>
               </div>
@@ -83,7 +84,7 @@
           </div>
         </div>
         <div class="relative py-3 select-none ml-4 mr-6 lg:mx-3" v-if="selectedFilter == 'health'">
-          <FormsRangeSlider v-model="healthScoreRange" :min="0" :max="110" class="max-w-lg" :display-map="getGrade"
+          <FormsRangeSlider v-model="healthScoreRange" :min="0" :max="120" class="max-w-lg" :display-map="getGrade"
             :update="updateGradeTag" />
         </div>
         <div class="relative py-3 select-none ml-4 mr-12 lg:mx-3" v-if="selectedFilter == 'kcal'">
@@ -97,9 +98,9 @@
       </div>
       <div v-if="visibleTags.length" class="flex gap-2 flex-wrap mt-4">
         <button v-for="(tag, index) in visibleTags"
-          class="px-3 main-button animated-button bg-primary-5 flex items-center justify-center gap-2 group shadow-none!"
+          class="px-3 main-button animated-button text-sm text-gray-700 flex items-center justify-center gap-2 "
           @click="removeTag(index)">
-          <IconX class="w-5" />
+          <IconX class="w-3" />
           <span>{{ tag }}</span>
         </button>
       </div>
@@ -140,7 +141,7 @@ const isEmbedding = ref(false);
 const selectedFilter = ref('');
 const results = ref<RecipeOverview[]>([]);
 
-const healthScoreRange = ref<[number, number]>([0, 110]);
+const healthScoreRange = ref<[number, number]>([0, 120]);
 const kcalRange = ref<[number, number]>([0, 2500]);
 const costRange = ref<[number, number]>([0, 200]);
 
@@ -202,7 +203,7 @@ const sorts = ref([
   { displayName: 'Newest', value: { column: 'created_at', ascending: false } },
 ]);
 
-const RECIPES_PER_PAGE = 13;
+const RECIPES_PER_PAGE = 16;
 const currentOffset = ref(0);
 const isLoading = ref(false);
 const hasMoreRecipes = ref(true);

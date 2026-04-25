@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <div>
     <!-- Header -->
     <div class="flex items-center gap-2.5 mb-3.5 pb-2 border-b border-gray-100">
       <div class="w-1 h-5 rounded-full" :class="accentClass"></div>
@@ -118,7 +118,7 @@
           @click="explainerOpen = false">Got it</button>
       </div>
     </BlocksModal>
-  </section>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -182,6 +182,7 @@ const BADGE_TIERS = {
   solid: { text: 'Solid', cls: 'bg-sky-100 text-sky-700' },
   some: { text: 'Some', cls: 'bg-slate-100 text-slate-600' },
   low: { text: 'Low', cls: 'bg-orange-50 text-orange-400' },
+  none: { text: 'None', cls: 'bg-slate-50 text-slate-400' },
 } as const;
 
 /** Normalized density: how much of RDA this meal's nutrient concentration would hit across a 2200-kcal day. */
@@ -192,18 +193,18 @@ function normalizedDensity(value: number, rda: number): number {
 }
 
 function rdaBadge(value: number | undefined, rda: number | undefined): Badge | null {
-  if (!value || !rda) return null;
   const n = normalizedDensity(value, rda);
   if (n >= 130) return BADGE_TIERS.very_high;
   if (n >= 90) return BADGE_TIERS.complete;
   if (n >= 50) return BADGE_TIERS.solid;
   if (n >= 25) return BADGE_TIERS.some;
-  return BADGE_TIERS.low;
+  if (n > 0) return BADGE_TIERS.low;
+  return BADGE_TIERS.none;
 }
 
 function levelBadge(value: number | undefined): Badge {
   if (!value || value < 5) return { text: 'None', cls: 'bg-slate-50 text-slate-400' };
-  if (value < 20) return { text: 'Trace', cls: 'bg-green-50 text-green-600' };
+  if (value < 20) return { text: 'Trace', cls: 'bg-slate-100 text-slate-600' };
   if (value < 30) return { text: 'Some', cls: 'bg-green-100 text-green-700' };
   if (value < 40) return { text: 'Moderate', cls: 'bg-emerald-100 text-emerald-700' };
   if (value < 60) return { text: 'High', cls: 'bg-sky-100 text-sky-700' };

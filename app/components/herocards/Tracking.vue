@@ -15,12 +15,12 @@
         <div
           class="flex flex-col items-center text-center gap-2 p-6 main-card main-card-rounded shadow-sm! flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card1" @click="scrollTo(card1)">
-          <img src="/blob.webp" alt="Blob" class="opacity-20 h-50 z-0 rotate-160" />
+          <img src="/blob.webp" alt="Blob" class="opacity-10 h-50 z-0 rotate-160" />
           <img src="/tracking-define-your-path.webp" alt="Universal Cookbook" class="h-30 -mt-44 z-10" />
           <h2 class="text-xl md:text-2xl font-headers tracking-tight mt-12">
             1. Define Your Path
           </h2>
-          <p class="text-base md:text-lg tracking-tight text-center leading-6 -mt-2">
+          <p class="tracking-tight text-center -mt-2 text-gray-700">
             Set personalized diet preferences, weight goals, and activity
             levels. We calculate your ideal macro and caloric needs
             automatically.
@@ -29,12 +29,12 @@
         <div
           class="flex flex-col items-center text-center gap-2 p-6 main-card main-card-rounded shadow-sm! flex-1 min-w-76 snap-start md:min-w-0 shrink-0"
           ref="card2" @click="scrollTo(card2)">
-          <img src="/blob.webp" alt="Blob" class="opacity-20 h-50 rotate-340 z-0" />
+          <img src="/blob.webp" alt="Blob" class="opacity-10 h-50 rotate-340 z-0" />
           <img src="/tracking-log-instantly.webp" alt="Tailored Discovery" class="h-38 -mt-44 z-10" />
           <h2 class="text-xl md:text-2xl font-headers tracking-tight mt-4">
             2. Log Instantly
           </h2>
-          <p class="text-base md:text-lg tracking-tight text-center leading-6 -mt-2">
+          <p class="tracking-tight text-center -mt-2 text-gray-700">
             Scan barcodes, search 35k+ branded foods, or simply type what you
             ate. Our smart parser extracts ingredients and portions instantly.
           </p>
@@ -42,12 +42,12 @@
         <div
           class="flex flex-col items-center text-center gap-2 p-6 main-card main-card-rounded shadow-sm! flex-1 min-w-70 snap-start md:min-w-0 shrink-0"
           ref="card3" @click="scrollTo(card3)">
-          <img src="/blob.webp" alt="Blob" class="opacity-20 h-50" />
+          <img src="/blob.webp" alt="Blob" class="opacity-10 h-50" />
           <img src="/tracking-see-the-impact.webp" alt="Smart Tracking" class="h-30 -mt-40 z-10" />
           <h2 class="text-xl md:text-2xl font-headers tracking-tight mt-8">
             3. See the Impact
           </h2>
-          <p class="text-base md:text-lg tracking-tight text-center leading-6 -mt-2">
+          <p class="tracking-tight text-center -mt-2 text-gray-700">
             Go beyond calories. Track micronutrients, get Health Scores for
             every meal, and visualize your progress over time.
           </p>

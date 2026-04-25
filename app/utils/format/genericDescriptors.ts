@@ -82,7 +82,7 @@ export const positiveAmountDescriptors = {
 };
 
 export const negativeAmountDescriptors = {
-  F: { description: 'Excessive', ...POOR },
+  F: { description: 'Very High in', ...POOR },
   E: { description: 'High in', ...BAD },
   D: { description: 'Elevated', ...SUBOPTIMAL },
   C: { description: 'Normal amount of', ...OKAY },

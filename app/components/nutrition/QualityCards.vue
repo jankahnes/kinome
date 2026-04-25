@@ -1,12 +1,12 @@
 <template>
   <div class="">
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-px bg-faint! main-card main-card-rounded overflow-hidden">
       <div v-for="item in sortedCards" :key="item.title"
-        class="relative flex flex-col items-center p-4 main-card main-card-rounded transition-all gap-1"
-        :class="{ 'main-button animated-button': item.clickable, 'opacity-40': item.orderValue < 0 }"
+        class="relative flex flex-col items-center p-4 transition-all gap-1 bg-primary-5"
+        :class="{ 'rounded-none!': item.clickable, 'opacity-40': item.orderValue < 0 }"
         @click="item.clickable && handleCardClick(item.title)">
         <IconChevronRight v-if="item.clickable" class="absolute top-3 right-3 w-5 text-slate-400" />
-        <img class="h-14 object-contain mt-1" :src="`/nutrition-highlights/${item.img}`" :alt="item.title" />
+        <img class="h-14 object-contain mt-1" :src="item.img" :alt="ALTS[item.img]" />
         <div class="text-lg font-semibold tracking-tighter leading-none text-center mt-1">{{ item.title }}</div>
         <div class="text-sm text-slate-600 text-center leading-none">{{ item.subtitle }}</div>
         <div class="px-2.5 py-0.5 rounded-full text-sm font-semibold mt-2" :class="item.pillClass">

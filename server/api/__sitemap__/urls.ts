@@ -111,7 +111,7 @@ export default defineEventHandler(async () => {
           .replace(/-+$/, '');
         urls.push({
           loc: `/foods/${food.id}-${slug}`,
-          lastmod: '2026-04-01',
+          lastmod: '2026-04-25',
           changefreq: 'monthly',
           priority: 0.6,
         });

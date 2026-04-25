@@ -163,12 +163,7 @@
                   </div>
 
                   <div class="flex flex-col gap-2 pb-2">
-                    <!-- Tip -->
-                    <div v-if="currentStepData?.tip" class="p-4 border bg-primary-50 border-primary-400 rounded-3xl">
-                      <p class="text-sm">
-                        💡 {{ currentStepData.tip }}
-                      </p>
-                    </div>
+
 
                     <!-- Timer -->
                     <div v-if="timerTotal > 0" class="self-center bg-primary-5 rounded-3xl flex items-center gap-4">
@@ -200,6 +195,12 @@
                           <IconRotateCcw class="w-4 h-4" />
                         </button>
                       </div>
+                    </div>
+                    <!-- Tip -->
+                    <div v-if="currentStepData?.tip" class="p-4 border bg-primary-50 border-primary-400 rounded-3xl">
+                      <p class="text-sm">
+                        💡 {{ currentStepData.tip }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -344,8 +345,8 @@
           <!-- Intro footer -->
           <template v-if="phase === 'intro'">
             <button @click="startCooking" :disabled="!steps.length"
-              class="main-button animated-button flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-500 text-white font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed">
-              <IconChefHat class="w-4 h-4" />
+              class="main-button animated-button flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-500! text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+              <IconChefHat class="w-5" />
               Let's cook!
             </button>
           </template>
@@ -358,12 +359,12 @@
               {{ currentStep === 0 ? 'Back' : 'Previous' }}
             </button>
             <button v-if="currentStep < steps.length - 1" @click="nextStep"
-              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-primary text-white font-semibold text-sm">
+              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-primary! font-headers italic text-white">
               Next step
               <IconChevronRight class="w-4 h-4" />
             </button>
             <button v-else @click="finishCooking"
-              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-green-500 text-white font-semibold text-sm">
+              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-green-500 text-white font-semibold">
               <IconCheck class="w-4 h-4" />
               Done cooking!
             </button>
