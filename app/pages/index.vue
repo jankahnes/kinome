@@ -52,11 +52,12 @@
     <!-- Categories -->
     <BlocksCarousel show-progress show-arrows>
       <div class="flex items-center gap-x-1 px-3 py-0.5 text-gray-700 main-button animated-button my-2 mr-2 sm:mr-3"
-        @click="navigateTo('/kitchen/social')">
+        :class="{ 'carousel-active bg-dark! text-white': isTrendingSelected }" @click="onClickTrending">
         <span class="text-lg">🔥</span>
         <span class="text-sm text-nowrap">Trending</span>
       </div>
       <div v-for="category in categories" :key="category.tag"
+        :class="{ 'carousel-active bg-dark! text-white': selectedCategoryTag === category.tag }"
         class="flex items-center gap-x-1 px-3 py-0.5 text-gray-700 main-button animated-button my-2 mr-2 sm:mr-3"
         @click="onClickCategory(category.tag)">
         <span class="text-lg">{{ category.icon }}</span>
@@ -68,45 +69,77 @@
 
     <!-- Recommendations: Mobile -->
     <div class="flex flex-wrap gap-x-2 gap-y-4 2lg:hidden justify-center">
-      <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(2, 4)" :key="recipe.id + 'mobile'"
-        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
-        class="text-[20px] basis-40 flex-1" />
-      <RecipeCardHighlight :key="recipeStore.indexRecipes[0]?.id + 'mobile'" :recipe="recipeStore.indexRecipes[0]!"
-        :id="'mdh-0-0'" :uniqueId="'mdh-0-0'" class="basis-full" />
-      <RecipeCard v-for="(recipe, index) in recipeStore.indexRecipes.slice(4, 8)" :key="recipe.id + 'mobile'"
-        :recipe="recipe" :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + (index + 3) + '-' + recipe.id"
-        class="text-[20px] basis-40 flex-1" />
-      <RecipeCardHighlight :key="recipeStore.indexRecipes[1]?.id + 'mobile'" :recipe="recipeStore.indexRecipes[1]!"
-        :id="'mdh-0-1'" :uniqueId="'mdh-0-1'" class="basis-full" />
-
+      <template v-if="isRecommendationsLoading">
+        <Skeleton v-for="i in 2" :key="'mobile-card-skeleton-top-' + i"
+          class="text-[20px] basis-40 flex-1 h-[210px] mt-8 md:mt-16" />
+        <Skeleton class="basis-full min-h-[250px]" />
+        <Skeleton v-for="i in 4" :key="'mobile-card-skeleton-bottom-' + i"
+          class="text-[20px] basis-40 flex-1 h-[210px] mt-8 md:mt-16" />
+        <Skeleton class="basis-full min-h-[250px]" />
+      </template>
+      <template v-else>
+        <RecipeCard v-for="(recipe, index) in displayedRecipes.slice(2, 4)" :key="recipe.id + 'mobile'" :recipe="recipe"
+          :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + index + '-' + recipe.id"
+          :showSocialInfo="isTrendingSelected" class="text-[20px] basis-40 flex-1" />
+        <RecipeCardHighlight v-if="displayedRecipes[0]" :key="displayedRecipes[0].id + 'mobile'"
+          :recipe="displayedRecipes[0]" :id="'mdh-0-0'" :uniqueId="'mdh-0-0'" :showSocialInfo="isTrendingSelected"
+          class="basis-full" />
+        <RecipeCard v-for="(recipe, index) in displayedRecipes.slice(4, 8)" :key="recipe.id + 'mobile'" :recipe="recipe"
+          :id="'mobile-' + index + '-' + recipe.id" :uniqueId="'mobile-' + (index + 3) + '-' + recipe.id"
+          :showSocialInfo="isTrendingSelected" class="text-[20px] basis-40 flex-1" />
+        <RecipeCardHighlight v-if="displayedRecipes[1]" :key="displayedRecipes[1].id + 'mobile'"
+          :recipe="displayedRecipes[1]" :id="'mdh-0-1'" :uniqueId="'mdh-0-1'" :showSocialInfo="isTrendingSelected"
+          class="basis-full" />
+      </template>
     </div>
 
     <!-- Recommendations: Desktop -->
-    <div class="hidden 2lg:block transition-all duration-150" :class="rowMaxHeight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-x-2'
+    <div class="hidden 2lg:block transition-all duration-150" :class="isRecommendationsLoading || rowMaxHeight ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-x-2'
       ">
-      <div class="flex gap-8 py-1 overflow-hidden" :class="rowMaxHeight ? 'flex-wrap' : 'flex-nowrap'" :style="{
-        maxHeight: rowMaxHeight ? rowMaxHeight + 'px' : undefined,
-      }">
-        <RecipeCard v-for="(recipe, index) in desktopRecipes" :key="recipe.id + 'desktop'" :recipe="recipe"
-          :id="'desktop-' + (index - 1) + '-' + recipe.id" :uniqueId="index === 0
-            ? 'desktop-0-0'
-            : 'desktop-' + (index - 1) + '-' + recipe.id
-            " class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110" :ref="(el) => {
+      <div class="flex gap-8 py-1 overflow-hidden"
+        :class="isRecommendationsLoading || rowMaxHeight ? 'flex-wrap' : 'flex-nowrap'" :style="{
+          maxHeight: rowMaxHeight ? rowMaxHeight + 'px' : undefined,
+        }">
+        <template v-if="isRecommendationsLoading">
+          <Skeleton v-for="i in 6" :key="'desktop-card-skeleton-' + i"
+            class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110 h-[320px] mt-8 md:mt-16" />
+        </template>
+        <template v-else>
+          <RecipeCard v-for="(recipe, index) in desktopRecipes" :key="recipe.id + 'desktop'" :recipe="recipe"
+            :id="'desktop-' + (index - 1) + '-' + recipe.id" :uniqueId="index === 0
+              ? 'desktop-0-0'
+              : 'desktop-' + (index - 1) + '-' + recipe.id
+              " :showSocialInfo="isTrendingSelected"
+            class="flex-1 text-[30px] basis-54 max-w-92 2xl:basis-62 2xl:max-w-110" :ref="(el) => {
               if (el) desktopCards[index] = el;
             }
               " />
+        </template>
       </div>
       <div class="flex mt-6 flex-wrap gap-8 items-stretch">
-        <RecipeCardHighlight v-if="recipeStore.indexRecipes[0]" :recipe="recipeStore.indexRecipes[0]"
-          :uniqueId="'desktop-0-0'" class="flex-1 basis-244 3xl:max-w-6xl" />
-        <div class="flex flex-wrap gap-4 shrink-0 basis-80 flex-1 items-center">
-          <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(7, 9)"
-            :key="recipe.id + 'desktop'" :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"
-            :uniqueId="'desktop-' + index + '-' + recipe.id" class="text-[30px] basis-95 flex-1" />
-          <RecipeCardHorizontal v-for="(recipe, index) in recipeStore.indexRecipes.slice(9, 11)"
-            :key="recipe.id + 'desktop'" :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"
-            :uniqueId="'desktop-' + index + '-' + recipe.id" class="text-[30px] hide-below-2200 basis-95 flex-1" />
-        </div>
+        <template v-if="isRecommendationsLoading">
+          <Skeleton class="flex-1 basis-244 3xl:max-w-6xl min-h-[250px]" />
+          <div class="flex flex-wrap gap-4 shrink-0 basis-80 flex-1 items-center">
+            <Skeleton v-for="i in 2" :key="'desktop-horizontal-skeleton-' + i"
+              class="text-[30px] basis-95 flex-1 h-[140px]" />
+            <Skeleton v-for="i in 2" :key="'desktop-horizontal-wide-skeleton-' + i"
+              class="text-[30px] hide-below-2200 basis-95 flex-1 h-[140px]" />
+          </div>
+        </template>
+        <template v-else>
+          <RecipeCardHighlight v-if="displayedRecipes[0]" :recipe="displayedRecipes[0]"
+            :showSocialInfo="isTrendingSelected" :uniqueId="'desktop-0-0'" class="flex-1 basis-244 3xl:max-w-6xl" />
+          <div class="flex flex-wrap gap-4 shrink-0 basis-80 flex-1 items-center">
+            <RecipeCardHorizontal v-for="(recipe, index) in displayedRecipes.slice(7, 9)" :key="recipe.id + 'desktop'"
+              :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"
+              :uniqueId="'desktop-' + index + '-' + recipe.id" :showSocialInfo="isTrendingSelected"
+              class="text-[30px] basis-95 flex-1" />
+            <RecipeCardHorizontal v-for="(recipe, index) in displayedRecipes.slice(9, 11)" :key="recipe.id + 'desktop'"
+              :recipe="recipe" :id="'desktop-' + index + '-' + recipe.id"
+              :uniqueId="'desktop-' + index + '-' + recipe.id" :showSocialInfo="isTrendingSelected"
+              class="text-[30px] hide-below-2200 basis-95 flex-1" />
+          </div>
+        </template>
       </div>
     </div>
 
@@ -143,6 +176,12 @@ const searchQuery = ref('');
 const auth = useAuthStore();
 
 const recipeCount = ref(1000);
+const selectedCategoryTag = ref<number | null>(null);
+const filteredIndexRecipes = ref<RecipeOverview[]>([]);
+const trendingRecipes = ref<RecipeOverview[]>([]);
+const isTrendingSelected = ref(false);
+const isRecommendationsLoading = ref(false);
+let recommendationRequestId = 0;
 
 const getTodayString = () => {
   const today = new Date();
@@ -204,16 +243,33 @@ useHead({
 
 const desktopCards = ref<any[]>([]);
 const rowMaxHeight = useTruncateRow(desktopCards, 12);
-const desktopRecipes = computed(() => recipeStore.indexRecipes.slice(1, 7));
+const displayedRecipes = computed(() =>
+  isTrendingSelected.value
+    ? trendingRecipes.value
+    : selectedCategoryTag.value
+      ? filteredIndexRecipes.value
+      : recipeStore.indexRecipes
+);
+const desktopRecipes = computed(() => displayedRecipes.value.slice(1, 7));
+
+const getIndexRecipes = (tag?: number) =>
+  getRecipeOverviews(supabase, {
+    eq: { visibility: 'PUBLIC' },
+    not: { picture: null },
+    orderBy: { column: 'relevancy', ascending: false },
+    limit: 11,
+    ...(tag
+      ? { filtering: { tags: [tag], hidx: null, kcal: null, price: null } }
+      : {}),
+  });
+
+onBeforeUpdate(() => {
+  desktopCards.value = [];
+});
 
 if (!recipeStore.indexRecipes.length) {
   const { data } = await useLazyAsyncData('index', () =>
-    getRecipeOverviews(supabase, {
-      eq: { visibility: 'PUBLIC' },
-      not: { picture: null },
-      orderBy: { column: 'relevancy', ascending: false },
-      limit: 11,
-    })
+    getIndexRecipes()
   );
   watchEffect(() => {
     recipeStore.setIndexRecipes(data.value ?? []);
@@ -221,13 +277,16 @@ if (!recipeStore.indexRecipes.length) {
 }
 
 if (!recipeStore.socialIndexRecipes.length) {
-  useAsyncData('social', () =>
+  const { data: socialData } = await useLazyAsyncData('social', () =>
     getRecipeOverviews(supabase, {
       orderBy: { column: 'created_at', ascending: false },
       limit: 6,
       eq: { source_type: 'MEDIA', visibility: 'PUBLIC' },
     })
-  ).then(({ data }) => recipeStore.setSocialIndexRecipes(data.value ?? []));
+  );
+  watchEffect(() => {
+    if (socialData.value) recipeStore.setSocialIndexRecipes(socialData.value);
+  });
 }
 
 const categories = ref([
@@ -273,8 +332,57 @@ const categories = ref([
   },
 ]);
 
-const onClickCategory = (category: number) => {
-  navigateTo(`/kitchen/recipes?tags=${category}`);
+const onClickCategory = async (category: number) => {
+  if (selectedCategoryTag.value === category) {
+    recommendationRequestId++;
+    isRecommendationsLoading.value = false;
+    selectedCategoryTag.value = null;
+    filteredIndexRecipes.value = [];
+    return;
+  }
+
+  const requestId = ++recommendationRequestId;
+  isTrendingSelected.value = false;
+  selectedCategoryTag.value = category;
+  isRecommendationsLoading.value = true;
+  try {
+    const recipes = await getIndexRecipes(category);
+    if (requestId === recommendationRequestId && !isTrendingSelected.value && selectedCategoryTag.value === category) {
+      filteredIndexRecipes.value = recipes;
+    }
+  } finally {
+    if (requestId === recommendationRequestId) {
+      isRecommendationsLoading.value = false;
+    }
+  }
+};
+
+const onClickTrending = async () => {
+  if (isTrendingSelected.value) {
+    recommendationRequestId++;
+    isRecommendationsLoading.value = false;
+    isTrendingSelected.value = false;
+    return;
+  }
+
+  const requestId = ++recommendationRequestId;
+  isTrendingSelected.value = true;
+  selectedCategoryTag.value = null;
+  if (!trendingRecipes.value.length) {
+    isRecommendationsLoading.value = true;
+    try {
+      const recipes = await getTrendingThisMonth(supabase, 11);
+      if (requestId === recommendationRequestId && isTrendingSelected.value) {
+        trendingRecipes.value = recipes;
+      }
+    } finally {
+      if (requestId === recommendationRequestId) {
+        isRecommendationsLoading.value = false;
+      }
+    }
+  } else {
+    isRecommendationsLoading.value = false;
+  }
 };
 
 const handleSearch = () => {

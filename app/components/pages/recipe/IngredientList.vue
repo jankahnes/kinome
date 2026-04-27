@@ -6,14 +6,14 @@
 
     <div class="main-card main-card-padding main-card-rounded flex flex-col relative gap-2"
       :class="{ 'bg-primary-20/80! overflow-hidden': formalizationLoading }">
-      <div class="flex justify-between items-center w-full mb-4">
+      <div class="flex justify-between items-start w-full mb-4">
         <div v-if="ingredients && ingredients.length > 0">
           <div class="" v-if="batchSize && !servingMode">
             <p class="text-gray-600 ml-1 font-light">
               For {{ batchSize }} {{ batchSize === 1 ? 'serving' : 'servings' }}
             </p>
             <p @click="servingMode = !servingMode"
-              class="text-xs text-gray-400 ml-1 font-extralight cursor-pointer italic">
+              class="text-xs text-gray-500 ml-1 font-extralight cursor-pointer italic underline decoration-gray-300">
               Adjust servings
             </p>
           </div>
@@ -74,7 +74,7 @@
                 <div v-if="quickEditMode && !isFreeUnit(ingredient)"
                   class="absolute inset-y-0 left-0 bg-primary/5 pointer-events-none transition-all duration-200 ease-out"
                   :style="{ width: fillPct(ingredient) + '%', opacity: draggingIngredientId === ingredient.id ? 1 : 0 }" />
-                <img class="relative h-4.5 min-w-6 object-contain object-center"
+                <img class="relative h-4.5 w-6 object-contain object-center"
                   :src="`/foods/${ingredient.visual_category}.webp`" v-if="ingredient.visual_category" :alt="ALTS[`/foods/${ingredient.visual_category}.webp`]" />
                 <span class="relative leading-none">
                   <Transition :name="quickEditMode ? '' : 'fade-slide'" mode="out-in">
@@ -128,14 +128,14 @@
             (addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75)
           ">
             <div class="flex items-center rounded-xl" v-if="addedInfo?.addedFat && getAdded(addedInfo?.addedFat) >= 1">
-              <span class="text-[10px] text-gray-400 tracking-widest">
+              <span class="text-[10px] text-gray-500 tracking-widest">
                 🧈 Plus ~{{ getAdded(addedInfo?.addedFat) }}g of
                 fat</span>
             </div>
             <div class="flex items-center rounded-xl" v-if="
               addedInfo?.addedSalt && getAdded(addedInfo?.addedSalt) >= 0.75
             ">
-              <span class="text-[10px] text-gray-400 tracking-widest">
+              <span class="text-[10px] text-gray-500 tracking-widest">
                 🧂 Plus ~{{ getAdded(addedInfo?.addedSalt) }}g of
                 salt</span>
             </div>

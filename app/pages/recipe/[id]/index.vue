@@ -1,32 +1,34 @@
 <template>
   <div>
     <div class="flex flex-col items-center lg:ml-1 mb-20" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
-      <NuxtImg class="w-full h-50 sm:h-64 object-cover  object-top opacity-90"
+      <img class="w-full h-50 sm:h-64 object-cover  object-top opacity-90"
         :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.png" alt="Light wooden background" />
       <NuxtImg v-if="recipeStore.recipe?.picture"
-        class="-mt-47 h-44 sm:h-82 sm:-mt-60 shadow-[#00000038] filter-[drop-shadow(10px_10px_20px_var(--tw-shadow-color))_drop-shadow(0_0_10px_#00000015)]"
-        :src="recipeStore.recipe?.picture" :alt="recipeStore.recipe?.title ?? 'Recipe picture'" />
+        class="recipe-hero-image -mt-47 h-44 w-44 sm:h-82 sm:w-82 object-contain sm:-mt-60 shadow-[#00000038] transition-[opacity,border-radius] duration-250"
+        :class="recipeHeroImageLoaded ? 'opacity-100' : 'opacity-0'" :src="recipeStore.recipe?.picture"
+        :alt="recipeStore.recipe?.title ?? 'Recipe picture'" sizes="sm:180px md:330px" format="webp" preload
+        fetchpriority="high" @load="recipeHeroImageLoaded = true" />
       <!-- Central overview -->
       <div
         class="max-w-[850px] flex flex-col items-start md:items-center text-left md:text-center mx-5 lg:mx-8 mt-8 sm:mt-2"
         :class="{ 'mt-8!': !recipeStore.recipe?.picture }">
 
-        <h1 class="leading-none text-3xl xl:text-6xl font-headers tracking-tight text-balance">
+        <h1 class="leading-none text-[34px] xl:text-6xl font-headers tracking-tight text-balance">
           {{ recipeStore.recipe?.title }}
         </h1>
-        <p class="text-gray-600 mt-1 hidden xl:block">
+        <p class="text-gray-600 mt-1 hidden xl:block text-sm sm:text-base">
           {{ recipeStore.recipe?.description }}
         </p>
-        <p class="text-gray-600 mt-2 leading-snug block xl:hidden" v-if="mobileDescriptionExpanded"
+        <p class="text-gray-600 mt-2 leading-snug block xl:hidden text-sm sm:text-base" v-if="mobileDescriptionExpanded"
           @click="mobileDescriptionExpanded = false">
           {{ recipeStore.recipe?.description }}
         </p>
-        <p class="text-gray-600 mt-2 leading-snug block xl:hidden" v-else @click="mobileDescriptionExpanded = true">
+        <p class="text-gray-600 mt-2 leading-snug block xl:hidden text-sm sm:text-base" v-else @click="mobileDescriptionExpanded = true">
           {{ mobileDescription }}...
           <span class="text-xs text-gray-400 cursor-pointer">Show more
           </span>
         </p>
-        <p class="text-sm text-gray-400 mt-1 text-balance" v-if="originDisplay">
+        <p class="text-xs sm:text-[13px] text-gray-500 mt-2 sm:mt-1 text-balance" v-if="originDisplay">
           <span v-if="originDisplay.type === 'traditional'" class="inline-flex items-center gap-1.5 align-middle">
             <span class="rounded-sm overflow-hidden flex items-center" v-for="flag in originDisplay.flags" :key="flag">
               <img :src="`/flags/${flag}.svg`" :alt="flag" class="h-4" />
@@ -43,8 +45,8 @@
               recipeStore.recipe?.user?.username + " " }}</NuxtLink></span>
           </span>
           <span v-if="recipeStore.recipe?.based_on" class="leading-none align-middle">
-            · {{ recipeStore.recipe?.variation_name }} of <NuxtLink
-              :to="`/recipe/${recipeStore.recipe?.based_on_parent?.id}`" class="cursor-pointer font-bold">{{
+            <span class="hidden sm:inline">· </span><br class="sm:hidden"> {{ recipeStore.recipe?.variation_name }} of <NuxtLink
+              :to="`/recipe/${recipeStore.recipe?.based_on_parent?.id}`" class="cursor-pointer font-medium">{{
                 recipeStore.recipe?.based_on_parent?.title }}</NuxtLink>
           </span>
           <span v-else-if="originDisplay.type !== 'traditional'" class="leading-none align-middle">{{ " " }} · Original
@@ -58,41 +60,40 @@
             </button>
           </span>
         </p>
-
         <p class="flex gap-2 mt-2">
           <button
-            class="main-button animated-button bg-primary! text-white font-headers text-lg flex-1 flex justify-center items-center gap-2 px-4 italic"
+            class="main-button animated-button bg-primary! text-white font-headers md:text-lg flex-1 flex justify-center items-center gap-2 px-4 italic"
             @click="cookModeOpen = true">
-            <IconRocket class="w-5" :size="24" />
+            <IconRocket class="w-4 md:w-5" :size="24" />
             Start Cooking
           </button>
-          <button class="main-button animated-button flex justify-center items-center px-2"
+          <button class="main-button animated-button flex justify-center items-center px-2 text-sm md:text-base"
             v-if="effectiveSource && recipeStore.recipe?.source_type === 'MEDIA'" @click="scrollToWatchSection()">
             <IconChevronDown class="h-4" />
             <span class="leading-none">Video</span>
           </button>
-          <button v-if="!trackingAdded" class="flex justify-center items-center gap-2 p-1 text-slate-600"
+          <button v-if="!trackingAdded" class="flex justify-center items-center gap-2 px-1 py-0.5 md:py-1 text-slate-600"
             :class="{ 'opacity-60 cursor-not-allowed': trackingLoading }" :disabled="trackingLoading"
             title="Track this meal" @click="trackFromRecipePage">
-            <IconLoaderCircle v-if="trackingLoading" class="w-5.5 animate-spin" />
-            <IconNotebookPen v-else class="w-5.5" />
+            <IconLoaderCircle v-if="trackingLoading" class="w-4.5 md:w-5.5 animate-spin" />
+            <IconNotebookPen v-else class="w-4.5 md:w-5.5" />
           </button>
           <button v-else
             class="rounded-2xl flex justify-center items-center gap-0.5 pt-0.5 px-3 bg-green-100/70 text-green-800"
             disabled>
-            <IconCheck class="w-5" />
+            <IconCheck class="w-4.5 md:w-5" />
             <div class="flex flex-col items-start ml-2">
               <span class="text-lg leading-none">Tracked</span>
               <span class="leading-none text-[11px] -mt-0.5">Added to today</span>
             </div>
           </button>
-          <button class="flex justify-center items-center gap-2 p-1 text-slate-600 transition-all duration-200" :class="{
+          <button class="flex justify-center items-center gap-2 px-1 py-0.5 md:py-1 text-slate-600 transition-all duration-200" :class="{
             '': isBookmarked,
             'opacity-60 cursor-not-allowed': bookmarkLoading,
           }" :disabled="bookmarkLoading" :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this recipe'"
             @click="toggleBookmark">
-            <IconLoaderCircle v-if="bookmarkLoading" class="w-5.5 animate-spin" />
-            <IconBookmark v-else class="w-6" :class="{ 'fill-current': isBookmarked }" />
+            <IconLoaderCircle v-if="bookmarkLoading" class="w-4 md:w-5.5 animate-spin" />
+            <IconBookmark v-else class="w-4.5 md:w-6" :class="{ 'fill-current': isBookmarked }" />
           </button>
         </p>
 
@@ -173,7 +174,7 @@
           <div class="xl:hidden order-1">
             <div class="w-0 h-0" ref="mobileTabTarget"></div>
             <div
-              class="flex gap-4 justify-between sticky top-0 bg-[#fffefb] md:bg-main p-4 rounded-b-4xl z-10 select-none cursor-pointer">
+              class="flex gap-4 justify-between sticky top-0 bg-[#fffefb] md:bg-main px-4 pb-3 pt-4 -mt-2 rounded-b-4xl z-10 select-none cursor-pointer">
               <h2 class="text-3xl font-headers tracking-tight flex-1" @click="
                 mobileTab = 'ingredients';
               scrollIntoView(mobileTabTarget);
@@ -300,10 +301,10 @@
                   <div class="flex flex-col gap-2 items-center p-4 -mx-4 md:-mx-6 bg-primary/8">
                     <img class="w-20 h-20 object-cover rounded-full opacity-80 shadow-[0_0_10px_#00000020]"
                       src="/neutral-avatar1.webp" alt="Guest avatar" />
-                    <div class="flex items-center gap-2 bg-primary-5 px-3 rounded-3xl ">
+                    <div class="flex items-start sm:items-center gap-2 bg-primary-5 px-3 rounded-3xl py-1">
                       <img :src="`/${getWebsiteName(effectiveSource)}.webp`" :alt="getWebsiteName(effectiveSource)"
-                        class="h-4" />
-                      <h3 class="text-lg font-headers tracking-tight truncate max-w-48">
+                        class="h-4 mt-1 sm:mt-0" />
+                      <h3 class="text-sm leading-tight sm:text-[17px] font-headers tracking-tight sm:truncate sm:max-w-48">
                         {{ recipeStore.recipe?.video_metadata?.channel }}
                       </h3>
                     </div>
@@ -370,7 +371,7 @@
         :recipeId="recipeStore.recipe?.id" :totalTime="recipeStore.recipe?.total_time_mins ?? 0"
         :equipment="recipeStore.recipe?.equipment ?? []" />
       <BlocksResponsiveInfo v-if="recipeStore.recipe?.kcal && recipeStore.recipe?.hidx" v-model="contextModalOpen"
-        :sidePanelClass="`w-${contextMode === 'health' ? '150' : '120'}`">
+        sidePanelClass="w-120">
         <div v-if="contextMode === 'nutrition'" class="m-4">
           <h2 class="text-3xl font-headers tracking-tight mb-8">Full Nutrition</h2>
           <FoodFullNutritionFacts :recipe="recipeStore.recipe" class="mt-10" single-column show-macros
@@ -446,6 +447,14 @@ const mobileDescriptionExpanded = ref(false);
 const mobileDescription = computed(() => {
   return recipeStore.recipe?.description?.slice(0, 130);
 });
+const recipeHeroImageLoaded = ref(false);
+
+watch(
+  () => recipeStore.recipe?.picture,
+  () => {
+    recipeHeroImageLoaded.value = false;
+  }
+);
 
 const mobileTabTarget = ref<HTMLElement | null>(null);
 const watchSectionTarget = ref<HTMLElement | null>(null);
@@ -1622,6 +1631,10 @@ const metaPills = computed(() => {
 </script>
 
 <style>
+.recipe-hero-image {
+  filter: blur(0) drop-shadow(10px 10px 20px var(--tw-shadow-color)) drop-shadow(0 0 10px #00000015);
+}
+
 .slide-down-enter-active,
 .slide-down-leave-active {
   transition: transform 0.3s ease-out;

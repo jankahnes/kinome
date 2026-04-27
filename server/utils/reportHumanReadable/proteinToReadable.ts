@@ -26,33 +26,50 @@ const proteinDensityDescriptors = {
 
 export default function proteinToReadable(report: any, isFood: boolean) {
   const items = [];
-  const qualityItem = generics.getHighestThreshold(
-    report.protein.limitingAA_ratio,
-    aminoAcidRatioDescriptors
-  );
-  if (report.protein.limitingAA_ratio < 1) {
-    qualityItem.subtitle =
-      'Protein quality limited by low ' + report.protein.limitingAA;
+  const proteinPer100g = report.protein.proteinPer100g ?? 0;
+  // Trace state from shared displayHints (see displayHints.ts). Keeps the
+  // gate threshold in one place and matches what the overview bullet uses.
+  const proteinHint = report?.displayHints?.protein;
+
+  if (proteinHint?.state !== 'trace') {
+    const qualityItem = generics.getHighestThreshold(
+      report.protein.limitingAA_ratio,
+      aminoAcidRatioDescriptors,
+    );
+    if (report.protein.limitingAA_ratio < 1) {
+      qualityItem.subtitle =
+        'Protein quality limited by low ' + report.protein.limitingAA;
+    }
+    items.push(qualityItem);
+    const proteinPer100gItem = generics.getHighestThreshold(
+      proteinPer100g,
+      proteinOfficialStandards,
+    );
+    items.push({
+      ...proteinPer100gItem,
+      subtitle: isFood
+        ? proteinPer100g.toFixed(0) + 'g protein per 100g'
+        : report.protein.proteinPerServing.toFixed(0) + 'g protein per serving',
+    });
+  } else {
+    items.push({
+      description: 'Amino acid profile not meaningful',
+      subtitle: `Only ${proteinPer100g.toFixed(1)}g protein per 100g`,
+      ...generics.TRACE,
+      trace: true,
+    });
   }
-  const proteinPer100gItem = generics.getHighestThreshold(
-    report.protein.proteinPer100g,
-    proteinOfficialStandards
-  );
+
   const proteinDensityItem = generics.getHighestThreshold(
     report.protein.proteinKcalRatio,
-    proteinDensityDescriptors
+    proteinDensityDescriptors,
   );
-  items.push(qualityItem);
-  items.push({
-    ...proteinPer100gItem,
-    subtitle: isFood
-      ? report.protein.proteinPer100g.toFixed(0) + 'g protein per 100g'
-      : report.protein.proteinPerServing.toFixed(0) + 'g protein per serving',
-  });
+
   items.push({
     ...proteinDensityItem,
     subtitle:
-      (report.protein.proteinKcalRatio * 100).toFixed(0) + '% kcal from protein',
+      (report.protein.proteinKcalRatio * 100).toFixed(0) +
+      '% kcal from protein',
   });
 
   items.sort((a, b) => b.value - a.value);

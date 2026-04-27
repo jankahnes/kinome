@@ -1,4 +1,8 @@
-import { getHighestThreshold } from '~/utils/format/genericDescriptors';
+import {
+  getHighestThreshold,
+  TRACE,
+  LOW_ABS,
+} from '~/utils/format/genericDescriptors';
 import capitalize from '~/utils/format/capitalize';
 
 const thresholds = {
@@ -36,36 +40,42 @@ const compounds = {
   glucosinolatesPer2000kcal: 'glucosinolates',
 };
 
+// Per-100g raw (0–10 internal scale) gates so the per-2000kcal extrapolation
+// can't claim "Rich" / "Excellent" on dilute foods like cola or cucumber.
+const TRACE_RAW_PER100G = 1;
+const LOW_ABS_RAW_PER100G = 3;
+
 export default function protectiveCompoundsToReadable(report: any) {
   const items = [];
-  for (const compound of Object.keys(compounds)) {
-    const value = report.protectiveCompounds[compound];
+  for (const [densityKey, rawKey] of Object.entries(compounds)) {
+    const value = report.protectiveCompounds[densityKey];
+    const rawPer100g = report.protectiveCompounds[rawKey] ?? 0;
+    const label = capitalize(densityKey.replace('Per2000kcal', ''));
+
     const contributors =
-      report?.contributors?.[
-        compounds[compound as keyof typeof compounds]
-      ]?.filter(
+      report?.contributors?.[rawKey]?.filter(
         (contributor: any) =>
           contributor.totalContribution > 3 && contributor.value > 0.33,
       ) || [];
 
+    const highestThreshold = getHighestThreshold(value, thresholds);
+    const description = highestThreshold.description + ' ' + label;
     const subtitle =
       contributors.length > 0
         ? 'From ' +
           contributors.map((contributor: any) => contributor.name).join(', ')
         : null;
-    const highestThreshold = getHighestThreshold(value, thresholds);
-    const description =
-      highestThreshold.description +
-      ' ' +
-      capitalize(compound.replace('Per2000kcal', ''));
+
     items.push({
-      description: description,
+      description,
       color: highestThreshold.color,
       icon: highestThreshold.icon,
       value,
       subtitle,
+      ...(rawPer100g < LOW_ABS_RAW_PER100G ? { lowAbs: true, ...LOW_ABS } : {}),
     });
   }
+  // Trace items sort to bottom via their negative `value`.
   items.sort((a, b) => b.value - a.value);
   return items;
 }

@@ -2,31 +2,29 @@
   <Transition name="loaded-content">
     <div class="pt-10 pb-20 sm:pb-4 relative" v-if="mounted">
       <div class="flex gap-8 flex-wrap">
-        <div class="flex flex-col gap-4 flex-1 2xl:min-w-100">
-          <h2 class="text-4xl font-headers tracking-tighter">Tracking</h2>
+        <div class="flex flex-col gap-4 flex-1 basis-full lg:basis-100">
+          <h2 class="text-3xl font-headers tracking-tight">Tracking</h2>
           <div class="flex flex-col gap-6">
             <div class="flex flex-wrap gap-2">
 
               <button v-for="mealPreset in savedTemplates" :key="mealPreset.id"
-                class="main-button animated-button flex items-center gap-2 px-4 py-1 bg-primary-5"
+                class="main-button animated-button flex items-center gap-2 px-2 md:px-4 py-1 text-sm"
                 @click="addMealFromTemplate(mealPreset.id)">
-                <IconBookMarked class="w-5" :stroke-width="1.5" />
+                <IconBookMarked class="w-4 h-4" :stroke-width="1.5" />
                 Add {{ mealPreset.name }}
               </button>
-              <button class="main-button animated-button flex items-center gap-2 px-4 py-1 bg-primary-5"
+              <button class="main-button animated-button flex items-center gap-2 px-2 md:px-4 py-1 text-sm"
                 @click="showRecipeSearchModal = true">
-                <IconSalad class="w-5" :stroke-width="1.5" />
+                <IconSalad class="w-4 h-4" :stroke-width="1.5" />
                 Add Meal from Recipe
               </button>
               <button v-for="mealPreset in mealPresets" :key="mealPreset"
-                class="main-button animated-button flex items-center gap-2 px-4 py-1 bg-primary-5"
+                class="main-button animated-button flex items-center gap-2 px-2 md:px-4 py-1 text-sm"
                 @click="addMeal(mealPreset)">
                 Add {{ mealPreset }}
               </button>
 
             </div>
-
-            <div class="h-px bg-gray-200 mx-4 my-1"></div>
 
             <EditableGroupList v-model="trackedMeals" :show-collapse="true" :show-group-header="true"
               group-name-placeholder="Meal name" :show-kcal="true">
@@ -42,21 +40,46 @@
           </div>
         </div>
 
-        <div class="flex-1 flex flex-col gap-6 2xl:min-w-140">
-          <NutritionOverviewCard mode="tracking" :nutrition="computedDailyNutrition"
-            :tracking-goals="userTrackingGoals?.targets" @view-overall-report="showNutritionReportPanel = true" />
-          <div class="flex flex-col">
-            <div class="flex justify-between items-center mb-3 mx-2">
-              <h3 class="text-4xl font-headers tracking-tighter">Nutrition Quality</h3>
-              <button @click="showOverallReportPanel = true"
-                class="flex items-center gap-0.5 text-sm p-2 text-slate-400">
-                <IconChevronRight class="w-6" />
+        <div class="flex-1 flex flex-col gap-10 basis-full lg:basis-100">
+          <div class="space-y-2 order-3 xl:order-0">
+            <div class="flex gap-8 justify-between items-end mx-2">
+              <div>
+                <h2 class="font-headers text-3xl leading-none tracking-tight">
+                  Nutrition
+                </h2>
+                <p class="mt-1 text-xs text-gray-500">
+                  Today
+                </p>
+              </div>
+              <button
+                class="shrink-0 flex items-center gap-1 rounded-full bg-dark px-4 py-1.5 text-xs text-white transition"
+                @click="showNutritionReportPanel = true">
+                <span class="">Full nutrition breakdown</span>
+                <IconChevronRight class="h-4 w-4" />
               </button>
             </div>
-            <NutritionQualityCards mode="full" :cards="qualityItems" :gut-health="gutHealth" :fat-profile="fatProfile"
-              :fat-profile-readable="fatProfileReadable"
-              :micronutrients="computedDailyNutrition?.report?.details?.micronutrients" :kcal-progress="kcalProgress"
-              @view-overall-report="showOverallReportPanel = true" class="main-card-glass" />
+            <NutritionLabel :nutrition-source="computedDailyNutrition" :portion-multiplier="1"
+              :custom-goals="userTrackingGoals?.targets" />
+          </div>
+          <div class="space-y-2 order-3 xl:order-0">
+            <div class="flex gap-8 justify-between items-end mx-2">
+              <div>
+                <h2 class="font-headers text-3xl leading-none tracking-tight">
+                  Quality Profile
+                </h2>
+                <p class="mt-1 text-xs text-gray-500">
+                  Scored against dietary guidelines. <br class="sm:hidden" />Tap rows for a deeper breakdown.
+                </p>
+              </div>
+              <button
+                class="shrink-0 flex items-center gap-1 rounded-full bg-dark px-4 py-1.5 text-xs text-white transition"
+                @click="showOverallReportPanel = true">
+                <span class="">Full analysis</span>
+                <IconChevronRight class="h-4 w-4" />
+              </button>
+            </div>
+            <NutritionQualityList :quality-cards="qualityItems" :food-row="computedDailyNutrition"
+              @open-full-analysis="showOverallReportPanel = true" />
           </div>
         </div>
       </div>

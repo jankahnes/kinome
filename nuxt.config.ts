@@ -12,7 +12,7 @@ export default defineNuxtConfig({
     },
     pageTransition: {
       name: 'page-slide-right',
-      mode: 'out-in',
+      mode: 'default',
     },
   },
   site: {
@@ -75,10 +75,27 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     'nuxt-og-image',
   ],
+  image: {
+    provider: 'ipx',
+    format: ['webp'],
+    domains: [
+      'smovbezqgvxljtvdzvhp.supabase.co',
+      'img.youtube.com',
+      'i.ytimg.com',
+    ],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      '2xl': 1536,
+    },
+  },
   fonts: {
     defaults: {
-      weights: [400, 600, 700],
-      styles: ['normal'],
+      weights: [200, 300, 400, 500, 600, 700],
+      styles: ['normal', 'italic'],
       subsets: ['latin'],
     },
     families: [
@@ -95,12 +112,15 @@ export default defineNuxtConfig({
     key: process.env.NUXT_PUBLIC_SUPABASE_KEY,
     secretKey: process.env.NUXT_PRIVATE_SERVICE_ROLE_KEY,
     redirect: false,
-    types: 'types/supabase.ts',
+    types: '~/types/supabase.ts',
   },
   routeRules: {
     '/recipe-analyzer': { sitemap: { priority: 1.0, changefreq: 'weekly' } },
     '/recipe/1490-hot-honey-baked-feta-salmon-pasta': {
-      redirect: { to: '/recipe/1499-hot-honey-baked-feta-salmon-pasta', statusCode: 301 },
+      redirect: {
+        to: '/recipe/1499-hot-honey-baked-feta-salmon-pasta',
+        statusCode: 301,
+      },
     },
   },
   sitemap: {

@@ -58,13 +58,32 @@ const scoreDescriptors = {
 }
 
 
-export default function satietyToReadable(report: any, isFood: boolean) {
+// Drinks bypass most satiety mechanisms; the engine already downweights waterE
+// here (`liquid_keywords`) but the readable output kept showing "Low Calorie
+// Density" as a positive bullet for sodas. Mirror the keyword check so the
+// satiety summary matches the score's intent.
+const LIQUID_KEYWORDS = [
+    'juice','liquid','broth','soda','smoothie','drink','tea','coffee',
+    'milk','water','cola','beer','wine','cocktail',
+];
+function isLiquidByName(name: string | null | undefined): boolean {
+    if (!name) return false;
+    const words = name.toLowerCase().split(' ').map(w => w.replace(/[^\w\s]/g,''));
+    return LIQUID_KEYWORDS.some(kw => words.includes(kw));
+}
+
+export default function satietyToReadable(report: any, isFood: boolean, title?: string | null) {
     if(!report.satiety) return []
     const items = []
+    const liquid = isLiquidByName(title);
     for(const [key, value] of Object.entries(scoreDescriptors)) {
         const score = report.satiety[key]
         const item = generics.getHighestThreshold(score, value.descriptor)
         if(!item) continue
+        // For liquids, calorie-density and water-content readouts are positive
+        // labels for what's actually a satiety problem (drinks bypass volume
+        // satiety). Suppress those two items; the score itself already reflects this.
+        if (liquid && (key === 'kcal' || key === 'water')) continue;
         const description = item.description + " " + value.appendName
         items.push({
             description,

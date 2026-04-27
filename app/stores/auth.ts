@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
   const cookStreak = ref(1);
 
   function shouldResolveProfile(candidateUser: User | FullUser | null) {
-    if (!candidateUser || candidateUser.is_anonymous) return false;
+    if (!candidateUser) return false;
 
     return (
       user.value?.id !== candidateUser.id ||
@@ -163,7 +163,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function signUp(email: string, password: string) {
     if (user.value?.is_anonymous) {
-      const { data, error } = await supabase.auth.updateUser({
+      try {
+        await $fetch('/api/auth/convert-anonymous', {
+          method: 'POST',
+          body: { email, password },
+        });
+      } catch (error) {
+        return { data: { user: null }, error };
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });

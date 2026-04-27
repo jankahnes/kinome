@@ -4,9 +4,10 @@
     <div class="grid items-center gap-1 transition-[grid-template-columns] duration-300 ease-out"
       :style="{ gridTemplateColumns }">
       <NuxtLink v-for="link in sideLinks" :key="link.path" :to="link.path"
-        class="relative flex items-center justify-center h-10 rounded-full text-gray-700 overflow-hidden"
+        class="relative flex items-center justify-center h-11 rounded-full text-gray-700 overflow-hidden group"
         :class="isActive(link.path) ? 'bg-primary text-white' : ''">
-        <div class="flex items-center justify-center gap-1.5 px-3 whitespace-nowrap">
+        <div class="flex items-center justify-center gap-1.5 px-2.5 whitespace-nowrap"
+          :class="!isActive(link.path) ? 'group-first:pl-4 group-last:pr-4' : ''">
           <Icon :name="link.icon" :size="22" :strokeWidth="2" class="shrink-0" />
           <span class="text-sm font-headers overflow-hidden transition-opacity duration-150 ease-out"
             :class="isActive(link.path) ? 'opacity-100 max-w-30' : 'opacity-0 max-w-0'">

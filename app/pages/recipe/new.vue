@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-y-visible max-w-7xl mb-20 m-4 md:my-10 md:mx-16">
+  <div class="overflow-y-visible mb-20 m-4 md:my-10 md:mx-16">
     <div class="flex flex-col gap-10 ">
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink v-for="view in views" :key="view.value" :to="view.route" class="subnav-pill"
@@ -7,7 +7,7 @@
           {{ view.displayName }}
         </NuxtLink>
         <NuxtLink to="/recipe-analyzer"
-          class="main-button animated-button px-3 py-2.5 shrink-0 text-xs text-gray-600 flex items-center gap-1">
+          class="main-button animated-button px-3 py-2 shrink-0 text-xs text-gray-600 flex items-center gap-1">
           Analyzer
           <IconChevronRight class="h-4 w-4" :stroke-width="1.5" />
         </NuxtLink>

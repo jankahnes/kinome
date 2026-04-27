@@ -3,8 +3,8 @@
     <div class="p-4 lg:w-[70vw] max-w-4xl">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs font-semibold uppercase text-gray-400">Signature recipe</p>
-          <h2 class="mt-1 text-3xl font-bold tracking-tighter sm:text-4xl">Sign:</h2>
+          <p class="text-[11px] font-mono uppercase text-gray-400">Signature recipe</p>
+          <h2 class="mt-1 text-2xl font-headers tracking-tighter sm:text-3xl">Sign:</h2>
           <p class="mt-1 text-sm text-gray-500">
             {{ recipe?.title ?? 'Choose a recipe first.' }}
           </p>
@@ -16,7 +16,7 @@
       </div>
 
       <div class="mt-5 rounded-[30px] bg-white p-3 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)] sm:p-4">
-        <div class="aspect-[5/2] w-full overflow-hidden rounded-[26px] bg-white sm:aspect-[11/4]">
+        <div class="aspect-5/2 w-full overflow-hidden rounded-[26px] bg-white sm:aspect-11/4">
           <ProfileSignaturePad ref="padRef" />
         </div>
       </div>
@@ -41,7 +41,7 @@
           Cancel
         </button>
         <button type="button"
-          class="main-button animated-button rounded-full bg-primary px-5 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          class="main-button animated-button rounded-full bg-primary! px-5 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="saving || !recipe" @click="saveSignature">
           {{ saving ? 'Saving...' : 'Save signature' }}
         </button>

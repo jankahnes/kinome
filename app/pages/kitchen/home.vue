@@ -3,7 +3,7 @@
     <div v-if="auth.profileFetched">
 
       <!-- ─── GUEST VIEW ────────────────────────────────────────────── -->
-      <div v-if="!auth.isUser()">
+      <div v-if="!auth.isUser()" class="flex flex-col">
         <HerocardsHome />
         <div class="mt-10">
           <div class="">
@@ -133,20 +133,20 @@
 
 
             </div>
-              <!-- Macro-fit recipe suggestions -->
-              <template v-if="isFamiliarLoading">
-                <Skeleton v-for="i in 4" :key="i" class="basis-44 max-w-80 flex-1 h-86 rounded-xl" />
-              </template>
-              <template v-else-if="macroFitRecipes.length">
-                <RecipeCard v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
-                  :reason-text="getMacroBadgeText(recipe)" class="basis-50 text-[28px] max-w-80 hidden sm:flex flex-1"
-                  @mouseenter="hoveredRecipe = recipe" @mouseleave="hoveredRecipe = null" />
-                <RecipeCardHorizontal v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
-                  :reason-text="getMacroBadgeText(recipe)" class="text-[24px] sm:hidden flex-1" />
-              </template>
-              <p v-else class="text-sm text-gray-400 self-center">
-                Save some recipes to get personalised meal suggestions.
-              </p>
+            <!-- Macro-fit recipe suggestions -->
+            <template v-if="isFamiliarLoading">
+              <Skeleton v-for="i in 4" :key="i" class="basis-44 max-w-80 flex-1 h-86 rounded-xl" />
+            </template>
+            <template v-else-if="macroFitRecipes.length">
+              <RecipeCard v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
+                :reason-text="getMacroBadgeText(recipe)" class="basis-50 text-[28px] max-w-80 hidden sm:flex flex-1"
+                @mouseenter="hoveredRecipe = recipe" @mouseleave="hoveredRecipe = null" />
+              <RecipeCardHorizontal v-for="recipe in macroFitRecipes" :key="recipe.id" :recipe="recipe"
+                :reason-text="getMacroBadgeText(recipe)" class="text-[24px] sm:hidden flex-1" />
+            </template>
+            <p v-else class="text-sm text-gray-400 self-center">
+              Save some recipes to get personalised meal suggestions.
+            </p>
           </div>
         </section>
 

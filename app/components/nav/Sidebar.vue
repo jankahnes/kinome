@@ -79,7 +79,7 @@
           <p class="text-[11px] font-mono uppercase text-primary pt-1">Find out →</p>
         </NuxtLink>
 
-        <span class="text-[10px] text-gray-600 font-mono ml-3 mb-2">kinome / v0.8</span>
+        <span class="text-[10px] text-gray-600 font-mono ml-3 mb-2">kinome / v0.8.1</span>
       </div>
     </div>
   </aside>

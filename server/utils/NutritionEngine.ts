@@ -1053,7 +1053,7 @@ export default class NutritionEngine {
     const prediction = await this.safeFetch<{ prediction: number } | number>(
       hasNuxtFetch
         ? '/api/predict/satiety'
-        : 'https://jk-api.onrender.com/predict-satiety',
+        : 'https://api.kinome.app/predict-satiety',
       {
         method: 'POST',
         body: hasNuxtFetch
@@ -1181,6 +1181,8 @@ export default class NutritionEngine {
     const score = 100 - (10 / 9) * sugarPer2000kcal;
 
     if (this.logToReport) {
+      // 0–1 fraction. Recipes sum contributor.value (already 0–1 each);
+      // foods set 1 if the food itself is whole/minimally-processed, else 0.
       let percentContributedFromNaturalSources = 0;
       if (this.report?.contributors?.sugar) {
         for (const contributor of this.report.contributors.sugar) {
@@ -1190,7 +1192,7 @@ export default class NutritionEngine {
         }
       } else if (this.isFood) {
         percentContributedFromNaturalSources =
-          (this.tempNova ?? 10) <= 2 ? 100 : 0;
+          (this.tempNova ?? 10) <= 2 ? 1 : 0;
       }
       const percentOfKcal =
         (this.recipe.sugar.per100 * 4) / (this.recipe.kcal.per100 + 1e-6);
@@ -2237,6 +2239,7 @@ export default class NutritionEngine {
     const trimmedReport = {
       overall: this.report.overall,
       humanReadable: this.report.humanReadable,
+      displayHints: this.report.displayHints,
       details: {
         satiety: this.report.satiety,
         fatProfile: this.report.fatProfile,

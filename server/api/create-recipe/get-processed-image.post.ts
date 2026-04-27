@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
         user_image_base64: base_recipe_information.original_image_base64,
       };
       const response = await fetch(
-        'https://jk-api.onrender.com/generate-image-from-recipe-data',
+        'https://api.kinome.app/generate-image-from-recipe-data',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         video_url: videoUrl,
       };
       const response = await fetch(
-        'https://jk-api.onrender.com/generate-image-from-recipe-data',
+        'https://api.kinome.app/generate-image-from-recipe-data',
         {
           method: 'POST',
           headers: {

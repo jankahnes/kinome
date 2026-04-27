@@ -1,78 +1,141 @@
 <template>
-  <div class="flex justify-center w-full">
-    <div class="w-full flex flex-col gap-4 items-start">
-      <textarea v-model="baseRecipe.title" v-auto-resize rows="1" placeholder="✍️ New Recipe"
-        class="w-full md:w-auto min-w-[40%] font-headers text-3xl border-box main-card md:bg-primary-5/80! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto wrap-break-word scrollbar-hide" />
+  <div class="space-y-8 lg:space-y-12">
+    <!-- Hero -->
+    <div class="space-y-3 max-w-2xl">
+      <span class="font-mono text-[10px] uppercase tracking-[0.22em] text-gray-400">
+        CREATE / FROM SCRATCH
+      </span>
+      <h1 class="text-4xl md:text-5xl font-headers tracking-tight leading-none">
+        New recipe<span class="text-primary">.</span>
+      </h1>
+      <p class="text-base text-gray-600 max-w-xl leading-relaxed">
+        Type your ingredients freely. We'll match each one against our nutrition database so you can fine-tune amounts
+        before publishing.
+      </p>
+    </div>
 
-      <textarea v-model="baseRecipe.description" v-auto-resize rows="1" placeholder="✍️ Description"
-        class="min-w-[60%] main-card md:bg-primary-5/80! rounded-2xl p-2 outline-none resize-none overflow-hidden h-auto wrap-break-word scrollbar-hide text-sm" />
+    <!-- Recipe meta -->
+    <div class="main-card main-card-rounded p-5 md:p-6 space-y-4">
+      <div>
+        <label class="font-mono text-[10px] uppercase tracking-[0.22em] text-gray-400">TITLE</label>
+        <textarea v-model="baseRecipe.title" v-auto-resize rows="1" placeholder="Lemon pesto pasta"
+          class="w-full mt-1 bg-transparent text-2xl md:text-3xl font-headers tracking-tight focus:outline-none resize-none overflow-hidden scrollbar-hide placeholder:text-gray-300 leading-tight" />
+      </div>
+      <div class="h-px bg-gray-100"></div>
+      <div>
+        <label class="font-mono text-[10px] uppercase tracking-[0.22em] text-gray-400">DESCRIPTION ·
+          OPTIONAL</label>
+        <textarea v-model="baseRecipe.description" v-auto-resize rows="1"
+          placeholder="A weeknight pasta with bright lemon and basil…"
+          class="w-full mt-1 bg-transparent text-sm focus:outline-none resize-none overflow-hidden scrollbar-hide placeholder:text-gray-300 leading-relaxed" />
+      </div>
+    </div>
 
-      <div class="flex w-full flex-wrap gap-4 mt-6 flex-col md:flex-row">
-        <!-- Ingredients column -->
-        <div class="flex-1 space-y-2">
-          <h2 class="text-4xl font-headers tracking-tight">Ingredients</h2>
-          <div class="py-4 space-y-2">
-            <div class="flex gap-4 flex-wrap justify-between">
-              <div class="flex gap-4">
-                <!-- Serves -->
-                <div class="flex items-center gap-2 bg-primary-5 main-card-rounded px-3 py-1">
-                  <span class="text-xs uppercase text-gray-400 font-mono">Serves</span>
-                  <div class="w-px bg-gray-300 self-stretch"></div>
-                  <input v-model.number="serves" type="number" min="1" max="16"
-                    class="w-8 text-center font-mono focus:outline-none bg-transparent" />
-                </div>
-
-                <!-- Nutrition preview -->
-                <div class="flex items-center gap-2 bg-primary-5 main-card-rounded px-3 py-1">
-                  <span class="text-xs uppercase text-gray-400 font-mono">kcal/serving</span>
-                  <div class="w-px bg-gray-300 self-stretch"></div>
-                  <span class="font-mono text-slate-700">
-                    {{ Math.round((computedRecipe ?? {}).kcal ?? 0) }}
-                  </span>
-                </div>
-              </div>
-              <!-- NL toggle -->
-              <button class="main-button animated-button flex items-center gap-2 px-3 py-1 text-sm bg-primary-5"
-                @click="useNaturalLanguage = !useNaturalLanguage">
-                <IconRefreshCcw class="w-4" />
-                {{ !useNaturalLanguage ? 'Natural language' : 'Structured' }}
-              </button>
-            </div>
-
-            <!-- Natural language textarea -->
-            <div v-if="useNaturalLanguage">
-              <textarea v-model="base_ingredients" rows="10"
-                placeholder="For the sauce: &#10;1 cup of wine&#10;1 cup of tomato sauce&#10;2 tbsp of olive oil"
-                class="w-full bg-primary-20/70! main-card-rounded p-3 outline-none resize-y text-sm font-mono" />
-            </div>
-
-            <!-- Structured ingredient groups -->
-            <div v-else>
-              <EditableGroupList v-model="categories" :show-collapse="false" :show-group-header="false"
-                group-name-placeholder="For the sauce" add-group-label="Add category" new-group-name="" />
-            </div>
+    <!-- Ingredients + Method -->
+    <div class="grid lg:grid-cols-2 gap-4 lg:gap-6">
+      <!-- Ingredients card -->
+      <div class="main-card main-card-rounded p-5 md:p-6 space-y-4">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="text-2xl md:text-3xl font-headers tracking-tight">Ingredients</h2>
+          <div class="flex bg-primary/8 rounded-full p-0.5 text-xs font-mono">
+            <button type="button" class="px-3 py-1 rounded-full transition-all"
+              :class="mode === 'nl' ? 'bg-white shadow-sm font-semibold' : 'text-gray-500 hover:text-gray-700'"
+              @click="switchMode('nl')">Paste</button>
+            <button type="button" class="px-3 py-1 rounded-full transition-all"
+              :class="mode === 'structured' ? 'bg-linear-to-br from-primary to-primary-700 text-white shadow-sm font-semibold' : 'text-gray-500 hover:text-gray-700'"
+              @click="switchMode('structured')">Structured</button>
           </div>
         </div>
-        <div class="h-px bg-gray-100 self-stretch md:hidden"></div>
-        <!-- Method column -->
-        <div class="space-y-2 flex-1">
-          <h2 class="text-4xl font-headers tracking-tight ml-2 mb-6">Method</h2>
-          <PagesRecipeInstructionContainerEditable v-model="instructionsEditableInformation.instructions" />
+
+        <Transition name="slide" mode="out-in">
+          <div v-if="mode === 'nl' && !hasParsed" key="textarea" class="space-y-2">
+            <textarea v-model="base_ingredients" rows="10"
+              placeholder="200g chicken breast&#10;1 cup of rice&#10;2 tbsp olive oil&#10;&#10;For the sauce:&#10;2 tbsp soy sauce&#10;1 tbsp sesame oil"
+              class="w-full bg-primary-5/70 rounded-2xl p-4 outline-none resize-y font-mono text-sm leading-relaxed focus:bg-primary-5 transition-colors" />
+            <p class="text-xs text-gray-500 leading-snug">
+              Lines ending with
+              <code class="font-mono bg-primary/8 px-1 py-px rounded">:</code>
+              become categories. Empty lines reset.
+            </p>
+          </div>
+
+          <div v-else key="structured" class="space-y-3">
+            <div v-if="hasParsed" class="flex items-center justify-between gap-3 flex-wrap">
+              <p class="text-sm text-gray-500 leading-snug">
+                Tap any ingredient to adjust the match, amount, or unit.
+              </p>
+              <button type="button"
+                class="text-xs font-mono uppercase tracking-wider text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
+                @click="resetToText">
+                <IconArrowLeft class="w-3.5" />
+                Edit text
+              </button>
+            </div>
+            <p v-else class="text-sm text-gray-500 leading-snug">
+              Add ingredients one at a time. Amounts, units, and food names are recognized as you type.
+            </p>
+
+            <EditableGroupList v-model="categories" :show-collapse="false" :show-group-header="true" :show-kcal="true"
+              group-name-placeholder="For the sauce" add-group-label="Add category" new-group-name="" />
+          </div>
+        </Transition>
+
+        <!-- Bottom controls -->
+        <div class="flex items-center justify-between gap-3 flex-wrap pt-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="bg-primary-5 main-card-rounded">
+              <BlocksServesStepper v-model="serves" />
+            </div>
+          </div>
+
+          <button v-if="mode === 'nl' && !hasParsed" type="button"
+            class="main-button animated-button bg-primary! text-white font-medium px-5 py-2 rounded-[25px]! flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="parsing || !canAnalyze" @click="analyze">
+            <IconLoaderCircle v-if="parsing" class="w-4 h-4 animate-spin" />
+            <span>{{ parsing ? 'Analyzing…' : 'Analyze' }}</span>
+            <IconArrowRight v-if="!parsing" class="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      <div class="flex gap-2 w-full justify-end md:justify-start md:mt-6">
-        <button class="main-button animated-button bg-primary! text-white px-4 py-2 font-bold shadow-lg"
-          @click="submit()">
-          Submit
-        </button>
+      <!-- Method card -->
+      <div class="main-card main-card-rounded p-5 md:p-6 space-y-4">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-headers tracking-tight">Method</h2>
+          <p class="text-sm text-gray-500 mt-1">One step per line. Short and clear is best.</p>
+        </div>
+        <PagesRecipeInstructionContainerEditable v-model="instructionsEditableInformation.instructions" />
       </div>
+    </div>
+
+    <!-- Submit bar -->
+    <div class="main-card main-card-rounded px-5 md:px-7 py-5 flex items-center justify-between gap-4 flex-wrap">
+      <div class="min-w-0">
+        <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-gray-400">READY?</p>
+        <p class="text-sm text-gray-700 mt-1">
+          <template v-if="hasParsed">
+            All ingredients matched. Submit publishes with the nutrition shown above.
+          </template>
+          <template v-else>
+            Submitting raw text - our AI will parse ingredients on the server.
+          </template>
+        </p>
+      </div>
+
+      <button type="button"
+        class="main-button animated-button bg-primary! text-white font-medium px-6 py-3 rounded-[25px]! flex items-center gap-2 shrink-0"
+        @click="submit">
+        Submit recipe
+        <IconArrowRight class="w-4 h-4" />
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
+import { parseIngredientString } from '~/utils/format/parseIngredientString';
+import type { EditableIngredient } from '~/types/types';
 
 const submitFromPreparsed = inject<(recipe: ComputableRecipe) => void>('submitFromPreparsed')!;
 const submitFromNaturalLanguage = inject<(recipe: BaseRecipe) => void>('submitFromNaturalLanguage')!;
@@ -87,45 +150,31 @@ useHead({
     {
       key: 'description',
       name: 'description',
-      content: 'Build a recipe from structured ingredients or natural language and preview nutrition before publishing it on Kinome.',
+      content:
+        'Build a recipe from structured ingredients or natural language and preview nutrition before publishing it on Kinome.',
     },
-    {
-      key: 'og:title',
-      property: 'og:title',
-      content: 'Create a Recipe | Kinome',
-    },
+    { key: 'og:title', property: 'og:title', content: 'Create a Recipe | Kinome' },
     {
       key: 'og:description',
       property: 'og:description',
-      content: 'Build a recipe from structured ingredients or natural language and preview nutrition before publishing it on Kinome.',
+      content:
+        'Build a recipe from structured ingredients or natural language and preview nutrition before publishing it on Kinome.',
     },
-    {
-      key: 'og:type',
-      property: 'og:type',
-      content: 'website',
-    },
-    {
-      key: 'og:url',
-      property: 'og:url',
-      content: 'https://kinome.app/recipe/new',
-    },
+    { key: 'og:type', property: 'og:type', content: 'website' },
+    { key: 'og:url', property: 'og:url', content: 'https://kinome.app/recipe/new' },
   ],
-  link: [
-    {
-      key: 'canonical',
-      rel: 'canonical',
-      href: 'https://kinome.app/recipe/new',
-    },
-  ],
+  link: [{ key: 'canonical', rel: 'canonical', href: 'https://kinome.app/recipe/new' }],
 });
 
-// Flat state replacing the old `ingredientListEditableInformation` blob
+// ---- State ----
 const serves = ref(4);
 const categories = ref<TrackedMeal[]>([
   { name: null, editableIngredients: [{ rawText: '', displayText: '' }], collapsed: false },
 ]);
-const useNaturalLanguage = ref(false);
 const base_ingredients = ref('');
+const mode = ref<'nl' | 'structured'>('nl');
+const hasParsed = ref(false);
+const parsing = ref(false);
 
 const baseRecipe = ref({
   title: '',
@@ -140,7 +189,7 @@ const instructionsEditableInformation = ref<{ instructions: string[] }>({
 
 const computedRecipe = ref<InsertableRecipe | null>(null);
 
-// Convert TrackedMeal groups → FullIngredient[] for the preparsed submit path
+// ---- Derived ingredient projections ----
 function groupsToFullIngredients(mealCategories: TrackedMeal[]): FullIngredient[] {
   return mealCategories.flatMap((category) =>
     category.editableIngredients
@@ -151,7 +200,7 @@ function groupsToFullIngredients(mealCategories: TrackedMeal[]): FullIngredient[
         name: ing.ingredientName ?? '',
         amount: ing.amount ?? 0,
         unit: ing.unit ?? 'G',
-        category: category.name || null,
+        category: category.name || 'uncategorized',
         preparation_description: ing.preparationDescription ?? null,
       } as unknown as FullIngredient))
   );
@@ -176,16 +225,129 @@ const naturalLanguageBaseRecipe = computed<BaseRecipe>(() => ({
   source_type: 'TEXT',
 }));
 
-function submit() {
-  if (useNaturalLanguage.value) {
-    submitFromNaturalLanguage(naturalLanguageBaseRecipe.value);
-  } else {
-    submitFromPreparsed(parsingRecipe.value);
+const canAnalyze = computed(() =>
+  base_ingredients.value
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean).length > 0
+);
+
+// ---- NL → grouped lines (categories via lines ending with ":") ----
+function parseRawTextIntoGroups(raw: string): { name: string | null; lines: string[] }[] {
+  const groups: { name: string | null; lines: string[] }[] = [
+    { name: null, lines: [] },
+  ];
+
+  for (const rawLine of raw.split('\n')) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      const last = groups[groups.length - 1]!;
+      if (last.lines.length > 0 || last.name !== null) {
+        groups.push({ name: null, lines: [] });
+      }
+      continue;
+    }
+
+    if (line.endsWith(':')) {
+      let name = line.slice(0, -1).trim().replace(/^for the\s+/i, '');
+      if (name) name = name.charAt(0).toUpperCase() + name.slice(1);
+      const last = groups[groups.length - 1]!;
+      if (last.lines.length === 0 && last.name === null) {
+        last.name = name || null;
+      } else {
+        groups.push({ name: name || null, lines: [] });
+      }
+      continue;
+    }
+
+    groups[groups.length - 1]!.lines.push(line);
+  }
+
+  return groups.filter((g) => g.lines.length > 0);
+}
+
+// ---- Actions ----
+async function analyze() {
+  if (parsing.value) return;
+  const groups = parseRawTextIntoGroups(base_ingredients.value);
+  if (!groups.length) return;
+
+  parsing.value = true;
+  try {
+    const newCategories: TrackedMeal[] = [];
+    for (const group of groups) {
+      const parsed = await Promise.all(
+        group.lines.map((line) => parseIngredientString(supabase as any, line)),
+      );
+      const editable: EditableIngredient[] = parsed.map((p, i) => ({
+        rawText: p.displayText || group.lines[i]!,
+        displayText: p.displayText || group.lines[i]!,
+        displayTextContext: p.displayTextContext,
+        displayTextIngredient: p.displayTextIngredient,
+        displayTextExtra: p.displayTextExtra,
+        amount: p.amount ?? null,
+        unit: p.unit ?? 'G',
+        preparationDescription: p.preparationDescription ?? null,
+        foodNameId: p.foodNameId,
+        ingredientName: p.ingredientName,
+        foodData: p.foodData,
+        foodVariants: p.foodVariants,
+      }));
+      newCategories.push({
+        name: group.name,
+        editableIngredients: editable.length
+          ? editable
+          : [{ rawText: '', displayText: '' }],
+        collapsed: false,
+      });
+    }
+    if (!newCategories.length) {
+      newCategories.push({
+        name: null,
+        editableIngredients: [{ rawText: '', displayText: '' }],
+        collapsed: false,
+      });
+    }
+    categories.value = newCategories;
+    hasParsed.value = true;
+    mode.value = 'structured';
+  } finally {
+    parsing.value = false;
   }
 }
 
-// Convert FullIngredient[] → EditableIngredient[] for edit mode
-function fullIngredientToEditableItem(ing: FullIngredient, batchSize: number): EditableIngredient {
+function switchMode(next: 'nl' | 'structured') {
+  if (next === mode.value) return;
+  if (next === 'nl') {
+    resetToText();
+    return;
+  }
+  mode.value = next;
+}
+
+function resetToText() {
+  mode.value = 'nl';
+  hasParsed.value = false;
+  categories.value = [
+    { name: null, editableIngredients: [{ rawText: '', displayText: '' }], collapsed: false },
+  ];
+  computedRecipe.value = null;
+}
+
+function submit() {
+  if (mode.value === 'structured') {
+    submitFromPreparsed(parsingRecipe.value);
+  } else {
+    submitFromNaturalLanguage(naturalLanguageBaseRecipe.value);
+  }
+}
+
+// ---- Edit-mode hydration ----
+function fullIngredientToEditableItem(
+  ing: FullIngredient,
+  batchSize: number,
+): EditableIngredient {
   const amount = (ing.amount ?? 0) * batchSize;
   const displayTextContext = getStringFromAmountInfo([amount, ing.unit ?? 'G'], 1).trim();
   const displayText = [displayTextContext, ing.name].filter(Boolean).join(' ');
@@ -208,7 +370,6 @@ function setEditableInformation(computableRecipe: ComputableRecipe | null) {
   if (!computableRecipe) return;
   const batchSize = computableRecipe.batch_size ?? 1;
 
-  // Group full ingredients by category → TrackedMeal[]
   const grouped = new Map<string, FullIngredient[]>();
   for (const ing of computableRecipe.fullIngredients) {
     const key = ing.category ?? '';
@@ -223,7 +384,9 @@ function setEditableInformation(computableRecipe: ComputableRecipe | null) {
   } else {
     categories.value = [...grouped.entries()].map(([catName, ings]) => ({
       name: catName ?? null,
-      editableIngredients: ings.map((ing) => fullIngredientToEditableItem(ing, batchSize)),
+      editableIngredients: ings.map((ing) =>
+        fullIngredientToEditableItem(ing, batchSize),
+      ),
       collapsed: false,
     }));
   }
@@ -239,10 +402,18 @@ function setEditableInformation(computableRecipe: ComputableRecipe | null) {
   instructionsEditableInformation.value.instructions =
     removeInstructionFormatting(computableRecipe.instructions);
   Object.assign(baseRecipe.value, computableRecipe);
+
+  // Pre-populated structured data → start in structured mode.
+  hasParsed.value = true;
+  mode.value = 'structured';
 }
 
+// ---- Live nutrition compute ----
 async function compute() {
-  if (groupsToFullIngredients(categories.value).length === 0) return;
+  if (groupsToFullIngredients(categories.value).length === 0) {
+    computedRecipe.value = null;
+    return;
+  }
   const response = (await $fetch('/api/calculate/recipe', {
     method: 'POST',
     body: {
@@ -274,3 +445,22 @@ onMounted(async () => {
   compute();
 });
 </script>
+
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+  transition:
+    opacity 220ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+</style>

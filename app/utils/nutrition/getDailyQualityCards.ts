@@ -363,9 +363,12 @@ function protectiveSubtitle(
   const significant = candidates
     .filter((c) => (compounds[c.key] ?? 0) > 0)
     .sort((a, b) => (compounds[b.key] ?? 0) - (compounds[a.key] ?? 0));
-  return significant[0]
-    ? `${resolved.rating} ${resolved.rating === 'Rich' ? 'in' : ''} ${significant[0].label}`
-    : '';
+  if (!significant[0]) return '';
+  const prefix =
+    resolved.rating === 'Rich' || resolved.rating === 'Exceptional'
+      ? `${resolved.rating} in`
+      : resolved.rating;
+  return `${prefix} ${significant[0].label}`;
 }
 
 export interface QualityCardContext {
@@ -382,12 +385,30 @@ export function getDailyQualityCards(
   const overall = report?.overall;
   const details = report?.details;
 
-  // --- Micronutrients (order 10, always shown) ---
-  const mnResolved = resolve(overall?.mnidx, genericTiers);
-  const microSubtitle = micronutrientSubtitle(
+  // Shared display gates (set by NutritionEngine via reportHumanReadable).
+  // See server/utils/reportHumanReadable/displayHints.ts for thresholds.
+  const hints = report?.displayHints ?? report?.humanReadable?.displayHints;
+
+  // --- Micronutrients (order 10) ---
+  // Trace state catches dilute foods (cucumber 16 kcal/100g + low absolute
+  // density-sum) where the per-2000kcal MNIDX would otherwise rate "Excellent".
+  // Below trace, downgrade the pill, blank the subtitle, and push the card
+  // toward the bottom.
+  let mnResolved = resolve(overall?.mnidx, genericTiers);
+  let microSubtitle = micronutrientSubtitle(
     details?.micronutrients ?? [],
     pillIsNegative(mnResolved.pillClass),
   );
+  let microOrder = 10;
+  if (hints?.micronutrients?.state === 'trace') {
+    mnResolved = { rating: 'Low Density', pillClass: NULL_PILL };
+    microSubtitle = 'Few micronutrients per 100g';
+    microOrder = 10 - 20;
+  } else if (hints?.micronutrients?.state === 'low') {
+    microSubtitle = microSubtitle
+      ? `${microSubtitle} · sparse per 100g`
+      : 'Sparse per 100g';
+  }
 
   // --- Fat Quality (order 6, condition: meaningful fat content) ---
   const totalFat =
@@ -412,7 +433,7 @@ export function getDailyQualityCards(
     pillIsNegative(gutResolved.pillClass),
   );
 
-  // --- Whole Food % (order 7, always shown) ---
+  // --- Whole Food % (order 7, recipes only — pctWhole is null for foods) ---
   const pctWhole: number | null = details?.processingLevel?.pctWhole ?? null;
   const wholeResolved = resolve(pctWhole, wholeFoodTiers);
   const wholeFoodSubtitle =
@@ -421,6 +442,7 @@ export function getDailyQualityCards(
         ? `Only ${Math.round(pctWhole)}% whole`
         : `${Math.round(pctWhole)}% whole`
       : '';
+  const wholeFoodOrder = pctWhole != null ? 5 : 5 - 20;
 
   // --- Electrolytes (order 5, condition: Na:K ratio data available) ---
   const naKRatio: number | null = details?.salt?.naKRatio ?? null;
@@ -449,11 +471,20 @@ export function getDailyQualityCards(
     pillIsNegative(satietyResolved.pillClass),
   );
 
-  // --- Antioxidants / Protective (order 4, condition: meaningful protective score) ---
+  // --- Antioxidants / Protective (order 4, condition: meaningful score AND
+  // a non-trivial absolute amount of at least one compound). The absolute gate
+  // is what stops cola/cucumber from being labelled "Rich in Polyphenols".
   const protectiveScore =
     context?.protectiveScore ?? overall?.protective_score ?? null;
   const antioxidantResolved = resolve(protectiveScore, antioxidantTiers);
-  const antioxidantConditionMet = (protectiveScore ?? 0) >= 10;
+  const compoundsRaw = details?.protectiveCompounds ?? {};
+  const maxRawCompound = Math.max(
+    compoundsRaw.polyphenols ?? 0,
+    compoundsRaw.carotenoids ?? 0,
+    compoundsRaw.glucosinolates ?? 0,
+  );
+  const antioxidantConditionMet =
+    (protectiveScore ?? 0) >= 10 && maxRawCompound >= 3;
   const antioxidantSubtitle = protectiveSubtitle(
     details?.protectiveCompounds,
     pillIsNegative(antioxidantResolved.pillClass),
@@ -462,25 +493,50 @@ export function getDailyQualityCards(
   const antioxidantOrder = antioxidantConditionMet ? 4 : 4 - 20;
 
   // --- Fiber (order 3, condition: notably high or low) ---
+  // Hint-gated so cucumber's 0.5g/100g doesn't get an "Excellent" pill from
+  // its inflated per-2000kcal density score.
   const fiberScore: number | null = overall?.fiber_score ?? null;
-  const fiberResolved = resolve(fiberScore, fiberTiers);
+  let fiberResolved = resolve(fiberScore, fiberTiers);
+  const fiberHint = hints?.fiber?.state;
+  if (fiberHint === 'trace') {
+    fiberResolved = { rating: 'Not a source', pillClass: NULL_PILL };
+  } else if (fiberHint === 'low') {
+    fiberResolved = resolve(Math.min(fiberScore ?? 0, 60), fiberTiers);
+  }
   const fiberConditionMet =
-    fiberScore != null && (fiberScore >= 68 || fiberScore <= 25);
+    fiberHint !== 'trace' &&
+    fiberScore != null &&
+    (fiberScore >= 68 || fiberScore <= 25);
   const fiberOrder = fiberConditionMet ? 6 : 6 - 20;
   const fiberSubtitle = fiberConditionMet
     ? `${details?.fiber?.fiberTotal?.toFixed(0)}g per serving`
-    : '';
+    : fiberHint === 'low'
+      ? `Only ${(details?.fiber?.fiberPer100g ?? 0).toFixed(1)}g per 100g`
+      : '';
 
   // --- Protein (order 2, condition: notably high) ---
+  // Hint-gated so cucumber's 0.7g/100g doesn't read "High" off the
+  // per-2000kcal density score.
   const proteinScore: number | null = overall?.protein_score ?? null;
-  const totalProtein = details?.protein?.proteinPerServing?.toFixed(0) ?? 0;
-  const proteinResolved = resolve(proteinScore, proteinTiers);
+  const totalProtein = Number(details?.protein?.proteinPerServing ?? 0);
+  let proteinResolved = resolve(proteinScore, proteinTiers);
+  const proteinHint = hints?.protein?.state;
+  if (proteinHint === 'trace') {
+    proteinResolved = { rating: 'Not a source', pillClass: NULL_PILL };
+  } else if (proteinHint === 'low') {
+    proteinResolved = resolve(Math.min(proteinScore ?? 0, 60), proteinTiers);
+  }
   const proteinConditionMet =
-    proteinScore != null && proteinScore >= 68 && totalProtein > 5;
+    proteinHint !== 'trace' &&
+    proteinScore != null &&
+    proteinScore >= 68 &&
+    totalProtein > 5;
   const proteinOrder = proteinConditionMet ? 7 : 7 - 20;
   const proteinSubtitle = proteinConditionMet
-    ? `${totalProtein}g per serving`
-    : '';
+    ? `${totalProtein.toFixed(0)}g per serving`
+    : proteinHint === 'low'
+      ? `Only ${(details?.protein?.proteinPer100g ?? 0).toFixed(1)}g per 100g`
+      : '';
 
   const allCards: DailyQualityCard[] = [
     {
@@ -489,7 +545,7 @@ export function getDailyQualityCards(
       ...mnResolved,
       subtitle: microSubtitle,
       clickable: true,
-      orderValue: 10,
+      orderValue: microOrder,
     },
     {
       title: 'Gut Health',
@@ -513,7 +569,7 @@ export function getDailyQualityCards(
       ...wholeResolved,
       subtitle: wholeFoodSubtitle,
       clickable: false,
-      orderValue: 5,
+      orderValue: wholeFoodOrder,
     },
     {
       title: 'Fat Quality',

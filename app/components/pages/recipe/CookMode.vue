@@ -364,7 +364,7 @@
               <IconChevronRight class="w-4 h-4" />
             </button>
             <button v-else @click="finishCooking"
-              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-green-500 text-white font-semibold">
+              class="main-button animated-button flex-2 flex items-center justify-center gap-1.5 py-3.5 bg-green-500! text-white font-semibold">
               <IconCheck class="w-4 h-4" />
               Done cooking!
             </button>

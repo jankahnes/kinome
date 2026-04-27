@@ -8,16 +8,13 @@ const avgNOVAThresholds = {
   3.5: { description: 'Ultra-processed ingredients', ...generics.BAD },
 };
 
+// Mirrors wholeFoodTiers in getDailyQualityCards so the card and panel agree.
 const pctWholeThresholds = {
-  0: { ...generics.POOR },
-  20: { ...generics.BAD },
-  30: { ...generics.SUBOPTIMAL },
-  40: { ...generics.NEUTRAL },
-  50: { ...generics.OKAY },
-  60: { ...generics.GOOD },
-  75: { ...generics.GREAT },
-  85: { ...generics.GREAT },
-  99: { ...generics.EXCELLENT },
+  0: { description: 'Mostly processed ingredients', ...generics.POOR },
+  20: { description: 'Mixed processing levels', ...generics.SUBOPTIMAL },
+  60: { description: 'Mostly whole ingredients', ...generics.GOOD },
+  75: { description: 'Majority whole ingredients', ...generics.GREAT },
+  92: { description: 'Almost entirely whole ingredients', ...generics.EXCELLENT },
 };
 
 const pctUPFThresholds = {
@@ -29,17 +26,17 @@ const pctUPFThresholds = {
 };
 
 const novaDescriptorsFood = {
-  1: { description: 'NOVA Classifiaction: Whole (1)', ...generics.GOOD },
+  1: { description: 'NOVA Classification: Whole (1)', ...generics.GOOD },
   2: {
-    description: 'NOVA Classifiaction: Traditionally processed (2)',
+    description: 'NOVA Classification: Traditionally processed (2)',
     ...generics.OKAY,
   },
   3: {
-    description: 'NOVA Classifiaction: Processed (3)',
+    description: 'NOVA Classification: Processed (3)',
     ...generics.SUBOPTIMAL,
   },
   4: {
-    description: 'NOVA Classifiaction: Ultra-processed (4)',
+    description: 'NOVA Classification: Ultra-processed (4)',
     ...generics.BAD,
   },
 };
@@ -70,25 +67,28 @@ export default function processingLevelToReadable(
     pctWholeThresholds
   );
   items.push(avgNOVAItem);
-  items.push({
-    ...pctUPFItem,
-    description:
-      report.processingLevel.upfCount +
-      ' ' +
-      (report.processingLevel.upfCount == 1
-        ? 'ultra-processed ingredient'
-        : 'ultra-processed ingredients'),
-    subtitle: report.processingLevel.upfIngredients.join(', ') || null,
-  });
+  if (report.processingLevel.upfCount > 0) {
+    items.push({
+      ...pctUPFItem,
+      description:
+        report.processingLevel.upfCount +
+        ' ' +
+        (report.processingLevel.upfCount == 1
+          ? 'ultra-processed ingredient'
+          : 'ultra-processed ingredients'),
+      subtitle: report.processingLevel.upfIngredients.join(', ') || null,
+    });
+  }
+  // pctWholeItem.description already carries the rating ("Mostly whole...").
+  // Putting the raw count in the subtitle avoids "3 whole ingredients" rendered
+  // in red, which reads as if the count itself is the bad signal.
   items.push({
     ...pctWholeItem,
-    description:
-      report.processingLevel.wholeCount +
-      ' ' +
-      (report.processingLevel.wholeCount > 1
-        ? 'whole ingredients'
-        : 'whole ingredient'),
-    subtitle: report.processingLevel.wholeIngredients.join(', ') || null,
+    subtitle:
+      `${Math.round(report.processingLevel.pctWhole)}% whole` +
+      (report.processingLevel.wholeIngredients?.length
+        ? ` · ${report.processingLevel.wholeIngredients.join(', ')}`
+        : ''),
   });
   items.sort((a, b) => b.value - a.value);
   return items;

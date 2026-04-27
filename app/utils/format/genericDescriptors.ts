@@ -30,6 +30,28 @@ export const NEUTRAL = {
   bgColor: 'bg-gray-800/10',
 };
 
+// Section/item is too dilute to evaluate meaningfully (e.g. fat profile of a
+// fat-free food). Renders dimmed and sorts to bottom in Report.vue.
+//
+// Colour is text-gray-500 (≈4.6:1 on white, just above WCAG AA) — chosen so
+// the row stays legible without an `opacity` overlay. De-emphasis is done
+// via sort order + neutral icon + (optional) italic in templates, NOT by
+// stacking opacity on top of an already-dim colour.
+export const TRACE = {
+  icon: 'remove',
+  color: 'text-gray-500',
+  value: -2,
+  bgColor: 'bg-gray-100',
+};
+// Present but in absolute terms low enough that the per-density rating
+// would be misleading without the absolute context.
+export const LOW_ABS = {
+  icon: 'remove',
+  color: 'text-gray-600',
+  value: -1,
+  bgColor: 'bg-gray-200/60',
+};
+
 export const OKAY = {
   icon: 'check',
   color: 'text-green-800',

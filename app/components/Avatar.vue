@@ -3,7 +3,7 @@
     <Transition name="fade" mode="out-in">
       <Skeleton v-if="placeholder" class="rounded-full aspect-square transition-all duration-300" />
 
-      <NuxtImg v-else-if="user?.picture"
+      <img v-else-if="user?.picture"
         class="rounded-full aspect-square w-full h-full object-cover transition-all duration-300" :src="user.picture"
         :alt="user.username + '\'s profile picture'" />
       <div v-else-if="user?.username"

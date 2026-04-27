@@ -66,7 +66,9 @@
             class="flex flex-col sm:flex-row gap-6 items-center main-card main-card-padding main-card-rounded">
             <NuxtLink :to="getRecipeUrl(guessRecipe.id, guessRecipe.title)" class="shrink-0 w-40 h-40 sm:w-52 sm:h-52">
               <NuxtImg v-if="guessRecipe.picture" :src="guessRecipe.picture" :alt="guessRecipe.title"
-                class="w-full h-full object-contain filter-[drop-shadow(0_0_8px_rgba(0,0,0,0.1))]" />
+                class="w-full h-full object-contain filter-[drop-shadow(0_0_8px_rgba(0,0,0,0.1))] transition-[opacity,border-radius] duration-500"
+                sizes="160px sm:208px" format="webp" loading="lazy"
+                placeholder placeholder-class="rounded-full opacity-60" />
             </NuxtLink>
             <div class="flex-1 flex flex-col gap-4 items-center sm:items-start w-full">
               <NuxtLink :to="getRecipeUrl(guessRecipe.id, guessRecipe.title)">
@@ -131,7 +133,9 @@
                 class="w-full main-card main-card-rounded main-card-padding flex flex-col items-center gap-3 group transition-all duration-300 hover:shadow-lg">
                 <div class="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">
                   <NuxtImg v-if="recipe.picture" :src="recipe.picture" :alt="recipe.title"
-                    class="w-full h-full object-contain [filter:drop-shadow(0_0_6px_rgba(0,0,0,0.1))] transition-transform duration-500 group-hover:scale-[1.03]" />
+                    class="w-full h-full object-contain [filter:drop-shadow(0_0_6px_rgba(0,0,0,0.1))] transition-[transform,opacity,border-radius] duration-500 group-hover:scale-[1.03]"
+                    sizes="128px sm:160px" format="webp" loading="lazy"
+                    placeholder placeholder-class="rounded-full opacity-60" />
                 </div>
                 <h3 class="text-lg sm:text-xl font-headers tracking-tight text-center line-clamp-2">{{ recipe.title }}
                 </h3>
@@ -396,7 +400,7 @@ onMounted(async () => {
   queryCollection('articles').order('date', 'DESC').limit(3).all().then((data) => {
     articles.value = data;
   });
-  getTrendingThisMonth(supabase).then((recipes) => {
+  getTrendingThisMonth(supabase, 6).then((recipes) => {
     socialRecipes.value = recipes.slice(0, 6);
   });
   getRecipeOverviews(supabase, {

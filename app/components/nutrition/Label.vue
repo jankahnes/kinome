@@ -4,14 +4,15 @@
             <h3 class="text-[14px] font-semibold">Calories</h3>
             <div class="flex flex-col gap-2">
                 <div class="text-[46px] font-headers leading-none">{{ formattedCalories }}<span
-                        class="font-main text-xs text-gray-500 tracking-tighter"> kcal</span>
+                        class="font-main text-xs text-gray-500 tracking-tighter"> {{ customGoals?.kcal ? ('/ ' +
+                            customGoals?.kcal) : '' }} kcal</span>
                 </div>
                 <div class="space-y-2">
                     <div class="h-1 rounded-full bg-primary/10">
                         <div class="h-full rounded-full bg-primary-700"
                             :style="{ width: `${nutritionDailyProgress.calories}%` }" />
                     </div>
-                    <p class="text-[11px] font-mono tracking-wider text-gray-400">
+                    <p class="text-[11px] font-mono tracking-wider text-gray-600 font-extralight">
                         {{ nutritionDailyLabels.calories }}
                     </p>
                 </div>
@@ -23,14 +24,14 @@
             <div class="flex flex-col gap-2">
                 <div class="text-3xl font-headers leading-none" :class="item.value === '0' ? 'text-gray-400' : ''">{{
                     item.value }}<span class="font-main text-xs text-gray-500 tracking-tighter"
-                        :class="item.value === '0' ? 'text-gray-400!' : ''"> {{ " " + item.unit }}
+                        :class="item.value === '0' ? 'text-gray-400!' : ''"> {{ (customGoals?.[item.key] ? ('/ ' + customGoals?.[item.key]) : '') + " " + item.unit }}
                     </span>
                 </div>
                 <div class="space-y-2">
                     <div class="h-1 rounded-full bg-dark/10">
                         <div class="h-full rounded-full bg-dark" :style="{ width: `${item.progress}%` }" />
                     </div>
-                    <p class="text-[11px] font-mono tracking-wider text-gray-400">
+                    <p class="text-[11px] font-mono tracking-wider text-gray-600 font-extralight">
                         {{ item.subtext }}
                     </p>
                 </div>
@@ -41,19 +42,20 @@
 
 <script setup lang="ts">
 interface NutritionSource {
-  kcal?: number | null;
-  protein?: number | null;
-  fat?: number | null;
-  saturated_fat?: number | null;
-  carbohydrates?: number | null;
-  fiber?: number | null;
-  sugar?: number | null;
-  salt?: number | null;
+    kcal?: number | null;
+    protein?: number | null;
+    fat?: number | null;
+    saturated_fat?: number | null;
+    carbohydrates?: number | null;
+    fiber?: number | null;
+    sugar?: number | null;
+    salt?: number | null;
 }
 
 const props = defineProps<{
     nutritionSource: NutritionSource | null | undefined;
     portionMultiplier: number;
+    customGoals?: Record<string, number>;
 }>();
 
 function getScaledValue(value: number | null | undefined): number {
@@ -74,17 +76,17 @@ function formatPercent(value: number, goal: number): number {
 }
 
 const nutritionDailyProgress = computed(() => ({
-    calories: formatPercent(getScaledValue(props.nutritionSource?.kcal), 2000),
-    protein: formatPercent(getScaledValue(props.nutritionSource?.protein), 50),
-    fat: formatPercent(getScaledValue(props.nutritionSource?.fat), 70),
-    carbohydrates: formatPercent(getScaledValue(props.nutritionSource?.carbohydrates), 275),
-    sugar: formatPercent(getScaledValue(props.nutritionSource?.sugar), 50),
-    fiber: formatPercent(getScaledValue(props.nutritionSource?.fiber), 30),
-    salt: formatPercent(getScaledValue(props.nutritionSource?.salt), 5),
+    calories: formatPercent(getScaledValue(props.nutritionSource?.kcal), props.customGoals?.kcal ?? 2000),
+    protein: formatPercent(getScaledValue(props.nutritionSource?.protein), props.customGoals?.protein ?? 50),
+    fat: formatPercent(getScaledValue(props.nutritionSource?.fat), props.customGoals?.fat ?? 70),
+    carbohydrates: formatPercent(getScaledValue(props.nutritionSource?.carbohydrates), props.customGoals?.carbohydrates ?? 275),
+    sugar: formatPercent(getScaledValue(props.nutritionSource?.sugar), props.customGoals?.sugar ?? 50),
+    fiber: formatPercent(getScaledValue(props.nutritionSource?.fiber), props.customGoals?.fiber ?? 30),
+    salt: formatPercent(getScaledValue(props.nutritionSource?.salt), props.customGoals?.salt ?? 5),
 }));
 
 const energyLabel = computed(() => {
-    if(props.nutritionSource?.title) return ''; //is recipe
+    if (props.nutritionSource?.title) return ''; //is recipe
     const kcal = getScaledValue(props.nutritionSource?.kcal);
     if (kcal <= 180) return '· low-calorie';
     if (kcal >= 220) return '· energy-dense';
@@ -92,13 +94,13 @@ const energyLabel = computed(() => {
 });
 
 const nutritionDailyLabels = computed(() => ({
-    calories: `${nutritionDailyProgress.value.calories}% of Daily kcal ${energyLabel.value}`,
-    protein: `${nutritionDailyProgress.value.protein}% RDI`,
-    fat: `${nutritionDailyProgress.value.fat}% RDI`,
-    carbohydrates: `${nutritionDailyProgress.value.carbohydrates}% RDI`,
-    sugar: `${nutritionDailyProgress.value.sugar}% RDI`,
-    fiber: `${nutritionDailyProgress.value.fiber}% RDI`,
-    salt: `${nutritionDailyProgress.value.salt}% RDI`,
+    calories: `${nutritionDailyProgress.value.calories}% ${props.customGoals?.kcal ? 'of target' : 'of Daily kcal'} ${energyLabel.value}`,
+    protein: `${nutritionDailyProgress.value.protein}% ${props.customGoals?.protein ? 'of target' : 'RDI'}`,
+    fat: `${nutritionDailyProgress.value.fat}% ${props.customGoals?.fat ? 'of target' : 'RDI'}`,
+    carbohydrates: `${nutritionDailyProgress.value.carbohydrates}% ${props.customGoals?.carbohydrates ? 'of target' : 'RDI'}`,
+    sugar: `${nutritionDailyProgress.value.sugar}% ${props.customGoals?.sugar ? 'of target' : 'RDI'}`,
+    fiber: `${nutritionDailyProgress.value.fiber}% ${props.customGoals?.fiber ? 'of target' : 'RDI'}`,
+    salt: `${nutritionDailyProgress.value.salt}% ${props.customGoals?.salt ? 'of target' : 'RDI'}`,
 }));
 
 const formattedCalories = computed(() => Math.round(getScaledValue(props.nutritionSource?.kcal)));

@@ -6,13 +6,13 @@ export default defineEventHandler(async (event) => {
   const { link, args } = input;
 
   const responseBase = (await $fetch(
-    'https://jk-api.onrender.com/scrape-recipe-page',
+    'https://api.kinome.app/scrape-recipe-page',
     {
       method: 'POST',
       body: {
         url: link,
       },
-    }
+    },
   )) as any;
   if (!responseBase || !responseBase.title)
     throw new Error('No valid content returned from scrape response');

@@ -165,6 +165,11 @@
         <IconChevronsDown class="w-5" />
         <span>Deboost</span>
       </button>
+      <button class="button px-2 py-[3px] inline-flex gap-2 items-center text-gray-800! bg-primary-5/70!" type="button"
+        @click="boost">
+        <IconChevronsUp class="w-5" />
+        <span>Boost</span>
+      </button>
     </div>
   </div>
 
@@ -433,6 +438,24 @@ const deboost = async () => {
     .update({
       relevancy: Math.round(props.recipe.relevancy * 0.6),
       daily_engagement_score: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    })
+    .eq('id', props.recipe.id);
+};
+
+const boost = async () => {
+  const dailyEngagementScore = Array.isArray((props.recipe as any).daily_engagement_score)
+    ? [...(props.recipe as any).daily_engagement_score]
+    : Array(14).fill(0);
+
+  for (let i = 0; i < 3; i++) {
+    dailyEngagementScore[i] = Number(dailyEngagementScore[i] ?? 0) + 100;
+  }
+
+  await supabase
+    .from('recipes')
+    .update({
+      relevancy: Math.round((props.recipe.relevancy + 10) * 1.3),
+      daily_engagement_score: dailyEngagementScore,
     })
     .eq('id', props.recipe.id);
 };

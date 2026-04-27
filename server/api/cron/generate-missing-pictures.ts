@@ -136,7 +136,9 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    log(`Found ${candidateRecipes.length} eligible recipes; attempting to claim 1`);
+    log(
+      `Found ${candidateRecipes.length} eligible recipes; attempting to claim 1`,
+    );
     await persistLogs();
 
     const results = {
@@ -145,9 +147,7 @@ export default defineEventHandler(async (event) => {
       errors: [] as Array<{ recipeId: number; error: string }>,
     };
 
-    let claimedRecipe:
-      | (typeof candidateRecipes)[number]
-      | null = null;    
+    let claimedRecipe: (typeof candidateRecipes)[number] | null = null;
     let processingMarker: string | null = null;
 
     for (const recipe of candidateRecipes) {
@@ -155,8 +155,7 @@ export default defineEventHandler(async (event) => {
       let claimQuery = client
         .from('recipes')
         .update({ picture: nextMarker })
-        .eq('id', recipe.id)
-        
+        .eq('id', recipe.id);
 
       if (!recipe.picture) {
         claimQuery = claimQuery.is('picture', null);
@@ -200,7 +199,9 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      log(`Generating picture for recipe ${claimedRecipe.id}: ${claimedRecipe.title}`);
+      log(
+        `Generating picture for recipe ${claimedRecipe.id}: ${claimedRecipe.title}`,
+      );
       await persistLogs();
 
       // Generate image from recipe data
@@ -217,7 +218,7 @@ export default defineEventHandler(async (event) => {
       };
 
       const imageResponse = await fetch(
-        'https://jk-api.onrender.com/generate-image-from-recipe-data',
+        'https://api.kinome.app/generate-image-from-recipe-data',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

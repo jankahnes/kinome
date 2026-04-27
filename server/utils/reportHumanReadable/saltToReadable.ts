@@ -40,13 +40,9 @@ export default function saltToReadable(report: any, isFood: boolean) {
     report.salt.saltRDAPerServing,
     saltRDAPerServingThresholds
   );
-  const naKRatioItem = generics.getHighestThreshold(
-    report.salt.naKRatio,
-    naKRatioThresholds
-  );
   items.push({
     ...saltPer100gItem,
-    subtitle: report.salt.saltPer100g.toFixed(1) + 'g salt per 100g',
+    subtitle: report.salt.saltPer100g.toFixed(2) + 'g salt per 100g',
   });
   items.push({
     ...saltRDAPerServingItem,
@@ -54,11 +50,28 @@ export default function saltToReadable(report: any, isFood: boolean) {
       (report.salt.saltRDAPerServing * 100).toFixed(0) +
       (isFood ? '% of Sodium RDA per 100g' : '% of sodium RDA per serving'),
   });
-  items.push({
-    ...naKRatioItem,
-    description: naKRatioItem.description + ' electrolyte balance',
-    subtitle: report.salt.naKRatio.toFixed(1) + ' Na/K',
-  });
+  // The displayHints salt state is sodium-driven (gates the overall S+
+  // bullet); the Na/K ratio item has its own separate concern — it needs
+  // enough combined Na+K mass to compute a meaningful ratio. Keep that
+  // gate local.
+  if ((report.salt.totalElectrolytesPer100g ?? 0) >= 100) {
+    const naKRatioItem = generics.getHighestThreshold(
+      report.salt.naKRatio,
+      naKRatioThresholds,
+    );
+    items.push({
+      ...naKRatioItem,
+      description: naKRatioItem.description + ' electrolyte balance',
+      subtitle: report.salt.naKRatio.toFixed(1) + ' Na/K',
+    });
+  } else {
+    items.push({
+      description: 'Negligible electrolytes',
+      subtitle: 'Na/K ratio not meaningful at this level',
+      ...generics.TRACE,
+      trace: true,
+    });
+  }
   if (!isFood) {
     const contributors =
       report.contributors['salt_without_added'] || [];

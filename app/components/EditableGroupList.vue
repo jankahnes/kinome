@@ -1,11 +1,11 @@
 <template>
-  <div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-6 main-card main-card-rounded p-2 md:p-4">
     <div v-for="(group, groupIndex) in groups" :key="groupIndex" class="flex flex-col">
 
       <!-- Group header: hidden for the default empty-name group when showGroupHeader=false -->
       <slot v-if="showGroupHeader || group.name !== null" name="group-header" :group="group" :group-index="groupIndex"
         :remove-group="() => removeGroup(groupIndex)">
-        <div class="flex items-center gap-2 justify-between pr-1 pb-2" :class="{ 'cursor-pointer': showCollapse }"
+        <div class="flex items-center gap-2 justify-between pr-1 py-2" :class="{ 'cursor-pointer': showCollapse }"
           @click="showCollapse ? (group.collapsed = !group.collapsed) : undefined">
 
           <div class="relative flex mx-1">

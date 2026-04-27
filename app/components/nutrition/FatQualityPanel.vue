@@ -24,10 +24,10 @@
       </div>
       <div class="flex flex-col gap-2">
         <div v-for="item in fatProfileReadable" :key="item.description" class="flex items-start gap-3 p-3 rounded-xl"
-          :class="item.bgColor">
+          :class="[item.bgColor, { 'italic': item.trace }]">
           <div>
             <div class="font-semibold text-sm" :class="item.color">{{ item.description }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ item.subtitle }} of total fat</div>
+            <div v-if="item.subtitle" class="text-xs text-slate-500 mt-0.5">{{ item.subtitle }}</div>
           </div>
         </div>
         <p v-if="!fatProfileReadable.length" class="text-sm text-slate-400">Log some food with fat content to see
@@ -49,7 +49,7 @@ const props = defineProps<{
     o6Percent?: number;
     mufaPercent?: number;
   } | null | undefined;
-  fatProfileReadable: { description: string; subtitle: string; color: string; bgColor: string }[];
+  fatProfileReadable: { description: string; subtitle?: string | null; color: string; bgColor: string; trace?: boolean; lowAbs?: boolean }[];
 }>();
 
 const fatDonutSegments = computed(() => {

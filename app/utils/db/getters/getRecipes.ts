@@ -74,11 +74,11 @@ async function getRecipeIdsByTags(
   return [];
 }
 
-export async function getRecipes(
+export async function getRecipe(
   client: SupabaseClient<Database>,
   opts: GetterOpts = {},
-  includePercentiles: boolean = false,
-): Promise<Recipe[]> {
+  _includePercentiles: boolean = false,
+): Promise<Recipe> {
   let query = client
     .from('recipes')
     .select(
@@ -107,120 +107,83 @@ export async function getRecipes(
         comments:comments(*,
           user:profiles(id, username, picture)
         ),
-        user:profiles!recipes_user_id_fkey(id, username, picture)
+        user:profiles!recipes_user_id_fkey(id, username, picture),
+        based_on_parent:recipe_overviews!recipes_based_on_fkey(id, title)
       `,
     )
     .neq('visibility', 'HIDDEN');
 
   query = buildQuery(query, opts);
 
-  const { data, error } = await query;
-  const recipes = data as any;
-  if (error) throw error;
-  for (const recipe of recipes) {
-    sanitizeRecipePicture(recipe);
-    recipe.tags = recipe.tags.map((t: { tag_id: number }) => t.tag_id);
-  }
-  if (recipes.length === 0) return [];
+  const recipeId = (opts.eq as { id?: number } | undefined)?.id;
 
-  const userIds = recipes.flatMap((r: Recipe) =>
-    r.comments.map((c: { user_id: string }) => c.user_id),
-  );
-  const recipeIds = recipes.map((r: Recipe) => r.id);
-  const [ratings, variationOverviews] = await Promise.all([
-    getRatings(client, {
-      in: { user_id: userIds, recipe_id: recipeIds },
-    }),
-    getRecipeOverviews(client, { in: { based_on: recipeIds } }),
+  const [mainResult, ratings, variationOverviews] = await Promise.all([
+    query,
+    recipeId != null
+      ? getRatings(client, { eq: { recipe_id: recipeId } })
+      : Promise.resolve([] as Awaited<ReturnType<typeof getRatings>>),
+    recipeId != null
+      ? getRecipeOverviews(client, { eq: { based_on: recipeId } })
+      : Promise.resolve([] as RecipeOverview[]),
   ]);
 
-  const variationsByParent = new Map<number, RecipeOverview[]>();
-  for (const v of variationOverviews) {
-    const parentId = v.based_on;
-    if (parentId == null) continue;
-    const list = variationsByParent.get(parentId);
-    if (list) list.push(v);
-    else variationsByParent.set(parentId, [v]);
+  const { data, error } = mainResult;
+  if (error) throw error;
+  const recipe = expectSingle(data as any[]) as any;
+
+  sanitizeRecipePicture(recipe);
+  recipe.tags = recipe.tags.map((t: { tag_id: number }) => t.tag_id);
+
+  for (const c of recipe.comments) {
+    const match = ratings.find(
+      (r) => r.user_id === c.user_id && r.recipe_id === recipe.id,
+    );
+    c.rating = match?.rating ?? null;
   }
 
-  for (const recipe of recipes) {
-    if (includePercentiles && false) {
-      const { data: percentileData, error: percentileError } = await client.rpc(
-        'get_percentile',
-        {
-          p_table_name: 'recipes',
-          p_column_name: 'hidx',
-          p_value: recipe.hidx ?? 0,
-        },
-      );
-      if (percentileError) throw percentileError;
-      recipe.percentile = percentileData;
+  const commentMap: Record<number, Comment> = {};
+  recipe.comments.forEach((c: Comment) => {
+    c.replies = [];
+    commentMap[c.id!] = c;
+  });
+  const commentRoots: Comment[] = [];
+  recipe.comments.forEach((c: Comment) => {
+    if (c.replying_to && commentMap[c.replying_to]) {
+      commentMap[c.replying_to].replies!.push(c);
+    } else {
+      commentRoots.push(c);
     }
-    if (recipe.based_on) {
-      const { data } = await client
-        .from('recipes')
-        .select('id, title')
-        .eq('id', recipe.based_on);
-      recipe.based_on_parent = data?.[0] ?? null;
-    }
-    for (const c of recipe.comments) {
-      const match = ratings.find(
-        (r) => r.user_id === c.user_id && r.recipe_id === recipe.id,
-      );
-      c.rating = match?.rating ?? null;
-    }
+  });
+  recipe.comments = commentRoots;
 
-    const map: Record<number, Comment> = {};
-    recipe.comments.forEach((c: Comment) => {
-      c.replies = [];
-      map[c.id!] = c;
-    });
-    const roots: Comment[] = [];
-    recipe.comments.forEach((c: Comment) => {
-      if (c.replying_to && map[c.replying_to]) {
-        map[c.replying_to].replies!.push(c);
-      } else {
-        roots.push(c);
-      }
-    });
-    recipe.comments = roots;
+  recipe.ingredients = recipe.ingredients.map((ingredient: any) => {
+    return {
+      id: ingredient.food_name.id,
+      name: ingredient.food_name.name,
+      category: ingredient.category,
+      amount: ingredient.amount,
+      unit: ingredient.unit,
+      countable_units: ingredient.food_name.food.countable_units,
+      amountInfo: [[ingredient.amount, ingredient.unit]],
+      currentUnit: 0,
+      density: ingredient.food_name.food.density,
+      aisle: ingredient.food_name.food.aisle,
+      price: ingredient.food_name.food.price,
+      visual_category: ingredient.food_name.food.visual_category,
+      preparation_description: ingredient.preparation_description,
+      consumption_factor: ingredient.consumption_factor,
+      thermal_intensity: ingredient.thermal_intensity,
+      heat_medium: ingredient.heat_medium,
+      mechanical_disruption: ingredient.mechanical_disruption,
+      thermal_description: ingredient.thermal_description,
+      mechanical_description: ingredient.mechanical_description,
+    } as Ingredient;
+  });
+  recipe.ingredients.forEach(fillForUnits);
 
-    recipe.ingredients = recipe.ingredients.map((ingredient: any) => {
-      return {
-        id: ingredient.food_name.id,
-        name: ingredient.food_name.name,
-        category: ingredient.category,
-        amount: ingredient.amount,
-        unit: ingredient.unit,
-        countable_units: ingredient.food_name.food.countable_units,
-        amountInfo: [[ingredient.amount, ingredient.unit]],
-        currentUnit: 0,
-        density: ingredient.food_name.food.density,
-        aisle: ingredient.food_name.food.aisle,
-        price: ingredient.food_name.food.price,
-        visual_category: ingredient.food_name.food.visual_category,
-        preparation_description: ingredient.preparation_description,
-        consumption_factor: ingredient.consumption_factor,
-        thermal_intensity: ingredient.thermal_intensity,
-        heat_medium: ingredient.heat_medium,
-        mechanical_disruption: ingredient.mechanical_disruption,
-        thermal_description: ingredient.thermal_description,
-        mechanical_description: ingredient.mechanical_description,
-      } as Ingredient;
-    });
-    recipe.ingredients.forEach(fillForUnits);
+  recipe.variations = variationOverviews;
 
-    recipe.variations = variationsByParent.get(recipe.id) ?? [];
-  }
-  return recipes as Recipe[];
-}
-
-export async function getRecipe(
-  client: SupabaseClient<Database>,
-  opts: GetterOpts = {},
-  includePercentiles: boolean = false,
-): Promise<Recipe> {
-  return expectSingle(await getRecipes(client, opts, includePercentiles));
+  return recipe as Recipe;
 }
 
 export async function getRecipeOverviews(
@@ -310,6 +273,9 @@ export async function getRecipeOverviews(
   for (const recipe of recipes) {
     sanitizeRecipePicture(recipe as { picture: string | null });
     (recipe as any).tags = recipe.tags.map((t: { tag_id: number }) => t.tag_id);
+    if (recipe.tags.includes(102)) {
+      recipe.tags = recipe.tags.filter((tagId: number) => tagId !== 103);
+    }
   }
   let recipeOverviews = recipes as unknown as RecipeOverview[];
 
@@ -337,8 +303,11 @@ export async function getRecipeOverview(
 
 export async function getTrendingThisMonth(
   client: SupabaseClient<Database>,
+  limit: number,
 ): Promise<RecipeOverview[]> {
-  const { data, error } = await client.rpc('get_trending_this_month');
+  const { data, error } = await client.rpc('get_trending_this_month', {
+    max: limit,
+  });
 
   if (error) throw error;
   data.forEach((recipe) =>

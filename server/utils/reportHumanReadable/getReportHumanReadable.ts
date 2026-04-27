@@ -8,6 +8,7 @@ import sugarToReadable from "~~/server/utils/reportHumanReadable/sugarToReadable
 import micronutrientsToReadable from "~~/server/utils/reportHumanReadable/micronutrientsToReadable";
 import fatProfileToReadable from "~~/server/utils/reportHumanReadable/fatProfileToReadable";
 import protectiveCompoundsToReadable from "~~/server/utils/reportHumanReadable/protectiveCompoundsToReadable";
+import { computeDisplayHints, type DisplayHints } from "~~/server/utils/reportHumanReadable/displayHints";
 import type { Recipe, Food } from "~/types/types";
 
 
@@ -31,9 +32,17 @@ type ReportHumanReadable = {
     fiber: ReportHumanReadableItem[];
     satiety: ReportHumanReadableItem[];
     protectiveCompounds: ReportHumanReadableItem[];
+    displayHints: DisplayHints;
 }
 
 export default function getReportHumanReadable(report: any, recipeComputed: Recipe | Food, isFood: boolean) {
+    // Compute once, share across all consumers. See displayHints.ts for the
+    // rationale and threshold tuning.
+    const hints = computeDisplayHints(report, recipeComputed as any, isFood);
+    // Also stamp onto the report so per-section helpers downstream can read
+    // it without us re-threading the parameter everywhere.
+    report.displayHints = hints;
+
     const humanReadable: ReportHumanReadable = {
         overall: [],
         micronutrients: [],
@@ -45,13 +54,14 @@ export default function getReportHumanReadable(report: any, recipeComputed: Reci
         fiber: [],
         satiety: [],
         protectiveCompounds: [],
+        displayHints: hints,
     }
     humanReadable.overall = gradesToReadable(report, recipeComputed, isFood) as ReportHumanReadableItem[]
     humanReadable.processingLevel = processingLevelToReadable(report, isFood) as ReportHumanReadableItem[]
     humanReadable.protein = proteinToReadable(report, isFood) as ReportHumanReadableItem[]
     humanReadable.salt = saltToReadable(report, isFood) as ReportHumanReadableItem[]
     humanReadable.fiber = fiberToReadable(report, isFood) as ReportHumanReadableItem[]
-    humanReadable.satiety = satietyToReadable(report, isFood) as ReportHumanReadableItem[]
+    humanReadable.satiety = satietyToReadable(report, isFood, (recipeComputed as any)?.title ?? (recipeComputed as any)?.name ?? null) as ReportHumanReadableItem[]
     humanReadable.sugar = sugarToReadable(report, isFood) as ReportHumanReadableItem[]
     humanReadable.micronutrients = micronutrientsToReadable(report, isFood) as ReportHumanReadableItem[]
     humanReadable.fatProfile = fatProfileToReadable(report) as ReportHumanReadableItem[]

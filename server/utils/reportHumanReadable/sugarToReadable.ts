@@ -56,13 +56,10 @@ const percentOfKcalThresholds = {
 export default function sugarToReadable(report: any, isFood: boolean) {
   if (!report.sugar) return [];
   const items = [];
+  const totalSugar = report.sugar.totalSugarPer100 ?? 0;
   const totalSugarPer100Item = generics.getHighestThreshold(
-    report.sugar.totalSugarPer100,
+    totalSugar,
     totalSugarPer100Thresholds,
-  );
-  const naturalSourceItem = generics.getHighestThreshold(
-    report.sugar.percentContributedFromNaturalSources,
-    naturalSourceThresholds,
   );
   const percentOfKcalItem = generics.getHighestThreshold(
     report.sugar.percentOfKcal,
@@ -71,15 +68,23 @@ export default function sugarToReadable(report: any, isFood: boolean) {
   items.push({
     ...totalSugarPer100Item,
     description: totalSugarPer100Item.description + ' sugar',
-    subtitle: report.sugar.totalSugarPer100.toFixed(0) + 'g sugar/100g',
+    subtitle: totalSugar.toFixed(0) + 'g sugar/100g',
   });
-  items.push({
-    ...naturalSourceItem,
-    description: naturalSourceItem.description,
-    subtitle:
-      (report.sugar.percentContributedFromNaturalSources * 100).toFixed(0) +
-      '%',
-  });
+  // Use shared displayHints gate. 'low' state still hides the natural
+  // breakdown — at <3g/100g the percentage is already noise.
+  if (report?.displayHints?.sugar?.state === 'normal') {
+    const naturalSourceItem = generics.getHighestThreshold(
+      report.sugar.percentContributedFromNaturalSources,
+      naturalSourceThresholds,
+    );
+    items.push({
+      ...naturalSourceItem,
+      description: naturalSourceItem.description,
+      subtitle:
+        (report.sugar.percentContributedFromNaturalSources * 100).toFixed(0) +
+        '%',
+    });
+  }
   items.push({
     ...percentOfKcalItem,
     description:

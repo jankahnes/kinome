@@ -9,11 +9,11 @@
       </div>
 
       <button v-if="showArrows && canScrollLeft" type="button" @click="scrollByPage(-1)" aria-label="Scroll left"
-        class="hidden md:flex absolute left-1 top-1/2 -translate-y-1/2 z-30 w-6 h-6 items-center justify-center rounded-full bg-white/70 text-gray-700 shadow-[0_1px_4px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 active:scale-95 transition-all">
+        class="flex absolute left-1 top-1/2 -translate-y-1/2 z-30 w-6 h-6 items-center justify-center rounded-full bg-white/70 text-gray-700 shadow-[0_1px_4px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 active:scale-95 transition-all">
         <IconChevronLeft class="w-4 h-4" />
       </button>
       <button v-if="showArrows && canScrollRight" type="button" @click="scrollByPage(1)" aria-label="Scroll right"
-        class="hidden md:flex absolute right-1 top-1/2 -translate-y-1/2 z-30 w-6 h-6 items-center justify-center rounded-full bg-white/70 text-gray-700 shadow-[0_1px_4px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 active:scale-95 transition-all">
+        class="flex absolute right-1 top-1/2 -translate-y-1/2 z-30 w-6 h-6 items-center justify-center rounded-full bg-white/70 text-gray-700 shadow-[0_1px_4px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 active:scale-95 transition-all">
         <IconChevronRight class="w-4 h-4" />
       </button>
 

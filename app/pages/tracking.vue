@@ -10,11 +10,11 @@
       </div>
       <!-- Date navigator - only on /tracking/daily -->
       <div v-if="isDaily" class="flex items-center  main-card-rounded bg-primary-5/40">
-        <button class="main-button animated-button py-1 px-3" @click="navigateDate(-1)">
+        <button class="animated-button py-1 px-3" @click="navigateDate(-1)">
           <IconChevronLeft class="w-4 h-4" />
         </button>
         <span class="text-xs font-mono min-w-28 text-center py-1.5 main-card main-card-rounded">{{ dateLabel }}</span>
-        <button class="main-button animated-button py-1 px-3" @click="navigateDate(1)" :disabled="isToday"
+        <button class="animated-button py-1 px-3" @click="navigateDate(1)" :disabled="isToday"
           :class="{ 'opacity-30 cursor-not-allowed': isToday }">
           <IconChevronRight class="w-4 h-4" />
         </button>

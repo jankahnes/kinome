@@ -60,6 +60,8 @@ const iconMap: Record<string, any> = {
   'arrow-right': LucideIcons.ArrowRight,
   'arrow-left': LucideIcons.ArrowLeft,
   plus: LucideIcons.Plus,
+  'check_small': LucideIcons.Check,
+  'info': LucideIcons.Info,
 };
 
 const icon = computed(() => iconMap[props.name]);

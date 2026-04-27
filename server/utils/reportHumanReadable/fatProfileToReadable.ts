@@ -57,12 +57,28 @@ const scoreDescriptors = {
 };
 
 export default function fatProfileToReadable(report: any) {
+  const totalFat = report.fatProfile?.totalFatPer100g ?? 0;
+  const hint = report?.displayHints?.fat_profile;
+  if (hint?.state === 'trace') {
+    return [];
+  }
   const items = [];
   for (const [key, value] of Object.entries(scoreDescriptors)) {
     const fattyAcidPct = report.fatProfile[key];
     const item = generics.getHighestThreshold(fattyAcidPct / 100, value);
-    items.push({ ...item, subtitle: (fattyAcidPct ?? 0).toFixed(0) + '%' });
+    items.push({
+      ...item,
+      subtitle: (fattyAcidPct ?? 0).toFixed(0) + '% of total fat',
+    });
   }
   items.sort((a, b) => b.value - a.value);
+  if (hint?.state === 'low') {
+    items.push({
+      description: 'Low overall fat',
+      subtitle: `${totalFat.toFixed(1)}g/100g — percentages above describe a small absolute amount`,
+      ...generics.LOW_ABS,
+      lowAbs: true,
+    });
+  }
   return items;
 }

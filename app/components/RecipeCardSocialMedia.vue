@@ -1,9 +1,12 @@
 <template>
   <div v-if="recipe?.id" class="flex transition-all duration-300 main-card main-card-rounded flex-1 group p-2 md:p-4 gap-4">
     <a :href="recipe.video_metadata?.url ?? recipe.source ?? undefined" target="_blank"
-      class="min-w-28 w-1/5 aspect-9/10 shrink-0 xs:my-0 group-hover:scale-[1.01] transition-transform duration-300 will-change-transform">
-      <NuxtImg v-if="recipe.social_picture" class="w-full h-full object-cover rounded-3xl" :src="recipe.social_picture"
-        :alt="recipe?.title" />
+      class="min-w-28 w-1/5 aspect-9/10 shrink-0 xs:my-0 group-hover:scale-[1.01] transition-transform duration-300 hover-will-change-transform">
+      <NuxtImg v-if="recipe.social_picture"
+        class="recipe-card-social-media-image w-full h-full object-cover rounded-3xl transition-opacity duration-250"
+        :class="recipeImageLoaded ? 'opacity-100' : 'opacity-0'" :src="recipe.social_picture"
+        :alt="recipe?.title" sizes="120px sm:200px md:260px" format="webp" loading="lazy"
+        @load="recipeImageLoaded = true" />
       <Skeleton v-else class="w-full xs:w-auto aspect-9/10 xs:h-full object-cover" />
     </a>
     <NuxtLink :to="getRecipeUrl(recipe.id, recipe.title)" class="z-0 flex-1 flex flex-col gap-3 justify-between my-2">
@@ -72,6 +75,14 @@ const props = defineProps<{
 }>();
 
 const recipeStore = useRecipeStore();
+const recipeImageLoaded = ref(false);
+
+watch(
+  () => props.recipe.social_picture,
+  () => {
+    recipeImageLoaded.value = false;
+  }
+);
 
 const getTop5Tags = (recipe: RecipeOverview) => {
   if (!recipe.tags) return [];

@@ -29,10 +29,12 @@ export default function fiberToReadable(report: any, isFood: boolean) {
     report.fiber.fiberRDAPer2000kcal,
     fiberTargetThresholds
   );
+  // Sub-1g amounts need a decimal so cucumber's 0.5g doesn't round to "1g".
+  const fiberDecimals = report.fiber.fiberTotal < 1 ? 1 : 0;
   items.push({
     ...fiberPer100gItem,
     description: fiberPer100gItem.description + ' in Fiber',
-    subtitle: report.fiber.fiberTotal.toFixed(1) + (isFood ? 'g fiber per 100g' : 'g fiber per serving'),
+    subtitle: report.fiber.fiberTotal.toFixed(fiberDecimals) + (isFood ? 'g fiber per 100g' : 'g fiber per serving'),
   });
   items.push({
     ...fiberTargetItem,
