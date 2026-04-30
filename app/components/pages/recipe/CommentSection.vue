@@ -46,7 +46,7 @@
               <IconCamera class="w-3" v-else />
               <span>{{ photoUploading ? 'Uploading…' : 'Photo' }}</span>
             </button>
-            <button class="main-button animated-button bg-primary! text-white font-headers italic px-3 py-1 rounded-xl! font-medium" @click="submitComment"
+            <button class="animated-button bg-primary text-white font-headers italic px-3 py-1 rounded-xl! font-medium" @click="submitComment"
               :disabled="photoUploading">
               Post
             </button>

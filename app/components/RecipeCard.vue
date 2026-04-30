@@ -33,7 +33,7 @@
           class=" text-xl sm:text-xl tracking-tight font-semibold font-headers line-clamp-2 text-center text-balance leading-5 sm:leading-6.5">
           {{ recipe?.title }}</h2>
         <p v-if="recipe?.variation_name && recipe?.variation_display_name"
-          class="text-[10px] sm:text-[11px] uppercase tracking-[2px] text-gray-500 font-mono font-light mt-0.5">
+          class="text-[10px] sm:text-[11px] uppercase tracking-[2px] text-gray-500 font-mono font-light mt-0.5 text-center">
           {{ recipe?.variation_name }}
         </p>
       </div>

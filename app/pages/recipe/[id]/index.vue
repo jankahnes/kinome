@@ -1,13 +1,14 @@
 <template>
   <div>
     <div class="flex flex-col items-center lg:ml-1 mb-20" v-if="recipeStore.recipe && recipeStore.recipe?.id === id">
-      <img class="w-full h-50 sm:h-64 object-cover  object-top opacity-90"
-        :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.png" alt="Light wooden background" />
+      <NuxtImg class="w-full h-50 sm:h-64 object-cover object-top opacity-90"
+        :class="{ 'h-26!': !recipeStore.recipe?.picture }" src="/wood.webp" alt="Light wooden background"
+        sizes="xs:100vw sm:100vw md:100vw lg:100vw xl:100vw 2xl:100vw" preload fetchpriority="high" />
       <NuxtImg v-if="recipeStore.recipe?.picture"
         class="recipe-hero-image -mt-47 h-44 w-44 sm:h-82 sm:w-82 object-contain sm:-mt-60 shadow-[#00000038] transition-[opacity,border-radius] duration-250"
         :class="recipeHeroImageLoaded ? 'opacity-100' : 'opacity-0'" :src="recipeStore.recipe?.picture"
-        :alt="recipeStore.recipe?.title ?? 'Recipe picture'" sizes="sm:180px md:330px" format="webp" preload
-        fetchpriority="high" @load="recipeHeroImageLoaded = true" />
+        :alt="recipeStore.recipe?.title ?? 'Recipe picture'" sizes="180px md:330px" preload fetchpriority="high"
+        @load="recipeHeroImageLoaded = true" />
       <!-- Central overview -->
       <div
         class="max-w-[850px] flex flex-col items-start md:items-center text-left md:text-center mx-5 lg:mx-8 mt-8 sm:mt-2"
@@ -23,7 +24,8 @@
           @click="mobileDescriptionExpanded = false">
           {{ recipeStore.recipe?.description }}
         </p>
-        <p class="text-gray-600 mt-2 leading-snug block xl:hidden text-sm sm:text-base" v-else @click="mobileDescriptionExpanded = true">
+        <p class="text-gray-600 mt-2 leading-snug block xl:hidden text-sm sm:text-base" v-else
+          @click="mobileDescriptionExpanded = true">
           {{ mobileDescription }}...
           <span class="text-xs text-gray-400 cursor-pointer">Show more
           </span>
@@ -45,8 +47,9 @@
               recipeStore.recipe?.user?.username + " " }}</NuxtLink></span>
           </span>
           <span v-if="recipeStore.recipe?.based_on" class="leading-none align-middle">
-            <span class="hidden sm:inline">· </span><br class="sm:hidden"> {{ recipeStore.recipe?.variation_name }} of <NuxtLink
-              :to="`/recipe/${recipeStore.recipe?.based_on_parent?.id}`" class="cursor-pointer font-medium">{{
+            <span class="hidden sm:inline">· </span><br class="sm:hidden"> {{ recipeStore.recipe?.variation_name ??
+              'Variation' }} of <NuxtLink :to="`/recipe/${recipeStore.recipe?.based_on_parent?.id}`"
+              class="cursor-pointer font-medium">{{
                 recipeStore.recipe?.based_on_parent?.title }}</NuxtLink>
           </span>
           <span v-else-if="originDisplay.type !== 'traditional'" class="leading-none align-middle">{{ " " }} · Original
@@ -72,7 +75,8 @@
             <IconChevronDown class="h-4" />
             <span class="leading-none">Video</span>
           </button>
-          <button v-if="!trackingAdded" class="flex justify-center items-center gap-2 px-1 py-0.5 md:py-1 text-slate-600"
+          <button v-if="!trackingAdded"
+            class="flex justify-center items-center gap-2 px-1 py-0.5 md:py-1 text-slate-600"
             :class="{ 'opacity-60 cursor-not-allowed': trackingLoading }" :disabled="trackingLoading"
             title="Track this meal" @click="trackFromRecipePage">
             <IconLoaderCircle v-if="trackingLoading" class="w-4.5 md:w-5.5 animate-spin" />
@@ -87,10 +91,12 @@
               <span class="leading-none text-[11px] -mt-0.5">Added to today</span>
             </div>
           </button>
-          <button class="flex justify-center items-center gap-2 px-1 py-0.5 md:py-1 text-slate-600 transition-all duration-200" :class="{
-            '': isBookmarked,
-            'opacity-60 cursor-not-allowed': bookmarkLoading,
-          }" :disabled="bookmarkLoading" :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this recipe'"
+          <button
+            class="flex justify-center items-center gap-2 px-1 py-0.5 md:py-1 text-slate-600 transition-all duration-200"
+            :class="{
+              '': isBookmarked,
+              'opacity-60 cursor-not-allowed': bookmarkLoading,
+            }" :disabled="bookmarkLoading" :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this recipe'"
             @click="toggleBookmark">
             <IconLoaderCircle v-if="bookmarkLoading" class="w-4 md:w-5.5 animate-spin" />
             <IconBookmark v-else class="w-4.5 md:w-6" :class="{ 'fill-current': isBookmarked }" />
@@ -149,7 +155,7 @@
             </p>
             <div class="">
               <span class="text-xl sm:text-[22px] font-medium font-headers leading-none">{{ recipeStore.recipe?.kcal
-                }}</span><span class="text-[11px] text-gray-500 font-headers italic"> kcal
+              }}</span><span class="text-[11px] text-gray-500 font-headers italic"> kcal
               </span>
             </div>
           </div>
@@ -304,7 +310,8 @@
                     <div class="flex items-start sm:items-center gap-2 bg-primary-5 px-3 rounded-3xl py-1">
                       <img :src="`/${getWebsiteName(effectiveSource)}.webp`" :alt="getWebsiteName(effectiveSource)"
                         class="h-4 mt-1 sm:mt-0" />
-                      <h3 class="text-sm leading-tight sm:text-[17px] font-headers tracking-tight sm:truncate sm:max-w-48">
+                      <h3
+                        class="text-sm leading-tight sm:text-[17px] font-headers tracking-tight sm:truncate sm:max-w-48">
                         {{ recipeStore.recipe?.video_metadata?.channel }}
                       </h3>
                     </div>
@@ -434,6 +441,8 @@
 import { useWindowSize } from '@vueuse/core';
 import { getGrade, gradeColors, gradeTextColors } from '~/utils/constants/grades';
 import convertUploadableToComputable from '~~/server/utils/convertUploadableToComputable';
+import getHealthLabel from '~/utils/format/healthLabel';
+import stripIngredientLinks from '~/utils/format/stripIngredientLinks';
 
 const route = useRoute();
 const router = useRouter();
@@ -815,24 +824,8 @@ const { job, isPolling, error, start, stop, restart, fetchJob } = useJobPolling(
 
 const healthLabel = computed(() => {
   const grade = getGrade(liveReport.value?.overall?.hidx, 'ovr')?.[0] ?? '';
-  if (!grade) return '';
-  switch (grade) {
-    case 'S':
-      return ' · Outstanding'
-    case 'A':
-      return ' · Excellent'
-    case 'B':
-      return ' · Healthy'
-    case 'C':
-      return ' · Balanced'
-    case 'D':
-      return ' · Occasional'
-    case 'E':
-      return ' · Indulgent'
-    case 'F':
-      return ' · Indulgent'
-  }
-
+  const label = getHealthLabel(grade);
+  return label ? ` · ${label}` : '';
 })
 
 const loadingStore = useLoadingStore();
@@ -1017,14 +1010,6 @@ const jsonLd = computed(() => {
                         ${getStringFromIngredient(ing, recipe.batch_size ?? 1)}
                       `.trim(),
     );
-  }
-  const stripIngredientLinks = (instruction: string): string => {
-    if (!instruction) return '';
-
-    return instruction.replace(
-      /\[([^\]]+)\]\(\d+\)/g,
-      (_, ingredient) => ingredient
-    ).replace(/\*([^*]+)\*/g, '$1');
   }
   if (recipe.full_instructions?.length) {
 

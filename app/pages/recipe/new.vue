@@ -116,96 +116,18 @@ const submitFromLink = async (link: string) => {
   isLoading.value = true;
   const supportedVideoSites = ['youtube', 'youtu.be', 'tiktok', 'instagram'];
   const isVideoLink = supportedVideoSites.some((site) => link.includes(site));
-  const canonical = canonicalUrl(link);
 
-  // Check if a canonical URL already exists in the DB (recipe.source or
-  // recipe_sources).  Returns the matching recipe or null.
-  const findExisting = async (canonUrl: string | null) => {
-    if (!canonUrl) return null;
-
-    // Instagram /p/<id> and /reel/<id> are the same content, so check both.
-    const urlsToCheck = [canonUrl];
-    if (canonUrl.includes('instagram.com/p/')) {
-      urlsToCheck.push(canonUrl.replace('/p/', '/reel/'));
-    } else if (canonUrl.includes('instagram.com/reel/')) {
-      urlsToCheck.push(canonUrl.replace('/reel/', '/p/'));
-    }
-
-    for (const url of urlsToCheck) {
-      // 1. Exact match against existing canonical recipes.
-      const recipes = await getRecipeOverviews(supabase, {
-        eq: { source: url },
-      });
-      if (recipes.length > 0) return recipes[0]!;
-
-      // 2. Exact match against absorbed-duplicate source urls.
-      const { data: absorbedMatches } = await supabase
-        .from('recipe_sources' as any)
-        .select('recipe_id')
-        .eq('source_url', url)
-        .limit(1);
-      const absorbedCanonicalId = (absorbedMatches as any)?.[0]?.recipe_id as
-        | number
-        | undefined;
-      if (absorbedCanonicalId) {
-        const canonicalOverviews = await getRecipeOverviews(supabase, {
-          eq: { id: absorbedCanonicalId },
-        });
-        if (canonicalOverviews[0]) return canonicalOverviews[0];
-      }
-    }
-    return null;
-  };
-
-  // Check with the URL as-is first.
-  const existingByDirect = await findExisting(canonical);
-  if (existingByDirect) {
+  // Two-pass duplicate check: direct match against recipes.source +
+  // recipe_sources, then for short video links a resolve + recheck (and a
+  // best-effort alt-source cache write on hit). Same logic powers the
+  // agent-side handleCheckUrlExists.
+  const existing = await findExistingRecipeByUrl(supabase, link, {
+    resolveShortUrls: true,
+  });
+  if (existing) {
     isLoading.value = false;
-    navigateTo(getRecipeUrl(existingByDirect.id, existingByDirect.title ?? ''));
+    navigateTo(getRecipeUrl(existing.id, existing.title ?? ''));
     return;
-  }
-
-  // For short/share video URLs, resolve to the long URL and check again.
-  // This catches the case where the long URL is already in the DB but the
-  // user is importing via a share link.
-  if (isVideoLink && isShortVideoUrl(link)) {
-    try {
-      const { resolved } = await $fetch('/api/create-recipe/resolve-url', {
-        method: 'POST',
-        body: { url: link },
-      });
-      const resolvedCanonical = canonicalUrl(resolved);
-      if (resolvedCanonical && resolvedCanonical !== canonical) {
-        const existingByResolved = await findExisting(resolvedCanonical);
-        if (existingByResolved) {
-          // Store the short URL as an alt source so future imports skip the
-          // resolve step.
-          if (canonical) {
-            supabase
-              .from('recipe_sources' as any)
-              .insert({
-                recipe_id: existingByResolved.id,
-                source_url: canonical,
-              } as any)
-              .then(({ error: srcErr }) => {
-                if (srcErr)
-                  console.error('Failed to store short URL alias:', srcErr);
-              });
-          }
-          isLoading.value = false;
-          navigateTo(
-            getRecipeUrl(
-              existingByResolved.id,
-              existingByResolved.title ?? '',
-            ),
-          );
-          return;
-        }
-      }
-    } catch (e) {
-      // Resolve failed – fall through to normal import.
-      console.warn('Short URL resolve failed, proceeding with import:', e);
-    }
   }
 
   if (isVideoLink) {

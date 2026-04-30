@@ -149,7 +149,13 @@ export default defineEventHandler(async (event) => {
   } = input;
 
   const supabase = serverSupabaseServiceRole<Database>(event);
-  const authHeaders = { cookie: authCookie, authorization: authHeader };
+  const config = useRuntimeConfig();
+  const authHeaders = {
+    cookie: authCookie,
+    authorization: config.bypassAuth
+      ? `Bearer ${config.bypassAuth}`
+      : authHeader,
+  };
 
   const { data: recipeState, error: recipeStateError } = await supabase
     .from('recipes')

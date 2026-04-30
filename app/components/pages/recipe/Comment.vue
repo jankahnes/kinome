@@ -1,7 +1,9 @@
 <template>
   <div class="flex gap-4">
     <div class="flex flex-col items-center gap-2">
-      <Avatar :user="comment.user" class="w-12 h-12" :class="isReply ? 'w-10! h-10!' : ''" />
+      <NuxtLink :to="'/profile/' + comment.user.username">
+        <Avatar :user="comment.user" class="w-12 h-12" :class="isReply ? 'w-10! h-10!' : ''" />
+      </NuxtLink>
       <div class="w-px h-full bg-primary/8" v-if="comment.replies?.length"></div>
     </div>
     <div class="flex-1">
@@ -20,8 +22,8 @@
       </div>
       <img v-if="!isEditing && comment.picture" :src="comment.picture"
         class="mt-2 rounded-2xl object-cover w-full max-h-72" />
-      <textarea v-else v-model="editText" v-auto-resize
-        class="w-full p-2 rounded-xl border border-[#DCCAB2] focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-16 mt-2"
+      <textarea v-else-if="isEditing" v-model="editText" v-auto-resize
+        class="w-full p-2 rounded-xl border border-[#DCCAB2] focus:outline-none resize-none scrollbar-hide overflow-hidden wrap-break-word min-h-16 mt-2"
         rows="2"></textarea>
 
       <div class="mt-2 flex flex-wrap gap-2 text-sm">
@@ -52,13 +54,15 @@
 
       <div v-if="replying && !isReply" class="mt-1 flex flex-col gap-2">
         <textarea v-model="replyText" v-auto-resize placeholder="Write a reply"
-          class="w-full p-2 rounded-xl border border-slate-200 focus:outline-none resize-none scrollbar-hide overflow-hidden break-words min-h-16"
+          class="w-full p-2 rounded-xl border border-slate-200 focus:outline-none resize-none scrollbar-hide overflow-hidden wrap-break-word min-h-16"
           rows="2"></textarea>
         <div class="flex gap-2 justify-end">
-          <button class="main-button animated-button bg-primary/8 px-3 rounded-xl py-0.5" @click="cancelReply">
+          <button class="animated-button bg-primary/10 px-3 py-1 rounded-xl! text-gray-600"
+            @click="cancelReply">
             Cancel
           </button>
-          <button class="main-button animated-button bg-primary/8-700 px-3 rounded-xl py-0.5" @click="submitReply">
+          <button class="animated-button bg-primary text-white font-headers italic px-3 py-1 rounded-xl! font-medium"
+            @click="submitReply">
             Post reply
           </button>
         </div>

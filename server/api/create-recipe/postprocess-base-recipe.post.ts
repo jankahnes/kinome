@@ -16,10 +16,7 @@ async function enqueuePhaseB(event: any, body: Record<string, any>) {
     });
   }
 
-  const origin = getRequestURL(event, {
-    xForwardedHost: true,
-    xForwardedProto: true,
-  }).origin;
+  const origin = "https://kinome.app"
   const destinationUrl = `${origin}/api/create-recipe/postprocess-enrich-recipe`;
   const publishUrl = `${qstashUrl}/v2/publish/${destinationUrl}`;
   let response: Response;
@@ -72,6 +69,10 @@ export default defineEventHandler(async (event) => {
   const { recipeId, jobId }: { recipeId: number; jobId?: number } = input;
   const supabase = serverSupabaseServiceRole<Database>(event);
   const headers = getRequestHeaders(event);
+  const config = useRuntimeConfig();
+  const bypassAuthorization = config.bypassAuth
+    ? `Bearer ${config.bypassAuth}`
+    : undefined;
 
   const { data: baseRecipe }: { data: RecipeRow | null } = await supabase
     .from('recipes')
@@ -152,7 +153,7 @@ export default defineEventHandler(async (event) => {
       method: 'POST',
       headers: {
         cookie: headers.cookie || '',
-        authorization: headers.authorization || '',
+        authorization: bypassAuthorization || headers.authorization || '',
       },
       body: { ...computableRecipe, full: false },
     },

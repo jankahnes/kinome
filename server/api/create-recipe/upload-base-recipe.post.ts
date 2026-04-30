@@ -39,17 +39,29 @@ async function uploadImage(
 
 //Uploads a recipe from BaseRecipeInformation object
 export default defineEventHandler(async (event) => {
+  const reqHeaders = getRequestHeaders(event);
+  const config = useRuntimeConfig();
+  const isInternalAgent =
+    !!config.agentInternalSecret &&
+    reqHeaders['x-agent-secret'] === config.agentInternalSecret;
+
+  const body = await readBody(event);
+  const { baseRecipe, internal_user_id }: { baseRecipe: InsertableRecipe & BaseRecipe; internal_user_id?: string } = body;
+
   let userId: string | null = null;
-  try {
-    const user = await serverSupabaseUser(event);
-    userId = user?.sub || null;
-  } catch (error) {
-    console.log('No auth session, proceeding with null userId');
+  if (isInternalAgent) {
+    userId = internal_user_id ?? null;
+    if (!userId) throw createError({ statusCode: 400, statusMessage: 'internal_user_id required' });
+  } else {
+    try {
+      const user = await serverSupabaseUser(event);
+      userId = user?.sub || null;
+    } catch (error) {
+      console.log('No auth session, proceeding with null userId');
+    }
   }
 
   const client = serverSupabaseServiceRole<Database>(event);
-  const { baseRecipe }: { baseRecipe: InsertableRecipe & BaseRecipe } =
-    await readBody(event);
 
   const { data, error } = await client
     .from('recipes')

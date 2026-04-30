@@ -2,12 +2,32 @@ import {
   serverSupabaseServiceRole,
   serverSupabaseUser,
 } from '#supabase/server';
+import { timingSafeEqual } from 'crypto';
 import type { ComputableRecipe, InsertableRecipe } from '~/types/types';
 import type { Database } from '~/types/supabase';
 import {
   evaluateAlchemistForRecipe,
   handleRecipeCreated,
 } from '~~/server/utils/gamification/service';
+
+function verifyBypassBearer(
+  secret: string | undefined,
+  authorization: string | undefined,
+): boolean {
+  if (!secret || !authorization) return false;
+  const match = /^Bearer\s+(\S+)/i.exec(authorization.trim());
+  if (!match?.[1]) return false;
+
+  const provided = Buffer.from(match[1], 'utf8');
+  const expected = Buffer.from(secret, 'utf8');
+  if (provided.length !== expected.length) return false;
+
+  try {
+    return timingSafeEqual(provided, expected);
+  } catch {
+    return false;
+  }
+}
 
 // Helper function to check if recipe exists in database
 async function recipeExists(client: any, recipeId: number): Promise<boolean> {
@@ -284,6 +304,11 @@ async function updateExistingRecipe(
 
 //Uploads a recipe from UploadableRecipeInformation object
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const authBypassed = verifyBypassBearer(
+    config.bypassAuth as string | undefined,
+    getHeader(event, 'authorization'),
+  );
   let userId: string | null = null;
   try {
     const user = await serverSupabaseUser(event);
@@ -353,7 +378,7 @@ export default defineEventHandler(async (event) => {
       body,
       userId,
       event,
-      body.mode === 'update',
+      body.mode === 'update' || authBypassed,
     );
   } else {
     console.log('🔍 Creating new recipe');

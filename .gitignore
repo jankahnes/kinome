@@ -38,3 +38,5 @@ scripts/syncPromptsToBucket.js
 .npm-cache/
 server/assetsOld/
 supabase/
+
+social-scraper/

@@ -33,6 +33,9 @@ export default defineNuxtConfig({
       ],
     },
   },
+  nitro: {
+    compressPublicAssets: true,
+  },
   devtools: {
     enabled: false,
   },
@@ -40,6 +43,8 @@ export default defineNuxtConfig({
     gptKey: process.env.NUXT_PRIVATE_GPT_KEY,
     adminUuid: process.env.NUXT_PUBLIC_ADMIN_ID,
     bypassAuth: process.env.NUXT_PRIVATE_BYPASS_AUTH,
+    agentInternalSecret: process.env.AGENT_INTERNAL_SECRET,
+    agentPileOnCap: process.env.AGENT_PILE_ON_CAP,
   },
   imports: {
     dirs: [

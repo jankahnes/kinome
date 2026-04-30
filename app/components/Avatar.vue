@@ -14,7 +14,7 @@
       </div>
       <div v-else
         class="rounded-full bg-primary-5 flex items-center justify-center aspect-square overflow-hidden transition-all duration-300">
-        <img src="/guest.webp" class="w-full h-full object-cover" alt="Default guest profile picture" />
+        <img src="/neutral-avatar1.webp" class="w-full h-full object-cover" alt="Default guest profile picture" />
       </div>
     </Transition>
   </div>

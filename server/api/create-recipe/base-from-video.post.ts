@@ -16,6 +16,23 @@ export default defineEventHandler(async (event) => {
   )) as any;
   if (!responseBase)
     throw new Error('No valid content returned from video extraction response');
+
+  // Recipe gate: the multimodal extractor decided this video isn't actually a
+  // recipe (tutorial, vlog, ingredient deep-dive, etc.). Surface as a typed
+  // error so handleImportUrl can turn it into a graceful natural-text reply
+  // for the agent.
+  if (responseBase.not_a_recipe) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'NOT_A_RECIPE',
+      data: {
+        code: 'NOT_A_RECIPE',
+        message:
+          "The video doesn't actually contain a recipe — looks more like a tutorial, commentary, or vlog.",
+      },
+    });
+  }
+
   if (
     !responseBase.ingredients_string ||
     !responseBase.serves ||

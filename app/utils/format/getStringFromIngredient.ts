@@ -1,12 +1,12 @@
-import { getStringFromAmountInfo } from './getStringFromAmountInfo';
-import isCountable from './isCountable';
-import pluralizeWord from './pluralizeWord';
-import unitIsNoun from './unitIsNoun';
+import { getStringFromAmountInfo } from '~/utils/format/getStringFromAmountInfo';
+import isCountable from '~/utils/format/isCountable';
+import pluralizeWord from '~/utils/format/pluralizeWord';
+import unitIsNoun from '~/utils/format/unitIsNoun';
 
 /** Matches the on-screen ingredient line in IngredientList (amount, optional “ of”, name, optional preparation). */
 export function getIngredientDisplayName(
   ingredient: any,
-  servingSize: number
+  servingSize: number,
 ): string {
   if (!ingredient?.amountInfo || !ingredient?.amountInfo.length) {
     return ingredient.name;
@@ -16,7 +16,8 @@ export function getIngredientDisplayName(
     return ingredient.name;
   }
   if (
-    (isCountable(amountInfo[1]) || ingredient.countable_units?.[''] !== undefined) &&
+    (isCountable(amountInfo[1]) ||
+      ingredient.countable_units?.[''] !== undefined) &&
     amountInfo[0] * (servingSize ?? 1) > 1 &&
     !unitIsNoun(amountInfo[1])
   ) {
@@ -27,11 +28,11 @@ export function getIngredientDisplayName(
 
 export function getStringFromIngredient(
   ingredient: any,
-  servingSize: number = 1
+  servingSize: number = 1,
 ): string {
   const amountStr = getStringFromAmountInfo(
     ingredient?.amountInfo?.[ingredient?.currentUnit],
-    servingSize
+    servingSize,
   );
   const unit = ingredient?.amountInfo?.[ingredient?.currentUnit]?.[1];
   let out = amountStr;

@@ -114,7 +114,7 @@
     <template v-else>
       <!-- Scan barcode CTA -->
       <NuxtLink to="/foods/scan"
-        class="block main-card-rounded animated-button overflow-hidden relative group p-5 md:p-7 bg-gradient-to-br from-primary-100 via-primary-50 to-primary-5">
+        class="block main-card-rounded animated-button overflow-hidden relative group p-5 md:p-7 bg-linear-to-br from-primary-100 via-primary-50 to-primary-5">
         <div class="flex items-start gap-4 md:gap-6">
           <div class="rounded-full bg-white p-3 md:p-4 shrink-0 shadow-[0_0_12px_rgba(0,0,0,0.08)]">
             <IconScanBarcode class="w-6 h-6 md:w-7 md:h-7 text-primary" />
@@ -152,7 +152,7 @@
               class="main-card main-card-rounded animated-button px-3 py-2.5 flex items-center gap-3 hover:bg-primary-10/50 transition-colors text-left">
               <img :src="`/foods/${cat.slug}.webp`" :alt="cat.label"
                 class="w-9 h-9 object-contain shrink-0" />
-              <span class="text-xs font-medium truncate">{{ cat.label }}</span>
+              <span class="text-[13px] font-medium truncate">{{ cat.label }}</span>
             </button>
           </div>
         </div>

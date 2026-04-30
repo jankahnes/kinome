@@ -291,35 +291,16 @@ if (!recipeStore.socialIndexRecipes.length) {
 
 const categories = ref([
   {
-    name: 'Breakfast',
-    icon: '🥐',
-    tag: 201,
-  },
-  {
-    name: 'Dinner',
-    icon: '🍝',
-    tag: 200,
-  },
-  {
-    name: 'Snacks',
-    icon: '🍟',
-    tag: 203,
-  },
-  {
-    name: 'Dessert',
-    icon: '🍰',
-    tag: 204,
+    name: 'Healthy',
+    icon: '🏵️',
+    tag: 100,
   },
   {
     name: 'Quick and Easy',
     icon: '⚡',
     tag: 3,
   },
-  {
-    name: 'Healthy',
-    icon: '🏵️',
-    tag: 100,
-  },
+
   {
     name: 'Budget',
     icon: '💰',
@@ -330,6 +311,21 @@ const categories = ref([
     icon: '🍱',
     tag: 5,
   },
+  {
+    name: 'Breakfast',
+    icon: '🥐',
+    tag: 201,
+  },
+  {
+    name: 'Dinner',
+    icon: '🍝',
+    tag: 200,
+  },
+  {
+    name: 'Dessert',
+    icon: '🍰',
+    tag: 204,
+  }
 ]);
 
 const onClickCategory = async (category: number) => {

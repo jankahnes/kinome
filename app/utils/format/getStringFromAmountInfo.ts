@@ -1,3 +1,7 @@
+import isCountable from '~/utils/format/isCountable';
+import pluralizeWord from '~/utils/format/pluralizeWord';
+import unitIsNoun from '~/utils/format/unitIsNoun';
+
 export function getStringFromAmountInfo(
   amountInfo: [number, string], // [amount, unit]
   servingSize: number

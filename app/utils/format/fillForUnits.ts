@@ -1,4 +1,4 @@
-import isCountable from './isCountable';
+import isCountable from '~/utils/format/isCountable';
 
 type Unit =
   | 'G'
