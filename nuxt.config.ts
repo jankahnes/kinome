@@ -81,7 +81,10 @@ export default defineNuxtConfig({
     'nuxt-og-image',
   ],
   image: {
-    provider: 'ipx',
+    // On Vercel, public/ assets live on the CDN and are not on the serverless
+    // function's filesystem, so runtime IPX 404s on local images. Let the
+    // module auto-detect (vercel on Vercel, ipx when self-hosted).
+    provider: process.env.VERCEL ? 'vercel' : 'ipx',
     format: ['webp'],
     domains: [
       'smovbezqgvxljtvdzvhp.supabase.co',
