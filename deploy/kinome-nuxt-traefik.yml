@@ -1,0 +1,27 @@
+http:
+  middlewares:
+    compress:
+      compress: {}
+  routers:
+    kinome-nuxt-http:
+      rule: Host(`kinome.app`) || Host(`www.kinome.app`)
+      service: kinome-nuxt-service
+      middlewares:
+        - redirect-to-https
+      entryPoints:
+        - web
+    kinome-nuxt-https:
+      rule: Host(`kinome.app`) || Host(`www.kinome.app`)
+      service: kinome-nuxt-service
+      middlewares:
+        - compress
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+  services:
+    kinome-nuxt-service:
+      loadBalancer:
+        servers:
+          - url: "http://kinome-nuxt-mi9oy9:3000"
+        passHostHeader: true
